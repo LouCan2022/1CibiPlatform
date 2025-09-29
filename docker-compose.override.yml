@@ -1,7 +1,7 @@
 services:
   postgres:
     environment:
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=cibi
       - POSTGRES_PASSWORD=p@ssw0rd!
       - POSTGRES_DB=OnePlatform
     ports:
@@ -33,3 +33,6 @@ services:
 networks:
   backend:
     driver: bridge
+
+volumes:
+  pgdata:
