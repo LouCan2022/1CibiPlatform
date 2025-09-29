@@ -4,3 +4,6 @@ services:
     build:
       context: .
       dockerfile: BackendAPI/API/APIs/Dockerfile
+  
+  postgres:
+    image: postgres:16
