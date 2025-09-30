@@ -1,5 +1,4 @@
-﻿
-namespace Auth.ServiceConfig
+﻿namespace Auth.ServiceConfig
 {
     public static class AuthServiceConfiguration
     {

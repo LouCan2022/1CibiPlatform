@@ -1,4 +1,5 @@
-﻿namespace Auth.Data.Context;
+﻿
+namespace Auth.Data.Context;
 public class AuthApplicationDbContext : DbContext
 {
     public AuthApplicationDbContext(DbContextOptions options) : base(options)
