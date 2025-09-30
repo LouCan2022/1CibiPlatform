@@ -1,3 +1,5 @@
+using APIs.Data.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
@@ -14,7 +16,7 @@ var assembly = typeof(Program).Assembly;
 
 
 // Register services to the DI container.
-//builder.services
+// builder.services
 //    .addjwtauthentication(builder.configuration)
 //    .AddCarterModules(assembly)
 //    .AddMediaTR(assembly)
@@ -27,7 +29,10 @@ var assembly = typeof(Program).Assembly;
 //    .AddSwaggerGen();
 
 builder.Services
-    .AddModuleInfrastructure(builder.Configuration);
+    .AddModuleServices()
+    .AddJwtAuthentication(builder.Configuration)
+    .AddModuleInfrastructure(builder.Configuration)
+    .AddModuleCarter(assembly);
 
 
 var app = builder.Build();
@@ -35,7 +40,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
-    //await app.IntializeDatabaseAsync();
+    await app.IntializeDatabaseAsync();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -47,7 +52,7 @@ app.UseExceptionHandler(options => { })
    .UseAuthentication()
    .UseAuthorization();
 
-app.UseCors("CorsPolicy");
+//app.UseCors("CorsPolicy");
 
 
 app.Run();

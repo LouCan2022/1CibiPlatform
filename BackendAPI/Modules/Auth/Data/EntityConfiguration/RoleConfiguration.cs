@@ -1,8 +1,8 @@
 ﻿namespace Auth.Data.EntityConfiguration;
 
-public class RoleConfiguration : IEntityTypeConfiguration<Role>
+public class RoleConfiguration : IEntityTypeConfiguration<AuthRole>
 {
-    public void Configure(EntityTypeBuilder<Role> builder)
+    public void Configure(EntityTypeBuilder<AuthRole> builder)
     {
         builder.HasKey(r => r.RoleId);
         builder.Property(r => r.RoleName).IsRequired().HasMaxLength(50);
