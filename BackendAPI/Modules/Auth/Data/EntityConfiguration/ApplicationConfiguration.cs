@@ -1,8 +1,9 @@
-﻿namespace Auth.Data.EntityConfiguration;
+﻿
+namespace Auth.Data.EntityConfiguration;
 
-public class ApplicationConfiguration : IEntityTypeConfiguration<Application>
+public class ApplicationConfiguration : IEntityTypeConfiguration<AuthApplication>
 {
-    public void Configure(EntityTypeBuilder<Application> builder)
+    public void Configure(EntityTypeBuilder<AuthApplication> builder)
     {
         builder.HasKey(a => a.AppId);
         builder.Property(a => a.AppName).IsRequired().HasMaxLength(100);

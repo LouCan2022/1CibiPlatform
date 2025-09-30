@@ -1,9 +1,11 @@
 services:
   apis:
+    container_name: oneplatform-backend
     image: ${DOCKER_REGISTRY-}apis
     build:
       context: .
       dockerfile: BackendAPI/API/APIs/Dockerfile
   
   postgres:
+    container_name: postgres
     image: postgres:16

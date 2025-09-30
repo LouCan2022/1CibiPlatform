@@ -1,19 +1,23 @@
-﻿namespace Auth.Data.Context;
+﻿
+namespace Auth.Data.Context;
 public class AuthApplicationDbContext : DbContext
 {
     public AuthApplicationDbContext(DbContextOptions options) : base(options)
     {
     }
 
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Application> Applications => Set<Application>();
-    public DbSet<Role> Roles => Set<Role>();
-    public DbSet<UserAppRole> UserAppRoles => Set<UserAppRole>();
+    public DbSet<Authusers> AuthUsers { get; set; }
+
+    public DbSet<AuthApplication> AuthApplications { get; set; }
+
+    public DbSet<AuthRole> AuthRoles { get; set; }
+
+    public DbSet<AuthUserAppRole> AuthUserAppRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthApplicationDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
     }
 
 }

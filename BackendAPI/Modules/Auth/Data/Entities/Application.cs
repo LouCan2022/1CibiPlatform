@@ -1,5 +1,6 @@
 ﻿namespace Auth.Data.Entities;
-public class Application
+
+public class AuthApplication
 {
     public int AppId { get; set; }
     public string AppName { get; set; } = null!;

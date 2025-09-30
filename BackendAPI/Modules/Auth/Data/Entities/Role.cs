@@ -1,7 +1,7 @@
 ﻿
 namespace Auth.Data.Entities;
 
-public class Role
+public class AuthRole
 {
     public int RoleId { get; set; }
     public string RoleName { get; set; } = null!;

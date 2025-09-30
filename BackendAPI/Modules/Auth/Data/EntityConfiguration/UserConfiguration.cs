@@ -1,9 +1,9 @@
 ﻿
 namespace Auth.Data.EntityConfiguration;
 
-public class UserConfiguration : IEntityTypeConfiguration<User>
+public class UserConfiguration : IEntityTypeConfiguration<Authusers>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<Authusers> builder)
     {
         builder.HasKey(u => u.Id);
         builder.Property(u => u.Username).IsRequired().HasMaxLength(50);

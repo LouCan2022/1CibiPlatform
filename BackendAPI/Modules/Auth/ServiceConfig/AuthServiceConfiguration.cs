@@ -1,8 +1,10 @@
-﻿
-namespace Auth.ServiceConfig
+﻿namespace Auth.ServiceConfig
 {
     public static class AuthServiceConfiguration
     {
+        private const string assemblyName = "APIs";
+        private const string connStringSegment = "OnePlatform_Connection";
+
         #region CORS
         public static void ConfigureAuthCorsProd(this IServiceCollection services)
         {
@@ -138,12 +140,16 @@ namespace Auth.ServiceConfig
 
         #region Db Config
 
-        public static IServiceCollection AddAuthInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddAuthInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            // Add DbContext
             services.AddDbContext<AuthApplicationDbContext>(options =>
             {
-                options.UseNpgsql(configuration.GetConnectionString("OnePlatform_Connection"));
+                options.UseNpgsql(
+                    configuration.GetConnectionString(connStringSegment),
+                    npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
+                );
             });
             return services;
         }
