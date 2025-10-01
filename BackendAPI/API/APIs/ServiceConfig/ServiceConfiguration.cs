@@ -1,4 +1,6 @@
 ﻿using Auth;
+using BuildingBlocks.Exceptions.Handler;
+using FluentValidation;
 
 namespace APIs.ServiceConfig
 {
@@ -74,7 +76,10 @@ namespace APIs.ServiceConfig
             this IServiceCollection services)
         {
             // Add MediaTR
-            services.AddAuthMediaTR(typeof(AuthMarker).Assembly);
+            var assembly = typeof(AuthMarker).Assembly;
+
+            services.AddAuthMediaTR(assembly);
+
             return services;
         }
 

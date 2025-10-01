@@ -1,6 +1,4 @@
-﻿using Mapster;
-
-namespace Auth.Data.Repository;
+﻿namespace Auth.Data.Repository;
 
 public class AuthRepository : IAuthRepository
 {
@@ -13,12 +11,25 @@ public class AuthRepository : IAuthRepository
 
     public async Task<LoginDTO> LoginAsync(LoginCred cred)
     {
-        var userData = await _dbcontext.AuthUsers
-            .Where(u => u.Username == cred.Username)
-            .FirstOrDefaultAsync();
+        var userData = await (from user in _dbcontext.AuthUsers
+                              join userRole in _dbcontext.AuthUserAppRoles
+                                    on user.Id equals userRole.UserId into userRolesGroup
+                              where user.IsActive == true
+                              select new LoginDTO(
+                                  user.Id,
+                                  user.Username,
+                                  user.PasswordHash,
+                                  user.Email!,
+                                  user.FirstName!,
+                                  user.LastName!,
+                                  user.MiddleName,
+                                  userRolesGroup.Select(r => r.AppId.ToString()).ToList(),
+                                  userRolesGroup.Select(r => r.RoleId.ToString()).ToList()
+                              )
+                          ).AsNoTracking()
+                           .FirstOrDefaultAsync();
 
-        var userDTO = userData.Adapt<LoginDTO>();
 
-        return userDTO!;
+        return userData!;
     }
 }

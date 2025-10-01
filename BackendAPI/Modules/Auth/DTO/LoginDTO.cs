@@ -3,13 +3,14 @@
 public record LoginDTO(
     Guid Id,
     string Username,
-    string Email,
     string PasswordHash,
+    string Email,
     string FirstName,
     string LastName,
     string? MiddleName,
-    bool IsActive,
-    DateTimeOffset CreatedAt);
+    List<string> AppId,
+    List<string> roleId
+    );
 
 
 public record LoginCred(
