@@ -5,17 +5,17 @@
 [![Blazor](https://img.shields.io/badge/Blazor-Frontend-green)](https://blazor.net/)
 [![YARP](https://img.shields.io/badge/YARP-API_Gateway-orange)](https://microsoft.github.io/reverse-proxy/)
 
-**1CibiPlatform** is a hybrid single platform designed for both client-facing and internal applications, built with modern microservices architecture using .NET 9.0.
+**1CibiPlatform** is a hybrid single platform designed for both client-facing and internal applications, built as a modular monolith using .NET 9.0.
 
 ## 🏗️ Architecture Overview
 
-This platform follows a **Clean Architecture** approach with **Domain-Driven Design (DDD)** principles, implementing a microservices pattern with the following key components:
+This platform follows a **Clean Architecture** approach with **Domain-Driven Design (DDD)** principles, implemented as a modular monolith with the following key components:
 
 ### 🎯 Core Components
 
 - **🌐 Frontend (UI)** - Blazor Server application for user interfaces
 - **🚪 API Gateway** - YARP-based reverse proxy for routing and load balancing
-- **🔧 Backend APIs** - Modular REST APIs with CQRS pattern
+- **🔧 Backend (APIs & Modules)** - Modular REST APIs with CQRS pattern, organized as feature modules within a single deployable application
 - **🧱 Building Blocks** - Shared libraries and cross-cutting concerns
 - **🐳 Docker Compose** - Container orchestration for development and deployment
 
@@ -33,9 +33,9 @@ This platform follows a **Clean Architecture** approach with **Domain-Driven Des
 ├── BackendAPI/
 │   ├── API/
 │   │   └── APIs/                   # Main API Project
-│   │       └── Modules/            # Modular API Design
-│   │           ├── CNX/            # CNX Module
-│   │           └── Philsys/        # Philsys Module
+│   │       └── Modules/            # Modular Feature Design
+│   │           ├── CNX/            # CNX Feature Module
+│   │           └── Philsys/        # Philsys Feature Module
 │   └── BuildingBlocks/
 │       └── BuildingBlocks/         # Shared Libraries
 │           ├── CQRS/              # Command Query Responsibility Segregation
@@ -71,8 +71,7 @@ This platform follows a **Clean Architecture** approach with **Domain-Driven Des
 - **Clean Architecture** - Separation of concerns
 - **Domain-Driven Design (DDD)** - Domain modeling
 - **CQRS** - Command Query Responsibility Segregation
-- **Microservices** - Distributed system architecture
-- **Modular Monolith** - Organized code structure
+- **Modular Monolith** - Organized code structure with feature modules inside a single deployable application
 
 ## 🚀 Getting Started
 
@@ -144,7 +143,7 @@ This platform follows a **Clean Architecture** approach with **Domain-Driven Des
 ### Key Features
 
 - **🔄 CQRS Pattern** - Separate read and write operations
-- **📋 Modular Design** - Organized by business domains (CNX, Philsys)
+- **📋 Modular Monolith Design** - Organized by business domains (CNX, Philsys) as feature modules within a single application
 - **🛡️ Validation** - FluentValidation for input validation
 - **🗺️ Object Mapping** - Mapster for efficient object mapping
 - **⚡ Feature Flags** - Microsoft Feature Management
@@ -166,7 +165,3 @@ This project is licensed under the terms specified in the [LICENSE](LICENSE) fil
 ## 📞 Support
 
 For support and questions, please contact the development team or create an issue in the repository.
-
----
-
-**Built with ❤️ using .NET 9.0 and modern architectural patterns**
