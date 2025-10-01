@@ -42,8 +42,12 @@ public class JWTService : IJWTService
     {
         return new List<Claim>
         {
+            new Claim("userId", loginDTO.Id.ToString()),
             new Claim("username", loginDTO.Username),
-
+            new Claim("email", loginDTO.Email),
+            new Claim("FullName", $"{loginDTO.FirstName} {loginDTO.MiddleName} {loginDTO.LastName}"),
+            new Claim("appId", string.Join(",", loginDTO.AppId)),
+            new Claim("role", string.Join(",",  loginDTO.roleId))
         };
     }
 }

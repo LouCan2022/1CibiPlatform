@@ -61,8 +61,10 @@ namespace APIs.ServiceConfig
         public static IServiceCollection AddModuleCarter(
             this IServiceCollection services)
         {
+            var assembly = typeof(AuthMarker).Assembly;
+
             // Add Carter
-            services.AddAuthCarterModules(typeof(AuthMarker).Assembly);
+            services.AddAuthCarterModules(assembly);
             return services;
         }
 
@@ -74,7 +76,10 @@ namespace APIs.ServiceConfig
             this IServiceCollection services)
         {
             // Add MediaTR
-            services.AddAuthMediaTR(typeof(AuthMarker).Assembly);
+            var assembly = typeof(AuthMarker).Assembly;
+
+            services.AddAuthMediaTR(assembly);
+
             return services;
         }
 

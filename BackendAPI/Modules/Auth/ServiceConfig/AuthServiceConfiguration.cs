@@ -1,4 +1,6 @@
-﻿namespace Auth.ServiceConfig
+﻿using BuildingBlocks.Exceptions.Handler;
+
+namespace Auth.ServiceConfig
 {
     public static class AuthServiceConfiguration
     {
@@ -106,6 +108,8 @@
                 config.AddOpenBehavior(typeof(ValidationBehavior<,>));
                 config.AddOpenBehavior(typeof(LoggingBehavior<,>));
             });
+            services.AddValidatorsFromAssembly(assembly);
+            services.AddExceptionHandler<CustomExceptionHandler>();
             return services;
         }
         #endregion

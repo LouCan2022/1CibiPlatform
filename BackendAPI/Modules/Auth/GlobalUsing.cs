@@ -29,3 +29,4 @@ global using Auth.Data.Repository;
 global using Auth.Services;
 global using BuildingBlocks.Behaviors;
 global using BuildingBlocks.CQRS;
+global using BuildingBlocks.Exceptions.Handler;
