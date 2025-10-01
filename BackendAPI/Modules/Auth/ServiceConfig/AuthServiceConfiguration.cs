@@ -97,42 +97,25 @@
         #endregion
 
         #region MediaTR Config
-        //public static IServiceCollection AddAuthMediaTR(this IServiceCollection services, Assembly assembly)
-        //{
-        //    // Add MediatR
-        //    services.AddMediatR(config =>
-        //    {
-        //        config.RegisterServicesFromAssembly(assembly);
-        //        config.AddOpenBehavior(typeof(ValidationBehavior<,>));
-        //        config.AddOpenBehavior(typeof(LoggingBehavior<,>));
-        //    });
-        //    return services;
-        //}
+        public static IServiceCollection AddAuthMediaTR(this IServiceCollection services, Assembly assembly)
+        {
+            // Add MediatR
+            services.AddMediatR(config =>
+            {
+                config.RegisterServicesFromAssembly(assembly);
+                config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+                config.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            });
+            return services;
+        }
         #endregion
 
         #region Services
         public static IServiceCollection AddAuthServices(this IServiceCollection services)
         {
             services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-            //services.AddTransient<InitialData>();
-            //services.AddScoped<IJWTService, JWTService>();
-            //services.AddScoped<ICacheService, MemoryCacheService>();
-            //services.AddScoped<IPagination, Pagination>();
-
-            ////For Add Credentials
-            //services.AddScoped<IAddCredentialRepository, AddCredentialRepository>();
-
-            ////For Get Credentials
-            //services.AddScoped<IGetCredentialRepository, GetCredentialRepository>();
-            //services.AddScoped<IPaginatedQ, GetCredentialRepository>();
-
-            ////For Update Credentials
-            //services.AddScoped<IUpdateCredentialRepository, UpdateCredentialRepository>();
-
-            ////For Delete Credentials
-            //services.AddScoped<IDeleteCredentialRepository, DeleteCredentialRepository>();
-
-            //services.AddScoped<ILoginRepository, LoginRepository>();
+            services.AddScoped<IJWTService, JWTService>();
+            services.AddScoped<IAuthRepository, AuthRepository>();
             return services;
         }
 

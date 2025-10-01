@@ -2,5 +2,5 @@
 
 public interface IJWTService
 {
-    //string GetAccessToken(ClientLoginDataDTO clientLoginDataDTO);
+    string GetAccessToken(LoginDTO loginDTO);
 }

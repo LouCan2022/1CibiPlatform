@@ -11,4 +11,5 @@ global using System.Reflection;
 global using System.Security.Claims;
 global using System.Text;
 global using Auth.Data.Entities;
+global using APIs.Data.Extensions;
 

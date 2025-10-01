@@ -1,4 +1,6 @@
-﻿namespace APIs.ServiceConfig
+﻿using Auth;
+
+namespace APIs.ServiceConfig
 {
     public static class ServiceConfiguration
     {
@@ -54,44 +56,41 @@
 
         #endregion
 
-
-        #region Db Config
+        #region Carter Config
 
         public static IServiceCollection AddModuleCarter(
-            this IServiceCollection services,
-            Assembly assembly)
+            this IServiceCollection services)
         {
             // Add Carter
-            services.AddAuthCarterModules(assembly);
+            services.AddAuthCarterModules(typeof(AuthMarker).Assembly);
             return services;
         }
 
         #endregion
 
-        public static IServiceCollection AddModuleServices(this IServiceCollection services)
+        #region MediaTR Config
+
+        public static IServiceCollection AddModuleMediaTR(
+            this IServiceCollection services)
         {
-            services.AddTransient<IPasswordHasherService, PasswordHasherService>();
-            services.AddTransient<InitialData>();
-            //services.AddScoped<IJWTService, JWTService>();
-            //services.AddScoped<ICacheService, MemoryCacheService>();
-            //services.AddScoped<IPagination, Pagination>();
-
-            ////For Add Credentials
-            //services.AddScoped<IAddCredentialRepository, AddCredentialRepository>();
-
-            ////For Get Credentials
-            //services.AddScoped<IGetCredentialRepository, GetCredentialRepository>();
-            //services.AddScoped<IPaginatedQ, GetCredentialRepository>();
-
-            ////For Update Credentials
-            //services.AddScoped<IUpdateCredentialRepository, UpdateCredentialRepository>();
-
-            ////For Delete Credentials
-            //services.AddScoped<IDeleteCredentialRepository, DeleteCredentialRepository>();
-
-            //services.AddScoped<ILoginRepository, LoginRepository>();
+            // Add MediaTR
+            services.AddAuthMediaTR(typeof(AuthMarker).Assembly);
             return services;
         }
+
+        #endregion
+
+        #region Services Config
+        public static IServiceCollection AddModuleServices(this IServiceCollection services)
+        {
+            // Add Services
+            services.AddAuthServices();
+            services.AddTransient<InitialData>();
+
+            return services;
+        }
+
+        #endregion
 
     }
 }
