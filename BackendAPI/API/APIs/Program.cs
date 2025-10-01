@@ -1,4 +1,4 @@
-using APIs.Data.Extensions;
+using Carter;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
@@ -15,30 +15,23 @@ var assembly = typeof(Program).Assembly;
 //}
 
 
-// Register services to the DI container.
-// builder.services
-//    .addjwtauthentication(builder.configuration)
-//    .AddCarterModules(assembly)
-//    .AddMediaTR(assembly)
-//    .AddValidatorsFromAssembly(assembly)
-//    .AddExceptionHandler<CustomExceptionHandler>()
-//    .AddServices()
-//    .AddMemoryCache()
-//    .AddDbContext(builder.Configuration)
-//    .AddEndpointsApiExplorer()
-//    .AddSwaggerGen();
 
 builder.Services
+    .AddModuleMediaTR()
+    .AddModuleCarter()
     .AddModuleServices()
     .AddJwtAuthentication(builder.Configuration)
     .AddModuleInfrastructure(builder.Configuration)
-    .AddModuleCarter(assembly);
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen();
+
 
 
 var app = builder.Build();
 
+app.MapCarter();
 
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+if (app.Environment.IsDevelopment())
 {
     await app.IntializeDatabaseAsync();
     app.UseSwagger();

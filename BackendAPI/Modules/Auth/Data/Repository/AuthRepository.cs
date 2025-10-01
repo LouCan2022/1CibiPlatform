@@ -1,11 +1,24 @@
-﻿using Auth.DTO;
+﻿using Mapster;
 
 namespace Auth.Data.Repository;
 
 public class AuthRepository : IAuthRepository
 {
-    public Task<LoginDTO> LoginAsync(LoginCred cred)
+    private readonly AuthApplicationDbContext _dbcontext;
+
+    public AuthRepository(AuthApplicationDbContext dbcontext)
     {
-        throw new NotImplementedException();
+        this._dbcontext = dbcontext;
+    }
+
+    public async Task<LoginDTO> LoginAsync(LoginCred cred)
+    {
+        var userData = await _dbcontext.AuthUsers
+            .Where(u => u.Username == cred.Username)
+            .FirstOrDefaultAsync();
+
+        var userDTO = userData.Adapt<LoginDTO>();
+
+        return userDTO!;
     }
 }
