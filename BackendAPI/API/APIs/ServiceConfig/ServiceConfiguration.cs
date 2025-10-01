@@ -1,6 +1,4 @@
 ﻿using Auth;
-using BuildingBlocks.Exceptions.Handler;
-using FluentValidation;
 
 namespace APIs.ServiceConfig
 {
@@ -63,8 +61,10 @@ namespace APIs.ServiceConfig
         public static IServiceCollection AddModuleCarter(
             this IServiceCollection services)
         {
+            var assembly = typeof(AuthMarker).Assembly;
+
             // Add Carter
-            services.AddAuthCarterModules(typeof(AuthMarker).Assembly);
+            services.AddAuthCarterModules(assembly);
             return services;
         }
 

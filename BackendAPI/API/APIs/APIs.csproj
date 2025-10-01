@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\Modules\Auth\Auth.csproj" />
     <ProjectReference Include="..\..\Modules\CNX\CNX.csproj" />
     <ProjectReference Include="..\..\Modules\Philsys\Philsys.csproj" />
