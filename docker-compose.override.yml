@@ -1,4 +1,15 @@
 services:
+  apigateway:
+    container_name: apigateway
+    ports:
+        - "5123:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - backend
+    depends_on:
+      - apis
+
   postgres:
     environment:
       - POSTGRES_USER=cibi
@@ -16,10 +27,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
     ports:
       - "5050:8080"
-      - "5056:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro

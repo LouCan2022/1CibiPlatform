@@ -1,4 +1,11 @@
 services:
+  apigateway:
+    image: apigateway
+    build:
+      context: .
+      dockerfile: ApiGateways/YarpApiGateway/Dockerfile
+
+
   apis:
     container_name: oneplatform-backend
     image: ${DOCKER_REGISTRY-}apis
