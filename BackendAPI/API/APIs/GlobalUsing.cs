@@ -3,7 +3,6 @@ global using Auth.ServiceConfig;
 global using APIs.ServiceConfig;
 global using Auth.Data.Context;
 global using Auth.Service;
-global using Auth.Data.DataSeed.DataExtensions;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;
