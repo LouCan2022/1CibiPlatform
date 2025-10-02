@@ -46,7 +46,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, LoginResult>
         LoginDTO userData = await this._authRepository.LoginAsync(cred);
 
         // checking if client credentials are valid
-        if (userData.Id == Guid.Empty)
+        if (userData == null)
         {
             throw new NotFoundException("Invalid username or password.");
         }

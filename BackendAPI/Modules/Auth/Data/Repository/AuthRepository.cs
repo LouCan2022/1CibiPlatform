@@ -14,7 +14,7 @@ public class AuthRepository : IAuthRepository
         var userData = await (from user in _dbcontext.AuthUsers
                               join userRole in _dbcontext.AuthUserAppRoles
                                     on user.Id equals userRole.UserId into userRolesGroup
-                              where user.IsActive == true
+                              where user.Username == cred.Username && user.IsActive == true
                               select new LoginDTO(
                                   user.Id,
                                   user.Username,

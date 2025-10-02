@@ -1,6 +1,6 @@
 ﻿namespace CNX.Data.Entities;
 
-public class CNXTalksPush
+public class CNXTalkpush
 {
     public string? CandidateId { get; set; }
     public string? JobRequisitionId { get; set; }
