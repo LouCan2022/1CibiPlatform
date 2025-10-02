@@ -1,11 +1,12 @@
-﻿namespace Auth.Data.DataSeed.DataExtensions;
+﻿namespace Auth.Data.DataSeed;
 
-internal class InitialData
+public class AuthInitialData
 {
+
     private readonly IPasswordHasherService _passwordHasherService;
     private readonly Guid _Id;
 
-    public InitialData(IPasswordHasherService passwordHasherService)
+    public AuthInitialData(IPasswordHasherService passwordHasherService)
     {
         this._passwordHasherService = passwordHasherService;
         this._Id = Guid.NewGuid();
@@ -20,8 +21,8 @@ internal class InitialData
                     Username = "admin",
                     Email = "john@example.com",
                     PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-                    FirstName = "admin",
-                    LastName = "admin",
+                    FirstName = "Admin",
+                    LastName = "",
                     IsActive = true,
                     CreatedAt = DateTimeOffset.UtcNow
                 },
@@ -95,5 +96,6 @@ internal class InitialData
                 }
             };
     }
+
 
 }

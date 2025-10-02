@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.CNX
 {
     [DbContext(typeof(CNXApplicationDbContext))]
-    [Migration("20251002034859_InitialCNXMigration")]
+    [Migration("20251002080008_InitialCNXMigration")]
     partial class InitialCNXMigration
     {
         /// <inheritdoc />

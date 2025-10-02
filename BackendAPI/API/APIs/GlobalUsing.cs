@@ -16,4 +16,6 @@ global using CNX;
 global using CNX.ServiceConfig;
 global using Carter;
 global using System.Reflection;
+global using Auth.Data.Extensions;
+global using CNX.Data.Extensions;
 

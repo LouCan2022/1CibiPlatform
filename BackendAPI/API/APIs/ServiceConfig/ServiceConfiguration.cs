@@ -92,7 +92,6 @@
             // Add Services
             services.AddAuthServices();
             services.AddCNXServices();
-            services.AddTransient<InitialData>();
 
             return services;
         }

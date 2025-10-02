@@ -30,3 +30,4 @@ global using Auth.Services;
 global using BuildingBlocks.Behaviors;
 global using BuildingBlocks.CQRS;
 global using BuildingBlocks.Exceptions.Handler;
+global using Auth.Data.DataSeed;

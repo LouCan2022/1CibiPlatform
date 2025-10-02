@@ -1,6 +1,4 @@
-﻿using BuildingBlocks.Exceptions.Handler;
-
-namespace Auth.ServiceConfig
+﻿namespace Auth.ServiceConfig
 {
     public static class AuthServiceConfiguration
     {
@@ -44,6 +42,7 @@ namespace Auth.ServiceConfig
         #region Services
         public static IServiceCollection AddAuthServices(this IServiceCollection services)
         {
+            services.AddTransient<AuthInitialData>();
             services.AddTransient<IPasswordHasherService, PasswordHasherService>();
             services.AddScoped<IJWTService, JWTService>();
             services.AddScoped<IAuthRepository, AuthRepository>();

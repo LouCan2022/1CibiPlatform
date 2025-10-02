@@ -13,7 +13,6 @@ var assembly = typeof(Program).Assembly;
 //}
 
 
-
 builder.Services
     .AddModuleMediaTR()
     .AddModuleCarter()
@@ -29,13 +28,18 @@ var app = builder.Build();
 
 app.MapCarter();
 
+
 if (app.Environment.IsDevelopment())
 {
-    await app.IntializeDatabaseAsync();
+    await DatabaseExtensions.IntializeDatabaseAsync(app);
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+if (app.Environment.IsProduction())
+{
+    await DatabaseExtensions.IntializeDatabaseAsync(app);
+}
 
 // use exception handler after register
 app.UseExceptionHandler(options => { })
