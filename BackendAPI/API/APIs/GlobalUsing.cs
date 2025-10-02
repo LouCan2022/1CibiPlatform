@@ -12,4 +12,8 @@ global using System.Security.Claims;
 global using System.Text;
 global using Auth.Data.Entities;
 global using APIs.Data.Extensions;
+global using CNX;
+global using CNX.ServiceConfig;
+global using Carter;
+global using System.Reflection;
 

@@ -1,9 +1,10 @@
-﻿using Auth;
-
-namespace APIs.ServiceConfig
+﻿namespace APIs.ServiceConfig
 {
     public static class ServiceConfiguration
     {
+
+        private static readonly Assembly _authAssembly = typeof(AuthMarker).Assembly;
+        private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
 
         #region JWT Config
         public static IServiceCollection AddJwtAuthentication(
@@ -51,23 +52,24 @@ namespace APIs.ServiceConfig
         {
             // Add DbContext
             services.AddAuthInfrastructure(configuration);
+            services.AddCNXInfrastructure(configuration);
             return services;
         }
 
         #endregion
 
         #region Carter Config
-
-        public static IServiceCollection AddModuleCarter(
-            this IServiceCollection services)
+        public static IServiceCollection AddModuleCarter(this IServiceCollection services)
         {
-            var assembly = typeof(AuthMarker).Assembly;
+            services.AddCarter(new DependencyContextAssemblyCatalog([
+                 _authAssembly,
+                 _cnxAssembly
+             // Add any other assembly here
+             ]));
 
-            // Add Carter
-            services.AddAuthCarterModules(assembly);
+
             return services;
         }
-
         #endregion
 
         #region MediaTR Config
@@ -76,9 +78,8 @@ namespace APIs.ServiceConfig
             this IServiceCollection services)
         {
             // Add MediaTR
-            var assembly = typeof(AuthMarker).Assembly;
-
-            services.AddAuthMediaTR(assembly);
+            services.AddAuthMediaTR(_authAssembly);
+            services.AddCNXMediaTR(_cnxAssembly);
 
             return services;
         }
@@ -90,6 +91,7 @@ namespace APIs.ServiceConfig
         {
             // Add Services
             services.AddAuthServices();
+            services.AddCNXServices();
             services.AddTransient<InitialData>();
 
             return services;

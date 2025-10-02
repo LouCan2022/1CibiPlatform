@@ -14,9 +14,7 @@ namespace Auth.ServiceConfig
         {
             services.AddCarter(configurator: c =>
             {
-                // Specify the assembly containing your modules
-                var modulesAssembly = assembly;
-                var modules = modulesAssembly.GetTypes()
+                var modules = assembly.GetTypes()
                     .Where(t => typeof(ICarterModule).IsAssignableFrom(t) && !t.IsAbstract)
                     .ToArray();
                 c.WithModules(modules);

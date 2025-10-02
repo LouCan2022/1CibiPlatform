@@ -7,13 +7,11 @@ public static class CNXServiceConfiguration
 
     #region Carter Config
 
-    public static IServiceCollection AddAuthCarterModules(this IServiceCollection services, Assembly assembly)
+    public static IServiceCollection AddCNXCarterModules(this IServiceCollection services, Assembly assembly)
     {
         services.AddCarter(configurator: c =>
         {
-            // Specify the assembly containing your modules
-            var modulesAssembly = assembly;
-            var modules = modulesAssembly.GetTypes()
+            var modules = assembly.GetTypes()
                 .Where(t => typeof(ICarterModule).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
             c.WithModules(modules);
@@ -25,7 +23,7 @@ public static class CNXServiceConfiguration
     #endregion
 
     #region MediaTR Config
-    public static IServiceCollection AddAuthMediaTR(this IServiceCollection services, Assembly assembly)
+    public static IServiceCollection AddCNXMediaTR(this IServiceCollection services, Assembly assembly)
     {
         // Add MediatR
         services.AddMediatR(config =>
@@ -41,7 +39,7 @@ public static class CNXServiceConfiguration
     #endregion
 
     #region Services
-    public static IServiceCollection AddAuthServices(this IServiceCollection services)
+    public static IServiceCollection AddCNXServices(this IServiceCollection services)
     {
         return services;
     }
@@ -50,7 +48,7 @@ public static class CNXServiceConfiguration
 
     #region Db Config
 
-    public static IServiceCollection AddAuthInfrastructure(
+    public static IServiceCollection AddCNXInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
     {

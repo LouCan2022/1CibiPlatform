@@ -1,4 +1,6 @@
-﻿namespace APIs.Data.Extensions;
+﻿using CNX.Data.Context;
+
+namespace APIs.Data.Extensions;
 
 public static class DatabaseExtensions
 {
@@ -8,9 +10,12 @@ public static class DatabaseExtensions
 
         var context = scope.ServiceProvider.GetRequiredService<AuthApplicationDbContext>();
         var initData = scope.ServiceProvider.GetRequiredService<InitialData>();
-
         context.Database.MigrateAsync().GetAwaiter().GetResult();
         await SeedAsync(context, initData);
+
+        // Handle CNX DbContext
+        var cnxContext = scope.ServiceProvider.GetRequiredService<CNXApplicationDbContext>();
+        await cnxContext.Database.MigrateAsync();
     }
 
     private static async Task SeedAsync(
