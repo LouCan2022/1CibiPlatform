@@ -1,8 +1,4 @@
-﻿
-using Auth.DTO;
-using System.IdentityModel.Tokens.Jwt;
-
-namespace Auth.Services;
+﻿namespace Auth.Services;
 public class JWTService : IJWTService
 {
     private readonly IConfiguration _configuration;
