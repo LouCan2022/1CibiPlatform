@@ -9,7 +9,7 @@
 
 ## 🏗️ Architecture Overview
 
-This platform follows a **Clean Architecture** approach with **Domain-Driven Design (DDD)** principles, implemented as a modular monolith with the following key components:
+This platform follows a **Vertical Slice Architecture** approach with **Domain-Driven Design (DDD)** principles, implemented as a modular monolith with the following key components:
 
 ### 🎯 Core Components
 
@@ -68,7 +68,7 @@ This platform follows a **Clean Architecture** approach with **Domain-Driven Des
 
 ### Architecture Patterns
 
-- **Clean Architecture** - Separation of concerns
+- **Vertical Slice Architecture** - Features are organized as independent slices, each containing all layers (UI, logic, data) for a specific feature or use case
 - **Domain-Driven Design (DDD)** - Domain modeling
 - **CQRS** - Command Query Responsibility Segregation
 - **Modular Monolith** - Organized code structure with feature modules inside a single deployable application
@@ -133,12 +133,11 @@ This platform follows a **Clean Architecture** approach with **Domain-Driven Des
 
 ## 🏛️ Architectural Principles
 
-### Clean Architecture Layers
+### Vertical Slice Principles
 
-- **Presentation Layer** - UI components and API controllers
-- **Application Layer** - Use cases, CQRS handlers, and application logic
-- **Domain Layer** - Business logic and domain entities
-- **Infrastructure Layer** - External concerns (databases, external services)
+- Each feature or use case is implemented as a "slice" containing its own request, handler, validation, and data access logic
+- Slices are independent and encapsulate all concerns for that feature
+- Encourages high cohesion and low coupling between features
 
 ### Key Features
 
