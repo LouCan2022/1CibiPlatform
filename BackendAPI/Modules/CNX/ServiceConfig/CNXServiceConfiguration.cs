@@ -41,6 +41,14 @@ public static class CNXServiceConfiguration
     #region Services
     public static IServiceCollection AddCNXServices(this IServiceCollection services)
     {
+        services.AddHttpClient("Talkpush", client =>
+        {
+            client.BaseAddress = new Uri("https://concentrix-ph.talkpush.com/api/talkpush_services/");
+
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+        });
+        services.AddScoped<GetCandidateService>();
         return services;
     }
 

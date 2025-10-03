@@ -2,7 +2,6 @@
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
 global using Carter;
-global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.IdentityModel.Tokens;
 global using System.Security.Claims;
@@ -17,6 +16,7 @@ global using Mapster;
 global using Microsoft.AspNetCore.Http;
 global using BuildingBlocks.Exceptions;
 global using FluentValidation;
+global using System.IdentityModel.Tokens.Jwt;
 
 
 // path
