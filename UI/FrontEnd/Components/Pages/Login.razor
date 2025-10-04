@@ -1,7 +1,7 @@
 ﻿@page "/login"
 @layout LoginLayout
 @inject NavigationManager Navigation
-@inject AuthService AuthService
+@inject IAuthRepository IAuthRepository
 
 <style>
     .login-container {
@@ -207,11 +207,16 @@
     {
         isLoading = true;
 
-        // Simulate API call
-        await Task.Delay(1500);
+        var token = await IAuthRepository.Login(new LoginCred(username, password));
 
-        isLoading = false;
 
-        Navigation.NavigateTo("/", true);
+        if (token is not null)
+        {
+                await IAuthRepository.SetToken(token);
+
+                isLoading = false;
+
+                Navigation.NavigateTo("/", true);
+        }
     }
 }

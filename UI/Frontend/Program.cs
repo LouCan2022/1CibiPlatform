@@ -1,3 +1,5 @@
+using FrontEnd.ServiceConfig;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMudServices();
@@ -6,7 +8,8 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<AuthService>();
+
+builder.Services.AddFrontEndCServices();
 
 var app = builder.Build();
 
