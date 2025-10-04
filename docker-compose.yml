@@ -1,10 +1,10 @@
 services:
   apigateway:
+    container_name: apigateway
     image: apigateway
     build:
       context: .
       dockerfile: ApiGateways/YarpApiGateway/Dockerfile
-
 
   apis:
     container_name: oneplatform-backend
@@ -12,6 +12,13 @@ services:
     build:
       context: .
       dockerfile: BackendAPI/API/APIs/Dockerfile
+
+  frontendUI:
+    container_name: oneplatform-frontend
+    image: ${DOCKER_REGISTRY-}frontendui
+    build:
+      context: .
+      dockerfile: UI/FrontEnd/Dockerfile
   
   postgres:
     container_name: postgres

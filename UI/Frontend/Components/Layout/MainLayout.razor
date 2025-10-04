@@ -1,7 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using FrontEnd.Services.Auth.Repository
+@inherits LayoutComponentBase
 @inject NavigationManager Navigation
-@inject AuthService AuthService
-
+@inject IAuthRepository IAuthService
 
 
 <style>
@@ -21,8 +21,8 @@
 
 
 
-@if (userId == "0")
-{
+@* @if (userId == "0")
+{ *@
 
     <MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
     <MudPopoverProvider />
@@ -68,9 +68,9 @@
             </MudPaper>
         </MudMainContent>
     </MudLayout>
-}
+@* } *@
 @code {
-    public string userId => AuthService.GetUserId();
+    // public string userId => AuthService.GetUserId();
 
     // Drawer state
     private bool _drawerOpen = true;
@@ -114,14 +114,16 @@
 
     private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
 
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        var isTokenExist = await IAuthService.IsTokenExist();
 
-            if (userId == "1")
-            {
-                Navigation.NavigateTo("/login", true);
-            }
+        if (!isTokenExist)
+        {
+            Navigation.NavigateTo("/login", true);
+        }
+
     }
+
 
 }
