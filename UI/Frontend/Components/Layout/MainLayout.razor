@@ -1,23 +1,75 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<MudLayout>
+    <!-- AppBar -->
+    <MudAppBar Color="Color.Primary">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
+        My Application
+        <MudSpacer />
+        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                       Color="Color.Inherit"
+                       OnClick="@ToggleDarkMode" />
+    </MudAppBar>
+    
+    <!-- Drawer -->
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">OnePlatform</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+            <MudNavGroup Title="Settings" Expanded="true">
+                <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
+                <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    
+    <!-- Main content -->
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@code {
+    // Drawer state
+    private bool _drawerOpen = true;
+    
+    // Dark/light toggle
+    private bool _isDarkMode = false;
+    
+    // Theme definition
+    private MudTheme _myTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = Colors.Blue.Darken4,
+            Secondary = Colors.Green.Accent4,
+            Background = Colors.Gray.Lighten5,
+            Surface = Colors.Shades.White,
+            AppbarBackground = Colors.Blue.Default,
+            AppbarText = Colors.Shades.White,
+            TextPrimary = Colors.Gray.Darken3
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary = Colors.Blue.Darken2,
+            Secondary = Colors.Green.Lighten1,
+            Background = Colors.Gray.Darken4,
+            Surface = Colors.Gray.Darken3,
+            AppbarBackground = Colors.Blue.Darken4,
+            AppbarText = Colors.Shades.White,
+            TextPrimary = Colors.Shades.White
+        }
+    };
+    
+    private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+    
+    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
+}
