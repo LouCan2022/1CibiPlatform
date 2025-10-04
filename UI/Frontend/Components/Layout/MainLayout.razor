@@ -5,6 +5,21 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+
+<style>
+    .mud-drawer {
+        border-radius: 30px 30px 30px 30px !important;
+    }
+
+    .mud-drawer.mud-drawer-open {
+            border-radius: 30px 30px 30px 30px !important;
+    }
+
+    .mud-appbar {
+        border-radius: 30px 30px 30px 30px !important;
+    }
+</style>
+
 <MudLayout>
     <!-- AppBar -->
     <MudAppBar Color="Color.Primary">
@@ -33,7 +48,9 @@
     
     <!-- Main content -->
     <MudMainContent>
-        @Body
+        <MudPaper Class="pa-5 ma-5" Elevation="2">
+            @Body
+        </MudPaper>
     </MudMainContent>
 </MudLayout>
 
@@ -49,7 +66,7 @@
     {
         PaletteLight = new PaletteLight()
         {
-            Primary = Colors.Blue.Darken4,
+            Primary = Colors.Blue.Default,
             Secondary = Colors.Green.Accent4,
             Background = Colors.Gray.Lighten5,
             Surface = Colors.Shades.White,
@@ -59,13 +76,20 @@
         },
         PaletteDark = new PaletteDark()
         {
-            Primary = Colors.Blue.Darken2,
+            Primary = Colors.Blue.Lighten2,
             Secondary = Colors.Green.Lighten1,
             Background = Colors.Gray.Darken4,
             Surface = Colors.Gray.Darken3,
             AppbarBackground = Colors.Blue.Darken4,
             AppbarText = Colors.Shades.White,
             TextPrimary = Colors.Shades.White
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            DefaultBorderRadius = "30px",
+            DrawerWidthLeft = "260px",
+            DrawerWidthRight = "260px",
+            AppbarHeight = "64px"
         }
     };
     

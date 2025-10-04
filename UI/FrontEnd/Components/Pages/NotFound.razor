@@ -1,12 +1,13 @@
 ﻿@page "/{**catchAll}"
 
-<MudPaper Class="pa-6 mx-auto mt-12" Style="max-width:600px;text-align:center;">
+<MudPaper Class="pa-6 mx-auto transparent-paper" Style="max-width:600px;text-align:center;"
+          Elevation="0" Outlined="false">
     <MudText Typo="Typo.h3" Color="Color.Error">404 - Page Not Found</MudText>
     <MudText Typo="Typo.body1" Class="mt-2">
         Sorry, the page you are looking for does not exist.
     </MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/">
-        Go Back Home
+        Go Back
     </MudButton>
 </MudPaper>
 
