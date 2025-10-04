@@ -4,13 +4,16 @@ public class GetCandidateService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<GetCandidateService> _logger;
+    private readonly IConfiguration _configuration;
 
     public GetCandidateService(
         IHttpClientFactory factory,
-        ILogger<GetCandidateService> logger)
+        ILogger<GetCandidateService> logger,
+        IConfiguration configuration)
     {
         this._httpClient = factory.CreateClient("Talkpush");
         this._logger = logger;
+        this._configuration = configuration;
     }
 
 
@@ -18,7 +21,15 @@ public class GetCandidateService
         string searchData,
         CancellationToken ct = default)
     {
-        var requestURI = BuildRequestUri(searchData);
+        var apiKey = _configuration.GetValue<string>("CNXTalkpushsKey:Key");
+        var filterCheck = _configuration.GetValue<string>("CNXTalkpushsKey:FilterCheck");
+
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            throw new InvalidOperationException("API key is not configured.");
+        }
+
+        var requestURI = BuildRequestUri(searchData, apiKey, filterCheck);
 
         _logger.LogInformation("=== REQUEST ===");
 
@@ -46,18 +57,25 @@ public class GetCandidateService
         return mapDTO;
     }
 
-    protected virtual async Task<HttpResponseMessage> SendRequestAsync(string requestUri, CancellationToken ct)
+    protected virtual async Task<HttpResponseMessage> SendRequestAsync(
+        string requestUri,
+
+        CancellationToken ct)
     {
         return await _httpClient.GetAsync(requestUri, ct);
     }
 
-    private string BuildRequestUri(string searchData)
+    private string BuildRequestUri(
+        string searchData,
+        string apiKey,
+        string filterCheck
+        )
     {
         var queryParams = new Dictionary<string, string>
         {
-            ["api_key"] = "fe5b9baf4a79c19b9f1de4a62b2de990",
+            ["api_key"] = apiKey,
             ["filter[query]"] = searchData,
-            ["filter[others][bi_check]"] = "CIBI",
+            ["filter[others][bi_check]"] = filterCheck,
             ["page"] = "1"
         };
 
