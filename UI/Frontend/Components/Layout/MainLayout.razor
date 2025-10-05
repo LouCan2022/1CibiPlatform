@@ -3,7 +3,6 @@
 @inject NavigationManager Navigation
 @inject IAuthRepository IAuthService
 
-
 <style>
     .mud-drawer {
         border-radius: 30px 30px 30px 30px !important;
@@ -114,16 +113,17 @@
 
     private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var isTokenExist = await IAuthService.IsTokenExist();
-
-        if (!isTokenExist)
+        if (!firstRender)
         {
-            Navigation.NavigateTo("/login", true);
+            var token = await IAuthService.ReadToken();
+
+            if (token == null)
+            {
+                Navigation.NavigateTo("/login", true);
+            }
         }
 
     }
-
-
 }

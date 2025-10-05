@@ -212,10 +212,6 @@
 
         if (token is not null)
         {
-                await IAuthRepository.SetToken(token);
-
-                isLoading = false;
-
                 Navigation.NavigateTo("/", true);
         }
     }

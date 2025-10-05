@@ -2,11 +2,8 @@
 
 public interface IAuthRepository
 {
-    Task<string> Login(LoginCred cred);
+	Task<string> Login(LoginCred cred);
 
-    Task<bool> SetToken(string token);
+	Task<string> ReadToken();
 
-    Task<bool> IsTokenExist();
-
-    Task<bool> RemoveToken();
 }
