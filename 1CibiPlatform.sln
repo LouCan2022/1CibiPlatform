@@ -36,7 +36,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhilSys", "BackendAPI\Modul
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendWebassembly", "UI\FrontendWebassembly\FrontendWebassembly.csproj", "{09F289F1-61C9-4B9E-B09C-FF8C9F7554AF}"
 EndProject
-
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -34,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Auth\Auth.csproj" />
     <ProjectReference Include="..\..\Modules\CNX\CNX.csproj" />
+	<ProjectReference Include="..\..\Modules\PhilSys\PhilSys.csproj" />
   </ItemGroup>
 
   <ItemGroup>
