@@ -2,25 +2,24 @@ var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
 //check env configuration
-//if (builder.Environment.IsDevelopment())
-//{
-//    builder.Services.ConfigureCorsDev();
-//}
+if (builder.Environment.IsDevelopment())
+{
+	builder.Services.ConfigureCorsDev();
+}
 
-//if (builder.Environment.IsProduction())
-//{
-//    builder.Services.ConfigureCorsProd();
-//}
-
+if (builder.Environment.IsProduction())
+{
+	builder.Services.ConfigureCorsProd();
+}
 
 builder.Services
-    .AddModuleMediaTR()
-    .AddModuleCarter()
-    .AddModuleServices()
-    .AddJwtAuthentication(builder.Configuration)
-    .AddModuleInfrastructure(builder.Configuration)
-    .AddEndpointsApiExplorer()
-    .AddSwaggerGen();
+	.AddModuleMediaTR()
+	.AddModuleCarter()
+	.AddModuleServices()
+	.AddJwtAuthentication(builder.Configuration)
+	.AddModuleInfrastructure(builder.Configuration)
+	.AddEndpointsApiExplorer()
+	.AddSwaggerGen();
 
 
 
@@ -31,14 +30,14 @@ app.MapCarter();
 
 if (app.Environment.IsDevelopment())
 {
-    await DatabaseExtensions.IntializeDatabaseAsync(app);
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	await DatabaseExtensions.IntializeDatabaseAsync(app);
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 if (app.Environment.IsProduction())
 {
-    await DatabaseExtensions.IntializeDatabaseAsync(app);
+	await DatabaseExtensions.IntializeDatabaseAsync(app);
 }
 
 // use exception handler after register
@@ -47,7 +46,7 @@ app.UseExceptionHandler(options => { })
    .UseAuthentication()
    .UseAuthorization();
 
-//app.UseCors("CorsPolicy");
+app.UseCors("CorsPolicy");
 
 
 app.Run();

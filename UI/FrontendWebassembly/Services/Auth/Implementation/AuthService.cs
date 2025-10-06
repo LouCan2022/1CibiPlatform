@@ -1,4 +1,6 @@
-﻿namespace FrontendWebassembly.Services.Auth.Implementation;
+﻿using FrontendWebassembly.DTO.Auth;
+
+namespace FrontendWebassembly.Services.Auth.Implementation;
 
 public class AuthService : IAuthService
 {
@@ -17,8 +19,10 @@ public class AuthService : IAuthService
 		return Task.FromResult(string.Empty);
 	}
 
-	public async Task<string> Login(LoginCred cred)
+	public async Task<AuthResponseDTO> Login(LoginCred cred)
 	{
+		Console.WriteLine("🔹 Starting login request...");
+
 		var payload = new
 		{
 			loginCred = new
@@ -28,12 +32,29 @@ public class AuthService : IAuthService
 			}
 		};
 
-		var response = await _httpClient.PostAsJsonAsync("/login", payload);
+		Console.WriteLine($"➡️ Sending POST to /token/generatetoken for user: {cred.Username}");
 
-		response.EnsureSuccessStatusCode();
+		var response = await _httpClient.PostAsJsonAsync("/token/generatetoken", payload);
+		Console.WriteLine($"⬅️ Received response: {(int)response.StatusCode} {response.ReasonPhrase}");
 
-		var token = await response.Content.ReadFromJsonAsync<CredResponse>();
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Login failed. Reading error content...");
 
-		return token!.access_token;
+			var errorContent = await response.Content.ReadFromJsonAsync<CredErrorResponseDTO>();
+
+			var rawError = await response.Content.ReadAsStringAsync();
+			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {rawError}");
+			return new AuthResponseDTO(Guid.Empty, string.Empty, rawError, "Unknown Error");
+		}
+
+		Console.WriteLine("✅ Login successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<CredResponseDTO>();
+
+		Console.WriteLine($"🎉 User {cred.Username} logged in successfully with UserId: {successContent.UserId}");
+
+		return new AuthResponseDTO(successContent.UserId, successContent.AccessToken, string.Empty, string.Empty);
 	}
+
 }
