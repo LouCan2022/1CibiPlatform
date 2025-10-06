@@ -1,10 +1,9 @@
-﻿
-.login-container {
+﻿.login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(120deg, #1E3A8A 0%, #3B82F6 100%);
+    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%);
     padding: 20px;
 }
 
@@ -26,7 +25,7 @@
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
-    background: linear-gradient(120deg, #1E3A8A 0%, #3B82F6 100%);
+    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%);
     border-radius: 20px;
     display: flex;
     align-items: center;
@@ -54,13 +53,7 @@
     border-radius: 12px !important;
 }
 
-.login-button {
-    border-radius: 12px !important;
-    height: 48px !important;
-    font-weight: 600 !important;
-    text-transform: none !important;
-    font-size: 16px !important;
-}
+
 
 .divider-text {
     display: flex;
@@ -70,17 +63,17 @@
     margin: 24px 0;
 }
 
-    .divider-text::before,
-    .divider-text::after {
-        content: '';
-        flex: 1;
-        border-bottom: 1px solid #e2e8f0;
-    }
+.divider-text::before,
+.divider-text::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+}
 
-    .divider-text span {
-        padding: 0 12px;
-        font-size: 14px;
-    }
+.divider-text span {
+    padding: 0 12px;
+    font-size: 14px;
+}
 
 .footer-links {
     text-align: center;
@@ -89,12 +82,12 @@
     font-size: 14px;
 }
 
-    .footer-links a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 600;
-    }
+.footer-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
 
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
+.footer-links a:hover {
+    text-decoration: underline;
+}

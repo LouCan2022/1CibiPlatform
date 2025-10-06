@@ -11,7 +11,7 @@ public class GetTokenService
         ILogger<GetTokenService> logger,
         IConfiguration configuration)
     {
-        _httpClient = httpClientFactory.CreateClient("Philsys");
+        _httpClient = httpClientFactory.CreateClient("PhilSys");
         _logger = logger;
         _configuration = configuration;
     }

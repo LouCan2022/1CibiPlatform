@@ -20,7 +20,7 @@ public static class PhilSysServiceConfiguration
 	#region MediatR Config
 	public static IServiceCollection AddPhilSysServices(this IServiceCollection services)
 	{
-		services.AddHttpClient("Philsys", client =>
+		services.AddHttpClient("PhilSys", client =>
 		{
 			client.BaseAddress = new Uri("https://ws.everify.gov.ph/api/");
 
