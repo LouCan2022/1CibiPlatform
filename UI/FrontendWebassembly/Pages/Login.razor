@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using FrontendWebassembly.DTO.Auth
 @using MudBlazor
 @layout AuthLayout
 @inject NavigationManager Navigation
@@ -10,7 +11,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(120deg, #1E3A8A 0%, #3B82F6 100%);
         padding: 20px;
     }
 
@@ -32,7 +33,7 @@
         width: 80px;
         height: 80px;
         margin: 0 auto 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(120deg, #1E3A8A 0%, #3B82F6 100%);
         border-radius: 20px;
         display: flex;
         align-items: center;
@@ -88,12 +89,6 @@
             font-size: 14px;
         }
 
-    .social-button {
-        border-radius: 12px !important;
-        height: 48px !important;
-        text-transform: none !important;
-    }
-
     .footer-links {
         text-align: center;
         margin-top: 24px;
@@ -112,7 +107,7 @@
 </style>
 
 <div class="login-container">
-    <MudPaper Class="login-card" Elevation="0">
+    <MudPaper Class="login-card" Elevation="2">
         <div class="login-header">
             <div class="login-logo">
                 <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Style="color: white;" />
@@ -122,6 +117,14 @@
         </div>
 
         <div class="login-body">
+
+            @if (!isUserVald)
+            {
+                <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
+                    Invalid username or password.
+                </MudAlert>
+            }
+
             <MudForm @ref="form" @bind-IsValid="@success">
                 <MudTextField @bind-Value="username"
                               Label="Username"
@@ -151,7 +154,8 @@
                     <MudLink Href="/forgot-password" Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
                 </MudStack>
 
-                <MudButton Variant="Variant.Filled"
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
                            Color="Color.Primary"
                            FullWidth="true"
                            Class="login-button"
@@ -169,7 +173,7 @@
             </MudForm>
 
             <div class="footer-links">
-                Don't have an account <a href="/register">Sign up</a>
+                Don't have an account? <a href="/register">Sign up</a>
             </div>
         </div>
     </MudPaper>
@@ -182,6 +186,8 @@
     private string username = "";
     private string password = "";
     private bool rememberMe = false;
+    private bool isUserVald = true;
+    private string errorMessage = "";
 
     private bool isPasswordVisible = false;
     private InputType passwordInput = InputType.Password;
@@ -207,12 +213,21 @@
     {
         isLoading = true;
 
-        var token = await IAuthService.Login(new LoginCred(username, password));
+        var userData = await IAuthService.Login(new LoginCred(username, password));
 
-
-        if (token is not null)
+        if (userData.detail is not null && userData.detail != string.Empty)
         {
-                Navigation.NavigateTo("/", true);
+            Console.WriteLine($"Login Error: {userData.detail}");
+            isLoading = false;
+            isUserVald = false;
+            errorMessage = userData!.detail;
+            StateHasChanged();
+            return;
         }
+       else
+        {          
+           Navigation.NavigateTo("/", true);
+        }
+
     }
 }
