@@ -44,12 +44,12 @@
                         </MudPaper>
                     </MudDrawerHeader>
                     <MudNavMenu>
-                        <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+                        <MudNavLink Href="/" Match="NavLinkMatch.All" ForceLoad="false">Dashboard</MudNavLink>
                         <MudNavGroup Title="Settings" Expanded="false">
-                            <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
-                            <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
+                            <MudNavLink Href="/users" Match="NavLinkMatch.Prefix" ForceLoad="false">Users</MudNavLink>
+                            <MudNavLink Href="/security" Match="NavLinkMatch.Prefix" ForceLoad="false">Security</MudNavLink>
                         </MudNavGroup>
-                        <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink>
+                        <MudNavLink Href="/about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
                     </MudNavMenu>
                 </MudDrawer>
                 <!-- Main content -->
@@ -146,8 +146,6 @@
             {
                  Console.WriteLine($"UserData: {userData}");
                 Navigation.NavigateTo("/login", true);
-               
-                return;
             }
 
             _isAuthenticated = true;

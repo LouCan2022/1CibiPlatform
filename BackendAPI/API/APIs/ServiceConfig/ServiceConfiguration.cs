@@ -6,6 +6,38 @@
 		private static readonly Assembly _authAssembly = typeof(AuthMarker).Assembly;
 		private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
 
+		#region CORS
+		public static void ConfigureCorsProd(this IServiceCollection services) =>
+			services.AddCors(options =>
+			{
+				options.AddPolicy("CorsPolicy",
+								 policy =>
+								 {
+									 policy.WithOrigins(
+										 "http://192.168.32.21:4200",
+										 "http://localhost:5055")
+										   .AllowAnyHeader()
+										   .AllowAnyMethod()
+										   .AllowCredentials();
+								 });
+			});
+
+		public static void ConfigureCorsDev(this IServiceCollection services) =>
+			services.AddCors(options =>
+			{
+				options.AddPolicy("CorsPolicy",
+								 policy =>
+								 {
+									 policy.WithOrigins(
+										 "http://localhost:5123",
+										 "http://localhost:5134")
+										   .AllowAnyHeader()
+										   .AllowAnyMethod()
+										   .AllowCredentials();
+								 });
+			});
+		#endregion
+
 		#region JWT Config
 		public static IServiceCollection AddJwtAuthentication(
 			this IServiceCollection services,

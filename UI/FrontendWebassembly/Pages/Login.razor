@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using FrontendWebassembly.DTO.Auth
 @using MudBlazor
 @layout AuthLayout
 @inject NavigationManager Navigation
@@ -88,12 +89,6 @@
             font-size: 14px;
         }
 
-    .social-button {
-        border-radius: 12px !important;
-        height: 48px !important;
-        text-transform: none !important;
-    }
-
     .footer-links {
         text-align: center;
         margin-top: 24px;
@@ -123,6 +118,14 @@
         </div>
 
         <div class="login-body">
+
+            @if (!isUserVald)
+            {
+                <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
+                    Invalid username or password.
+                </MudAlert>
+            }
+
             <MudForm @ref="form" @bind-IsValid="@success">
                 <MudTextField @bind-Value="username"
                               Label="Username"
@@ -170,7 +173,7 @@
             </MudForm>
 
             <div class="footer-links">
-                Don't have an account <a href="/register">Sign up</a>
+                Don't have an account? <a href="/register">Sign up</a>
             </div>
         </div>
     </MudPaper>
@@ -183,6 +186,8 @@
     private string username = "";
     private string password = "";
     private bool rememberMe = false;
+    private bool isUserVald = true;
+    private string errorMessage = "";
 
     private bool isPasswordVisible = false;
     private InputType passwordInput = InputType.Password;
@@ -208,12 +213,21 @@
     {
         isLoading = true;
 
-        var token = await IAuthService.Login(new LoginCred(username, password));
+        var userData = await IAuthService.Login(new LoginCred(username, password));
 
-
-        if (token is not null)
+        if (userData.detail is not null || !string.IsNullOrEmpty(userData.errorMessage))
         {
-                Navigation.NavigateTo("/", true);
+            isLoading = false;
+            isUserVald = false;
+            errorMessage = userData!.detail;
+            StateHasChanged();
+            return;
         }
+       else
+        {
+            
+        Navigation.NavigateTo("/", true);
+        }
+
     }
 }

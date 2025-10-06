@@ -10,7 +10,7 @@ public static class FrontendServiceConfig
 		{
 			var client = new HttpClient
 			{
-				BaseAddress = new Uri("http://apis:8080")
+				BaseAddress = new Uri("http://localhost:5123")
 			};
 			return client;
 		});
