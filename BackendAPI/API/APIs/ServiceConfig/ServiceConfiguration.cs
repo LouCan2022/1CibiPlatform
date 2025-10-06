@@ -1,102 +1,116 @@
 ﻿namespace APIs.ServiceConfig
 {
-    public static class ServiceConfiguration
-    {
+	public static class ServiceConfiguration
+	{
 
-        private static readonly Assembly _authAssembly = typeof(AuthMarker).Assembly;
-        private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
+		private static readonly Assembly _authAssembly = typeof(AuthMarker).Assembly;
+		private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
 
-        #region JWT Config
-        public static IServiceCollection AddJwtAuthentication(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            // JWT Authentication
-            var jwtSettings = configuration.GetSection("Jwt");
-            var key = jwtSettings["Key"];
-            var issuer = jwtSettings["Issuer"];
-            var audience = jwtSettings["Audience"];
-            var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]!);
+		#region JWT Config
+		public static IServiceCollection AddJwtAuthentication(
+			this IServiceCollection services,
+			IConfiguration configuration)
+		{
+			// JWT Authentication
+			var jwtSettings = configuration.GetSection("Jwt");
+			var key = jwtSettings["Key"];
+			var issuer = jwtSettings["Issuer"];
+			var audience = jwtSettings["Audience"];
+			var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]!);
 
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
-            {
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
-                    RoleClaimType = ClaimTypes.Role,
-                };
-            });
-            services.AddAuthorization();
+			var _httpCookieOnlyKey = configuration.GetValue<string>("HttpCookieOnlyKey");
 
-            return services;
-        }
-        #endregion
+			services.AddAuthentication(x =>
+			{
+				x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+			.AddJwtBearer(options =>
+			{
+				options.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = true,
+					ValidateAudience = true,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					ValidIssuer = issuer,
+					ValidAudience = audience,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
+					RoleClaimType = ClaimTypes.Role,
+				};
+				options.Events = new JwtBearerEvents
+				{
+					OnMessageReceived = context =>
+					{
+						// Try to get token from cookie
+						if (context.Request.Cookies.TryGetValue(_httpCookieOnlyKey!, out var token))
+						{
+							context.Token = token;
+						}
+						return Task.CompletedTask;
+					}
+				};
+			});
+			services.AddAuthorization();
 
-        #region Db Config
+			return services;
+		}
+		#endregion
 
-        public static IServiceCollection AddModuleInfrastructure(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            // Add DbContext
-            services.AddAuthInfrastructure(configuration);
-            services.AddCNXInfrastructure(configuration);
-            return services;
-        }
+		#region Db Config
 
-        #endregion
+		public static IServiceCollection AddModuleInfrastructure(
+			this IServiceCollection services,
+			IConfiguration configuration)
+		{
+			// Add DbContext
+			services.AddAuthInfrastructure(configuration);
+			services.AddCNXInfrastructure(configuration);
+			return services;
+		}
 
-        #region Carter Config
-        public static IServiceCollection AddModuleCarter(this IServiceCollection services)
-        {
-            services.AddCarter(new DependencyContextAssemblyCatalog([
-                 _authAssembly,
-                 _cnxAssembly
+		#endregion
+
+		#region Carter Config
+		public static IServiceCollection AddModuleCarter(this IServiceCollection services)
+		{
+			services.AddCarter(new DependencyContextAssemblyCatalog([
+				 _authAssembly,
+				 _cnxAssembly
              // Add any other assembly here
              ]));
 
 
-            return services;
-        }
-        #endregion
+			return services;
+		}
+		#endregion
 
-        #region MediaTR Config
+		#region MediaTR Config
 
-        public static IServiceCollection AddModuleMediaTR(
-            this IServiceCollection services)
-        {
-            // Add MediaTR
-            services.AddAuthMediaTR(_authAssembly);
-            services.AddCNXMediaTR(_cnxAssembly);
+		public static IServiceCollection AddModuleMediaTR(
+			this IServiceCollection services)
+		{
+			// Add MediaTR
+			services.AddAuthMediaTR(_authAssembly);
+			services.AddCNXMediaTR(_cnxAssembly);
 
-            return services;
-        }
+			return services;
+		}
 
-        #endregion
+		#endregion
 
-        #region Services Config
-        public static IServiceCollection AddModuleServices(this IServiceCollection services)
-        {
-            // Add Services
-            services.AddAuthServices();
-            services.AddCNXServices();
+		#region Services Config
+		public static IServiceCollection AddModuleServices(this IServiceCollection services)
+		{
+			// Add Services
+			services.AddAuthServices();
+			services.AddCNXServices();
 
-            return services;
-        }
+			return services;
+		}
 
-        #endregion
+		#endregion
 
-    }
+	}
 }

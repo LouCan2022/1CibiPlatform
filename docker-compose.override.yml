@@ -1,6 +1,5 @@
 services:
   apigateway:
-    container_name: apigateway
     ports:
         - "5123:8080"
     environment:
@@ -22,7 +21,6 @@ services:
     networks:
       - backend
 
-
   apis:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -38,6 +36,19 @@ services:
       - backend
     depends_on:
       - postgres
+  # FOR PROD
+  # frontendwebassembly:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #   ports:
+  #     - "5100:8080"
+  #   volumes:
+  #     - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  #     - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - apis
 
 networks:
   backend:
