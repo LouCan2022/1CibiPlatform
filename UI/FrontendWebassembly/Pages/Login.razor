@@ -11,7 +11,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(120deg, #1E3A8A 0%, #3B82F6 100%);
         padding: 20px;
     }
 
@@ -33,7 +33,7 @@
         width: 80px;
         height: 80px;
         margin: 0 auto 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(120deg, #1E3A8A 0%, #3B82F6 100%);
         border-radius: 20px;
         display: flex;
         align-items: center;
@@ -108,7 +108,7 @@
 </style>
 
 <div class="login-container">
-    <MudPaper Class="login-card" Elevation="0">
+    <MudPaper Class="login-card" Elevation="2">
         <div class="login-header">
             <div class="login-logo">
                 <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Style="color: white;" />
@@ -155,7 +155,8 @@
                     <MudLink Href="/forgot-password" Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
                 </MudStack>
 
-                <MudButton Variant="Variant.Filled"
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
                            Color="Color.Primary"
                            FullWidth="true"
                            Class="login-button"
@@ -215,8 +216,9 @@
 
         var userData = await IAuthService.Login(new LoginCred(username, password));
 
-        if (userData.detail is not null || !string.IsNullOrEmpty(userData.errorMessage))
+        if (userData.detail is not null && userData.detail != string.Empty)
         {
+            Console.WriteLine($"Login Error: {userData.detail}");
             isLoading = false;
             isUserVald = false;
             errorMessage = userData!.detail;
@@ -224,9 +226,8 @@
             return;
         }
        else
-        {
-            
-        Navigation.NavigateTo("/", true);
+        {          
+           Navigation.NavigateTo("/", true);
         }
 
     }
