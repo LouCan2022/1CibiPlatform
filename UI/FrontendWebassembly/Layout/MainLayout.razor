@@ -1,0 +1,161 @@
+﻿@using MudBlazor
+
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject IAuthService IAuthService
+
+<style>
+    .mud-drawer {
+        border-radius: 30px 30px 30px 30px !important;
+    }
+
+        .mud-drawer.mud-drawer-open {
+            border-radius: 30px 30px 30px 30px !important;
+        }
+
+    .mud-appbar {
+        border-radius: 30px 30px 30px 30px !important;
+    }
+</style>
+
+<MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<ErrorBoundary>
+    <ChildContent>
+        @if (_isAuthenticated)
+        {
+            <MudLayout>
+                <!-- AppBar -->
+                <MudAppBar Color="Color.Primary">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
+                    <MudSpacer />
+                    <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                                   Color="Color.Inherit"
+                                   OnClick="@ToggleDarkMode" />
+                </MudAppBar>
+                <!-- Drawer -->
+                <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
+                        <MudPaper>
+                            <MudIcon Icon="@Icons.Material.Filled.RepeatOneOn" Size="Size.Large" Style="color: blue;" />
+                        </MudPaper>
+                    </MudDrawerHeader>
+                    <MudNavMenu>
+                        <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+                        <MudNavGroup Title="Settings" Expanded="false">
+                            <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
+                            <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
+                        </MudNavGroup>
+                        <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink>
+                    </MudNavMenu>
+                </MudDrawer>
+                <!-- Main content -->
+                <MudMainContent>
+                    <MudPaper Class="pa-5 ma-5" Elevation="2">
+                        @Body
+                    </MudPaper>
+                </MudMainContent>
+            </MudLayout>
+        }
+        else
+        {
+            <!-- Loading -->
+            <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
+                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            </MudContainer>
+        }
+    </ChildContent>
+    <ErrorContent Context="exception">
+        <MudContainer Class="d-flex flex-column justify-center align-center" Style="height: 100vh; gap: 20px;">
+            <MudPaper Class="pa-8" Elevation="3" Style="max-width: 600px; text-align: center;">
+                <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" Class="mb-4" />
+                <MudText Typo="Typo.h4" Color="Color.Error" Class="mb-2">
+                    Oops! Something went wrong
+                </MudText>
+                <MudText Typo="Typo.body1" Class="mb-4">
+                    We encountered an unexpected error. Please try refreshing the page.
+                </MudText>
+                <MudExpansionPanels>
+                    <MudExpansionPanel Text="Error Details">
+                        <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap; word-break: break-word;">
+                            @exception.Message
+                        </MudText>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
+                           StartIcon="@Icons.Material.Filled.Refresh"
+                           Class="mt-4">
+                    Reload Page
+                </MudButton>
+            </MudPaper>
+        </MudContainer>
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+    private bool _isAuthenticated = false;
+
+    private MudTheme _myTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#667eea",
+            Secondary = "#764ba2",
+            Background = Colors.Gray.Lighten5,
+            Surface = Colors.Shades.White,
+            AppbarBackground = "#667eea",
+            AppbarText = Colors.Shades.White,
+            TextPrimary = Colors.Gray.Darken3
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#8b9dff",
+            Secondary = "#9d6bc7",
+            Background = Colors.Gray.Darken4,
+            Surface = Colors.Gray.Darken3,
+            AppbarBackground = "#5568d3",
+            AppbarText = Colors.Shades.White,
+            TextPrimary = Colors.Shades.White
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            DefaultBorderRadius = "30px",
+            DrawerWidthLeft = "260px",
+            DrawerWidthRight = "260px",
+            AppbarHeight = "64px"
+        }
+    };
+
+    private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var userData = await IAuthService.GetUserInfoIfAuthenticated();
+
+            if (string.IsNullOrEmpty(userData))
+            {
+                 Console.WriteLine($"UserData: {userData}");
+                Navigation.NavigateTo("/login", true);
+               
+                return;
+            }
+
+            _isAuthenticated = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Authentication Error: {ex.Message}");
+            throw;
+        }
+    }
+}
