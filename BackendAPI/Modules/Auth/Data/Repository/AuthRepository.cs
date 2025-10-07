@@ -24,11 +24,11 @@ public class AuthRepository : IAuthRepository
 							   user.FirstName!,
 							   user.LastName!,
 							   user.MiddleName,
-							   userRolesGroup.Select(r => r.AppId.ToString()).ToList(),
+							   userRolesGroup.Select(r => r.AppId).Distinct().ToList(),
 							   userRolesGroup.GroupBy(r => r.AppId)
 											 .Select(g => g.Select(r => r.Submenu).ToList())
 											 .ToList(),
-							   userRolesGroup.Select(r => r.RoleId.ToString()).ToList()
+							   userRolesGroup.Select(r => r.RoleId).Distinct().ToList()
 							  )
 			).AsNoTracking()
 			 .FirstOrDefaultAsync();

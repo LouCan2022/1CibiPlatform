@@ -8,12 +8,12 @@ public record LoginDTO(
 	string FirstName,
 	string LastName,
 	string? MiddleName,
-	List<string> AppId,
+	List<int> AppId,
 	List<List<int>> SubMenuId,
-	List<string> roleId
+	List<int> roleId
 	);
 
 
 public record LoginCred(
-    string Username,
-    string Password);
+	string Username,
+	string Password);

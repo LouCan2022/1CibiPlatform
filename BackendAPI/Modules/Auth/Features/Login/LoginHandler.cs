@@ -81,7 +81,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, LoginResult>
 			HttpOnly = true,
 			Secure = false, // Only send over HTTPS
 			SameSite = SameSiteMode.Strict,
-			Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_configuration.GetSection("Jwt:ExpiryInMinutes").Value!))
+			Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(configTime))
 		};
 
 		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey, jwtToken, cookieOptions);
