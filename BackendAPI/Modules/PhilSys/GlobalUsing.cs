@@ -13,6 +13,5 @@ global using FluentValidation;
 global using PhilSys.Services;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
-global using System.Text.Json;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;

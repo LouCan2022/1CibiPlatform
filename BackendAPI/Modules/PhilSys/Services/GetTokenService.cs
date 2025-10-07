@@ -31,32 +31,31 @@ public class GetTokenService
 
         _logger.LogInformation("Sending token request to PhilSys endpoint: {Endpoint}", endpoint);
 
-        var response = await SendRequestAsync(endpoint, body, ct);
+		var response = await SendRequestAsync(endpoint, body, ct);
 
-        var responseBody = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
-        _logger.LogInformation("PhilSys Token Response: {Response}", responseBody);
+		var responseBody = await response.Content.ReadFromJsonAsync<PhilSysTokenResponse>(ct);
+		_logger.LogInformation("PhilSys Token Response: {Response}", responseBody);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
-            throw new HttpRequestException($"PhilSys token request failed: {response.StatusCode} - {responseBody}");
-        }
+		if (!response.IsSuccessStatusCode)
+		{
+			_logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
+			throw new HttpRequestException($"PhilSys token request failed: {response.StatusCode} - {responseBody}");
+		}
 
-        var data = responseBody.GetProperty("data");
+		var tokenData = responseBody!.data;
 
-        return new CredentialResponseDTO(
-            data.GetProperty("access_token").GetString()!,
-            data.GetProperty("token_type").GetString()!,
-            data.GetProperty("expires_at").GetString()!
-        );
-    }
+		return new CredentialResponseDTO(
+			tokenData.access_token,
+			tokenData.token_type,
+			tokenData.expires_at
+		);
+	}
 
-    protected virtual async Task<HttpResponseMessage> SendRequestAsync(
-        string endpoint, 
-        object body, 
-        CancellationToken ct)
-    {
-        return await _httpClient.PostAsJsonAsync(endpoint, body, ct);
-    }
-
+	protected virtual async Task<HttpResponseMessage> SendRequestAsync(
+		string endpoint,
+		object body,
+		CancellationToken ct)
+	{
+		return await _httpClient.PostAsJsonAsync(endpoint, body, ct);
+	}
 }
