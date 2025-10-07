@@ -56,9 +56,8 @@
 
                 <MudButton ButtonType="ButtonType.Submit"
                            Variant="Variant.Filled"
-                           Color="Color.Primary"
                            FullWidth="true"
-                           Class="login-button"
+                           Class="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
                            OnClick="HandleLogin"
                            Disabled="@(!success || isLoading)">
                     @if (isLoading)
