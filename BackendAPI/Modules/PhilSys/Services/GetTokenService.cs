@@ -33,7 +33,7 @@ public class GetTokenService
 
         var response = await SendRequestAsync(endpoint, body, ct);
 
-        var responseBody = await response.Content.ReadAsStringAsync(ct);
+        var responseBody = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
         _logger.LogInformation("PhilSys Token Response: {Response}", responseBody);
 
         if (!response.IsSuccessStatusCode)
@@ -42,10 +42,7 @@ public class GetTokenService
             throw new HttpRequestException($"PhilSys token request failed: {response.StatusCode} - {responseBody}");
         }
 
-        using var stream = await response.Content.ReadAsStreamAsync(ct);
-        var jsonDoc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
-
-        var data = jsonDoc.RootElement.GetProperty("data");
+        var data = responseBody.GetProperty("data");
 
         return new CredentialResponseDTO(
             data.GetProperty("access_token").GetString()!,
