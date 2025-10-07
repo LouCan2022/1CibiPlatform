@@ -17,4 +17,5 @@ global using Carter;
 global using System.Reflection;
 global using Auth.Data.Extensions;
 global using CNX.Data.Extensions;
-
+global using PhilSys;
+global using PhilSys.ServiceConfig;

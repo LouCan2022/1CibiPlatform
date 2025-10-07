@@ -11,6 +11,7 @@ public class LoggingBehavior<TRequest, TResponse>
             typeof(TRequest).Name, typeof(TResponse).Name, request);
 
         var timer = new Stopwatch();
+
         timer.Start();
 
         var response = await next();
