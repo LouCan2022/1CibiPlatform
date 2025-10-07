@@ -59,7 +59,6 @@ public class GetCandidateService
 
     protected virtual async Task<HttpResponseMessage> SendRequestAsync(
         string requestUri,
-
         CancellationToken ct)
     {
         return await _httpClient.GetAsync(requestUri, ct);

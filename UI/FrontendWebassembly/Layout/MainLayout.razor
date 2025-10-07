@@ -16,6 +16,7 @@
     .mud-appbar {
         border-radius: 30px 30px 30px 30px !important;
     }
+
 </style>
 
 <MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
@@ -37,19 +38,32 @@
                                    OnClick="@ToggleDarkMode" />
                 </MudAppBar>
                 <!-- Drawer -->
-                <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+                <MudDrawer @bind-Open="_drawerOpen" 
+                           Elevation="1"
+                           Style="box-shadow: 0 0 15px rgba(0, 0, 0, 0.25); border-radius: 10px;">
                     <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
-                        <MudPaper>
-                            <MudIcon Icon="@Icons.Material.Filled.RepeatOneOn" Size="Size.Large" Style="color: blue;" />
-                        </MudPaper>
+                        <MudImage Src="images/logo/cibi.png"
+                                    Alt="Cibi Logo"
+                                    Width="125"
+                                    Height="45"/>
                     </MudDrawerHeader>
                     <MudNavMenu>
-                        <MudNavLink Href="counter" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-                        <MudNavGroup Title="Settings" Expanded="false">
-                            <MudNavLink Href="page" Match="NavLinkMatch.Prefix" >Users</MudNavLink>
-                            <MudNavLink Href="non" Match="NavLinkMatch.Prefix">Security</MudNavLink>
+
+                        <MudNavLink Href="" Match="NavLinkMatch.All" ForceLoad="false">Dashboard</MudNavLink>
+                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Class="main-nav-item-custom">
+                            <img src="images/logo/philsys.png" alt="PhilSys Icon" class="main-nav-icon" />
+                            <span class="main-nav-text">PhilSys</span>
+                        </MudNavLink>
+                        <MudNavLink Href="cnx" Match="NavLinkMatch.Prefix" Class="main-nav-item-custom">
+                            <img src="images/logo/cnx.png" alt="PhilSys Icon" class="main-nav-icon" />
+                            <span class="main-nav-text">CNX</span>
+                        </MudNavLink>
+                        <MudNavGroup Title="Settings" IconColor="Color.Primary" Expanded="false">
+                            <MudNavLink Href="users" Match="NavLinkMatch.Prefix" ForceLoad="false">Users</MudNavLink>
+                            <MudNavLink Href="security" Match="NavLinkMatch.Prefix" ForceLoad="false">Security</MudNavLink>
                         </MudNavGroup>
-                        <MudNavLink Href="none" Match="NavLinkMatch.Prefix">About</MudNavLink>
+                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
+
                     </MudNavMenu>
                 </MudDrawer>
                 <!-- Main content -->
