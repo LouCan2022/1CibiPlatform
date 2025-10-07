@@ -16,6 +16,8 @@ public class AuthApplicationDbContext : DbContext
 
 	public DbSet<AuthRefreshToken> AuthRefreshToken { get; set; }
 
+	public DbSet<AuthSubMenu> AuthSubmenu { get; set; }
+
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthApplicationDbContext).Assembly);

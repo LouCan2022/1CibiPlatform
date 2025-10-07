@@ -14,21 +14,24 @@ public class AuthRepository : IAuthRepository
 	{
 		var userData = await (from user in _dbcontext.AuthUsers
 							  join userRole in _dbcontext.AuthUserAppRoles
-									on user.Id equals userRole.UserId into userRolesGroup
+														 on user.Id equals userRole.UserId into userRolesGroup
 							  where user.Username == cred.Username && user.IsActive == true
 							  select new LoginDTO(
-								  user.Id,
-								  user.Username,
-								  user.PasswordHash,
-								  user.Email!,
-								  user.FirstName!,
-								  user.LastName!,
-								  user.MiddleName,
-								  userRolesGroup.Select(r => r.AppId.ToString()).ToList(),
-								  userRolesGroup.Select(r => r.RoleId.ToString()).ToList()
+							   user.Id,
+							   user.Username,
+							   user.PasswordHash,
+							   user.Email!,
+							   user.FirstName!,
+							   user.LastName!,
+							   user.MiddleName,
+							   userRolesGroup.Select(r => r.AppId.ToString()).ToList(),
+							   userRolesGroup.GroupBy(r => r.AppId)
+											 .Select(g => g.Select(r => r.Submenu).ToList())
+											 .ToList(),
+							   userRolesGroup.Select(r => r.RoleId.ToString()).ToList()
 							  )
-						  ).AsNoTracking()
-						   .FirstOrDefaultAsync();
+			).AsNoTracking()
+			 .FirstOrDefaultAsync();
 
 
 		return userData!;

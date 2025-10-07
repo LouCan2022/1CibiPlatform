@@ -57,6 +57,11 @@ public class LoginWebHandler
 			// fetching user data from database
 			LoginDTO userData = await this._authRepository.LoginAsync(cred);
 
+
+			var roleId = string.Join(",", userData.roleId);
+			var appId = string.Join(",", userData.AppId);
+			var subMenuId = userData.SubMenuId;
+
 			// checking if client credentials are valid
 			if (userData == null)
 			{
@@ -101,7 +106,10 @@ public class LoginWebHandler
 				refreshToken,
 				"bearer",
 				ExpireInMinutes(),
-				"admin",
+				userData.Username,
+				appId,
+				subMenuId,
+				roleId,
 				DateTime.Now.ToString(),
 				DateTime.Now.AddMinutes(configTime).ToString()
 			);
