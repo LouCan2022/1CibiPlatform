@@ -3,6 +3,7 @@ using System;
 using Auth.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     [DbContext(typeof(AuthApplicationDbContext))]
-    partial class AuthApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251007035452_AddRefreshtokenTable")]
+    partial class AddRefreshtokenTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,32 +123,6 @@ namespace APIs.Migrations.Auth
                     b.ToTable("AuthRoles");
                 });
 
-            modelBuilder.Entity("Auth.Data.Entities.AuthSubMenu", b =>
-                {
-                    b.Property<int>("SubMenuId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SubMenuId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SubMenuName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("SubMenuId");
-
-                    b.ToTable("AuthSubmenu");
-                });
-
             modelBuilder.Entity("Auth.Data.Entities.AuthUserAppRole", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -162,9 +139,6 @@ namespace APIs.Migrations.Auth
 
                     b.Property<Guid>("AssignedBy")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("Submenu")
-                        .HasColumnType("integer");
 
                     b.HasKey("UserId", "AppId", "RoleId");
 
