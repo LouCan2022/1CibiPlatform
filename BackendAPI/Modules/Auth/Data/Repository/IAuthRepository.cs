@@ -1,10 +1,10 @@
-﻿using Auth.DTO;
-
-namespace Auth.Data.Repository;
+﻿namespace Auth.Data.Repository;
 
 public interface IAuthRepository
 {
 
-    Task<LoginDTO> LoginAsync(LoginCred cred);
+	Task<LoginDTO> LoginAsync(LoginCred cred);
+
+	Task<bool> SaveRefreshToken(Guid userId, string refreshToken, DateTime expiryDate);
 
 }
