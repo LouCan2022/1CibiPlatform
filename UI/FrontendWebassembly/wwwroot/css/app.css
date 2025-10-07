@@ -1,5 +1,5 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Calibri, Helvetica, Arial, sans-serif;
 }
 
 h1:focus {
@@ -111,4 +111,55 @@ code {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.login-card {
+    width: 100% !important;
+    max-width: 450px !important;
+    backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.login-button {
+    border-radius: 12px !important;
+    height: 48px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    font-size: 16px !important;
+}
+
+.login-button-inactive {
+    background: #cbd5e1 !important;
+    cursor: not-allowed;
+}
+
+.login-button-active {
+    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;
+    box-shadow: 0 4px 15px rgba(16, 34, 71, 0.3) !important;
+    color: white !important;
+}
+
+.main-nav-item-custom {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 100px !important;
+    font-size: 18px;
+}
+
+.main-nav-icon {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    display: inline-block;
+}
+
+.main-nav-text {
+    display: inline-block;
+    font-weight: 500;
+    line-height: 1;
+    vertical-align: middle;
 }

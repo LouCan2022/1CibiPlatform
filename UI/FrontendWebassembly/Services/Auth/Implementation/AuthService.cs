@@ -16,7 +16,7 @@ public class AuthService : IAuthService
 
 	public Task<string> GetUserInfoIfAuthenticated()
 	{
-		return Task.FromResult(string.Empty);
+		return Task.FromResult("sample");
 	}
 
 	public async Task<AuthResponseDTO> Login(LoginCred cred)

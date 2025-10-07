@@ -5,36 +5,6 @@
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
 
-<style>
-    .login-card {
-        width: 100%;
-        max-width: 450px;
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 24px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .login-button {
-        border-radius: 12px !important;
-        height: 48px !important;
-        font-weight: 600 !important;
-        text-transform: none !important;
-        font-size: 16px !important;
-    }
-
-    .login-button-inactive {
-        background: #cbd5e1 !important;
-        cursor: not-allowed;
-    }
-
-    .login-button-active {
-        background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;
-        box-shadow: 0 4px 15px rgba(16, 34, 71, 0.3);
-        color: white !important;
-    }
-</style> 
-
 <div class="login-container">
     <MudPaper Class="login-card" Elevation="2">
         <div class="login-header">
