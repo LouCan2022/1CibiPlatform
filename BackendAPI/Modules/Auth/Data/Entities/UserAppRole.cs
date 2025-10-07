@@ -2,9 +2,10 @@
 
 public class AuthUserAppRole
 {
-    public Guid UserId { get; set; }
-    public int AppId { get; set; }
-    public int RoleId { get; set; }
-    public Guid AssignedBy { get; set; }
-    public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
+	public Guid UserId { get; set; }
+	public int AppId { get; set; }
+	public int Submenu { get; set; }
+	public int RoleId { get; set; }
+	public Guid AssignedBy { get; set; }
+	public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
 }
