@@ -30,6 +30,7 @@
 			services.AddTransient<IPasswordHasherService, PasswordHasherService>();
 			services.AddScoped<IJWTService, JWTService>();
 			services.AddScoped<IAuthRepository, AuthRepository>();
+			services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 			return services;
 		}
 
