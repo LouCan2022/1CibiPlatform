@@ -58,8 +58,8 @@ public class LoginWebHandler
 			LoginDTO userData = await this._authRepository.LoginAsync(cred);
 
 
-			var roleId = string.Join(",", userData.roleId);
-			var appId = string.Join(",", userData.AppId);
+			var roleId = userData.roleId;
+			var appId = userData.AppId;
 			var subMenuId = userData.SubMenuId;
 
 			// checking if client credentials are valid
