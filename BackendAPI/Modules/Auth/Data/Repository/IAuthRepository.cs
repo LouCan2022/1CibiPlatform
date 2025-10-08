@@ -3,8 +3,12 @@
 public interface IAuthRepository
 {
 
-	Task<LoginDTO> LoginAsync(LoginCred cred);
+	Task<LoginDTO> GetUserDataAsync(LoginCred cred);
 
-	Task<bool> SaveRefreshToken(Guid userId, string refreshToken, DateTime expiryDate);
+	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
+
+	Task<LoginDTO> GetNewUserDataAsync(string refreshToken);
+
+	Task<bool> UpdateRevokeReasonAsync(string refreshToken, string reason);
 
 }
