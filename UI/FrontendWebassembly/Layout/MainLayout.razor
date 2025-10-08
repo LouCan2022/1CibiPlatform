@@ -16,6 +16,7 @@
     .mud-appbar {
         border-radius: 30px 30px 30px 30px !important;
     }
+
 </style>
 
 <MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
@@ -52,7 +53,8 @@
                             <MudNavLink Href="page" Match="NavLinkMatch.Prefix" >Users</MudNavLink>
                             <MudNavLink Href="none" Match="NavLinkMatch.Prefix">Security</MudNavLink>
                         </MudNavGroup>
-                        <MudNavLink Href="none" Match="NavLinkMatch.Prefix">About</MudNavLink>
+                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
+
                     </MudNavMenu>
                 </MudDrawer>
                 <!-- Main content -->

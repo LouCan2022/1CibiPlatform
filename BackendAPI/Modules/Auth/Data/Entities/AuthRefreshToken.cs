@@ -9,4 +9,5 @@ public class AuthRefreshToken
 	public DateTime ExpiresAt { get; set; }
 	public DateTime? RevokedAt { get; set; }
 	public string? RevokedReason { get; set; }
+	public bool IsActive { get; set; } = true;
 }
