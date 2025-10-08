@@ -28,6 +28,7 @@ public static class PhilSysServiceConfiguration
 				new MediaTypeWithQualityHeaderValue("application/json"));
 		});
 		services.AddScoped<GetTokenService>();
+		services.AddScoped<PostBasicInformationService>();
 		return services;
 	}
 	#endregion
