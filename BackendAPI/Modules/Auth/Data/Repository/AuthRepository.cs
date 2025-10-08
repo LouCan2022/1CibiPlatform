@@ -1,5 +1,4 @@
-﻿
-namespace Auth.Data.Repository;
+﻿namespace Auth.Data.Repository;
 
 public class AuthRepository : IAuthRepository
 {
@@ -10,7 +9,7 @@ public class AuthRepository : IAuthRepository
 		this._dbcontext = dbcontext;
 	}
 
-	public async Task<LoginDTO> LoginAsync(LoginCred cred)
+	public async Task<LoginDTO> GetUserDataAsync(LoginCred cred)
 	{
 		var userData = await (from user in _dbcontext.AuthUsers
 							  join userRole in _dbcontext.AuthUserAppRoles
@@ -37,8 +36,63 @@ public class AuthRepository : IAuthRepository
 		return userData!;
 	}
 
-	public Task<bool> SaveRefreshToken(Guid userId, string refreshToken, DateTime expiryDate)
+
+	public async Task<LoginDTO> GetNewUserDataAsync(string refreshToken)
 	{
-		throw new NotImplementedException();
+		var userData = await (from user in _dbcontext.AuthUsers
+							  join authRefreshToken in _dbcontext.AuthRefreshToken
+														 on user.Id equals authRefreshToken.UserId
+							  join userRole in _dbcontext.AuthUserAppRoles
+														 on user.Id equals userRole.UserId into userRolesGroup
+							  where user.Id == authRefreshToken.UserId && user.IsActive == true
+							  select new LoginDTO(
+							   user.Id,
+							   user.Username,
+							   user.PasswordHash,
+							   user.Email!,
+							   user.FirstName!,
+							   user.LastName!,
+							   user.MiddleName,
+							   userRolesGroup.Select(r => r.AppId).Distinct().ToList(),
+							   userRolesGroup.GroupBy(r => r.AppId)
+											 .Select(g => g.Select(r => r.Submenu).ToList())
+											 .ToList(),
+							   userRolesGroup.Select(r => r.RoleId).Distinct().ToList()
+							  )
+			).AsNoTracking()
+			 .FirstOrDefaultAsync();
+
+
+		return userData!; throw new NotImplementedException();
+	}
+
+
+	public async Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate)
+	{
+		await _dbcontext.AuthRefreshToken.AddAsync(new AuthRefreshToken
+		{
+			UserId = userId,
+			TokenHash = hashToken,
+			ExpiresAt = expiryDate,
+			CreatedAt = DateTime.UtcNow
+		});
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
+
+	public async Task<bool> UpdateRevokeReasonAsync(string refreshToken, string reason)
+	{
+		var userData = await _dbcontext.AuthRefreshToken
+			.FirstOrDefaultAsync(rt => rt.TokenHash == refreshToken);
+
+		userData!.RevokedReason = reason;
+
+		_dbcontext.AuthRefreshToken.Update(userData);
+
+		_dbcontext.SaveChanges();
+
+		return true;
 	}
 }

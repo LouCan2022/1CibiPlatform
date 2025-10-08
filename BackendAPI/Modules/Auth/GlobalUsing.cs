@@ -19,6 +19,7 @@ global using FluentValidation;
 global using System.IdentityModel.Tokens.Jwt;
 global using Microsoft.Extensions.Logging;
 
+
 // path
 global using Auth.Data.Entities;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
