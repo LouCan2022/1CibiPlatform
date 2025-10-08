@@ -8,6 +8,12 @@
 		private readonly IConfiguration _configuration;
 		private readonly ILogger<RefreshTokenService> _logger;
 
+		private readonly string _httpCookieOnlyKey;
+		private readonly double _expiryinMinutesKey;
+		private readonly string _cookieExpiryinMinutesKey;
+		private readonly bool _isHttps;
+
+
 		public RefreshTokenService(
 			IAuthRepository authRepository,
 			IHttpContextAccessor httpContextAccessor,
@@ -20,6 +26,11 @@
 			this._jWTService = jWTService;
 			this._configuration = configuration;
 			this._logger = logger;
+
+			_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
+			_expiryinMinutesKey = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value! ?? "");
+			_cookieExpiryinMinutesKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
+			_isHttps = bool.Parse(_configuration.GetSection("AuthWeb:isHttps").Value!);
 		}
 
 
@@ -47,21 +58,28 @@
 
 		public bool ValidateHashToken(string providedToken, string storedHash)
 		{
-			var providedHash = HashToken(providedToken);
+			// DECODE FIRST before hashing!
+			var decodedToken = System.Net.WebUtility.UrlDecode(providedToken);
+
+			var providedHash = HashToken(decodedToken); // Now hash the decoded string
 			return CryptographicOperations.FixedTimeEquals(
 				Convert.FromBase64String(providedHash),
 				Convert.FromBase64String(storedHash)
 			);
 		}
 
-		public Task<string> RevokeToken()
+		public Task<string> RevokeTokenAsync()
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task<LoginResponseWebDTO> GetNewAccessToken(string refreshToken)
+		public async Task<LoginResponseWebDTO> GetNewAccessTokenAsync(Guid userId, string refreshToken)
 		{
-			var userData = await _authRepository.GetNewUserDataAsync(refreshToken);
+			_logger.LogInformation("Attempting to get new access token using refresh token.");
+
+			var hashToken = HashToken(refreshToken);
+
+			var userData = await _authRepository.GetNewUserDataAsync(userId);
 
 			// checking if client credentials are valid
 			if (userData == null)
@@ -71,46 +89,32 @@
 
 			}
 
+			if (!ValidateHashToken(refreshToken, userData.refreshToken))
+			{
+				_logger.LogWarning("Invalid refresh token provided for user ID: {UserId}", userId);
+				throw new UnauthorizedAccessException("Invalid refresh token.");
+			}
+
 			var roleId = userData.roleId;
 			var appId = userData.AppId;
 			var subMenuId = userData.SubMenuId;
 
 
-			// produce token
-			string jwtToken = this._jWTService.GetAccessToken(userData);
-			(string newRefreshToken, string hashRefreshToken) = this.GenerateRefreshToken();
+			// produce access token
+			var loginDTO = userData.Adapt<LoginDTO>();
+			_logger.LogInformation("Generating JWT token for user: {Username}", userData.Username);
+			string jwtToken = this._jWTService.GetAccessToken(loginDTO);
+			SetAccessTokenCookie(jwtToken);
 
-			double configTime = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value!);
+			// reuse refresh token
+			var refreshTokenExist = _httpContextAccessor.HttpContext!.Request.Cookies[_cookieExpiryinMinutesKey!];
 
-			// set cookie key
-			var _httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey");
-
-			// set httpcookieonly
-			var cookieOptions = new CookieOptions
-			{
-				HttpOnly = true,
-				Secure = false, // Only send over HTTPS
-				SameSite = SameSiteMode.Strict,
-				Expires = DateTime.UtcNow.AddDays(configTime)
-			};
-
-			_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey, jwtToken, cookieOptions);
-
-			_logger.LogInformation("Generated new JWT token for user: {UserId}", userData.Id);
-
-
-			// save refresh token to database
-			_logger.LogInformation("Saving refresh token for user: {UserId}", userData.Id);
-			await this._authRepository.SaveRefreshTokenAsync(userData.Id, hashRefreshToken, DateTime.UtcNow.AddMinutes(configTime));
-
-			//Revoke old refresh token
-			_logger.LogInformation("Revoking old refresh token for user: {UserId}", userData.Id);
-			await this._authRepository.UpdateRevokeReasonAsync(refreshToken, "Replaced by new token");
-
+			_logger.LogInformation("Reusing existing refresh token for user: {Username}", userData.Username);
+			// reuse existing refresh token if not expired
 			return new LoginResponseWebDTO(
 				userData.Id.ToString()!,
 				jwtToken,
-				refreshToken,
+				refreshTokenExist!,
 				"bearer",
 				ExpireInMinutes(),
 				userData.Username,
@@ -118,9 +122,28 @@
 				subMenuId,
 				roleId,
 				DateTime.Now.ToString(),
-				DateTime.Now.AddMinutes(configTime).ToString());
+				DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
+			);
 
 		}
+
+
+		protected virtual void SetAccessTokenCookie(
+			string accessToken)
+		{
+			// set httpcookieonly
+			var cookieAccessTokenOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Secure = _isHttps,
+				SameSite = SameSiteMode.Strict,
+				Expires = DateTime.UtcNow.AddMinutes(_expiryinMinutesKey)
+			};
+
+
+			_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, accessToken, cookieAccessTokenOptions);
+		}
+
 		protected virtual int ExpireInMinutes()
 		{
 			double configTime = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value!);

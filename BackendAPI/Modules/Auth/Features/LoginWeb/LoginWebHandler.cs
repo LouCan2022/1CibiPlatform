@@ -2,7 +2,7 @@
 
 public class LoginWebHandler
 {
-	public record LoginWebCommand(LoginCred LoginCred) : ICommand<LoginWebResult>;
+	public record LoginWebCommand(LoginWebCred loginWebCred) : ICommand<LoginWebResult>;
 
 	public record LoginWebResult(LoginResponseWebDTO loginResponseWebDTO);
 
@@ -10,11 +10,15 @@ public class LoginWebHandler
 	{
 		public LoginCommandValidator()
 		{
-			RuleFor(x => x.LoginCred.Username)
+			RuleFor(x => x.loginWebCred.Username)
 				.NotEmpty().WithMessage("Username is required.")
 				.MaximumLength(50).WithMessage("Username must not exceed 50 characters.");
-			RuleFor(x => x.LoginCred.Password)
+
+			RuleFor(x => x.loginWebCred.Password)
 				.NotEmpty().WithMessage("Password is required.");
+
+			RuleFor(x => x.loginWebCred.IsRememberMe)
+				.NotNull().WithMessage("IsRememberMe is required.");
 		}
 	}
 
@@ -32,7 +36,7 @@ public class LoginWebHandler
 			CancellationToken cancellationToken)
 		{
 
-			var loginResponse = await this._loginService.LoginWebAsync(request.LoginCred);
+			var loginResponse = await this._loginService.LoginWebAsync(request.loginWebCred);
 
 			return new LoginWebResult(loginResponse);
 		}
