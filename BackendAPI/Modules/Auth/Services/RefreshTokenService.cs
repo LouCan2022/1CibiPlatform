@@ -34,7 +34,7 @@
 		}
 
 
-		public (string, string) GenerateRefreshToken()
+		public virtual (string, string) GenerateRefreshToken()
 		{
 			// Generate random token
 			var randomNumber = new byte[64];
@@ -48,15 +48,14 @@
 			return (token, hashedToken);
 		}
 
-
-		private string HashToken(string token)
+		public virtual string HashToken(string token)
 		{
 			using var sha256 = SHA256.Create();
 			var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
 			return Convert.ToBase64String(hashBytes);
 		}
 
-		public bool ValidateHashToken(string providedToken, string storedHash)
+		public virtual bool ValidateHashToken(string providedToken, string storedHash)
 		{
 			// DECODE FIRST before hashing!
 			var decodedToken = System.Net.WebUtility.UrlDecode(providedToken);
@@ -68,12 +67,12 @@
 			);
 		}
 
-		public Task<string> RevokeTokenAsync()
+		public virtual Task<string> RevokeTokenAsync()
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task<LoginResponseWebDTO> GetNewAccessTokenAsync(Guid userId, string refreshToken)
+		public virtual async Task<LoginResponseWebDTO> GetNewAccessTokenAsync(Guid userId, string refreshToken)
 		{
 			_logger.LogInformation("Attempting to get new access token using refresh token.");
 

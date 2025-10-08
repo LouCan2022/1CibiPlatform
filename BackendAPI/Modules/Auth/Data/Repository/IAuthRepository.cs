@@ -9,6 +9,8 @@ public interface IAuthRepository
 
 	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
 
-	Task<bool> UpdateRevokeReasonAsync(string refreshToken, string reason);
+	Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason);
+
+	Task<AuthRefreshToken> IsUserExistAsync(Guid userId);
 
 }

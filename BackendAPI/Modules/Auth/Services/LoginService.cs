@@ -12,7 +12,7 @@ public class LoginService : ILoginService
 
 	private readonly string _httpCookieOnlyKey;
 	private readonly double _expiryinMinutesKey;
-	private readonly string _cookieExpiryinMinutesKey;
+	private readonly string _httpCookieOnlyRefreshTokenKey;
 	private readonly int _cookieExpiryinDaysKey;
 	private readonly bool _isHttps;
 
@@ -35,7 +35,7 @@ public class LoginService : ILoginService
 
 		_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
 		_expiryinMinutesKey = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value! ?? "");
-		_cookieExpiryinMinutesKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
+		_httpCookieOnlyRefreshTokenKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 		_cookieExpiryinDaysKey = int.Parse(_configuration.GetSection("AuthWeb:CookieExpiryInDayIsRememberMe").Value! ?? "");
 		_isHttps = bool.Parse(_configuration.GetSection("AuthWeb:isHttps").Value!);
 
@@ -132,7 +132,7 @@ public class LoginService : ILoginService
 
 
 		// produce refresh token
-		var refreshTokenExist = _httpContextAccessor.HttpContext!.Request.Cookies[_cookieExpiryinMinutesKey!];
+		var refreshTokenExist = this.GetAccessTokenFromCookie();
 
 		if (refreshTokenExist != null)
 		{
@@ -196,6 +196,18 @@ public class LoginService : ILoginService
 		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, accessToken, cookieAccessTokenOptions);
 	}
 
+	protected virtual string? GetAccessTokenFromCookie()
+	{
+		var accessToken = _httpContextAccessor.HttpContext!.Request.Cookies[_httpCookieOnlyKey!];
+		return accessToken;
+	}
+
+	protected virtual string? GetRefreshTokenFromCookie()
+	{
+		var accessToken = _httpContextAccessor.HttpContext!.Request.Cookies[_httpCookieOnlyRefreshTokenKey!];
+		return accessToken;
+	}
+
 	protected virtual void SetRefreshTokenCookie(
 	string refreshToken,
 	bool isRememberMe)
@@ -211,9 +223,8 @@ public class LoginService : ILoginService
 		};
 
 
-		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_cookieExpiryinMinutesKey!, refreshToken, cookieRefreshTokenOptions);
+		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyRefreshTokenKey!, refreshToken, cookieRefreshTokenOptions);
 	}
-
 
 	protected virtual int ExpireInMinutes()
 	{
@@ -222,5 +233,50 @@ public class LoginService : ILoginService
 
 		return expireIn;
 	}
+
+	public async Task<bool> LogoutAsync(
+		Guid userId,
+		string revokeReason)
+	{
+		_logger.LogInformation("Logout attempt for user: {UserId}", userId);
+
+		if (string.IsNullOrEmpty(GetRefreshTokenFromCookie()))
+		{
+			_logger.LogWarning("Logout failed: No refresh token found in cookies for user: {UserId}", userId);
+			throw new BadRequestException("Logout failed.");
+		}
+
+
+		var userData = await this._authRepository.IsUserExistAsync(userId);
+
+		if (userData == null)
+		{
+			_logger.LogWarning("Logout failed: User not found for user: {UserId}", userId);
+			throw new NotFoundException("User not found.");
+		}
+
+		if (!_refreshTokenService.ValidateHashToken(GetRefreshTokenFromCookie()!, userData.TokenHash))
+		{
+			_logger.LogWarning("Logout failed: Invalid refresh token for user: {UserId}", userId);
+			throw new BadRequestException("Logout failed.");
+		}
+
+		var result = await _authRepository.UpdateRevokeReasonAsync(userData, revokeReason);
+
+		if (result == false)
+		{
+			_logger.LogInformation("Logout failed for user: {UserId}", userId);
+			throw new BadRequestException("Logout failed.");
+		}
+
+		_logger.LogInformation("Logout successful for user: {UserId}", userId);
+
+		return result;
+
+	}
+
+
+
+
 }
 
