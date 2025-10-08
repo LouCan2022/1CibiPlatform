@@ -12,6 +12,9 @@ public class LoginService : ILoginService
 
 	private readonly string _httpCookieOnlyKey;
 	private readonly double _expiryinMinutesKey;
+	private readonly string _cookieExpiryinMinutesKey;
+	private readonly int _cookieExpiryinDaysKey;
+	private readonly bool _isHttps;
 
 	public LoginService(
 	IAuthRepository authRepository,
@@ -31,7 +34,11 @@ public class LoginService : ILoginService
 		this._logger = logger;
 
 		_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
-		_expiryinMinutesKey = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value!);
+		_expiryinMinutesKey = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value! ?? "");
+		_cookieExpiryinMinutesKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
+		_cookieExpiryinDaysKey = int.Parse(_configuration.GetSection("AuthWeb:CookieExpiryInDayIsRememberMe").Value! ?? "");
+		_isHttps = bool.Parse(_configuration.GetSection("AuthWeb:isHttps").Value!);
+
 	}
 
 
@@ -117,29 +124,45 @@ public class LoginService : ILoginService
 			throw new NotFoundException("Invalid username or password.");
 		}
 
-		// produce token
+		// produce access token
+		_logger.LogInformation("Generating JWT token for user: {Username}", cred.Username);
 		string jwtToken = this._jWTService.GetAccessToken(userData);
-		(string refreshToken, string hashRefreshToken) = this._refreshTokenService.GenerateRefreshToken();
+		SetAccessTokenCookie(jwtToken);
 
 
-		// set httpcookieonly
-		var cookieOptions = new CookieOptions
+		// produce refresh token
+		var refreshTokenExist = _httpContextAccessor.HttpContext!.Request.Cookies[_cookieExpiryinMinutesKey!];
+
+		if (refreshTokenExist != null)
 		{
-			HttpOnly = true,
-			Secure = false, // Only send over HTTPS
-			SameSite = SameSiteMode.Strict,
-			Expires = DateTime.UtcNow.AddMinutes(_expiryinMinutesKey)
-		};
+			_logger.LogInformation("Reusing existing refresh token for user: {Username}", cred.Username);
+			// reuse existing refresh token if not expired
+			return new LoginResponseWebDTO(
+				userData.Id.ToString()!,
+				jwtToken,
+				refreshTokenExist,
+				"bearer",
+				ExpireInMinutes(),
+				userData.Username,
+				appId,
+				subMenuId,
+				roleId,
+				DateTime.Now.ToString(),
+				DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
+			);
+		}
 
-		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, jwtToken, cookieOptions);
-
-		_logger.LogInformation("Login successful for user: {Username}", cred.Username);
-
+		_logger.LogInformation("Generating refresh token for user: {Username}", cred.Username);
+		(string refreshToken, string hashRefreshToken) = this._refreshTokenService.GenerateRefreshToken();
+		SetRefreshTokenCookie(refreshToken, cred.isRememberMe ?? false);
 
 		// save refresh token to database
+		// save if http cookie only for refresh token is already expired
 		_logger.LogInformation("Saving refresh token for user: {UserId}", userData.Id);
 		await this._authRepository.SaveRefreshTokenAsync(userData.Id, hashRefreshToken, DateTime.UtcNow.AddMinutes(_expiryinMinutesKey));
 
+
+		_logger.LogInformation("Login successful for user: {Username}", cred.Username);
 
 		return new LoginResponseWebDTO(
 			userData.Id.ToString()!,
@@ -154,6 +177,40 @@ public class LoginService : ILoginService
 			DateTime.Now.ToString(),
 			DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
 		);
+	}
+
+	protected virtual void SetAccessTokenCookie(
+		string accessToken)
+	{
+		// set httpcookieonly
+		var cookieAccessTokenOptions = new CookieOptions
+		{
+			HttpOnly = true,
+			Secure = _isHttps,
+			SameSite = SameSiteMode.Strict,
+			Expires = DateTime.UtcNow.AddMinutes(_expiryinMinutesKey)
+		};
+
+
+		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, accessToken, cookieAccessTokenOptions);
+	}
+
+	protected virtual void SetRefreshTokenCookie(
+	string refreshToken,
+	bool isRememberMe)
+	{
+		// set httpcookieonly
+
+		var cookieRefreshTokenOptions = new CookieOptions
+		{
+			HttpOnly = true,
+			Secure = _isHttps,
+			SameSite = SameSiteMode.Strict,
+			Expires = isRememberMe ? DateTime.UtcNow.AddDays(_cookieExpiryinDaysKey) : DateTime.UtcNow.AddMinutes(Convert.ToInt32(_expiryinMinutesKey))
+		};
+
+
+		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_cookieExpiryinMinutesKey!, refreshToken, cookieRefreshTokenOptions);
 	}
 
 
