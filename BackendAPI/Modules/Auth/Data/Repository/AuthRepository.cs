@@ -65,11 +65,14 @@ public class AuthRepository : IAuthRepository
 			 .FirstOrDefaultAsync();
 
 
-		return userData!; throw new NotImplementedException();
+		return userData!;
 	}
 
 
-	public async Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate)
+	public async Task<bool> SaveRefreshTokenAsync(
+		Guid userId,
+		string hashToken,
+		DateTime expiryDate)
 	{
 		await _dbcontext.AuthRefreshToken.AddAsync(new AuthRefreshToken
 		{
@@ -84,17 +87,26 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
-	public async Task<bool> UpdateRevokeReasonAsync(string refreshToken, string reason)
+	public async Task<bool> UpdateRevokeReasonAsync(
+		AuthRefreshToken authRefresh,
+		string reason)
 	{
-		var userData = await _dbcontext.AuthRefreshToken
-			.FirstOrDefaultAsync(rt => rt.TokenHash == refreshToken);
 
-		userData!.RevokedReason = reason;
+		authRefresh!.RevokedReason = reason;
+		authRefresh.IsActive = false;
+		authRefresh.RevokedAt = DateTime.UtcNow;
 
-		_dbcontext.AuthRefreshToken.Update(userData);
+		_dbcontext.AuthRefreshToken.Update(authRefresh);
 
 		_dbcontext.SaveChanges();
 
 		return true;
+	}
+
+	public async Task<AuthRefreshToken> IsUserExistAsync(Guid userId)
+	{
+		return await
+			_dbcontext.AuthRefreshToken
+			.FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive == true);
 	}
 }
