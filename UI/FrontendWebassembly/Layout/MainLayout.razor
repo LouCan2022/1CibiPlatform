@@ -30,37 +30,28 @@
         {
             <MudLayout>
                 <!-- AppBar -->
-                <MudAppBar Color="Color.Primary">
-                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
+                <MudAppBar Style="@GetAppBarStyle()">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Style="@GetMenuIconStyle()" Edge="Edge.Start" OnClick="@DrawerToggle" />
                     <MudSpacer />
                     <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                                   Color="Color.Inherit"
+                                   Style="Color.Inherit"
                                    OnClick="@ToggleDarkMode" />
                 </MudAppBar>
                 <!-- Drawer -->
                 <MudDrawer @bind-Open="_drawerOpen" 
                            Elevation="1"
-                           Style="box-shadow: 0 0 15px rgba(0, 0, 0, 0.25); border-radius: 10px;">
+                           Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px;">
                     <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
                         <MudImage Src="images/logo/cibi.png"
-                                    Alt="Cibi Logo"
-                                    Width="125"
-                                    Height="45"/>
+                                  Alt="Cibi Logo"
+                                  Style="width: 125px; height:45px;" />
                     </MudDrawerHeader>
                     <MudNavMenu>
-
-                        <MudNavLink Href="" Match="NavLinkMatch.All" ForceLoad="false">Dashboard</MudNavLink>
-                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Class="main-nav-item-custom">
-                            <img src="images/logo/philsys.png" alt="PhilSys Icon" class="main-nav-icon" />
-                            <span class="main-nav-text">PhilSys</span>
-                        </MudNavLink>
-                        <MudNavLink Href="cnx" Match="NavLinkMatch.Prefix" Class="main-nav-item-custom">
-                            <img src="images/logo/cnx.png" alt="PhilSys Icon" class="main-nav-icon" />
-                            <span class="main-nav-text">CNX</span>
-                        </MudNavLink>
-                        <MudNavGroup Title="Settings" IconColor="Color.Primary" Expanded="false">
-                            <MudNavLink Href="users" Match="NavLinkMatch.Prefix" ForceLoad="false">Users</MudNavLink>
-                            <MudNavLink Href="security" Match="NavLinkMatch.Prefix" ForceLoad="false">Security</MudNavLink>
+                        <MudNavLink Href="counter" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix">PhilSys</MudNavLink>
+                        <MudNavGroup Title="Settings" Expanded="false">
+                            <MudNavLink Href="page" Match="NavLinkMatch.Prefix" >Users</MudNavLink>
+                            <MudNavLink Href="none" Match="NavLinkMatch.Prefix">Security</MudNavLink>
                         </MudNavGroup>
                         <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
 
@@ -149,7 +140,19 @@
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
     private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
-    
+
+    private string GetAppBarStyle()
+    {
+        return _isDarkMode
+            ? "background: linear-gradient(90deg, #68c0d6 0%, #2a77ae 50%, #102247 100%) !important;"
+            : "background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;";
+    }
+    private string GetMenuIconStyle()
+    {
+        return _isDarkMode
+            ? "color: #102247;"   
+            : "color: white;";    
+    }
     protected override async Task OnInitializedAsync()
     {
         try
