@@ -11,6 +11,7 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
 		RuleFor(x => x.LoginCred.Username)
 			.NotEmpty().WithMessage("Username is required.")
 			.MaximumLength(50).WithMessage("Username must not exceed 50 characters.");
+
 		RuleFor(x => x.LoginCred.Password)
 			.NotEmpty().WithMessage("Password is required.");
 	}

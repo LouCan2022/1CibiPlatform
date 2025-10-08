@@ -6,7 +6,7 @@ public interface IRefreshTokenService
 
 	bool ValidateHashToken(string providedToken, string storedHash);
 
-	Task<string> RevokeToken();
+	Task<string> RevokeTokenAsync();
 
-	Task<LoginResponseWebDTO> GetNewAccessToken(string refreshToken);
+	Task<LoginResponseWebDTO> GetNewAccessTokenAsync(Guid UserId, string refreshToken);
 }

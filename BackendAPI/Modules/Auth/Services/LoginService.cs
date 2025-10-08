@@ -46,9 +46,10 @@ public class LoginService : ILoginService
 	{
 		_logger.LogInformation("Login attempt for user: {Username}", cred.Username);
 
+		var loginCred = new LoginWebCred(cred.Username, cred.Password, false);
 
 		// fetching user data from database
-		LoginDTO userData = await this._authRepository.GetUserDataAsync(cred);
+		LoginDTO userData = await this._authRepository.GetUserDataAsync(loginCred);
 
 		// checking if client credentials are valid
 		if (userData == null)
@@ -95,7 +96,7 @@ public class LoginService : ILoginService
 		return response;
 	}
 
-	public async Task<LoginResponseWebDTO> LoginWebAsync(LoginCred cred)
+	public async Task<LoginResponseWebDTO> LoginWebAsync(LoginWebCred cred)
 	{
 		_logger.LogInformation("Login attempt for user: {Username}", cred.Username);
 
@@ -154,7 +155,7 @@ public class LoginService : ILoginService
 
 		_logger.LogInformation("Generating refresh token for user: {Username}", cred.Username);
 		(string refreshToken, string hashRefreshToken) = this._refreshTokenService.GenerateRefreshToken();
-		SetRefreshTokenCookie(refreshToken, cred.isRememberMe ?? false);
+		SetRefreshTokenCookie(refreshToken, cred.IsRememberMe);
 
 		// save refresh token to database
 		// save if http cookie only for refresh token is already expired

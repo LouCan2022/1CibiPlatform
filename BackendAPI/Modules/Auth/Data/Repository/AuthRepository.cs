@@ -9,7 +9,7 @@ public class AuthRepository : IAuthRepository
 		this._dbcontext = dbcontext;
 	}
 
-	public async Task<LoginDTO> GetUserDataAsync(LoginCred cred)
+	public async Task<LoginDTO> GetUserDataAsync(LoginWebCred cred)
 	{
 		var userData = await (from user in _dbcontext.AuthUsers
 							  join userRole in _dbcontext.AuthUserAppRoles
@@ -37,15 +37,16 @@ public class AuthRepository : IAuthRepository
 	}
 
 
-	public async Task<LoginDTO> GetNewUserDataAsync(string refreshToken)
+	public async Task<UserDataDTO> GetNewUserDataAsync(Guid userId)
 	{
 		var userData = await (from user in _dbcontext.AuthUsers
 							  join authRefreshToken in _dbcontext.AuthRefreshToken
 														 on user.Id equals authRefreshToken.UserId
 							  join userRole in _dbcontext.AuthUserAppRoles
 														 on user.Id equals userRole.UserId into userRolesGroup
-							  where user.Id == authRefreshToken.UserId && user.IsActive == true
-							  select new LoginDTO(
+							  where user.Id == authRefreshToken.UserId &&
+							  user.IsActive == true && authRefreshToken.IsActive == true
+							  select new UserDataDTO(
 							   user.Id,
 							   user.Username,
 							   user.PasswordHash,
@@ -53,6 +54,7 @@ public class AuthRepository : IAuthRepository
 							   user.FirstName!,
 							   user.LastName!,
 							   user.MiddleName,
+							   authRefreshToken.TokenHash,
 							   userRolesGroup.Select(r => r.AppId).Distinct().ToList(),
 							   userRolesGroup.GroupBy(r => r.AppId)
 											 .Select(g => g.Select(r => r.Submenu).ToList())
