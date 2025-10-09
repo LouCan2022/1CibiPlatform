@@ -103,11 +103,6 @@ public class LoginService : ILoginService
 		// fetching user data from database
 		LoginDTO userData = await this._authRepository.GetUserDataAsync(cred);
 
-
-		var roleId = userData.roleId;
-		var appId = userData.AppId;
-		var subMenuId = userData.SubMenuId;
-
 		// checking if client credentials are valid
 		if (userData == null)
 		{
@@ -115,6 +110,7 @@ public class LoginService : ILoginService
 			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
 			throw new NotFoundException("Refresh Token not found");
 		}
+
 
 		// verifying password
 		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, cred.Password);
@@ -133,6 +129,10 @@ public class LoginService : ILoginService
 
 		// produce refresh token
 		var refreshTokenExist = this.GetRefreshTokenFromCookie();
+
+		var roleId = userData.roleId;
+		var appId = userData.AppId;
+		var subMenuId = userData.SubMenuId;
 
 		if (refreshTokenExist != null)
 		{

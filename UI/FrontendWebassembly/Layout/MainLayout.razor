@@ -3,6 +3,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
+@inject LocalStorageService LocalStorageService
 
 <style>
     .mud-drawer {
@@ -38,24 +39,35 @@
                                    OnClick="@ToggleDarkMode" />
                 </MudAppBar>
                 <!-- Drawer -->
-                <MudDrawer @bind-Open="_drawerOpen" 
+                <MudDrawer @bind-Open="_drawerOpen"
                            Elevation="1"
-                           Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px;">
+                           Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px; display: flex; flex-direction: column;">
+
                     <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
                         <MudImage Src="images/logo/cibi.png"
                                   Alt="Cibi Logo"
                                   Style="width: 125px; height:45px;" />
                     </MudDrawerHeader>
-                    <MudNavMenu>
-                        <MudNavLink Href="counter" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix">PhilSys</MudNavLink>
-                        <MudNavGroup Title="Settings" Expanded="false">
-                            <MudNavLink Href="page" Match="NavLinkMatch.Prefix" >Users</MudNavLink>
-                            <MudNavLink Href="none" Match="NavLinkMatch.Prefix">Security</MudNavLink>
-                        </MudNavGroup>
-                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
 
+                    <!-- Navigation menu that fills remaining space -->
+                    <MudNavMenu Class="flex-grow-1">
+                        <MudNavLink Href="counter" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser">PhilSys</MudNavLink>
+                        <MudNavGroup Title="Settings" Expanded="false" Icon="@Icons.Material.Filled.Settings">
+                            <MudNavLink Href="page" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">Users</MudNavLink>
+                            <MudNavLink Href="none" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Security">Security</MudNavLink>
+                        </MudNavGroup>
+                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false" Icon="@Icons.Material.Filled.Info">About</MudNavLink>
                     </MudNavMenu>
+
+                    <!-- Logout at the very bottom -->
+                    <div class="px-4 py-2 mt-auto">
+                        <MudNavLink Icon="@Icons.Material.Filled.Logout"
+                                    Match="NavLinkMatch.All"
+                                    OnClick="HandleLogout">
+                            Logout
+                        </MudNavLink>
+                    </div>
                 </MudDrawer>
                 <!-- Main content -->
                 <MudMainContent>
@@ -105,6 +117,9 @@ else
 }
 
 @code {
+
+
+
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
     private bool _isAuthenticated = false;
@@ -174,4 +189,27 @@ else
             throw;
         }
     }
+    private async Task HandleLogout()
+    {
+        Console.WriteLine("Logging out...");
+
+        try
+        {
+            var logout = await IAuthService.Logout();
+
+         
+            if (logout)
+            {
+                Console.WriteLine(logout ? "Logout successful." : "Logout failed.");
+                Navigation.NavigateTo("/login", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            _isAuthenticated = true;
+            Console.WriteLine($"Authentication Error: {ex.Message}");
+            throw;
+        }
+    }
+
 }

@@ -11,3 +11,6 @@ public record CredResponseDTO(Guid UserId,
 
 public record IsAuthenticatedDTO(bool isAuthenticated);
 
+
+public record LogoutResponseDTO(bool isLoggedOut);
+
