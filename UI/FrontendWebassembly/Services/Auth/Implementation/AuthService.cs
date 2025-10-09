@@ -7,11 +7,15 @@ public class AuthService : IAuthService
 	private HttpClient _httpClient;
 	private readonly IConfiguration _configuration;
 
+	private readonly string _httpRefreshTokenCookieOnly;
+
 	public AuthService(HttpClient httpClient,
 		IConfiguration configuration)
 	{
 		this._httpClient = httpClient;
 		this._configuration = configuration;
+
+		_httpRefreshTokenCookieOnly = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 	}
 
 	public Task<string> GetUserInfoIfAuthenticated()
@@ -56,5 +60,4 @@ public class AuthService : IAuthService
 
 		return new AuthResponseDTO(successContent.UserId, successContent.AccessToken, string.Empty, string.Empty);
 	}
-
 }
