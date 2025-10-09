@@ -23,11 +23,11 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-
+@if (_isAuthenticated)
+{
 <ErrorBoundary>
     <ChildContent>
-        @if (_isAuthenticated)
-        {
+       
             <MudLayout>
                 <!-- AppBar -->
                 <MudAppBar Style="@GetAppBarStyle()">
@@ -64,14 +64,7 @@
                     </MudPaper>
                 </MudMainContent>
             </MudLayout>
-        }
-        else
-        {
-            <!-- Loading -->
-            <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
-                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-            </MudContainer>
-        }
+ 
     </ChildContent>
     <ErrorContent Context="exception">
         <MudContainer Class="d-flex flex-column justify-center align-center" Style="height: 100vh; gap: 20px;">
@@ -101,6 +94,15 @@
         </MudContainer>
     </ErrorContent>
 </ErrorBoundary>
+
+}
+else
+{
+    <!-- Loading -->
+    <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </MudContainer>
+}
 
 @code {
     private bool _drawerOpen = true;
@@ -157,15 +159,14 @@
     {
         try
         {
-            var userData = await IAuthService.GetUserInfoIfAuthenticated();
+            var isAuthenticated = await IAuthService.IsAuthenticated();
 
-            if (string.IsNullOrEmpty(userData))
+            if (!isAuthenticated)
             {
-                 Console.WriteLine($"UserData: {userData}");
                 Navigation.NavigateTo("/login", true);
             }
 
-            _isAuthenticated = true;
+            _isAuthenticated = isAuthenticated;
         }
         catch (Exception ex)
         {

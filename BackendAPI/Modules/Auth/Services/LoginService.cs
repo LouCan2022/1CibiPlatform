@@ -132,7 +132,7 @@ public class LoginService : ILoginService
 
 
 		// produce refresh token
-		var refreshTokenExist = this.GetAccessTokenFromCookie();
+		var refreshTokenExist = this.GetRefreshTokenFromCookie();
 
 		if (refreshTokenExist != null)
 		{
