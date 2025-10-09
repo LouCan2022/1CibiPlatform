@@ -1,8 +1,7 @@
 ﻿@page "/philsys"
-
+@inject NavigationManager Navigation
 @using MudBlazor
 
-<MudPaper Class="p-6 mx-auto mt-6" MaxWidth="550px" MaxHeight="550px" Elevation="1" Style="padding: 25px; background-color: var(--mud-palette-surface);">
     <MudTabs Rounded="true" Centered="true" Elevation="0"
              @bind-ActivePanelIndex="_activeIndex"
              OnActivePanelIndexChanged="OnTabChanged">
@@ -35,7 +34,6 @@
                     </MudSelect>
                 </MudItem>
             </MudGrid>
-
             <MudTextField @bind-Value="MiddleName"
                           Label="Middle Name (Optional)"
                           Required="true"
@@ -83,8 +81,6 @@
         </MudForm>
     }
 
-</MudPaper>
-
 @code {
     private MudForm? personalForm;
     private MudForm? pcnForm;
@@ -113,11 +109,11 @@
   
     private void SubmitPersonalInfo()
     {
-        // handle PCN form submission
+        Navigation.NavigateTo("/philsys/liveness");
     }
 
     private void SubmitPCN()
     {
-        // handle PCN form submission
+        Navigation.NavigateTo("/philsys/liveness");
     }
 }
