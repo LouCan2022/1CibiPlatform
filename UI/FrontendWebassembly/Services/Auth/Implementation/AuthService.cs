@@ -29,16 +29,17 @@ public class AuthService : IAuthService
 
 		var payload = new
 		{
-			loginCred = new
+			loginWebCred = new
 			{
-				username = cred.Username,
-				password = cred.Password
+				Username = cred.Username,
+				Password = cred.Password,
+				IsRememberMe = cred.IsRememberMe
 			}
 		};
 
 		Console.WriteLine($"➡️ Sending POST to /token/generatetoken for user: {cred.Username}");
 
-		var response = await _httpClient.PostAsJsonAsync("/token/generatetoken", payload);
+		var response = await _httpClient.PostAsJsonAsync("/token/web/generatetoken", payload);
 		Console.WriteLine($"⬅️ Received response: {(int)response.StatusCode} {response.ReasonPhrase}");
 
 		if (!response.IsSuccessStatusCode)
@@ -59,5 +60,28 @@ public class AuthService : IAuthService
 		Console.WriteLine($"🎉 User {cred.Username} logged in successfully with UserId: {successContent.UserId}");
 
 		return new AuthResponseDTO(successContent.UserId, successContent.AccessToken, string.Empty, string.Empty);
+	}
+
+	public async Task<bool> IsAuthenticated()
+	{
+		var response = await _httpClient.GetAsync("/auth/isAuthenticated");
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("Something went wrong call the IT Team for further support {response}", response);
+			return false;
+		}
+
+		var successContent = await response.Content.ReadFromJsonAsync<IsAuthenticatedDTO>();
+
+		if (successContent!.isAuthenticated == false)
+		{
+			Console.WriteLine("User is not authenticated");
+			return false;
+
+		}
+
+		return true;
+
 	}
 }

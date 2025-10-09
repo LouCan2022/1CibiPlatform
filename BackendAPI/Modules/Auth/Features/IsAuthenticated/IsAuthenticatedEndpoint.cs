@@ -1,4 +1,5 @@
-﻿namespace Auth.Features.IsAuthenticated;
+﻿
+namespace Auth.Features.IsAuthenticated;
 
 public record IsAuthenticatedRequest() : ICommand<IsAuthenticatedResponse>;
 
@@ -8,7 +9,7 @@ public class IsAuthenticatedEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("isAuthenticated", (
+		app.MapGet("isAuthenticated", (
 			ISender sender,
 			CancellationToken cancellationToken) =>
 		{

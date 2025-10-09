@@ -78,6 +78,7 @@
 </div>
 
 @code {
+
     private MudForm form;
     private bool success;
     private bool isLoading = false;
@@ -90,6 +91,23 @@
     private bool isPasswordVisible = false;
     private InputType passwordInput = InputType.Password;
     private string passwordIcon = Icons.Material.Filled.VisibilityOff;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var isAuthenticated = await IAuthService.IsAuthenticated();
+
+        if (isAuthenticated)
+        {
+            Navigation.NavigateTo("/", true);
+
+            return;
+        }
+
+    }
+
+
 
     private void TogglePasswordVisibility()
     {
@@ -111,7 +129,7 @@
     {
         isLoading = true;
 
-        var userData = await IAuthService.Login(new LoginCred(username, password));
+        var userData = await IAuthService.Login(new LoginCred(username, password, rememberMe));
 
         if (userData.detail is not null && userData.detail != string.Empty)
         {
