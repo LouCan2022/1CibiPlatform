@@ -17,7 +17,7 @@
 
         <div class="login-body">
 
-            @if (!isUserVald)
+            @if (!isUserValid)
             {
                 <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
                     Invalid username or password.
@@ -50,7 +50,7 @@
 
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                     <MudCheckBox @bind-Value="rememberMe" Label="Remember me" Color="Color.Primary" Dense="true" />
-                    <MudLink Href="/forgot-password" Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
+                    <MudLink Href="/login"  Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
                 </MudStack>
 
                 <MudButton ButtonType="ButtonType.Submit"
@@ -71,7 +71,7 @@
             </MudForm>
 
             <div class="footer-links">
-                Don't have an account? <a href="/register">Sign up</a>
+                Don't have an account? <a href="/login">Sign up</a>
             </div>
         </div>
     </MudPaper>
@@ -84,7 +84,7 @@
     private string username = "";
     private string password = "";
     private bool rememberMe = false;
-    private bool isUserVald = true;
+    private bool isUserValid = true;
     private string errorMessage = "";
 
     private bool isPasswordVisible = false;
@@ -117,7 +117,7 @@
         {
             Console.WriteLine($"Login Error: {userData.detail}");
             isLoading = false;
-            isUserVald = false;
+            isUserValid = false;
             errorMessage = userData!.detail;
             StateHasChanged();
             return;
