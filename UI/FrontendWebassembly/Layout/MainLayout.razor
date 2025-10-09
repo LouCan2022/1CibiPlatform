@@ -9,14 +9,26 @@
         border-radius: 30px 30px 30px 30px !important;
     }
 
-        .mud-drawer.mud-drawer-open {
-            border-radius: 30px 30px 30px 30px !important;
-        }
+    .mud-drawer.mud-drawer-open {
+        border-radius: 30px 30px 30px 30px !important;
+    }
 
     .mud-appbar {
         border-radius: 30px 30px 30px 30px !important;
     }
 
+    .mud-navmenu {
+        color: white !important;
+    }
+
+    .mud-nav-link {
+        color: white !important;
+        transition: background-color 0.3s ease;
+    }
+
+    .mud-nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
 </style>
 
 <MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
@@ -28,7 +40,7 @@
     <ChildContent>
         @if (_isAuthenticated)
         {
-            <MudLayout>
+            <MudLayout >
                 <!-- AppBar -->
                 <MudAppBar Style="@GetAppBarStyle()">
                     <MudIconButton Icon="@Icons.Material.Filled.Menu" Style="@GetMenuIconStyle()" Edge="Edge.Start" OnClick="@DrawerToggle" />
@@ -41,27 +53,42 @@
                 <MudDrawer @bind-Open="_drawerOpen" 
                            Elevation="1"
                            Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px;">
-                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
+                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center; background: white;">
                         <MudImage Src="images/logo/cibi.png"
                                   Alt="Cibi Logo"
                                   Style="width: 125px; height:45px;" />
                     </MudDrawerHeader>
-                    <MudNavMenu>
-                        <MudNavLink Href="counter" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix">PhilSys</MudNavLink>
-                        <MudNavGroup Title="Settings" Expanded="false">
-                            <MudNavLink Href="page" Match="NavLinkMatch.Prefix" >Users</MudNavLink>
-                            <MudNavLink Href="none" Match="NavLinkMatch.Prefix">Security</MudNavLink>
-                        </MudNavGroup>
-                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
+                        <MudNavMenu Style="background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important; color: white;">
+                            <MudNavLink Href="counter" Match="NavLinkMatch.All">
+                                <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="me-2" />
+                                Dashboard
+                            </MudNavLink>
 
-                    </MudNavMenu>
+                            <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix">
+                                <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Class="me-2" />
+                                PhilSys
+                            </MudNavLink>
+
+                            <MudNavGroup Title="Settings" Expanded="false" Icon="@Icons.Material.Filled.Settings">
+                                <MudNavLink Href="page" Match="NavLinkMatch.Prefix">
+                                    <MudIcon Icon="@Icons.Material.Filled.Group" Class="me-2" />
+                                    Users
+                                </MudNavLink>
+                                <MudNavLink Href="none" Match="NavLinkMatch.Prefix">
+                                    <MudIcon Icon="@Icons.Material.Filled.Security" Class="me-2" />
+                                    Security
+                                </MudNavLink>
+                            </MudNavGroup>
+
+                            <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">
+                                <MudIcon Icon="@Icons.Material.Filled.Info" Class="me-2" />
+                                About
+                            </MudNavLink>
+                        </MudNavMenu>
                 </MudDrawer>
                 <!-- Main content -->
                 <MudMainContent>
-                    <MudPaper Class="pa-5 ma-5" Elevation="2">
                         @Body
-                    </MudPaper>
                 </MudMainContent>
             </MudLayout>
         }
