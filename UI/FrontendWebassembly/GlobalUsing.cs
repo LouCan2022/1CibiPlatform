@@ -3,10 +3,14 @@ global using Microsoft.AspNetCore.Components.Web;
 global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 global using MudBlazor.Services;
 global using System.Net.Http.Json;
+global using Microsoft.JSInterop;
+global using System.Text.Json;
 
-global using FrontendWebassembly.DTO;
+
 global using FrontendWebassembly.Services.Auth.Interfaces;
 global using FrontendWebassembly.ServiceConfig;
+global using FrontendWebassembly.Services.Auth.Implementation;
+global using FrontendWebassembly.SharedService;
 
 
 

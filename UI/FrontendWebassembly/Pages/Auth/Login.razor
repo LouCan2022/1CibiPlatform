@@ -5,77 +5,88 @@
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
 
-<div class="login-container">
-    <MudPaper Class="login-card" Elevation="2">
-        <div class="login-header">
-            <div class="login-logo">
-                <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Style="color: white;" />
-            </div>
-            <div class="login-title">One Platform</div>
-            <div class="login-subtitle">Sign in to your account to continue</div>
-        </div>
 
-        <div class="login-body">
-
-            @if (!isUserValid)
-            {
-                <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
-                    Invalid username or password.
-                </MudAlert>
-            }
-
-            <MudForm @ref="form" @bind-IsValid="@success">
-                <MudTextField @bind-Value="username"
-                              Label="Username"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Required="true"
-                              RequiredError="Username is required"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Person"
-                              Class="mb-4" />
-
-                <MudTextField @bind-Value="password"
-                              Label="Password"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                              Required="true"
-                              RequiredError="Password is required"
-                              InputType="@passwordInput"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@passwordIcon"
-                              OnAdornmentClick="TogglePasswordVisibility"
-                              AdornmentAriaLabel="Show Password"
-                              Class="mb-3" />
-
-                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-                    <MudCheckBox @bind-Value="rememberMe" Label="Remember me" Color="Color.Primary" Dense="true" />
-                    <MudLink Href="/login"  Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
-                </MudStack>
-
-                <MudButton ButtonType="ButtonType.Submit"
-                           Variant="Variant.Filled"
-                           FullWidth="true"
-                           Class="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
-                           OnClick="HandleLogin"
-                           Disabled="@(!success || isLoading)">
-                    @if (isLoading)
-                    {
-                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                    }
-                    else
-                    {
-                        <span>Sign In</span>
-                    }
-                </MudButton>
-            </MudForm>
-
-            <div class="footer-links">
-                Don't have an account? <a href="/login">Sign up</a>
-            </div>
-        </div>
-    </MudPaper>
-</div>
+@if (!_isLoading)
+{
+   <div class="login-container">
+       <MudPaper Class="login-card" Elevation="2">
+           <div class="login-header">
+               <div class="login-logo">
+                   <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Style="color: white;" />
+               </div>
+               <div class="login-title">One Platform</div>
+               <div class="login-subtitle">Sign in to your account to continue</div>
+           </div>
+   
+           <div class="login-body">
+   
+               @if (!isUserValid)
+               {
+                   <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
+                       Invalid username or password.
+                   </MudAlert>
+               }
+   
+               <MudForm @ref="form" @bind-IsValid="@success">
+                   <MudTextField @bind-Value="username"
+                                 Label="Username"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Required="true"
+                                 RequiredError="Username is required"
+                                 Adornment="Adornment.Start"
+                                 AdornmentIcon="@Icons.Material.Filled.Person"
+                                 Class="mb-4" />
+   
+                   <MudTextField @bind-Value="password"
+                                 Label="Password"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Required="true"
+                                 RequiredError="Password is required"
+                                 InputType="@passwordInput"
+                                 Adornment="Adornment.Start"
+                                 AdornmentIcon="@passwordIcon"
+                                 OnAdornmentClick="TogglePasswordVisibility"
+                                 AdornmentAriaLabel="Show Password"
+                                 Class="mb-3" />
+   
+                   <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                       <MudCheckBox @bind-Value="rememberMe" Label="Remember me" Color="Color.Primary" Dense="true" />
+                       <MudLink Href="/login"  Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
+                   </MudStack>
+   
+                   <MudButton ButtonType="ButtonType.Submit"
+                              Variant="Variant.Filled"
+                              FullWidth="true"
+                              Class="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
+                              OnClick="HandleLogin"
+                              Disabled="@(!success || isLoading)">
+                       @if (isLoading)
+                       {
+                           <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                       }
+                       else
+                       {
+                           <span>Sign In</span>
+                       }
+                   </MudButton>
+               </MudForm>
+   
+               <div class="footer-links">
+                   Don't have an account? <a href="/login">Sign up</a>
+               </div>
+           </div>
+       </MudPaper>
+   </div>
+}
+else
+{
+    <!-- Loading -->
+    <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </MudContainer>
+}
 
 @code {
 
@@ -87,6 +98,7 @@
     private bool rememberMe = false;
     private bool isUserValid = true;
     private string errorMessage = "";
+    private bool _isLoading = true;
 
     private bool isPasswordVisible = false;
     private InputType passwordInput = InputType.Password;
@@ -95,15 +107,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+ 
         var isAuthenticated = await IAuthService.IsAuthenticated();
 
         if (isAuthenticated)
         {
             Navigation.NavigateTo("/", true);
-
             return;
         }
+
+        _isLoading = false;
 
     }
 

@@ -10,4 +10,6 @@ public interface IAuthService
 
 	Task<string> GetUserInfoIfAuthenticated();
 
+	Task<bool> Logout();
+
 }
