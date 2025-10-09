@@ -31,6 +31,7 @@
 			services.AddScoped<IJWTService, JWTService>();
 			services.AddScoped<IAuthRepository, AuthRepository>();
 			services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+			services.AddScoped<ILoginService, LoginService>();
 			return services;
 		}
 
