@@ -1,7 +1,77 @@
-﻿@page "/philsys/liveness"
+﻿
+@using MudBlazor
+@inject IJSRuntime JS
+    <!-- Main Content -->
+    <MudContainer Class="d-flex justify-center align-center" Style="flex:1; padding-top:4rem;">
+        @if (!_completed)
+        {
+            <MudPaper Class="p-6 text-center background-color: var(--mud-palette-surface) !important;"
+                      Elevation="6"
+                  Style="background-color: var(--mud-palette-surface) !important; border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%; ">
 
-<h3>PhilSysLiveness</h3>
+                <MudText Typo="Typo.h5" Class="mb-4" Style="color: var(--mud-palette-text-primary);">
+                    Liveness Check
+                </MudText>
+
+                <MudText Typo="Typo.subtitle1" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
+                    Click the button below to start the liveness verification process.
+                </MudText>
+
+                <MudButton OnClick="StartLiveness"
+                           Variant="Variant.Filled"
+                           Class="px-6 py-2"
+                           Style="min-width:7rem; border-radius:9999px; font-weight:600; color:white;
+                                  background:radial-gradient(circle,#4EAEF2,#2a77ae,#102247);
+                                  background-size:600% 350%;
+                                  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+                                  transition:all 0.3s ease;">
+                    <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
+                    Start Liveness
+                </MudButton>
+
+            </MudPaper>
+        }
+        else
+        {
+            <MudText Typo="Typo.h4"
+                     Align="Align.Center"
+                     Class="fw-bold"
+                     Style="font-size:40px;">
+                ✅ Liveness Check Completed Successfully!
+            </MudText>
+        }
+    </MudContainer>
 
 @code {
+    private bool _completed = false;
 
+
+    private async Task StartLiveness()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("startLivenessInterop");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error calling eKYC: {ex.Message}");
+        }
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JS.InvokeVoidAsync("addEventListener", "livenessCompleted",
+                DotNetObjectReference.Create(this), "OnLivenessCompleted");
+        }
+    }
+
+    [JSInvokable]
+    public void OnLivenessCompleted()
+    {
+        _completed = true;
+        StateHasChanged();
+    }
 }
+
+   
