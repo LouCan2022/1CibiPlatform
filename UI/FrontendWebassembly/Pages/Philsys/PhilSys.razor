@@ -7,7 +7,6 @@
             @bind-ActivePanelIndex="_activeIndex"
             OnActivePanelIndexChanged="OnTabChanged"
              DisableIndicator="true">
-        >
     <MudTabs Rounded="true" Centered="true" Elevation="0" @bind-ActivePanelIndex="_activeIndex" >
     <MudTabPanel Variant="Variant.Outlined" Text="Personal Information" Class="@GetTabClass(0)" Style="text-transform:none; width: 200px; font-size: 18px;" />
     <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; width: 200px; font-size: 18px;" />
@@ -156,6 +155,7 @@ else
             ? "philsys-tab-pannel philsys-tab-pannel-active"
             : "philsys-tab-pannel philsys-tab-pannel-inactive";
     }
+
     private string? ValidatePCN(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
