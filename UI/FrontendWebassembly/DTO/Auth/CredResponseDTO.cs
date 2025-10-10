@@ -8,3 +8,9 @@ public record CredResponseDTO(Guid UserId,
 	string Issued,
 	string Expires);
 
+
+public record IsAuthenticatedDTO(bool isAuthenticated);
+
+
+public record LogoutResponseDTO(bool isLoggedOut);
+
