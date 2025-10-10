@@ -1,4 +1,4 @@
-﻿@using FrontendWebassembly.ShareData.Auth
+﻿﻿@using FrontendWebassembly.ShareData.Auth
 @using MudBlazor
 
 @inherits LayoutComponentBase
@@ -27,9 +27,9 @@
 <MudSnackbarProvider />
 @if (!_isLoading)
 {
-<ErrorBoundary>
-    <ChildContent>
-       
+    <ErrorBoundary>
+        <ChildContent>
+
             <MudLayout>
                 <!-- AppBar -->
                 <MudAppBar Style="@GetAppBarStyle()">
@@ -44,7 +44,7 @@
                            Elevation="1"
                            Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px; display: flex; flex-direction: column;">
 
-                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
+                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center; background: white;">
                         <MudImage Src="images/logo/cibi.png"
                                   Alt="Cibi Logo"
                                   Style="width: 125px; height:45px;" />
@@ -55,8 +55,8 @@
                         @for (int i = 0; i < Apps.Count; i++)
                         {
                             var appId = Apps[i];
-                            var (path,appDescription, appIcon) = ApplicationListDescriptionIcon.List[appId];
- 
+                            var (path, appDescription, appIcon) = ApplicationListDescriptionIcon.List[appId];
+
                             var subMenuIds = SubMenus[i];
 
                             <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
@@ -89,36 +89,36 @@
                     </MudPaper>
                 </MudMainContent>
             </MudLayout>
- 
-    </ChildContent>
-    <ErrorContent Context="exception">
-        <MudContainer Class="d-flex flex-column justify-center align-center" Style="height: 100vh; gap: 20px;">
-            <MudPaper Class="pa-8" Elevation="3" Style="max-width: 600px; text-align: center;">
-                <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" Class="mb-4" />
-                <MudText Typo="Typo.h4" Color="Color.Error" Class="mb-2">
-                    Oops! Something went wrong
-                </MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">
-                    We encountered an unexpected error. Please try refreshing the page.
-                </MudText>
-                <MudExpansionPanels>
-                    <MudExpansionPanel Text="Error Details">
-                        <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap; word-break: break-word;">
-                            @exception.Message
-                        </MudText>
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
-                           StartIcon="@Icons.Material.Filled.Refresh"
-                           Class="mt-4">
-                    Reload Page
-                </MudButton>
-            </MudPaper>
-        </MudContainer>
-    </ErrorContent>
-</ErrorBoundary>
+
+        </ChildContent>
+        <ErrorContent Context="exception">
+            <MudContainer Class="d-flex flex-column justify-center align-center" Style="height: 100vh; gap: 20px;">
+                <MudPaper Class="pa-8" Elevation="3" Style="max-width: 600px; text-align: center;">
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" Class="mb-4" />
+                    <MudText Typo="Typo.h4" Color="Color.Error" Class="mb-2">
+                        Oops! Something went wrong
+                    </MudText>
+                    <MudText Typo="Typo.body1" Class="mb-4">
+                        We encountered an unexpected error. Please try refreshing the page.
+                    </MudText>
+                    <MudExpansionPanels>
+                        <MudExpansionPanel Text="Error Details">
+                            <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap; word-break: break-word;">
+                                @exception.Message
+                            </MudText>
+                        </MudExpansionPanel>
+                    </MudExpansionPanels>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
+                               StartIcon="@Icons.Material.Filled.Refresh"
+                               Class="mt-4">
+                        Reload Page
+                    </MudButton>
+                </MudPaper>
+            </MudContainer>
+        </ErrorContent>
+    </ErrorBoundary>
 
 }
 else
@@ -178,7 +178,11 @@ else
     };
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
-    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
+    private async Task ToggleDarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+        await LocalStorageService.SetItemAsync("isDarkMode", _isDarkMode);
+    }
 
     private string GetAppBarStyle()
     {
@@ -189,8 +193,8 @@ else
     private string GetMenuIconStyle()
     {
         return _isDarkMode
-            ? "color: #102247;"   
-            : "color: white;";    
+            ? "color: #102247;"
+            : "color: white;";
     }
     protected override async Task OnInitializedAsync()
     {
@@ -207,12 +211,16 @@ else
 
             Apps = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_appIdKey));
             Console.WriteLine($"Apps: {string.Join(", ", Apps)}");
-            
+
             SubMenus = JsonSerializer.Deserialize<List<List<int>>>(await LocalStorageService.GetItemAsync<string>(_subMenuKey));
             Console.WriteLine($"SubMenus: {string.Join(", ", SubMenus.SelectMany(sm => sm))}");
-            
+
             Roles = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_roleIdKey));
             Console.WriteLine($"Roles: {string.Join(", ", Roles)}");
+
+            var stored = await LocalStorageService.GetItemAsync<bool?>("isDarkMode");
+            
+            _isDarkMode = stored ?? false;
 
             _isLoading = false;
         }

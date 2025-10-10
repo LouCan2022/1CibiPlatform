@@ -1,0 +1,65 @@
+﻿@page "/philsys/result"
+
+@using MudBlazor
+<MudPaper Class="p-6 d-flex flex-wrap align-items-start gap-6 position-relative"
+          Style="background-color: var(--mud-palette-surface); border-radius: 12px; padding: 20px 20px 60px 0px;">
+
+    <div class="d-flex flex-column align-items-center" style="width: 220px;">
+        <MudPaper Elevation="1"
+                  Class="d-flex justify-center align-center mb-3"
+                  Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 0px;">
+            <MudIcon Icon="@Icons.Material.Filled.Image" Size="Size.Large" Color="Color.Secondary" />
+        </MudPaper>
+
+        <MudButton StartIcon="@Icons.Material.Filled.Download">
+            API Response
+        </MudButton>
+    </div>
+
+    <div class="flex-grow-1" style="min-width: 500px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            @foreach (var row in InfoRows)
+            {
+                <tr>
+                    <td style="width: 25%; padding: 6px 8px; vertical-align: top; color: var(--mud-palette-text-primary);">
+                        <MudText Typo="Typo.body1">@row.Label1</MudText>
+                    </td>
+                    <td style="width: 25%; padding: 6px 8px;">
+                        <MudText Style="color: var(--mud-palette-text-primary);  font-weight: bold;" Typo="Typo.body1">@row.Value1</MudText>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div class="position-absolute" style="bottom: 16px; right: 16px;">
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Search"
+                   Style="text-transform:none;  background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;">
+            Search Again
+        </MudButton>
+    </div>
+</MudPaper>
+
+
+@code {
+    private List<(string Label1, string Value1)> InfoRows = new()
+    {
+        ("PhilSys Card Number", "1234123412341234"),
+        ("Digital ID Number", "AAA000"),
+        ("First Name", "JUAN"),
+        ("Middle Name", "SANTOS"),
+        ("Last Name", "DELA CRUZ"),
+        ("Suffix", "JR"),
+        ("Sex", "Male"),
+        ("Birth Date", "1989-09-12"),
+        ("Place of Birth", "QUEZON CITY, METRO MANILA"),
+        ("Permanent Address", "SOME FULL ADDRESS HERE"),
+        ("Present Address", "SOME FULL ADDRESS HERE"),
+        ("Marital Status", "Married"),
+        ("Mobile Number", "09661231231"),
+        ("Email", "jsdelacruz@email.com"),
+        ("Blood Type", "Unknown")
+    };
+}
