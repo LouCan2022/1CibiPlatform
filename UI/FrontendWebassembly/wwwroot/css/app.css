@@ -251,3 +251,10 @@ code {
     background-color: var(--mud-palette-surface);
 }
 
+.philsys-rounded-input .mud-input-outlined {
+    border-radius: 12px !important;
+}
+
+.philsys-rounded-input fieldset {
+    border-radius: 12px !important;
+}

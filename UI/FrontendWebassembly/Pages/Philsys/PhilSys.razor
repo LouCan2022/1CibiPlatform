@@ -23,11 +23,13 @@
                             <MudTextField @bind-Value="FirstName"
                                           Label="First Name"
                                           FullWidth="true"
+                                          Adornment="Adornment.Start"
                                           Required="true"
                                           RequiredError="First Name is required"
                                           InputType="InputType.Text"
                                           Variant="Variant.Outlined"
                                           Margin="Margin.Dense"
+                                          Class="philsys-rounded-input"
                                           For="@(() => FirstName)" />
                         </MudItem>
 
@@ -36,7 +38,9 @@
                                        Label="Suffix"
                                        @bind-Value="Suffix"
                                        Margin="Margin.Dense"
-                                       Variant="Variant.Outlined">
+                                       Variant="Variant.Outlined"
+                                       Adornment="Adornment.Start"
+                                       Class="philsys-rounded-input">
                                 <MudSelectItem Value=@("N/A")>N/A</MudSelectItem>
                                 <MudSelectItem Value=@("Jr")>Jr.</MudSelectItem>
                                 <MudSelectItem Value=@("Sr")>Sr.</MudSelectItem>
@@ -54,7 +58,8 @@
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   FullWidth="true"
-                                  Class="mb-4" />
+                                  Adornment="Adornment.Start"
+                                  Class="mb-4 philsys-rounded-input" />
 
                     <MudTextField @bind-Value="LastName"
                               Variant="Variant.Outlined"
@@ -64,20 +69,22 @@
                                   Placeholder=" "
                                   FullWidth="true"
                                   InputType="InputType.Text"
+                                  Adornment="Adornment.Start"
                                   RequiredError="Last Name is required"
                                   For="@(() => LastName)"
-                                 Class="mb-4" />
+                                  Class="mb-4 philsys-rounded-input" />
 
                     <MudTextField @bind-Value="BirthDate"
-                                  Label="Birth Date"
+                                  Label="Birth aDate"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   InputType="InputType.Date"
                                   FullWidth="true"
                                   Required="true"
+                                  Adornment="Adornment.Start"
                                   RequiredError="Birth Date is required"
                                   For="@(() => BirthDate)"
-                                 Class="mb-6" />
+                                  Class="mb-6 philsys-rounded-input" />
 
                     <MudButton Style="background:linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%) !important; color:white;"
                                FullWidth="true"
@@ -93,10 +100,10 @@
                 <MudTextField @bind-Value="PCN"
                                 Label="PhilSys Card Number (16-Digits)"
                                 Required="true"
-
+                                Adornment="Adornment.Start"
                                 Margin="Margin.Dense"
                                 RequiredError="PhilSys Card Number is required"
-                                Class="mb-5"
+                                Class="mb-5 philsys-rounded-input"
                                 Variant="Variant.Outlined"
                                 Validation="@((string? value) => ValidatePCN(value!))" />
 
@@ -106,6 +113,7 @@
                     Next
                 </MudButton>
         </MudForm>
+      
         }
     }
 else
@@ -123,8 +131,9 @@ else
     private string? BirthDate { get; set; }
     private string? Suffix { get; set; } = "N/A";
     private string? PCN { get; set; } = string.Empty;
-
     private int _activeIndex = 0;
+
+
     private async Task SubmitPersonalInfo()
     {
         await personalForm!.Validate();
@@ -166,4 +175,6 @@ else
 
         return null;
     }
+
+ 
 }
