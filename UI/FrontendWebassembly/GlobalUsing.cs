@@ -11,6 +11,7 @@ global using FrontendWebassembly.Services.Auth.Interfaces;
 global using FrontendWebassembly.ServiceConfig;
 global using FrontendWebassembly.Services.Auth.Implementation;
 global using FrontendWebassembly.SharedService;
+global using FrontendWebassembly.DTO.Auth;
 
 
 

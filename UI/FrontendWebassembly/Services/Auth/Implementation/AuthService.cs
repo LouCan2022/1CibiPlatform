@@ -1,6 +1,4 @@
-﻿using FrontendWebassembly.DTO.Auth;
-
-namespace FrontendWebassembly.Services.Auth.Implementation;
+﻿namespace FrontendWebassembly.Services.Auth.Implementation;
 
 public class AuthService : IAuthService
 {
@@ -11,6 +9,9 @@ public class AuthService : IAuthService
 	private readonly string _httpRefreshTokenCookieOnly;
 	private readonly string _userNameKey;
 	private readonly string _userIdKey;
+	private readonly string _appIdKey;
+	private readonly string _subMenuKey;
+	private readonly string _roleIdKey;
 
 	public AuthService(HttpClient httpClient,
 		LocalStorageService localStorageService,
@@ -23,6 +24,9 @@ public class AuthService : IAuthService
 		_httpRefreshTokenCookieOnly = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 		this._userNameKey = "Username";
 		this._userIdKey = "UserId";
+		this._appIdKey = "AppId";
+		this._subMenuKey = "SubMenu";
+		this._roleIdKey = "RoleId";
 	}
 
 	public Task<string> GetUserInfoIfAuthenticated()
@@ -72,11 +76,14 @@ public class AuthService : IAuthService
 		return new AuthResponseDTO(successContent.UserId, successContent.AccessToken, string.Empty, string.Empty);
 	}
 
-	protected virtual void SetLocalstorage(CredResponseDTO credResponseDTO)
+	protected virtual async void SetLocalstorage(CredResponseDTO credResponseDTO)
 	{
 		// Store UserId and Username in local storage
-		this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
-		this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.UserName);
+		await this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
+		await this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.UserName);
+		await _localStorageService.SetItemAsync(_appIdKey, JsonSerializer.Serialize(credResponseDTO.Appid));
+		await _localStorageService.SetItemAsync(_subMenuKey, JsonSerializer.Serialize(credResponseDTO.SubMenuid));
+		await _localStorageService.SetItemAsync(_roleIdKey, JsonSerializer.Serialize(credResponseDTO.RoleId));
 	}
 
 	public async Task<bool> IsAuthenticated()
@@ -135,7 +142,7 @@ public class AuthService : IAuthService
 
 
 		// Clear local storage
-		_localStorageService.ClearAsync();
+		await this._localStorageService.ClearAsync();
 
 		Console.WriteLine("✅ Logout successful.");
 
