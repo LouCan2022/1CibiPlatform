@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     /// <inheritdoc />
-    public partial class InitialAuthMigration : Migration
+    public partial class initialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,6 +30,25 @@ namespace APIs.Migrations.Auth
                 });
 
             migrationBuilder.CreateTable(
+                name: "AuthRefreshToken",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TokenHash = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RevokedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RevokedReason = table.Column<string>(type: "text", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthRefreshToken", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AuthRoles",
                 columns: table => new
                 {
@@ -42,6 +61,22 @@ namespace APIs.Migrations.Auth
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AuthRoles", x => x.RoleId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuthSubmenu",
+                columns: table => new
+                {
+                    SubMenuId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SubMenuName = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthSubmenu", x => x.SubMenuId);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,15 +102,18 @@ namespace APIs.Migrations.Auth
                 name: "AuthUserAppRoles",
                 columns: table => new
                 {
+                    AppRoleId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     AppId = table.Column<int>(type: "integer", nullable: false),
+                    Submenu = table.Column<int>(type: "integer", nullable: false),
                     RoleId = table.Column<int>(type: "integer", nullable: false),
                     AssignedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuthUserAppRoles", x => new { x.UserId, x.AppId, x.RoleId });
+                    table.PrimaryKey("PK_AuthUserAppRoles", x => x.AppRoleId);
                     table.ForeignKey(
                         name: "FK_AuthUserAppRoles_AuthApplications_AppId",
                         column: x => x.AppId,
@@ -136,6 +174,11 @@ namespace APIs.Migrations.Auth
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AuthUserAppRoles_UserId",
+                table: "AuthUserAppRoles",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AuthUsers_Email",
                 table: "AuthUsers",
                 column: "Email",
@@ -151,6 +194,12 @@ namespace APIs.Migrations.Auth
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AuthRefreshToken");
+
+            migrationBuilder.DropTable(
+                name: "AuthSubmenu");
+
             migrationBuilder.DropTable(
                 name: "AuthUserAppRoles");
 

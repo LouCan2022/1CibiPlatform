@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     [DbContext(typeof(AuthApplicationDbContext))]
-    [Migration("20251007091655_AddSubmenuTable")]
-    partial class AddSubmenuTable
+    [Migration("20251010032857_initialmigration")]
+    partial class initialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,6 +76,9 @@ namespace APIs.Migrations.Auth
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("timestamp with time zone");
@@ -151,13 +154,13 @@ namespace APIs.Migrations.Auth
 
             modelBuilder.Entity("Auth.Data.Entities.AuthUserAppRole", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("AppId")
+                    b.Property<int>("AppRoleId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    b.Property<int>("RoleId")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AppRoleId"));
+
+                    b.Property<int>("AppId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("AssignedAt")
@@ -166,16 +169,24 @@ namespace APIs.Migrations.Auth
                     b.Property<Guid>("AssignedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Submenu")
                         .HasColumnType("integer");
 
-                    b.HasKey("UserId", "AppId", "RoleId");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AppRoleId");
 
                     b.HasIndex("AppId");
 
                     b.HasIndex("AssignedBy");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("AuthUserAppRoles");
                 });
