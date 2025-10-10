@@ -5,6 +5,8 @@ global using MudBlazor.Services;
 global using System.Net.Http.Json;
 global using Microsoft.JSInterop;
 global using System.Text.Json;
+global using System.Text;
+global using MudBlazor;
 
 
 global using FrontendWebassembly.Services.Auth.Interfaces;

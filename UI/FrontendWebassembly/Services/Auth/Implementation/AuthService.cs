@@ -25,7 +25,7 @@ public class AuthService : IAuthService
 		this._userNameKey = "Username";
 		this._userIdKey = "UserId";
 		this._appIdKey = "AppId";
-		this._subMenuKey = "SubMenu";
+		this._subMenuKey = "SubMenuId";
 		this._roleIdKey = "RoleId";
 	}
 
@@ -81,9 +81,9 @@ public class AuthService : IAuthService
 		// Store UserId and Username in local storage
 		await this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
 		await this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.UserName);
-		await _localStorageService.SetItemAsync(_appIdKey, JsonSerializer.Serialize(credResponseDTO.Appid));
-		await _localStorageService.SetItemAsync(_subMenuKey, JsonSerializer.Serialize(credResponseDTO.SubMenuid));
-		await _localStorageService.SetItemAsync(_roleIdKey, JsonSerializer.Serialize(credResponseDTO.RoleId));
+		await this._localStorageService.SetItemAsync(_appIdKey, JsonSerializer.Serialize(credResponseDTO.Appid));
+		await this._localStorageService.SetItemAsync(_subMenuKey, JsonSerializer.Serialize(credResponseDTO.SubMenuid));
+		await this._localStorageService.SetItemAsync(_roleIdKey, JsonSerializer.Serialize(credResponseDTO.RoleId));
 	}
 
 	public async Task<bool> IsAuthenticated()
