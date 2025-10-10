@@ -2,11 +2,11 @@
 
 public static class SubMenuList
 {
-	public static Dictionary<int, string> List =>
+	public static Dictionary<int, (string path, string Name, string Icon)> List =>
 	  new()
 	  {
-		{ 1, "Dashboard" },
-		{ 2, "IDV" },
-		{ 3, "Search Candidate" }
+		{ 1, ("dashboard", "Dashboard" , Icons.Material.Filled.Dashboard) },
+		{ 2, ("idv", "IDV" , Icons.Material.Filled.Person) },
+		{ 3, ("usersearch", "User Search" , Icons.Material.Filled.Search) }
 	  };
 }

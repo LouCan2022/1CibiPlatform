@@ -1,4 +1,5 @@
-﻿@using MudBlazor
+﻿@using FrontendWebassembly.ShareData.Auth
+@using MudBlazor
 
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
@@ -24,7 +25,7 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-@if (_isAuthenticated)
+@if (!_isLoading)
 {
 <ErrorBoundary>
     <ChildContent>
@@ -51,13 +52,25 @@
 
                     <!-- Navigation menu that fills remaining space -->
                     <MudNavMenu Class="flex-grow-1">
-                        <MudNavLink Href="#" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-                        <MudNavGroup Title="Philsys" Expanded="false" Icon="@Icons.Material.Filled.Flag">
-                            <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">IDV</MudNavLink>
-                        </MudNavGroup>
-                        <MudNavGroup Title="CNX" Expanded="false" Icon="@Icons.Material.Filled.Call">
-                            <MudNavLink Href="cnx" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Search">Search Candidate</MudNavLink>
-                        </MudNavGroup>
+                        @for (int i = 0; i < Apps.Count; i++)
+                        {
+                            var appId = Apps[i];
+                            var (path,appDescription, appIcon) = ApplicationListDescriptionIcon.List[appId];
+ 
+                            var subMenuIds = SubMenus[i];
+
+                            <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
+                                @foreach (var subId in subMenuIds)
+                                {
+                                    var (subPath, subDescription, subIcon) = SubMenuList.List[subId];
+                                    <MudNavLink Href="@($"{path.ToLower()}/{subPath.ToLower()}")"
+                                                Match="NavLinkMatch.Prefix"
+                                                Icon="@subIcon">
+                                        @subDescription
+                                    </MudNavLink>
+                                }
+                            </MudNavGroup>
+                        }
                     </MudNavMenu>
 
                     <!-- Logout at the very bottom -->
@@ -122,7 +135,16 @@ else
 
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
-    private bool _isAuthenticated = false;
+    private bool _isLoading = true;
+
+    private const string _appIdKey = "AppId";
+    private const string _subMenuKey = "SubMenuId";
+    private const string _roleIdKey = "RoleId";
+
+    private List<int> Apps = new List<int>();
+    private List<List<int>> SubMenus = new List<List<int>>();
+    private List<int> Roles = new List<int>();
+
 
     private MudTheme _myTheme = new MudTheme()
     {
@@ -179,12 +201,25 @@ else
             if (!isAuthenticated)
             {
                 Navigation.NavigateTo("/login", true);
+
+                return;
             }
 
-            _isAuthenticated = isAuthenticated;
+            Apps = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_appIdKey));
+            Console.WriteLine($"Apps: {string.Join(", ", Apps)}");
+            
+            SubMenus = JsonSerializer.Deserialize<List<List<int>>>(await LocalStorageService.GetItemAsync<string>(_subMenuKey));
+            Console.WriteLine($"SubMenus: {string.Join(", ", SubMenus.SelectMany(sm => sm))}");
+            
+            Roles = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_roleIdKey));
+            Console.WriteLine($"Roles: {string.Join(", ", Roles)}");
+
+            _isLoading = false;
         }
         catch (Exception ex)
         {
+            _isLoading = false;
+            Console.WriteLine($"Is loading: {_isLoading}");
             Console.WriteLine($"Authentication Error: {ex.Message}");
             throw;
         }
@@ -197,16 +232,18 @@ else
         {
             var logout = await IAuthService.Logout();
 
-         
+
             if (logout)
             {
                 Console.WriteLine(logout ? "Logout successful." : "Logout failed.");
                 Navigation.NavigateTo("/login", true);
+
+                return;
             }
         }
         catch (Exception ex)
         {
-            _isAuthenticated = true;
+            _isLoading = true;
             Console.WriteLine($"Authentication Error: {ex.Message}");
             throw;
         }
