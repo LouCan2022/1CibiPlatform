@@ -51,13 +51,13 @@
 
                     <!-- Navigation menu that fills remaining space -->
                     <MudNavMenu Class="flex-grow-1">
-                        <MudNavLink Href="counter" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser">PhilSys</MudNavLink>
-                        <MudNavGroup Title="Settings" Expanded="false" Icon="@Icons.Material.Filled.Settings">
-                            <MudNavLink Href="page" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">Users</MudNavLink>
-                            <MudNavLink Href="none" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Security">Security</MudNavLink>
+                        <MudNavLink Href="#" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                        <MudNavGroup Title="Philsys" Expanded="false" Icon="@Icons.Material.Filled.Flag">
+                            <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">IDV</MudNavLink>
                         </MudNavGroup>
-                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false" Icon="@Icons.Material.Filled.Info">About</MudNavLink>
+                        <MudNavGroup Title="CNX" Expanded="false" Icon="@Icons.Material.Filled.Call">
+                            <MudNavLink Href="cnx" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Search">Search Candidate</MudNavLink>
+                        </MudNavGroup>
                     </MudNavMenu>
 
                     <!-- Logout at the very bottom -->

@@ -5,6 +5,9 @@ public record CredResponseDTO(Guid UserId,
 	string TokenType,
 	int ExpiresIn,
 	string UserName,
+	List<int> Appid,
+	List<List<int>> SubMenuid,
+	List<int> RoleId,
 	string Issued,
 	string Expires);
 
