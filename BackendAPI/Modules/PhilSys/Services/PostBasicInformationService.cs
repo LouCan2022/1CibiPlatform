@@ -19,20 +19,20 @@ public class PostBasicInformationService
 		string suffix,
 		DateTime birth_date,
 		string face_liveness_session_id,
-		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlNjE1ZWU4YjA2MyIsImlhdCI6MTc1OTkwOTM1OC41Njk0NDgsIm5iZiI6MTc1OTkwOTM1OC41Njk0NDgsImV4cCI6MTc1OTkxMTE1OC41Njk0NDh9.VNeaJ_nsqncwEnYFF1dWq-HHmzbWsDp9Vi9dnE3mtpA", 
+		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlNjE1ZWU4YjA2MyIsImlhdCI6MTc1OTkwOTM1OC41Njk0NDgsIm5iZiI6MTc1OTkwOTM1OC41Njk0NDgsImV4cCI6MTc1OTkxMTE1OC41Njk0NDh9.VNeaJ_nsqncwEnYFF1dWq-HHmzbWsDp9Vi9dnE3mtpA",
 		CancellationToken ct = default
 		)
 	{
 		var endpoint = "query";
 
-		var body = new 
+		var body = new
 		{
-			first_name = first_name,
-			middle_name = middle_name,
-			last_name = last_name,
-			suffix = suffix,
+			first_name,
+			middle_name,
+			last_name,
+			suffix,
 			birth_date = birth_date.ToString("yyyy-MM-dd"),
-			face_liveness_session_id = face_liveness_session_id
+			face_liveness_session_id
 		};
 
 		_logger.LogInformation("Sending basic information request to PhilSys endpoint: {Endpoint}", endpoint);
