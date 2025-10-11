@@ -1,8 +1,10 @@
-﻿@using MudBlazor
+﻿﻿@using FrontendWebassembly.ShareData.Auth
+@using MudBlazor
 
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
+@inject LocalStorageService LocalStorageService
 
 <style>
     .mud-drawer {
@@ -23,48 +25,62 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+@if (!_isLoading)
+{
+    <ErrorBoundary>
+        <ChildContent>
 
-<ErrorBoundary>
-    <ChildContent>
-        @if (_isAuthenticated)
-        {
             <MudLayout>
                 <!-- AppBar -->
-                <MudAppBar Color="Color.Primary">
-                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
+                <MudAppBar Style="@GetAppBarStyle()">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Style="@GetMenuIconStyle()" Edge="Edge.Start" OnClick="@DrawerToggle" />
                     <MudSpacer />
                     <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                                   Color="Color.Inherit"
+                                   Style="Color.Inherit"
                                    OnClick="@ToggleDarkMode" />
                 </MudAppBar>
                 <!-- Drawer -->
-                <MudDrawer @bind-Open="_drawerOpen" 
+                <MudDrawer @bind-Open="_drawerOpen"
                            Elevation="1"
-                           Style="box-shadow: 0 0 15px rgba(0, 0, 0, 0.25); border-radius: 10px;">
-                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center;">
+                           Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px; display: flex; flex-direction: column;">
+
+                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center; background: white;">
                         <MudImage Src="images/logo/cibi.png"
-                                    Alt="Cibi Logo"
-                                    Width="125"
-                                    Height="45"/>
+                                  Alt="Cibi Logo"
+                                  Style="width: 125px; height:45px;" />
                     </MudDrawerHeader>
-                    <MudNavMenu>
 
-                        <MudNavLink Href="" Match="NavLinkMatch.All" ForceLoad="false">Dashboard</MudNavLink>
-                        <MudNavLink Href="philsys" Match="NavLinkMatch.Prefix" Class="main-nav-item-custom">
-                            <img src="images/logo/philsys.png" alt="PhilSys Icon" class="main-nav-icon" />
-                            <span class="main-nav-text">PhilSys</span>
-                        </MudNavLink>
-                        <MudNavLink Href="cnx" Match="NavLinkMatch.Prefix" Class="main-nav-item-custom">
-                            <img src="images/logo/cnx.png" alt="PhilSys Icon" class="main-nav-icon" />
-                            <span class="main-nav-text">CNX</span>
-                        </MudNavLink>
-                        <MudNavGroup Title="Settings" IconColor="Color.Primary" Expanded="false">
-                            <MudNavLink Href="users" Match="NavLinkMatch.Prefix" ForceLoad="false">Users</MudNavLink>
-                            <MudNavLink Href="security" Match="NavLinkMatch.Prefix" ForceLoad="false">Security</MudNavLink>
-                        </MudNavGroup>
-                        <MudNavLink Href="about" Match="NavLinkMatch.Prefix" ForceLoad="false">About</MudNavLink>
+                    <!-- Navigation menu that fills remaining space -->
+                    <MudNavMenu Class="flex-grow-1">
+                        @for (int i = 0; i < Apps.Count; i++)
+                        {
+                            var appId = Apps[i];
+                            var (path, appDescription, appIcon) = ApplicationListDescriptionIcon.List[appId];
 
+                            var subMenuIds = SubMenus[i];
+
+                            <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
+                                @foreach (var subId in subMenuIds)
+                                {
+                                    var (subPath, subDescription, subIcon) = SubMenuList.List[subId];
+                                    <MudNavLink Href="@($"{path.ToLower()}/{subPath.ToLower()}")"
+                                                Match="NavLinkMatch.Prefix"
+                                                Icon="@subIcon">
+                                        @subDescription
+                                    </MudNavLink>
+                                }
+                            </MudNavGroup>
+                        }
                     </MudNavMenu>
+
+                    <!-- Logout at the very bottom -->
+                    <div class="px-4 py-2 mt-auto">
+                        <MudNavLink Icon="@Icons.Material.Filled.Logout"
+                                    Match="NavLinkMatch.All"
+                                    OnClick="HandleLogout">
+                            Logout
+                        </MudNavLink>
+                    </div>
                 </MudDrawer>
                 <!-- Main content -->
                 <MudMainContent>
@@ -73,48 +89,62 @@
                     </MudPaper>
                 </MudMainContent>
             </MudLayout>
-        }
-        else
-        {
-            <!-- Loading -->
-            <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
-                <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+
+        </ChildContent>
+        <ErrorContent Context="exception">
+            <MudContainer Class="d-flex flex-column justify-center align-center" Style="height: 100vh; gap: 20px;">
+                <MudPaper Class="pa-8" Elevation="3" Style="max-width: 600px; text-align: center;">
+                    <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" Class="mb-4" />
+                    <MudText Typo="Typo.h4" Color="Color.Error" Class="mb-2">
+                        Oops! Something went wrong
+                    </MudText>
+                    <MudText Typo="Typo.body1" Class="mb-4">
+                        We encountered an unexpected error. Please try refreshing the page.
+                    </MudText>
+                    <MudExpansionPanels>
+                        <MudExpansionPanel Text="Error Details">
+                            <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap; word-break: break-word;">
+                                @exception.Message
+                            </MudText>
+                        </MudExpansionPanel>
+                    </MudExpansionPanels>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
+                               StartIcon="@Icons.Material.Filled.Refresh"
+                               Class="mt-4">
+                        Reload Page
+                    </MudButton>
+                </MudPaper>
             </MudContainer>
-        }
-    </ChildContent>
-    <ErrorContent Context="exception">
-        <MudContainer Class="d-flex flex-column justify-center align-center" Style="height: 100vh; gap: 20px;">
-            <MudPaper Class="pa-8" Elevation="3" Style="max-width: 600px; text-align: center;">
-                <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" Class="mb-4" />
-                <MudText Typo="Typo.h4" Color="Color.Error" Class="mb-2">
-                    Oops! Something went wrong
-                </MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">
-                    We encountered an unexpected error. Please try refreshing the page.
-                </MudText>
-                <MudExpansionPanels>
-                    <MudExpansionPanel Text="Error Details">
-                        <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap; word-break: break-word;">
-                            @exception.Message
-                        </MudText>
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
-                           StartIcon="@Icons.Material.Filled.Refresh"
-                           Class="mt-4">
-                    Reload Page
-                </MudButton>
-            </MudPaper>
-        </MudContainer>
-    </ErrorContent>
-</ErrorBoundary>
+        </ErrorContent>
+    </ErrorBoundary>
+
+}
+else
+{
+    <!-- Loading -->
+    <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </MudContainer>
+}
 
 @code {
+
+
+
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
-    private bool _isAuthenticated = false;
+    private bool _isLoading = true;
+
+    private const string _appIdKey = "AppId";
+    private const string _subMenuKey = "SubMenuId";
+    private const string _roleIdKey = "RoleId";
+
+    private List<int> Apps = new List<int>();
+    private List<List<int>> SubMenus = new List<List<int>>();
+    private List<int> Roles = new List<int>();
+
 
     private MudTheme _myTheme = new MudTheme()
     {
@@ -148,26 +178,83 @@
     };
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
-    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
-    
+    private async Task ToggleDarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+        await LocalStorageService.SetItemAsync("isDarkMode", _isDarkMode);
+    }
+
+    private string GetAppBarStyle()
+    {
+        return _isDarkMode
+            ? "background: linear-gradient(90deg, #68c0d6 0%, #2a77ae 50%, #102247 100%) !important;"
+            : "background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;";
+    }
+    private string GetMenuIconStyle()
+    {
+        return _isDarkMode
+            ? "color: #102247;"
+            : "color: white;";
+    }
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var userData = await IAuthService.GetUserInfoIfAuthenticated();
+            var isAuthenticated = await IAuthService.IsAuthenticated();
 
-            if (string.IsNullOrEmpty(userData))
+            if (!isAuthenticated)
             {
-                 Console.WriteLine($"UserData: {userData}");
                 Navigation.NavigateTo("/login", true);
+
+                return;
             }
 
-            _isAuthenticated = true;
+            Apps = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_appIdKey));
+            Console.WriteLine($"Apps: {string.Join(", ", Apps)}");
+
+            SubMenus = JsonSerializer.Deserialize<List<List<int>>>(await LocalStorageService.GetItemAsync<string>(_subMenuKey));
+            Console.WriteLine($"SubMenus: {string.Join(", ", SubMenus.SelectMany(sm => sm))}");
+
+            Roles = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_roleIdKey));
+            Console.WriteLine($"Roles: {string.Join(", ", Roles)}");
+
+            var stored = await LocalStorageService.GetItemAsync<bool?>("isDarkMode");
+            
+            _isDarkMode = stored ?? false;
+
+            _isLoading = false;
         }
         catch (Exception ex)
         {
+            _isLoading = false;
+            Console.WriteLine($"Is loading: {_isLoading}");
             Console.WriteLine($"Authentication Error: {ex.Message}");
             throw;
         }
     }
+    private async Task HandleLogout()
+    {
+        Console.WriteLine("Logging out...");
+
+        try
+        {
+            var logout = await IAuthService.Logout();
+
+
+            if (logout)
+            {
+                Console.WriteLine(logout ? "Logout successful." : "Logout failed.");
+                Navigation.NavigateTo("/login", true);
+
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _isLoading = true;
+            Console.WriteLine($"Authentication Error: {ex.Message}");
+            throw;
+        }
+    }
+
 }

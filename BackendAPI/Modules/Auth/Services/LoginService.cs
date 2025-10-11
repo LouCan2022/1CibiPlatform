@@ -103,11 +103,6 @@ public class LoginService : ILoginService
 		// fetching user data from database
 		LoginDTO userData = await this._authRepository.GetUserDataAsync(cred);
 
-
-		var roleId = userData.roleId;
-		var appId = userData.AppId;
-		var subMenuId = userData.SubMenuId;
-
 		// checking if client credentials are valid
 		if (userData == null)
 		{
@@ -115,6 +110,7 @@ public class LoginService : ILoginService
 			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
 			throw new NotFoundException("Refresh Token not found");
 		}
+
 
 		// verifying password
 		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, cred.Password);
@@ -132,7 +128,11 @@ public class LoginService : ILoginService
 
 
 		// produce refresh token
-		var refreshTokenExist = this.GetAccessTokenFromCookie();
+		var refreshTokenExist = this.GetRefreshTokenFromCookie();
+
+		var roleId = userData.roleId;
+		var appId = userData.AppId;
+		var subMenuId = userData.SubMenuId;
 
 		if (refreshTokenExist != null)
 		{
@@ -208,6 +208,7 @@ public class LoginService : ILoginService
 		return accessToken;
 	}
 
+
 	protected virtual void SetRefreshTokenCookie(
 	string refreshToken,
 	bool isRememberMe)
@@ -224,6 +225,13 @@ public class LoginService : ILoginService
 
 
 		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyRefreshTokenKey!, refreshToken, cookieRefreshTokenOptions);
+	}
+
+	protected virtual bool RemoveAccessAndRefreshTokenCookie()
+	{
+		_httpContextAccessor.HttpContext!.Response.Cookies.Delete(_httpCookieOnlyKey!);
+		_httpContextAccessor.HttpContext!.Response.Cookies.Delete(_httpCookieOnlyRefreshTokenKey!);
+		return true;
 	}
 
 	protected virtual int ExpireInMinutes()
@@ -269,14 +277,27 @@ public class LoginService : ILoginService
 			throw new BadRequestException("Logout failed.");
 		}
 
+		this.RemoveAccessAndRefreshTokenCookie();
+
 		_logger.LogInformation("Logout successful for user: {UserId}", userId);
 
 		return result;
 
 	}
 
+	public Task<bool> IsAuthenticated()
+	{
+		_logger.LogInformation("Checking authentication status...");
 
+		if (string.IsNullOrEmpty(GetRefreshTokenFromCookie()))
+		{
+			_logger.LogWarning("Authentication check failed: zNo refresh token found in cookies.");
+			return Task.FromResult(false);
+		}
 
+		_logger.LogInformation("User is authenticated.");
+		return Task.FromResult(true);
+	}
 
 }
 

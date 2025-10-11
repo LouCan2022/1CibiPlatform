@@ -1,6 +1,4 @@
-﻿using FrontendWebassembly.Services.Auth.Implementation;
-
-namespace FrontendWebassembly.ServiceConfig;
+﻿namespace FrontendWebassembly.ServiceConfig;
 
 public static class FrontendServiceConfig
 {
@@ -16,6 +14,8 @@ public static class FrontendServiceConfig
 		});
 
 		services.AddScoped<IAuthService, AuthService>();
+		services.AddScoped<LocalStorageService>();
+		services.AddScoped<IAccessService, AccessService>();
 		return services;
 	}
 }

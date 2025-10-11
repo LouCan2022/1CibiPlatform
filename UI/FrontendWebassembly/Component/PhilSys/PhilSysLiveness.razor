@@ -1,0 +1,67 @@
+﻿
+@using MudBlazor
+@inject IJSRuntime JS
+  
+@if (!_completed)
+{
+<MudPaper Class="p-6 text-center background-color: var(--mud-palette-surface) !important; mx-auto p-6 mt-0 philsys-card form-container justify-center align-center"
+                Elevation="6"
+            Style="background-color: var(--mud-palette-surface) !important; border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%; ">
+
+        <MudText Typo="Typo.h5" Class="mb-4" Style="color: var(--mud-palette-text-primary);">
+            Liveness Check
+        </MudText>
+
+        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
+            Click the button below to start the liveness verification process.
+        </MudText>
+
+        <ButtonComponent OnClick="StartLiveness" Style="width: 170px; color:white; ">
+            <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
+            Start Liveness
+        </ButtonComponent>
+
+    </MudPaper>
+}
+else
+{
+    <MudText Typo="Typo.h4"
+                Align="Align.Center"
+                Class="fw-bold"
+                Style="font-size:40px;">
+        ✅ Liveness Check Completed Successfully!
+    </MudText>
+}
+
+@code {
+    private bool _completed = false;
+
+    private async Task StartLiveness()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("startLivenessInterop");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error calling eKYC: {ex.Message}");
+        }
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            JS.InvokeVoidAsync("addEventListener", "livenessCompleted",
+                DotNetObjectReference.Create(this), "OnLivenessCompleted");
+        }
+    }
+
+    [JSInvokable]
+    public void OnLivenessCompleted()
+    {
+        _completed = true;
+        StateHasChanged();
+    }
+}
+
+   

@@ -40,11 +40,15 @@
 			var randomNumber = new byte[64];
 			using var rng = RandomNumberGenerator.Create();
 			rng.GetBytes(randomNumber);
-			var token = Convert.ToBase64String(randomNumber);
+
+
+			var token = Convert.ToBase64String(randomNumber)
+				.TrimEnd('=')
+				.Replace('+', '-')
+				.Replace('/', '_');
 
 			// Hash for storage
 			var hashedToken = HashToken(token);
-
 			return (token, hashedToken);
 		}
 
@@ -57,10 +61,10 @@
 
 		public virtual bool ValidateHashToken(string providedToken, string storedHash)
 		{
-			// DECODE FIRST before hashing!
 			var decodedToken = System.Net.WebUtility.UrlDecode(providedToken);
 
-			var providedHash = HashToken(decodedToken); // Now hash the decoded string
+			var providedHash = HashToken(decodedToken);
+
 			return CryptographicOperations.FixedTimeEquals(
 				Convert.FromBase64String(providedHash),
 				Convert.FromBase64String(storedHash)
