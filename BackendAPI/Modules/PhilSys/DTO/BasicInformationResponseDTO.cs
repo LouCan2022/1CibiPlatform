@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.DTO;
-public record BasicInformationResponseDTO(
+public record BasicInformationOrPCNResponseDTO(
 	string code,
 	string token,
 	string reference,
@@ -38,10 +38,10 @@ public record BasicInformationResponseDTO(
 	string pob_country
 );
 
-public record BasicInformationMetaResponse(string tier_level, int result_grade);
+public record BasicInformationOrPCNMetaResponse(string tier_level, int result_grade);
 
-public record PostBasicInformationResponse(
-	BasicInformationResponseDTO data,
-	BasicInformationMetaResponse meta
+public record PostBasicInformationOrPCNResponse(
+	BasicInformationOrPCNResponseDTO data,
+	BasicInformationOrPCNMetaResponse meta
 );
 

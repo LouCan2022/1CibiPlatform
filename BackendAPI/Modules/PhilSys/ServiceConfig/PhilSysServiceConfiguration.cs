@@ -29,6 +29,7 @@ public static class PhilSysServiceConfiguration
 		});
 		services.AddScoped<GetTokenService>();
 		services.AddScoped<PostBasicInformationService>();
+		services.AddScoped<PostPCNService>();
 		return services;
 	}
 	#endregion
