@@ -16,17 +16,10 @@
             Click the button below to start the liveness verification process.
         </MudText>
 
-        <MudButton OnClick="StartLiveness"
-                    Variant="Variant.Filled"
-                    Class="px-6 py-2"
-                    Style="min-width:7rem; border-radius:9999px; font-weight:600; color:white;
-                            background:radial-gradient(circle,#4EAEF2,#2a77ae,#102247);
-                            background-size:600% 350%;
-                            box-shadow:0 2px 6px rgba(0,0,0,0.2);
-                            transition:all 0.3s ease;">
+        <ButtonComponent OnClick="StartLiveness" Style="width: 170px; color:white; ">
             <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
             Start Liveness
-        </MudButton>
+        </ButtonComponent>
 
     </MudPaper>
 }
