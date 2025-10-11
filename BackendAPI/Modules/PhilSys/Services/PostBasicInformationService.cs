@@ -1,4 +1,6 @@
-﻿namespace PhilSys.Services;
+﻿using System.Globalization;
+
+namespace PhilSys.Services;
 public class PostBasicInformationService
 {
 	private readonly HttpClient _httpClient;
@@ -19,7 +21,7 @@ public class PostBasicInformationService
 		string suffix,
 		DateTime birth_date,
 		string face_liveness_session_id,
-		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlNjE1ZWU4YjA2MyIsImlhdCI6MTc1OTkwOTM1OC41Njk0NDgsIm5iZiI6MTc1OTkwOTM1OC41Njk0NDgsImV4cCI6MTc1OTkxMTE1OC41Njk0NDh9.VNeaJ_nsqncwEnYFF1dWq-HHmzbWsDp9Vi9dnE3mtpA",
+		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlOWQyYWJiMGQyZCIsImlhdCI6MTc2MDE1NDI4My43MjQyNzcsIm5iZiI6MTc2MDE1NDI4My43MjQyNzcsImV4cCI6MTc2MDE1NjA4My43MjQyNzd9.tR2Q1fwxnPKfNL_RCm-Rc_sG3vO7b3gkujuJZT490cs",
 		CancellationToken ct = default
 		)
 	{
@@ -31,7 +33,7 @@ public class PostBasicInformationService
 			middle_name,
 			last_name,
 			suffix,
-			birth_date = birth_date.ToString("yyyy-MM-dd"),
+			birth_date = birth_date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
 			face_liveness_session_id
 		};
 
