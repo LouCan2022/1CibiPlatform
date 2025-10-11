@@ -2,7 +2,7 @@
 
 namespace Auth.Features.LoginWeb;
 
-public record LoginWebRequest(LoginCred LoginCred) : ICommand<LoginWebResponse>;
+public record LoginWebRequest(LoginWebCred loginWebCred) : ICommand<LoginWebResponse>;
 
 public record LoginWebResponse(LoginResponseWebDTO loginResponseWebDTO);
 
@@ -13,9 +13,7 @@ public class LoginWebEndpoint : ICarterModule
 	{
 		app.MapPost("Loginweb", async (LoginWebRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
-			LoginCred cred = request.LoginCred.Adapt<LoginCred>();
-
-			var command = new LoginWebCommand(cred);
+			var command = new LoginWebCommand(request.loginWebCred);
 
 			LoginWebResult result = await sender.Send(command, cancellationToken);
 

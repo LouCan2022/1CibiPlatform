@@ -84,14 +84,18 @@ public class AuthInitialData
 			{
 				new AuthRole
 				{
-					RoleId = 1,
+					RoleName = "SuperAdmin",
+					Description = "Super Admin",
+					CreatedAt = DateTime.UtcNow
+				},
+				new AuthRole
+				{
 					RoleName = "Admin",
 					Description = "Administrator Role",
 					CreatedAt = DateTime.UtcNow
 				},
 				new AuthRole
 				{
-					RoleId = 2,
 					RoleName = "User",
 					Description = "User Role",
 					CreatedAt = DateTime.UtcNow
@@ -106,14 +110,12 @@ public class AuthInitialData
 			{
 				new AuthSubMenu
 				{
-					SubMenuId = 1,
 					SubMenuName = "Dashboard",
 					Description = "Dashboard SubMenu",
 					CreatedAt = DateTime.UtcNow
 				},
 				new AuthSubMenu
 				{
-					SubMenuId = 2,
 					SubMenuName = "IDV",
 					Description = "Philsys IDV",
 					CreatedAt = DateTime.UtcNow

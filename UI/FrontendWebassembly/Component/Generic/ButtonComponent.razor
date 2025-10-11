@@ -1,0 +1,46 @@
+﻿@using MudBlazor
+
+<MudButton Style="@FinalStyle"
+           Variant="Variant.Filled"
+           FullWidth="true"
+           StartIcon="@StartIcon"
+           EndIcon="@EndIcon" 
+           OnClick="@OnClick"
+           Disabled="@Disabled"
+           ButtonType="@ButtonType">
+    @ChildContent
+</MudButton>
+
+@code {
+    [Parameter] 
+    public EventCallback OnClick { get; set; }
+
+    [Parameter] 
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] 
+    public string? Style { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter] 
+    public string? StartIcon { get; set; }
+
+    [Parameter] 
+    public string? EndIcon { get; set; }
+
+    [Parameter] 
+    public bool Disabled { get; set; } = false;
+
+    [Parameter] 
+    public MudBlazor.ButtonType ButtonType { get; set; } = MudBlazor.ButtonType.Button;
+
+    private string FinalStyle =>
+        $"{BaseGradientStyle}{(string.IsNullOrWhiteSpace(Style) ? string.Empty : $" {Style}")}";
+
+    private string BaseGradientStyle =>
+        "background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%) !important; color: white; text-transform: none;";
+ 
+}
+
