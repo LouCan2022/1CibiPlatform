@@ -5,15 +5,15 @@
           Style="background-color: var(--mud-palette-surface); border-radius: 12px; padding: 20px 20px 60px 0px;">
 
     <div class="d-flex flex-column align-items-center" style="width: 220px;">
-        <MudPaper Elevation="1"
+        <MudPaper Elevation="0"
                   Class="d-flex justify-center align-center mb-3"
                   Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 0px;">
             <MudIcon Icon="@Icons.Material.Filled.Image" Size="Size.Large" Color="Color.Secondary" />
         </MudPaper>
 
-        <MudButton StartIcon="@Icons.Material.Filled.Download">
+        <ButtonComponent StartIcon="@Icons.Material.Filled.Download" Style="width: 170px;">
             API Response
-        </MudButton>
+        </ButtonComponent>
     </div>
 
     <div class="flex-grow-1" style="min-width: 500px;">
@@ -33,12 +33,9 @@
     </div>
 
     <div class="position-absolute" style="bottom: 16px; right: 16px;">
-        <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   StartIcon="@Icons.Material.Filled.Search"
-                   Style="text-transform:none;  background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;">
+        <ButtonComponent StartIcon="@Icons.Material.Filled.Search" >
             Search Again
-        </MudButton>
+        </ButtonComponent>
     </div>
 </MudPaper>
 

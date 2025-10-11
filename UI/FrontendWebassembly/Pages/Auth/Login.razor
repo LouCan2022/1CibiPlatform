@@ -55,22 +55,20 @@
                        <MudCheckBox @bind-Value="rememberMe" Label="Remember me" Color="Color.Primary" Dense="true" />
                        <MudLink Href="/login"  Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
                    </MudStack>
-   
-                   <MudButton ButtonType="ButtonType.Submit"
-                              Variant="Variant.Filled"
-                              FullWidth="true"
-                              Class="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
-                              OnClick="HandleLogin"
-                              Disabled="@(!success || isLoading)">
-                       @if (isLoading)
-                       {
-                           <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                       }
-                       else
-                       {
-                           <span>Sign In</span>
-                       }
-                   </MudButton>
+              
+                    <ButtonComponent ButtonType="ButtonType.Submit" 
+                                    Class="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
+                                    OnClick="HandleLogin"
+                                    Disabled="@(!success || isLoading)">
+                        @if (isLoading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        }
+                        else
+                        {
+                            <span>Sign In</span>
+                        }
+                   </ButtonComponent>
                </MudForm>
    
                <div class="footer-links">

@@ -86,11 +86,9 @@
                                   For="@(() => BirthDate)"
                                   Class="mb-6 philsys-rounded-input" />
 
-                    <MudButton Style="background:linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%) !important; color:white;"
-                               FullWidth="true"
-                               OnClick="SubmitPersonalInfo">
+                    <ButtonComponent OnClick="SubmitPersonalInfo">
                         Next
-                    </MudButton>
+                    </ButtonComponent>
                 </MudForm>
  
         }
@@ -107,11 +105,9 @@
                                 Variant="Variant.Outlined"
                                 Validation="@((string? value) => ValidatePCN(value!))" />
 
-                <MudButton Style="background:linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%) !important; color:white;"
-                            FullWidth="true"
-                            OnClick="SubmitPCN">
+                <ButtonComponent OnClick="SubmitPCN">
                     Next
-                </MudButton>
+                </ButtonComponent>
         </MudForm>
       
         }
