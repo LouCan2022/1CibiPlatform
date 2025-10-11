@@ -15,6 +15,7 @@ public static class FrontendServiceConfig
 
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<LocalStorageService>();
+		services.AddScoped<IAccessService, AccessService>();
 		return services;
 	}
 }

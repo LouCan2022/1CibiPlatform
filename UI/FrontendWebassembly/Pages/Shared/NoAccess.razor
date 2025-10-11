@@ -1,0 +1,21 @@
+﻿@page "/access-denied"
+
+@using MudBlazor
+
+
+   <MudPaper Elevation="0" Outlined="false"
+             Class="p-6 text-center rounded-3"
+             Style="background-color: transparent; box-shadow: none;">
+       <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Error" Class="mb-4" />
+       <MudText Typo="Typo.h4" Class="mb-2">Access Denied</MudText>
+       <MudText Typo="Typo.subtitle1" Class="mb-4">
+           You don't have permission to access this page.
+       </MudText>
+       <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/" StartIcon="@Icons.Material.Filled.Home">
+           Go Back Home
+       </MudButton>
+   </MudPaper>
+
+@code {
+
+}
