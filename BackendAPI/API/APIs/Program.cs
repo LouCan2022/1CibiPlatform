@@ -1,18 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
-//check env configuration
-if (builder.Environment.IsDevelopment())
-{
-	builder.Services.ConfigureCorsDev();
-}
-
-if (builder.Environment.IsProduction())
-{
-	builder.Services.ConfigureCorsProd();
-}
+builder.Services.ConfigureEnvironment(builder);
 
 builder.Services
+	.AddSSOConfiguration(builder.Configuration)
 	.AddModuleMediaTR()
 	.AddModuleCarter()
 	.AddModuleServices()
@@ -21,33 +13,11 @@ builder.Services
 	.AddEndpointsApiExplorer()
 	.AddSwaggerGen();
 
-
-
 var app = builder.Build();
 
-app.MapCarter();
+await app.UseEnvironmentAsync();
 
-
-if (app.Environment.IsDevelopment())
-{
-	await DatabaseExtensions.IntializeDatabaseAsync(app);
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
-
-if (app.Environment.IsProduction())
-{
-	await DatabaseExtensions.IntializeDatabaseAsync(app);
-}
-
-// use exception handler after register
-app.UseExceptionHandler(options => { })
-   .UseHttpsRedirection()
-   .UseAuthentication()
-   .UseAuthorization();
-
-app.UseCors("CorsPolicy");
-
+app.UseCustomMiddlewares();
 
 app.Run();
 

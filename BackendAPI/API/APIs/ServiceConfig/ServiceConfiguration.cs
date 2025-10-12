@@ -5,8 +5,27 @@
 
 		private static readonly Assembly _authAssembly = typeof(AuthMarker).Assembly;
 		private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
-
 		private static readonly Assembly _philsysAssembly = typeof(PhilSysMarker).Assembly;
+
+		#region Environment Config
+
+		public static void ConfigureEnvironment(
+			this IServiceCollection services,
+			WebApplicationBuilder builder)
+		{
+			if (builder.Environment.IsDevelopment())
+			{
+				builder.Services.ConfigureCorsDev();
+			}
+
+			if (builder.Environment.IsProduction())
+			{
+				builder.Services.ConfigureCorsProd();
+			}
+		}
+
+
+		#endregion
 
 		#region CORS
 		public static void ConfigureCorsProd(this IServiceCollection services) =>
@@ -42,15 +61,15 @@
 
 		#region JWT Config
 		public static IServiceCollection AddJwtAuthentication(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            // JWT Authentication
-            var jwtSettings = configuration.GetSection("Jwt");
-            var key = jwtSettings["Key"];
-            var issuer = jwtSettings["Issuer"];
-            var audience = jwtSettings["Audience"];
-            var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]!);
+			this IServiceCollection services,
+			IConfiguration configuration)
+		{
+			// JWT Authentication
+			var jwtSettings = configuration.GetSection("Jwt");
+			var key = jwtSettings["Key"];
+			var issuer = jwtSettings["Issuer"];
+			var audience = jwtSettings["Audience"];
+			var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]!);
 
 
 			var _httpCookieOnlyKey = configuration.GetValue<string>("HttpCookieOnlyKey");
@@ -109,13 +128,13 @@
 		#endregion
 
 		#region Carter Config
-        public static IServiceCollection AddModuleCarter(this IServiceCollection services)
-        {
-            services.AddCarter(new DependencyContextAssemblyCatalog([
-                 _authAssembly,
-                 _cnxAssembly,
+		public static IServiceCollection AddModuleCarter(this IServiceCollection services)
+		{
+			services.AddCarter(new DependencyContextAssemblyCatalog([
+				 _authAssembly,
+				 _cnxAssembly,
 				 _philsysAssembly
-             ]));
+			 ]));
 
 
 			return services;
@@ -124,15 +143,15 @@
 
 		#region MediaTR Config
 
-        public static IServiceCollection AddModuleMediaTR(
-            this IServiceCollection services)
-        {
-            // Add MediaTR
-            services.AddAuthMediaTR(_authAssembly);
-            services.AddCNXMediaTR(_cnxAssembly);
+		public static IServiceCollection AddModuleMediaTR(
+			this IServiceCollection services)
+		{
+			// Add MediaTR
+			services.AddAuthMediaTR(_authAssembly);
+			services.AddCNXMediaTR(_cnxAssembly);
 			services.AddPhilSysMediaTR(_philsysAssembly);
 			return services;
-        }
+		}
 
 		#endregion
 
@@ -145,6 +164,18 @@
 			services.AddPhilSysServices();
 			return services;
 		}
+		#endregion
+
+		#region SSO Config
+
+		public static IServiceCollection AddSSOConfiguration(
+			this IServiceCollection services,
+			IConfiguration configuration)
+		{
+			services.AddSSOSamlConfiguration(configuration);
+			return services;
+		}
+
 		#endregion
 
 	}

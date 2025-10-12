@@ -19,3 +19,4 @@ global using Auth.Data.Extensions;
 global using CNX.Data.Extensions;
 global using PhilSys;
 global using PhilSys.ServiceConfig;
+global using SSO.ServiceConfig;
