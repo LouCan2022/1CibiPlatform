@@ -98,7 +98,7 @@ public class AuthRepository : IAuthRepository
 
 		_dbcontext.AuthRefreshToken.Update(authRefresh);
 
-		_dbcontext.SaveChanges();
+		await _dbcontext.SaveChangesAsync();
 
 		return true;
 	}
@@ -107,6 +107,6 @@ public class AuthRepository : IAuthRepository
 	{
 		return await
 			_dbcontext.AuthRefreshToken
-			.FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive == true);
+			.FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive);
 	}
 }
