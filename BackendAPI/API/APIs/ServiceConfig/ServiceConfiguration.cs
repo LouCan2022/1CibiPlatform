@@ -6,6 +6,7 @@
 		private static readonly Assembly _authAssembly = typeof(AuthMarker).Assembly;
 		private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
 		private static readonly Assembly _philsysAssembly = typeof(PhilSysMarker).Assembly;
+		private static readonly Assembly _ssoAssembly = typeof(SSOMarker).Assembly;
 
 		#region Environment Config
 
@@ -133,7 +134,8 @@
 			services.AddCarter(new DependencyContextAssemblyCatalog([
 				 _authAssembly,
 				 _cnxAssembly,
-				 _philsysAssembly
+				 _philsysAssembly,
+				 _ssoAssembly
 			 ]));
 
 
@@ -150,6 +152,7 @@
 			services.AddAuthMediaTR(_authAssembly);
 			services.AddCNXMediaTR(_cnxAssembly);
 			services.AddPhilSysMediaTR(_philsysAssembly);
+			services.AddSSOMediaTR(_ssoAssembly);
 			return services;
 		}
 

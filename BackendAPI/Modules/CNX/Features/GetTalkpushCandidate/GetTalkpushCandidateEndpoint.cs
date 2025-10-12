@@ -7,24 +7,24 @@ public record GetTalkpushCandidateResult(List<CandidateResponseDto> CandidateRes
 
 public class GetTalkpushCandidateEndpoint : ICarterModule
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
-    {
-        app.MapGet("GetTalkpushCandidate", async (string request, ISender sender, CancellationToken cancellationToken) =>
-        {
-            var command = new GetTalkpushCandidateCommmand(request);
+	public void AddRoutes(IEndpointRouteBuilder app)
+	{
+		app.MapGet("cnx/gettalkpushcandidate", async (string request, ISender sender, CancellationToken cancellationToken) =>
+		{
+			var command = new GetTalkpushCandidateCommmand(request);
 
-            GetTalkpushCandidateResponse result = await sender.Send(command, cancellationToken);
+			GetTalkpushCandidateResponse result = await sender.Send(command, cancellationToken);
 
-            var response = new GetTalkpushCandidateResult(result.CandidateResponseDto);
+			var response = new GetTalkpushCandidateResult(result.CandidateResponseDto);
 
-            return Results.Ok(response.CandidateResponseDto);
-        })
-          .WithName("GetTalkpushCandidate")
-          .WithTags("CNX")
-          .Produces<GetTalkpushCandidateResult>()
-          .ProducesProblem(StatusCodes.Status400BadRequest)
-          .WithSummary("Get Talkpush Candidate")
-          .WithDescription("Get Talkpush Candidate")
-          .RequireAuthorization();
-    }
+			return Results.Ok(response.CandidateResponseDto);
+		})
+		  .WithName("GetTalkpushCandidate")
+		  .WithTags("CNX")
+		  .Produces<GetTalkpushCandidateResult>()
+		  .ProducesProblem(StatusCodes.Status400BadRequest)
+		  .WithSummary("Get Talkpush Candidate")
+		  .WithDescription("Get Talkpush Candidate")
+		  .RequireAuthorization();
+	}
 }
