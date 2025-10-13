@@ -111,15 +111,20 @@ public class AuthService : IAuthService
 	public async Task<bool> Logout()
 	{
 		Console.WriteLine("🔹 Starting logout request...");
-		var userId = await _localStorageService.GetItemAsync<string>(_userIdKey);
-		//Console.WriteLine("UserId from local storage: {userId}", userId);
 
-		//Console.WriteLine("Decoded UserId: {decodedUserId}", decodedUserId);
+		var userId = await _localStorageService.GetItemAsync<Guid>(_userIdKey);
+
+		if (userId == Guid.Empty)
+		{
+			Console.WriteLine("UserId not found in local storage. Cannot proceed with logout.");
+			return false;
+		}
+
 		var payload = new
 		{
 			logoutDTO = new
 			{
-				UserId = Guid.Parse(userId!),
+				UserId = userId,
 				RevokeReason = "User Logged out"
 			}
 		};
@@ -128,7 +133,7 @@ public class AuthService : IAuthService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("Something went wrong call the IT Team for further support {response}", response);
+			Console.WriteLine("Something went wrong call the IT Team for further support {response}", JsonSerializer.Serialize(response));
 			return false;
 		}
 
