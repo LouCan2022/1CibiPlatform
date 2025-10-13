@@ -5,6 +5,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+		<DebuggerSupport>true</DebuggerSupport>
+		<BlazorEnableHotReload>true</BlazorEnableHotReload>
 	</PropertyGroup>
 
 	<ItemGroup>
