@@ -175,7 +175,7 @@
 			this IServiceCollection services,
 			IConfiguration configuration)
 		{
-			services.AddSSOSamlConfiguration(configuration);
+			//services.AddSSOSamlConfiguration(configuration);
 			return services;
 		}
 
