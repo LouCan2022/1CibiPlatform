@@ -26,6 +26,17 @@ public class AuthInitialData
 					IsActive = true,
 					CreatedAt = DateTimeOffset.UtcNow
 				},
+				new Authusers
+				{
+					Id = Guid.NewGuid(),
+					Username = "cbblueadmin",
+					Email = "cb@example.com",
+					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
+					FirstName = "CB",
+					LastName = "Admin",
+					IsActive = true,
+					CreatedAt = DateTimeOffset.UtcNow
+				},
 			};
 	}
 
