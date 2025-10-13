@@ -3,6 +3,11 @@
 @using FrontendWebassembly.Component.Generic
 @using MudBlazor
 @using System.Text.RegularExpressions
+@using FrontendWebassembly.Component.Special
+@using FrontendWebassembly.Services.Auth.Shared
+@inherits SecurePageBase
+@* philsys/idv *@
+@attribute [RequirePermission(2, 2)]
 
 <MudTabs Rounded="true" Centered="true" Elevation="0"
             @bind-ActivePanelIndex="_activeIndex"
