@@ -16,7 +16,7 @@
         }
 
     .mud-appbar {
-        border-radius: 30px 30px 30px 30px !important;
+        border-radius: 15px !important;
     }
 
 </style>
@@ -42,7 +42,7 @@
                 <!-- Drawer -->
                 <MudDrawer @bind-Open="_drawerOpen"
                            Elevation="1"
-                           Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 8px; display: flex; flex-direction: column;">
+                           Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 15px; display: flex; flex-direction: column;">
 
                     <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center; background: white;">
                         <MudImage Src="images/logo/cibi.png"
@@ -84,7 +84,7 @@
                 </MudDrawer>
                 <!-- Main content -->
                 <MudMainContent>
-                    <MudPaper Class="pa-5 ma-5" Elevation="2">
+                    <MudPaper Class="pa-5 ma-5" Elevation="2" Style="border-radius: 15px;">
                         @Body
                     </MudPaper>
                 </MudMainContent>
@@ -108,13 +108,12 @@
                             </MudText>
                         </MudExpansionPanel>
                     </MudExpansionPanels>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
-                               StartIcon="@Icons.Material.Filled.Refresh"
-                               Class="mt-4">
+                    <ButtonComponent OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
+                                     StartIcon="@Icons.Material.Filled.Refresh"
+                                     Class="mt-4"
+                                     Style="width: 140px;">
                         Reload Page
-                    </MudButton>
+                    </ButtonComponent>
                 </MudPaper>
             </MudContainer>
         </ErrorContent>

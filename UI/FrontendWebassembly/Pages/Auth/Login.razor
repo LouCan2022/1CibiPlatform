@@ -58,9 +58,10 @@
                    </MudStack>
               
                     <ButtonComponent ButtonType="ButtonType.Submit" 
-                                    Class="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
+                                    Style="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
                                     OnClick="HandleLogin"
-                                    Disabled="@(!success || isLoading)">
+                                    Disabled="@(!success || isLoading)"
+                                    Class="rounded-5">
                         @if (isLoading)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -70,6 +71,7 @@
                             <span>Sign In</span>
                         }
                    </ButtonComponent>
+
                </MudForm>
    
                <div class="footer-links">
