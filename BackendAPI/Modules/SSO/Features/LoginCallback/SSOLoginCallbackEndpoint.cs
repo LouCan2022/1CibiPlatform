@@ -9,7 +9,7 @@ public class SSOLoginCallbackEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapGet("/sso/login/callback", async (string returnUrl, ISender sender, HttpContext httpContext, CancellationToken cancellationToken) =>
+		app.MapGet("sso/login/callback", async (string returnUrl, ISender sender, HttpContext httpContext, CancellationToken cancellationToken) =>
 		{
 			var command = new SSOLoginCallbackRequest(returnUrl);
 

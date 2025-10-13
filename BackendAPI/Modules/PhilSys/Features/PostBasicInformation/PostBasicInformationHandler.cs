@@ -1,4 +1,6 @@
-﻿namespace PhilSys.Features.PostBasicInformation;
+﻿
+namespace PhilSys.Features.PostBasicInformation;
+
 public record PostBasicInformationCommand(string first_name,
 										  string middle_name,
 										  string last_name,

@@ -6,7 +6,7 @@ public class SSOLoginEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("/sso/login", async (ISender sender) =>
+		app.MapPost("sso/login", async (ISender sender) =>
 		{
 
 			var command = new SSOLoginRequest();

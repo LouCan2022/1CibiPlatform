@@ -51,7 +51,9 @@ public static class SSOServiceConfiguration
 						sharedOptions.SPOptions)
 					{
 						MetadataLocation = idpMetadataUrl,
-						LoadMetadata = true,
+						LoadMetadata = false,
+						SingleSignOnServiceUrl = new Uri("https://keycloak.yourdomain.com/realms/yourrealm/protocol/saml"),
+						SingleLogoutServiceUrl = new Uri("https://keycloak.yourdomain.com/realms/yourrealm/protocol/saml"),
 						AllowUnsolicitedAuthnResponse = true
 					};
 

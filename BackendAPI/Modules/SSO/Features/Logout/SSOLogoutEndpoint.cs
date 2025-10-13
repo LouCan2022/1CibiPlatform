@@ -6,7 +6,7 @@ public class SSOLogoutEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("SSO/Logout", async (SSOLogoutRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("sso/logout", async (SSOLogoutRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new SSOLogoutCommand();
 

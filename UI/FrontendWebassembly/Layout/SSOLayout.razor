@@ -1,6 +1,5 @@
 ﻿@using MudBlazor
 @inject LocalStorageService LocalStorageService
-
 @inherits LayoutComponentBase
 
 
@@ -35,7 +34,6 @@
         <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Style="Color.Inherit"
                        OnClick="@ToggleDarkMode" />
-
     </MudAppBar>
 
     <MudMainContent>
