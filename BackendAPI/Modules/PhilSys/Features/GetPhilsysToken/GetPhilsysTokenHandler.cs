@@ -13,13 +13,13 @@ public class GetPhilSysTokenHandler : ICommandHandler<GetPhilSysTokenCommand, Ge
 		_logger = logger;
 	}
 
-	public async Task<GetCredentialResult> Handle(GetPhilSysTokenCommand request, CancellationToken cancellationToken)
+	public async Task<GetCredentialResult> Handle(GetPhilSysTokenCommand command, CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Handling PhilSys token request for client: {ClientId}", request.client_id);
+		_logger.LogInformation("Handling PhilSys token request for client: {ClientId}", command.client_id);
 
 		var tokenResult = await _getTokenService.GetPhilsysTokenAsync(
-			request.client_id,
-			request.client_secret,
+			command.client_id,
+			command.client_secret,
 			cancellationToken
 		);
 
