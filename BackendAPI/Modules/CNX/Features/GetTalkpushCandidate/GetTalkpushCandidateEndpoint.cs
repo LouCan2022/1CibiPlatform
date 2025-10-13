@@ -2,7 +2,7 @@
 
 public record GetTalkpushCandidateRequest(string request) : ICommand<GetTalkpushCandidateResponse>;
 
-public record GetTalkpushCandidateResult(List<CandidateResponseDto> CandidateResponseDto);
+public record GetTalkpushCandidateResponse(List<CandidateResponseDto> CandidateResponseDto);
 
 
 public class GetTalkpushCandidateEndpoint : ICarterModule
@@ -13,15 +13,15 @@ public class GetTalkpushCandidateEndpoint : ICarterModule
 		{
 			var command = new GetTalkpushCandidateCommmand(request);
 
-			GetTalkpushCandidateResponse result = await sender.Send(command, cancellationToken);
+			GetTalkpushCandidateResult result = await sender.Send(command, cancellationToken);
 
-			var response = new GetTalkpushCandidateResult(result.CandidateResponseDto);
+			var response = new GetTalkpushCandidateResponse(result.CandidateResponseDto);
 
 			return Results.Ok(response.CandidateResponseDto);
 		})
 		  .WithName("GetTalkpushCandidate")
 		  .WithTags("CNX")
-		  .Produces<GetTalkpushCandidateResult>()
+		  .Produces<GetTalkpushCandidateResponse>()
 		  .ProducesProblem(StatusCodes.Status400BadRequest)
 		  .WithSummary("Get Talkpush Candidate")
 		  .WithDescription("Get Talkpush Candidate")

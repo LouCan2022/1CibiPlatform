@@ -9,7 +9,7 @@ public record PostBasicInformationRequest(string first_name,
 										  DateTime birth_date,
 										  string face_liveness_session_id) : ICommand<PostBasicInformationResponse>;
 
-public record PostBasicInformationResult(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
+public record PostBasicInformationResponse(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
 public class PostBasicInformationEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -25,9 +25,9 @@ public class PostBasicInformationEndpoint : ICarterModule
 				request.face_liveness_session_id
 				);
 
-			PostBasicInformationResponse result = await sender.Send(command, cancellationToken);
+			PostBasicInformationResult result = await sender.Send(command, cancellationToken);
 
-			var response = new PostBasicInformationResult(result.BasicInformationResponseDTO);
+			var response = new PostBasicInformationResponse(result.BasicInformationResponseDTO);
 
 			return Results.Ok(response.BasicInformationResponseDTO);
 		})

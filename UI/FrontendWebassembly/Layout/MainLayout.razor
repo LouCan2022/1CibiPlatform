@@ -11,14 +11,13 @@
         border-radius: 30px 30px 30px 30px !important;
     }
 
-        .mud-drawer.mud-drawer-open {
-            border-radius: 30px 30px 30px 30px !important;
-        }
+    .mud-drawer.mud-drawer-open {
+        border-radius: 30px !important;
+    }
 
     .mud-appbar {
         border-radius: 15px !important;
     }
-
 </style>
 
 <MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
@@ -44,10 +43,10 @@
                            Elevation="1"
                            Style="box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); border-radius: 15px; display: flex; flex-direction: column;">
 
-                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center; background: white;">
+                    <MudDrawerHeader Style="display: flex; justify-content: center; align-items: center; background: linear-gradient(90deg, #102247 0%, #2a77ae 50%) !important;">
                         <MudImage Src="images/logo/cibi.png"
                                   Alt="Cibi Logo"
-                                  Style="width: 125px; height:45px;" />
+                                  Style="width: 125px; height:45px; filter: drop-shadow(0 0 1px white) drop-shadow(0 0 2px white) drop-shadow(0 0 3px white);" />
                     </MudDrawerHeader>
 
                     <!-- Navigation menu that fills remaining space -->
@@ -171,8 +170,7 @@ else
         {
             DefaultBorderRadius = "30px",
             DrawerWidthLeft = "260px",
-            DrawerWidthRight = "260px",
-            AppbarHeight = "64px"
+            AppbarHeight = "69px"
         }
     };
 
@@ -185,10 +183,24 @@ else
 
     private string GetAppBarStyle()
     {
-        return _isDarkMode
-            ? "background: linear-gradient(90deg, #68c0d6 0%, #2a77ae 50%, #102247 100%) !important;"
-            : "background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;";
+        var gradient = _isDarkMode
+            ? "linear-gradient(90deg, #68c0d6 0%, #2a77ae 50%, #102247 100%)"
+            : "linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%)";
+
+        // dynamically adjust margin-left if drawer is open
+        var marginLeft = _drawerOpen ? "280px" : "20px";
+        var marginRight = "20px";
+
+        return $@"
+        width: auto !important;
+        background: {gradient} !important;
+        margin-left: {marginLeft};
+        margin-right: {marginRight};
+        transition: margin-left 0.3s ease, margin-right 0.3s ease;
+    ";
     }
+
+
     private string GetMenuIconStyle()
     {
         return _isDarkMode
