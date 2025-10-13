@@ -219,15 +219,15 @@ code {
 }
 
 .philsys-card {
-    width: 400px;
-    max-width: 400px;
+    width: 410px;
+    max-width: 420px;
     height: 200%;
     max-height: 80%;
     display: block;
     box-sizing: border-box;
     backdrop-filter: blur(10px);
     background-color: var(--mud-palette-surface) !important;
-    border-radius: 24px !important;
+    border-radius: 15px !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
     padding: 15px;
 }
@@ -245,4 +245,14 @@ code {
 
 .philsys-rounded-input fieldset {
     border-radius: 12px !important;
+}
+
+.philsys-custom-tabs .mud-tab {
+    border: 1px solid gray;
+    border-radius: 12px;
+    margin: 0 4px;
+    transition: all 0.2s ease-in-out;
+}
+.mud-tab-slider {
+    display: none !important;
 }
