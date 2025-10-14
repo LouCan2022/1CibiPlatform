@@ -1,9 +1,11 @@
 ﻿namespace Auth.DTO;
 
-public record RegisterRequestDTO(
+
+public record RegisterResponseDTO(
+	Guid Id,
 	string Username,
 	string Email,
-	string Password,
+	string PasswordHash,
 	string FirstName,
 	string LastName,
 	string? MiddleName);
