@@ -1,5 +1,5 @@
-﻿
-namespace Auth.Data.Context;
+﻿namespace Auth.Data.Context;
+
 public class AuthApplicationDbContext : DbContext
 {
 	public AuthApplicationDbContext(DbContextOptions<AuthApplicationDbContext> options) : base(options)
@@ -17,6 +17,10 @@ public class AuthApplicationDbContext : DbContext
 	public DbSet<AuthRefreshToken> AuthRefreshToken { get; set; }
 
 	public DbSet<AuthSubMenu> AuthSubmenu { get; set; }
+
+	public DbSet<OtpVerification> OtpVerification { get; set; }
+
+	public DbSet<PasswordResetToken> PasswordResetToken { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{

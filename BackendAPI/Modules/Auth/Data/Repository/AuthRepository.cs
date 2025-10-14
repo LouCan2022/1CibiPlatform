@@ -1,4 +1,5 @@
-﻿namespace Auth.Data.Repository;
+﻿
+namespace Auth.Data.Repository;
 
 public class AuthRepository : IAuthRepository
 {
@@ -78,8 +79,7 @@ public class AuthRepository : IAuthRepository
 		{
 			UserId = userId,
 			TokenHash = hashToken,
-			ExpiresAt = expiryDate,
-			CreatedAt = DateTime.UtcNow
+			ExpiresAt = expiryDate
 		});
 
 		await _dbcontext.SaveChangesAsync();
@@ -109,4 +109,6 @@ public class AuthRepository : IAuthRepository
 			_dbcontext.AuthRefreshToken
 			.FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive);
 	}
+
+
 }
