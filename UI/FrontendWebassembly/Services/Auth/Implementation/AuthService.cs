@@ -1,4 +1,6 @@
-﻿namespace FrontendWebassembly.Services.Auth.Implementation;
+﻿using FrontendWebassembly.DTO.SharedDTO;
+
+namespace FrontendWebassembly.Services.Auth.Implementation;
 
 public class AuthService : IAuthService
 {
@@ -42,13 +44,13 @@ public class AuthService : IAuthService
 		{
 			loginWebCred = new
 			{
-				Username = cred.Username,
+				Username = cred.Email,
 				Password = cred.Password,
 				IsRememberMe = cred.IsRememberMe
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /token/generatetoken for user: {cred.Username}");
+		Console.WriteLine($"➡️ Sending POST to /token/generatetoken for user: {cred.Email}");
 
 		var response = await _httpClient.PostAsJsonAsync("/token/web/generatetoken", payload);
 		Console.WriteLine($"⬅️ Received response: {(int)response.StatusCode} {response.ReasonPhrase}");
@@ -57,11 +59,10 @@ public class AuthService : IAuthService
 		{
 			Console.WriteLine("❌ Login failed. Reading error content...");
 
-			var errorContent = await response.Content.ReadFromJsonAsync<CredErrorResponseDTO>();
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
-			var rawError = await response.Content.ReadAsStringAsync();
-			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {rawError}");
-			return new AuthResponseDTO(Guid.Empty, string.Empty, rawError, "Unknown Error");
+			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {errorContent!.Detail}");
+			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Unknown Error");
 		}
 
 		Console.WriteLine("✅ Login successful. Reading success content...");
@@ -71,7 +72,7 @@ public class AuthService : IAuthService
 		Console.WriteLine("💾 Storing user info in local storage...");
 		this.SetLocalstorage(successContent!);
 
-		Console.WriteLine($"🎉 User {cred.Username} logged in successfully with UserId: {successContent!.UserId}");
+		Console.WriteLine($"🎉 User {cred.Email} logged in successfully with UserId: {successContent!.UserId}");
 
 		return new AuthResponseDTO(successContent.UserId, successContent.AccessToken, string.Empty, string.Empty);
 	}
