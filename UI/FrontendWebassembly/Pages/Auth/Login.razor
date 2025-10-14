@@ -6,7 +6,6 @@
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
 
-
 @if (!_isLoading)
 {
    <div class="login-container">
@@ -24,21 +23,22 @@
                @if (!isUserValid)
                {
                    <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
-                       Invalid username or password.
+                       @errorMessage
                    </MudAlert>
                }
    
                <MudForm @ref="form" @bind-IsValid="@success">
-                   <MudTextField @bind-Value="username"
-                                 Label="Username"
-                                 Variant="Variant.Outlined"
-                                 Margin="Margin.Dense"
-                                 Required="true"
-                                 RequiredError="Username is required"
-                                 Adornment="Adornment.Start"
-                                 AdornmentIcon="@Icons.Material.Filled.Person"
-                                 Class="mb-4" />
-   
+                    <MudTextField @bind-Value="email"
+                                  Label="Email"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Required="true"
+                                  RequiredError="Email is required"
+                                  InputType="InputType.Email"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email"
+                                  Class="mb-4" />
+
                    <MudTextField @bind-Value="password"
                                  Label="Password"
                                  Variant="Variant.Outlined"
@@ -54,10 +54,10 @@
    
                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                        <MudCheckBox @bind-Value="rememberMe" Label="Remember me" Color="Color.Primary" Dense="true" />
-                       <MudLink Href="/login"  Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
+                       <MudLink Href="/login" Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
                    </MudStack>
               
-                    <ButtonComponent ButtonType="ButtonType.Submit" 
+                   <ButtonComponent ButtonType="ButtonType.Submit" 
                                     Style="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
                                     OnClick="HandleLogin"
                                     Disabled="@(!success || isLoading)"
@@ -71,7 +71,6 @@
                             <span>Sign In</span>
                         }
                    </ButtonComponent>
-
                </MudForm>
    
                <div class="footer-links">
@@ -90,25 +89,23 @@ else
 }
 
 @code {
-
     private MudForm form;
     private bool success;
     private bool isLoading = false;
-    private string username = "";
+    private bool _isLoading = true;
+
+    private string email = "";
     private string password = "";
     private bool rememberMe = false;
     private bool isUserValid = true;
     private string errorMessage = "";
-    private bool _isLoading = true;
 
     private bool isPasswordVisible = false;
     private InputType passwordInput = InputType.Password;
     private string passwordIcon = Icons.Material.Filled.VisibilityOff;
 
-
     protected override async Task OnInitializedAsync()
     {
- 
         var isAuthenticated = await IAuthService.IsAuthenticated();
 
         if (isAuthenticated)
@@ -118,46 +115,48 @@ else
         }
 
         _isLoading = false;
-
     }
-
-
 
     private void TogglePasswordVisibility()
     {
-        if (isPasswordVisible)
-        {
-            isPasswordVisible = false;
-            passwordInput = InputType.Password;
-            passwordIcon = Icons.Material.Filled.VisibilityOff;
-        }
-        else
-        {
-            isPasswordVisible = true;
-            passwordInput = InputType.Text;
-            passwordIcon = Icons.Material.Filled.Visibility;
-        }
+        isPasswordVisible = !isPasswordVisible;
+        passwordInput = isPasswordVisible ? InputType.Text : InputType.Password;
+        passwordIcon = isPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
     }
 
     private async Task HandleLogin()
     {
         isLoading = true;
+        isUserValid = true;
+        errorMessage = "";
 
-        var userData = await IAuthService.Login(new LoginCred(username, password, rememberMe));
-
-        if (userData.detail is not null && userData.detail != string.Empty)
+        try
         {
-            Console.WriteLine($"Login Error: {userData.detail}");
+            var userData = await IAuthService.Login(new LoginCred(email, password, rememberMe));
+
+            if (!string.IsNullOrWhiteSpace(userData.detail))
+            {
+                Console.WriteLine($"Login Error: {userData.detail}");
+                isLoading = false;
+                isUserValid = false;
+                errorMessage = userData.detail;
+                StateHasChanged();
+                return;
+            }
+            
+            Navigation.NavigateTo("/", true);
+        }
+
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Login Exception: {ex.Message}");
             isLoading = false;
             isUserValid = false;
-            errorMessage = userData!.detail;
+            errorMessage = "An unexpected error occurred. Please try again.";
             StateHasChanged();
             return;
         }
-       else
-        {          
-           Navigation.NavigateTo("/", true);
-        }
+
 
     }
 }

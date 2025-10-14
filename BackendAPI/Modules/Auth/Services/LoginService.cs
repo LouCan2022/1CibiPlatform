@@ -54,7 +54,7 @@ public class LoginService : ILoginService
 		// checking if client credentials are valid
 		if (userData == null)
 		{
-			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
+			_logger.LogWarning("Login failed: Invalid zusername or password for user: {Username}", cred.Username);
 			throw new NotFoundException("Invalid username or password.");
 		}
 
@@ -74,7 +74,7 @@ public class LoginService : ILoginService
 		var cookieOptions = new CookieOptions
 		{
 			HttpOnly = true,
-			Secure = false, // Only send over HTTPS
+			Secure = _isHttps,
 			SameSite = SameSiteMode.Strict,
 			Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_expiryinMinutesKey))
 		};
@@ -108,7 +108,7 @@ public class LoginService : ILoginService
 		{
 			// invalid Refresh TOKEN
 			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
-			throw new NotFoundException("Refresh Token not found");
+			throw new NotFoundException("Invalid username or password");
 		}
 
 

@@ -1,5 +1,5 @@
 ﻿namespace FrontendWebassembly.DTO.Auth;
 public record LoginCred(
-	string Username,
+	string Email,
 	string Password,
 	bool IsRememberMe);
