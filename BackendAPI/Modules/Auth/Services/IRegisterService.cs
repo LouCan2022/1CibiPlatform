@@ -2,5 +2,5 @@
 
 public interface IRegisterService
 {
-	Task<bool> RegisterAsync(RegisterRequestDTO registerRequestDTO);
+	Task<OtpVerificationResponse> RegisterAsync(RegisterRequestDTO registerRequestDTO);
 }

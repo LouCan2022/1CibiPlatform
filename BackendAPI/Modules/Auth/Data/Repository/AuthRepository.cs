@@ -15,7 +15,7 @@ public class AuthRepository : IAuthRepository
 		var userData = await (from user in _dbcontext.AuthUsers
 							  join userRole in _dbcontext.AuthUserAppRoles
 														 on user.Id equals userRole.UserId into userRolesGroup
-							  where user.Username == cred.Username && user.IsActive == true
+							  where user.Email == cred.Username && user.IsActive == true
 							  select new LoginDTO(
 							   user.Id,
 							   user.Username,
@@ -111,4 +111,80 @@ public class AuthRepository : IAuthRepository
 	}
 
 
+	public async Task<Authusers> IsUserEmailExistAsync(string email)
+	{
+		return await
+			_dbcontext.AuthUsers
+			.FirstOrDefaultAsync(au => au.Email == email && au.IsActive);
+	}
+
+	public async Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto)
+	{
+		var user = new Authusers
+		{
+			Id = Guid.NewGuid(),
+			Username = userDto.Username,
+			Email = userDto.Email,
+			PasswordHash = userDto.Password,
+			FirstName = userDto.FirstName,
+			LastName = userDto.LastName,
+			MiddleName = userDto.MiddleName,
+		};
+
+		await _dbcontext.AddAsync(user);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return new RegisterResponseDTO(
+			user.Id,
+			user.Username!,
+			user.Email!,
+			user.PasswordHash!,
+			user.FirstName!,
+			user.LastName!,
+			user.MiddleName);
+	}
+
+	public async Task<bool> UpdateVerificationCodeAsync(OtpVerification otpVerification)
+	{
+
+		var otpEntity = new OtpVerification
+		{
+			Id = otpVerification.Id,
+			Email = otpVerification.Email,
+			OtpCodeHash = otpVerification.OtpCodeHash,
+			IsUsed = otpVerification.IsUsed,
+			AttemptCount = otpVerification.AttemptCount,
+			CreatedAt = otpVerification.CreatedAt,
+			ExpiresAt = otpVerification.ExpiresAt,
+			IsVerified = true,
+			VerifiedAt = DateTime.UtcNow
+		};
+
+		await _dbcontext.OtpVerification.AddAsync(otpEntity);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+
+	}
+
+	public async Task<OtpVerification> InsertOtpVerification(OtpVerificationDTO otpVerificationDTO)
+	{
+		var otpEntity = new OtpVerification
+		{
+			Email = otpVerificationDTO.Email,
+			OtpCodeHash = otpVerificationDTO.OtpCodeHash,
+			IsUsed = otpVerificationDTO.IsUsed,
+			AttemptCount = otpVerificationDTO.AttemptCount,
+			CreatedAt = otpVerificationDTO.CreatedAt,
+			ExpiresAt = otpVerificationDTO.ExpiresAt,
+		};
+
+		var otpUser = await _dbcontext.OtpVerification.AddAsync(otpEntity);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return otpEntity;
+	}
 }

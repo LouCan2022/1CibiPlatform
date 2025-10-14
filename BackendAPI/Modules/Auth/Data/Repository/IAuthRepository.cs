@@ -13,6 +13,11 @@ public interface IAuthRepository
 
 	Task<AuthRefreshToken> IsUserExistAsync(Guid userId);
 
+	Task<OtpVerification> InsertOtpVerification(OtpVerificationDTO otpVerificationDTO);
 
+	Task<Authusers> IsUserEmailExistAsync(string email);
 
+	Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto);
+
+	Task<bool> UpdateVerificationCodeAsync(OtpVerification userDto);
 }

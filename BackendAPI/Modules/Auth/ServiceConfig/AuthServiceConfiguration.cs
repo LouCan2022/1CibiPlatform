@@ -1,4 +1,6 @@
-﻿namespace Auth.ServiceConfig
+﻿using BuildingBlocks.SharedServices.Implementations;
+
+namespace Auth.ServiceConfig
 {
 	public static class AuthServiceConfiguration
 	{
@@ -32,6 +34,11 @@
 			services.AddScoped<IAuthRepository, AuthRepository>();
 			services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 			services.AddScoped<ILoginService, LoginService>();
+			services.AddScoped<IEmailService, EmailService>();
+			services.AddScoped<IOtpService, OtpService>();
+			services.AddScoped<IHashService, HashService>();
+			services.AddScoped<IRegisterService, RegisterService>();
+
 			return services;
 		}
 
