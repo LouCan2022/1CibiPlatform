@@ -7,7 +7,7 @@ public class PostPCNEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("PostPCN", async (PostPCNRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("postpcn", async (PostPCNRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new PostPCNCommand(
 				request.value,

@@ -1,6 +1,21 @@
 ﻿namespace PhilSys.ServiceConfig;
 public static class PhilSysServiceConfiguration
 {
+
+	#region Carter Config
+	public static IServiceCollection AddPhilSysCarterModules(this IServiceCollection services, Assembly assembly)
+	{
+		services.AddCarter(configurator: c =>
+		{
+			var modules = assembly.GetTypes()
+				.Where(t => typeof(ICarterModule).IsAssignableFrom(t) && !t.IsAbstract)
+				.ToArray();
+			c.WithModules(modules);
+		});
+		return services;
+	}
+	#endregion
+
 	#region MediatR Config
 	public static IServiceCollection AddPhilSysMediaTR(this IServiceCollection services, Assembly assembly)
 	{
@@ -17,7 +32,7 @@ public static class PhilSysServiceConfiguration
 	}
 	#endregion
 
-	#region MediatR Config
+	#region Services
 	public static IServiceCollection AddPhilSysServices(this IServiceCollection services)
 	{
 		services.AddHttpClient("PhilSys", client =>
@@ -30,6 +45,7 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<GetTokenService>();
 		services.AddScoped<PostBasicInformationService>();
 		services.AddScoped<PostPCNService>();
+		services.AddScoped<PartnerSystemService>();
 		return services;
 	}
 	#endregion

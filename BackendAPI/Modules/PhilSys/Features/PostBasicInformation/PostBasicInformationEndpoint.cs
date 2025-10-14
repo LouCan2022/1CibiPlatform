@@ -14,7 +14,7 @@ public class PostBasicInformationEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("PostBasicInformation", async (PostBasicInformationRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("postbasicinformation", async (PostBasicInformationRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new PostBasicInformationCommand(
 				request.first_name,
