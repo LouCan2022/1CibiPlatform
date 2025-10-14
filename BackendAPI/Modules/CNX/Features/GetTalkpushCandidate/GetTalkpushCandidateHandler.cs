@@ -1,10 +1,10 @@
 ﻿namespace CNX.Features.GetTalkpushCandidate;
 
-public record GetTalkpushCandidateCommmand(string request) : ICommand<GetTalkpushCandidateResponse>;
+public record GetTalkpushCandidateCommmand(string request) : ICommand<GetTalkpushCandidateResult>;
 
-public record GetTalkpushCandidateResponse(List<CandidateResponseDto> CandidateResponseDto);
+public record GetTalkpushCandidateResult(List<CandidateResponseDto> CandidateResponseDto);
 
-public class GetTalkpushCandidateHandler : ICommandHandler<GetTalkpushCandidateCommmand, GetTalkpushCandidateResponse>
+public class GetTalkpushCandidateHandler : ICommandHandler<GetTalkpushCandidateCommmand, GetTalkpushCandidateResult>
 {
     private readonly GetCandidateService _getCandidateService;
     private readonly ILogger<GetTalkpushCandidateHandler> _logger;
@@ -15,7 +15,7 @@ public class GetTalkpushCandidateHandler : ICommandHandler<GetTalkpushCandidateC
         this._getCandidateService = getCandidateService;
         this._logger = logger;
     }
-    public async Task<GetTalkpushCandidateResponse> Handle(
+    public async Task<GetTalkpushCandidateResult> Handle(
         GetTalkpushCandidateCommmand request,
         CancellationToken cancellationToken)
     {
@@ -32,6 +32,6 @@ public class GetTalkpushCandidateHandler : ICommandHandler<GetTalkpushCandidateC
             throw new NotFoundException("Candidate not found.");
         }
 
-        return new GetTalkpushCandidateResponse(candidate);
+        return new GetTalkpushCandidateResult(candidate);
     }
 }
