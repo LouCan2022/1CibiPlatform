@@ -9,7 +9,7 @@ public class GetNewAccessTokenEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("GetNewAccessToken", async (GetNewAccessTokenRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("getnewaccesstoken", async (GetNewAccessTokenRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new GetNewAccessTokenCommand(request.userId, request.RefreshToken);
 

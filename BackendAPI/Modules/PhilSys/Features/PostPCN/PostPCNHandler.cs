@@ -18,7 +18,7 @@ public class PostPCNHandler : ICommandHandler<PostPCNCommand, PostPCNResult>
 	{
 		_logger.LogInformation("Handling Philsys basic information request for client: {FirstName}", command.value);
 
-		var tokenResult = await _postPCNService.PostBasicInformationAsync(
+		var result = await _postPCNService.PostBasicInformationAsync(
 				command.value,
 				command.face_liveness_session_id,
 				cancellationToken
@@ -26,6 +26,6 @@ public class PostPCNHandler : ICommandHandler<PostPCNCommand, PostPCNResult>
 
 		_logger.LogInformation("Successfully retrieved the Response");
 
-		return new PostPCNResult(tokenResult);
+		return new PostPCNResult(result);
 	}
 }

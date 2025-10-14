@@ -9,7 +9,7 @@ public class LoginEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("Login", async (LoginRequest request, ISender sender, CancellationToken cancellationToken) =>
+        app.MapPost("login", async (LoginRequest request, ISender sender, CancellationToken cancellationToken) =>
         {
             LoginCred cred = request.LoginCred.Adapt<LoginCred>();
 
