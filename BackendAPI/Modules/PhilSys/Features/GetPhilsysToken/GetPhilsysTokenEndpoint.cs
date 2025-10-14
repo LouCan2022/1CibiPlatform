@@ -6,7 +6,7 @@ public class GetPhilsysTokenEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("GetPhilsysToken", async (GetPhilSysTokenRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("getphilsystoken", async (GetPhilSysTokenRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 		
 			var command = new GetPhilSysTokenCommand(

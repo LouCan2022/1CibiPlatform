@@ -23,7 +23,7 @@ public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationC
 	{
 		_logger.LogInformation("Handling Philsys basic information request for client: {FirstName}", command.first_name);
 
-		var tokenResult = await _postBasicInformationService.PostBasicInformationAsync(
+		var result = await _postBasicInformationService.PostBasicInformationAsync(
 				command.first_name,
 				command.middle_name,
 				command.last_name,
@@ -34,6 +34,6 @@ public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationC
 
 		_logger.LogInformation("Successfully retrieved the Response");
 
-		return new PostBasicInformationResult(tokenResult);
+		return new PostBasicInformationResult(result);
 	}
 }

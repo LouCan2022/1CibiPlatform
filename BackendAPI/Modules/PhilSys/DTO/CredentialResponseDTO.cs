@@ -9,4 +9,3 @@ public record CredentialResponseDTO(
 public record PhilSysTokenResponse(
 	CredentialResponseDTO data
 );
-

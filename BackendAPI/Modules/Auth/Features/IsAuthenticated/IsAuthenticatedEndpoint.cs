@@ -9,7 +9,7 @@ public class IsAuthenticatedEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapGet("isAuthenticated", (
+		app.MapGet("isauthenticated", (
 			ISender sender,
 			CancellationToken cancellationToken) =>
 		{
