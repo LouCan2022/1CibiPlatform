@@ -14,6 +14,7 @@ public class EmailService : IEmailService
 	private readonly string _appPassword;
 	private readonly string _smtpHost;
 	private readonly int _smtpPort;
+	private readonly int _expirationInMinutes;
 
 	public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
 	{
@@ -27,9 +28,14 @@ public class EmailService : IEmailService
 			?? throw new InvalidOperationException("Email:Gmail:AppPassword not configured");
 		_smtpHost = _configuration["Email:Gmail:SmtpHost"] ?? "smtp.gmail.com";
 		_smtpPort = int.Parse(_configuration["Email:Gmail:SmtpPort"] ?? "587");
+		_expirationInMinutes = int.Parse(_configuration["Email:OtpExpirationInMinutes"] ?? "15");
 	}
 
-	public async Task<bool> SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
+	public async Task<bool> SendEmailAsync(
+		string toEmail,
+		string subject,
+		string body,
+		bool isHtml = true)
 	{
 		try
 		{
@@ -102,7 +108,7 @@ public class EmailService : IEmailService
                             <p>Hello,</p>
                             <p>Thank you for registering with us. Please use the following code to verify your email address:</p>
                             <div class='otp-box'>{otpCode}</div>
-                            <p>This code will expire in 15 minutes.</p>
+                            <p>This code will expire in {_expirationInMinutes} minutes.</p>
                             <p>If you did not create this account, please ignore this email.</p>
                         </div>
                         <div class='footer'>

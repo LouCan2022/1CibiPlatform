@@ -11,7 +11,6 @@ public record OtpVerificationDTO(
 	DateTime ExpiresAt,
 	DateTime? VerifiedAt)
 {
-	public long Id { get; init; }
 	public string Email { get; set; } = Email;
 	public string OtpCodeHash { get; set; } = OtpCodeHash;
 	public bool IsVerified { get; set; } = IsVerified;

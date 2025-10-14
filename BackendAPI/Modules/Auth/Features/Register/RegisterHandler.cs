@@ -3,7 +3,7 @@ namespace Auth.Features.Register;
 
 public record RegisterRequestCommand(RegisterRequestDTO register) : ICommand<RegisterResult>;
 
-public record RegisterResult(OtpVerificationDTO OtpVerification);
+public record RegisterResult(OtpVerificationResponse otpVerificationResponse);
 
 
 public class RegisterHandler : ICommandHandler<RegisterRequestCommand, RegisterResult>

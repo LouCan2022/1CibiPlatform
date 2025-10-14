@@ -2,7 +2,7 @@
 
 public record RegisterRequest(RegisterRequestDTO register) : ICommand<RegisterResponse>;
 
-public record RegisterResponse(OtpVerificationDTO OtpVerification);
+public record RegisterResponse(OtpVerificationResponse otpVerificationResponse);
 
 public class RegisterEndpoint : ICarterModule
 {
@@ -14,7 +14,7 @@ public class RegisterEndpoint : ICarterModule
 
 			RegisterResult result = await sender.Send(command, cancellationToken);
 
-			RegisterResponse response = new RegisterResponse(result.OtpVerification);
+			RegisterResponse response = new RegisterResponse(result.otpVerificationResponse);
 
 			return Results.Ok(response);
 		})
