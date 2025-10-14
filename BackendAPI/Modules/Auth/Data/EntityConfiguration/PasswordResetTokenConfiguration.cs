@@ -18,7 +18,7 @@ public class PasswordResetTokenConfiguration : IEntityTypeConfiguration<Password
 			   .HasDefaultValue(false);
 
 		builder.Property(t => t.CreatedAt)
-			   .HasDefaultValueSql("GETUTCDATE()")
+			   .HasDefaultValueSql("timezone('utc', now())")
 			   .IsRequired();
 
 		builder.Property(t => t.ExpiresAt)

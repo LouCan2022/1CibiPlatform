@@ -9,7 +9,7 @@ public class AuthSubMenuConfiguration : IEntityTypeConfiguration<AuthSubMenu>
 		builder.Property(e => e.SubMenuId)
 			.IsRequired();
 
-		builder.Property(e => e.CreatedAt).HasDefaultValue(DateTime.UtcNow);
+		builder.Property(e => e.CreatedAt).HasDefaultValueSql("timezone('utc', now())");
 
 		builder.Property(e => e.IsActive).HasDefaultValue(true);
 

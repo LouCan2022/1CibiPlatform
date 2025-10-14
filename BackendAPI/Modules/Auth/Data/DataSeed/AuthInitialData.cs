@@ -46,8 +46,7 @@ public class AuthInitialData
 					AppId = 1,
 					Submenu = 1,
 					RoleId = 1,
-					AssignedBy = this._Id,
-					AssignedAt = DateTime.UtcNow
+					AssignedBy = this._Id
 				},
 				new AuthUserAppRole
 				{
@@ -55,8 +54,7 @@ public class AuthInitialData
 					AppId = 2,
 					Submenu= 2,
 					RoleId = 2,
-					AssignedBy = this._Id,
-					AssignedAt = DateTime.UtcNow
+					AssignedBy = this._Id
 				}
 			};
 	}
@@ -69,17 +67,13 @@ public class AuthInitialData
 				{
 					AppName = "CNX",
 					AppCode = "1",
-					Description = "Concentrix API",
-					IsActive = true,
-					CreatedAt = DateTime.UtcNow
+					Description = "Concentrix API"
 				},
 				new AuthApplication
 				{
 					AppName = "Philsys",
 					AppCode = "2",
-					Description = "IDV",
-					IsActive = true,
-					CreatedAt = DateTime.UtcNow
+					Description = "IDV"
 				}
 			};
 	}
@@ -92,20 +86,17 @@ public class AuthInitialData
 				new AuthRole
 				{
 					RoleName = "SuperAdmin",
-					Description = "Super Admin",
-					CreatedAt = DateTime.UtcNow
+					Description = "Super Admin"
 				},
 				new AuthRole
 				{
 					RoleName = "Admin",
-					Description = "Administrator Role",
-					CreatedAt = DateTime.UtcNow
+					Description = "Administrator Role"
 				},
 				new AuthRole
 				{
 					RoleName = "User",
-					Description = "User Role",
-					CreatedAt = DateTime.UtcNow
+					Description = "User Role"
 				}
 			};
 	}
@@ -118,14 +109,12 @@ public class AuthInitialData
 				new AuthSubMenu
 				{
 					SubMenuName = "Dashboard",
-					Description = "Dashboard SubMenu",
-					CreatedAt = DateTime.UtcNow
+					Description = "Dashboard SubMenu"
 				},
 				new AuthSubMenu
 				{
 					SubMenuName = "IDV",
-					Description = "Philsys IDV",
-					CreatedAt = DateTime.UtcNow
+					Description = "Philsys IDV"
 				}
 			};
 	}

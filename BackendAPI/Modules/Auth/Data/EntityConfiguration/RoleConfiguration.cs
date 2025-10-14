@@ -12,7 +12,7 @@ public class RoleConfiguration : IEntityTypeConfiguration<AuthRole>
 
 		builder.HasIndex(r => r.RoleName).IsUnique();
 
-		builder.Property(r => r.CreatedAt).HasDefaultValue(DateTime.UtcNow);
+		builder.Property(r => r.CreatedAt).HasDefaultValueSql("timezone('utc', now())");
 
 	}
 }

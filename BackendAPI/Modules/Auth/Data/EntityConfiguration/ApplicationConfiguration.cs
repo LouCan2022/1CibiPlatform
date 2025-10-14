@@ -15,7 +15,7 @@ public class ApplicationConfiguration : IEntityTypeConfiguration<AuthApplication
 
 		builder.HasIndex(a => a.AppCode).IsUnique();
 
-		builder.Property(a => a.CreatedAt).HasDefaultValue(DateTime.UtcNow);
+		builder.Property(a => a.CreatedAt).HasDefaultValueSql("timezone('utc', now())");
 
 	}
 }

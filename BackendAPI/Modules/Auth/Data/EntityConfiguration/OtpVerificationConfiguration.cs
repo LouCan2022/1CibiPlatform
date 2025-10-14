@@ -26,7 +26,7 @@ public class OtpVerificationConfiguration : IEntityTypeConfiguration<OtpVerifica
 			   .HasDefaultValue(0);
 
 		builder.Property(o => o.CreatedAt)
-			   .HasDefaultValue(DateTime.UtcNow)
+			   .HasDefaultValueSql("timezone('utc', now())")
 			   .IsRequired();
 
 		builder.Property(o => o.ExpiresAt)
