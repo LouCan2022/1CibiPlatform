@@ -6,9 +6,9 @@ public record PostBasicInformationCommand(string first_name,
 										  string last_name,
 										  string suffix,
 										  DateTime birth_date,
-										  string face_liveness_session_id) : ICommand<PostBasicInformationResponse>;
-public record PostBasicInformationResponse(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
-public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationCommand, PostBasicInformationResponse>
+										  string face_liveness_session_id) : ICommand<PostBasicInformationResult>;
+public record PostBasicInformationResult(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
+public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationCommand, PostBasicInformationResult>
 {
 	private readonly PostBasicInformationService _postBasicInformationService;
 	private readonly ILogger<PostBasicInformationHandler> _logger;
@@ -19,7 +19,7 @@ public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationC
 		_logger = logger;
 	}
 
-	public async Task<PostBasicInformationResponse> Handle(PostBasicInformationCommand command, CancellationToken cancellationToken)
+	public async Task<PostBasicInformationResult> Handle(PostBasicInformationCommand command, CancellationToken cancellationToken)
 	{
 		_logger.LogInformation("Handling Philsys basic information request for client: {FirstName}", command.first_name);
 
@@ -34,6 +34,6 @@ public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationC
 
 		_logger.LogInformation("Successfully retrieved the Response");
 
-		return new PostBasicInformationResponse(tokenResult);
+		return new PostBasicInformationResult(tokenResult);
 	}
 }
