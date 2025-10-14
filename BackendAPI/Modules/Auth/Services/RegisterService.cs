@@ -8,6 +8,8 @@ public class RegisterService : IRegisterService
 	private readonly IAuthRepository _authRepository;
 	private readonly IHashService _hashService;
 	private readonly IOtpService _otpService;
+	private readonly IConfiguration _configuration;
+	private readonly int _otpExpiryMinutes;
 
 	public RegisterService(
 		IEmailService emailService,
@@ -15,6 +17,7 @@ public class RegisterService : IRegisterService
 		IAuthRepository authRepository,
 		IHashService hashService,
 		IOtpService otpService,
+		IConfiguration configuration,
 		ILogger<RegisterService> logger)
 	{
 		this._emailService = emailService;
@@ -23,9 +26,13 @@ public class RegisterService : IRegisterService
 		this._authRepository = authRepository;
 		this._hashService = hashService;
 		this._otpService = otpService;
+		this._configuration = configuration;
+
+		this._otpExpiryMinutes = int.Parse(_configuration["Email:OtpExpirationInMinutes"] ?? "15");
+
 	}
 
-	public async Task<OtpVerificationDTO> RegisterAsync(RegisterRequestDTO registerRequestDTO)
+	public async Task<OtpVerificationResponse> RegisterAsync(RegisterRequestDTO registerRequestDTO)
 	{
 
 		_logger.LogInformation("Starting registration process for email: {Email}", registerRequestDTO.Email);
@@ -86,7 +93,7 @@ public class RegisterService : IRegisterService
 		  IsUsed: false,
 		  AttemptCount: 0,
 		  CreatedAt: DateTime.UtcNow,
-		  ExpiresAt: DateTime.UtcNow.AddMinutes(10),
+		  ExpiresAt: DateTime.UtcNow.AddMinutes(_otpExpiryMinutes),
 		  VerifiedAt: null
 		 );
 
@@ -100,6 +107,8 @@ public class RegisterService : IRegisterService
 			throw new Exception("Failed to store OTP verification record.");
 		}
 
-		return userDTO;
+		var userOtpResponse = otpUser.Adapt<OtpVerificationResponse>();
+
+		return userOtpResponse;
 	}
 }
