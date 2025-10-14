@@ -22,9 +22,7 @@ public class AuthInitialData
 					Email = "john@example.com",
 					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 					FirstName = "Admin",
-					LastName = "",
-					IsActive = true,
-					CreatedAt = DateTimeOffset.UtcNow
+					LastName = ""
 				},
 				new Authusers
 				{
@@ -33,9 +31,7 @@ public class AuthInitialData
 					Email = "cb@example.com",
 					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 					FirstName = "CB",
-					LastName = "Admin",
-					IsActive = true,
-					CreatedAt = DateTimeOffset.UtcNow
+					LastName = "Admin"
 				},
 			};
 	}

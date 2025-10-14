@@ -26,5 +26,7 @@ public class UserAppRoleConfiguration : IEntityTypeConfiguration<AuthUserAppRole
 			.WithMany()
 			.HasForeignKey(uar => uar.AssignedBy)
 			.OnDelete(DeleteBehavior.Restrict);
+
+		builder.Property(e => e.AssignedAt).HasDefaultValue(DateTime.UtcNow);
 	}
 }
