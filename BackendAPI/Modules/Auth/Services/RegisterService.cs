@@ -1,4 +1,6 @@
-﻿namespace Auth.Services;
+﻿using Auth.Data.Entities;
+
+namespace Auth.Services;
 
 public class RegisterService : IRegisterService
 {
