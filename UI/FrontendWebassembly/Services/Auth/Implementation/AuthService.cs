@@ -1,6 +1,4 @@
-﻿using FrontendWebassembly.DTO.SharedDTO;
-
-namespace FrontendWebassembly.Services.Auth.Implementation;
+﻿namespace FrontendWebassembly.Services.Auth.Implementation;
 
 public class AuthService : IAuthService
 {

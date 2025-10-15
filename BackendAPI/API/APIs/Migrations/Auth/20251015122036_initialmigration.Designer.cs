@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     [DbContext(typeof(AuthApplicationDbContext))]
-    [Migration("20251015072646_initialmigration")]
+    [Migration("20251015122036_initialmigration")]
     partial class initialmigration
     {
         /// <inheritdoc />
@@ -301,6 +301,9 @@ namespace APIs.Migrations.Auth
                     b.Property<string>("OtpCodeHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("OtpId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

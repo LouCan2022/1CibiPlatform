@@ -7,6 +7,7 @@ global using Microsoft.JSInterop;
 global using System.Text.Json;
 global using System.Text;
 global using MudBlazor;
+global using FrontendWebassembly.DTO.SharedDTO;
 
 
 global using FrontendWebassembly.Services.Auth.Interfaces;
