@@ -15,28 +15,23 @@ public class PhilSysRepository : IPhilSysRepository
 		await dbcontext.SaveChangesAsync();
 		return true;
 	}
-	public async Task<bool> UpdateTransactionDataAsync(Guid Tid, PhilSysTransaction PhilSysTransaction)
+	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid, PhilSysTransaction PhilSysTransaction)
 	{
 		var transaction = dbcontext.PhilSysTransactions.FirstOrDefault(x => x.Tid == Tid);
-		if (transaction == null)
-			return false;
-
-		transaction.IsTransacted = true;
+	
+		transaction!.IsTransacted = true;
 		transaction.TransactedAt = DateTime.UtcNow;
 
 		await dbcontext.SaveChangesAsync();
 
-		return true;
+		return transaction;
 	}
 
 	public async Task<PhilSysTransaction> GetTransactionDataByTidAsync(Guid Tid)
 	{
 		var transaction = await dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
 
-		if (transaction == null)
-			return null!;
-
-		return transaction;
+		return transaction!;
 	}
 
 }
