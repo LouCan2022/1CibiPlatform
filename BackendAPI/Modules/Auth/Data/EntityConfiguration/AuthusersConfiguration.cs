@@ -13,10 +13,6 @@ public class AuthusersConfiguration : IEntityTypeConfiguration<Authusers>
 		builder.Property(u => u.Id)
 			   .ValueGeneratedNever();
 
-		builder.Property(u => u.Username)
-			   .IsRequired()
-			   .HasMaxLength(255);
-
 		builder.Property(u => u.Email)
 			   .IsRequired()
 			   .HasMaxLength(255);

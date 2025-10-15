@@ -4,6 +4,10 @@
 public record OtpVerificationResponse(
 	long Id,
 	string Email,
+	string FirstName,
+	string MiddleName,
+	string LastName,
+	string PasswordHash,
 	string OtpCodeHash,
 	bool IsVerified,
 	bool IsUsed,
