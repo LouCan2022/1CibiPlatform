@@ -1,6 +1,8 @@
 ﻿namespace PhilSys.ServiceConfig;
 public static class PhilSysServiceConfiguration
 {
+	private const string assemblyName = "APIs";
+	private const string connStringSegment = "OnePlatform_Connection";
 
 	#region Carter Config
 	public static IServiceCollection AddPhilSysCarterModules(this IServiceCollection services, Assembly assembly)
@@ -46,6 +48,23 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<PostBasicInformationService>();
 		services.AddScoped<PostPCNService>();
 		services.AddScoped<PartnerSystemService>();
+		return services;
+	}
+	#endregion
+
+	#region Db Config
+	public static IServiceCollection AddPhilSysInfrastructure(
+		this IServiceCollection services, 
+		IConfiguration configuration)
+	{
+		services.AddDbContext<PhilSysDBContext>(options =>
+		{
+			options.UseNpgsql(
+				configuration.GetConnectionString(connStringSegment),
+				npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
+				);
+
+		});
 		return services;
 	}
 	#endregion
