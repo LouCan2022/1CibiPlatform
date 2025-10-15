@@ -1,6 +1,7 @@
 ﻿namespace PhilSys.Features.PostPCN;
 
-public record PostPCNRequest(int value, string face_liveness_session_id) : ICommand<PostPCNResponse>;
+public record PostPCNRequest(string value, 
+							 string face_liveness_session_id) : ICommand<PostPCNResponse>;
 
 public record PostPCNResponse(BasicInformationOrPCNResponseDTO PCNResponseDTO);
 public class PostPCNEndpoint : ICarterModule
@@ -24,6 +25,7 @@ public class PostPCNEndpoint : ICarterModule
 		.WithTags("PhilSys")
 		.Produces<PostPCNResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
+		.ProducesProblem(StatusCodes.Status401Unauthorized)
 		.WithSummary("Retrieve If Verified")
 		.WithDescription("Retrieves an the verify response from the PhilSys API using client credentials.");
 	}

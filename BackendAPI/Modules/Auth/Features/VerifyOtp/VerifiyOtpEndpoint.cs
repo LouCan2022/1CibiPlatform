@@ -9,7 +9,7 @@ public class VerifiyOtpEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("otp/verify", async (
+		app.MapPost("verify/otp", async (
 			VerifiyOtpRequest request,
 			ISender sender,
 			CancellationToken cancellationToken) =>

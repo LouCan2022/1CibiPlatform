@@ -1,6 +1,4 @@
-﻿using FrontendWebassembly.DTO.Auth;
-
-namespace FrontendWebassembly.Services.Auth.Interfaces;
+﻿namespace FrontendWebassembly.Services.Auth.Interfaces;
 
 public interface IAuthService
 {
@@ -9,6 +7,9 @@ public interface IAuthService
 	Task<bool> IsAuthenticated();
 
 	Task<string> GetUserInfoIfAuthenticated();
+
+
+	Task<RegisterResponseDTO> Register(RegisterRequestDTO registerRequestDTO);
 
 	Task<bool> Logout();
 

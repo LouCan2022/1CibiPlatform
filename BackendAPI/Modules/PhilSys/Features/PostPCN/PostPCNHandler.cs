@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.PostPCN;
 
-public record PostPCNCommand(int value,
+public record PostPCNCommand(string value,
 							 string face_liveness_session_id) : ICommand<PostPCNResult>;
 public record PostPCNResult(BasicInformationOrPCNResponseDTO PCNResponseDTO);
 public class PostPCNHandler : ICommandHandler<PostPCNCommand, PostPCNResult>

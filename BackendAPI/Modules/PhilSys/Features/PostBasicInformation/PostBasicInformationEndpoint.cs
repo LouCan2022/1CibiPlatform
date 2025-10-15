@@ -1,6 +1,4 @@
-﻿using PhilSys.Features.GetPhilSysToken;
-
-namespace PhilSys.Features.PostBasicInformation;
+﻿namespace PhilSys.Features.PostBasicInformation;
 
 public record PostBasicInformationRequest(string first_name,
 										  string middle_name,
@@ -33,10 +31,10 @@ public class PostBasicInformationEndpoint : ICarterModule
 		})
 		.WithName("PostBasicInformation")
 		.WithTags("PhilSys")
-		.Produces<GetPhilSysTokenResponse>()
+		.Produces<PostBasicInformationResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
+		.ProducesProblem(StatusCodes.Status401Unauthorized)
 		.WithSummary("Retrieve If Verified")
 		.WithDescription("Retrieves an the verify response from the PhilSys API using client credentials.");
-
 	}
 }
