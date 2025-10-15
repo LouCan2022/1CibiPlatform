@@ -1,0 +1,267 @@
+﻿@page "/verify-otp"
+@using FrontendWebassembly.Component.Generic
+@using FrontendWebassembly.DTO.Auth
+@using MudBlazor
+@layout AuthLayout
+@inject NavigationManager Navigation
+@inject IAuthService IAuthService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+@if (!_isLoading)
+{
+   <div class="login-container">
+       <MudPaper Class="login-card" Elevation="2">
+           <div class="login-header">
+               <div class="login-logo">
+                   <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Large" Style="color: white;" />
+               </div>
+               <div class="login-title">Verify Your Email</div>
+               <div class="login-subtitle">Enter the verification code sent to @email</div>
+           </div>
+   
+           <div class="login-body">
+   
+               @if (!isOtpValid)
+               {
+                   <MudAlert Severity="Severity.Error" Elevation="0" Variant="Variant.Filled" Class="mb-4">
+                       @errorMessage
+                   </MudAlert>
+               }
+
+               @if (showResendSuccess)
+               {
+                   <MudAlert Severity="Severity.Success" Elevation="0" Variant="Variant.Filled" Class="mb-4">
+                       Verification code has been resent to your email
+                   </MudAlert>
+               }
+   
+               <MudForm @ref="form" @bind-IsValid="@success">
+                   <MudTextField @bind-Value="otpCode"
+                                 Label="Verification Code"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Required="true"
+                                 RequiredError="Verification code is required"
+                                 Validation="@(new Func<string, string>(ValidateOtp))"
+                                 Adornment="Adornment.Start"
+                                 AdornmentIcon="@Icons.Material.Filled.Pin"
+                                 MaxLength="6"
+                                 Class="mb-4"
+                                 InputType="InputType.Text"
+                                 AutoFocus="true" />
+              
+                   <ButtonComponent ButtonType="ButtonType.Submit" 
+                                    Style="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
+                                    OnClick="HandleVerifyOtp"
+                                    Disabled="@(!success || isLoading)"
+                                    Class="rounded-5 mb-3">
+                        @if (isLoading)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        }
+                        else
+                        {
+                            <span>Verify Email</span>
+                        }
+                   </ButtonComponent>
+
+                   <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="mb-2">
+                       @if (resendCountdown > 0)
+                       {
+                           <MudText Typo="Typo.body2" Color="Color.Default">
+                               Resend code in @resendCountdown seconds
+                           </MudText>
+                       }
+                   </MudStack>
+               </MudForm>
+   
+               <div class="footer-links">
+                   Wrong email? <a href="/register">Go back to registration</a>
+               </div>
+           </div>
+       </MudPaper>
+   </div>
+}
+else
+{
+    <!-- Loading -->
+    <MudContainer Class="d-flex justify-center align-center" Style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </MudContainer>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "email")]
+    public string? email { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "userid")]
+    public string? userId { get; set; }
+
+    private MudForm form;
+    private bool success;
+    private bool isLoading = false;
+    private bool isResending = false;
+    private bool _isLoading = true;
+
+    private string otpCode = "";
+    private bool isOtpValid = true;
+    private string errorMessage = "";
+    private bool showResendSuccess = false;
+
+    private int resendCountdown = 0;
+    private System.Threading.Timer? countdownTimer;
+    private bool isNavigationLocked = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if email parameter exists
+        if (string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(userId))
+        {
+            Navigation.NavigateTo("/register", true);
+            return;
+        }
+
+        var isAuthenticated = await IAuthService.IsAuthenticated();
+
+        if (isAuthenticated)
+        {
+            Navigation.NavigateTo("/", true);
+            return;
+        }
+
+        _isLoading = false;
+        StartResendCountdown(10); 
+        
+        Navigation.LocationChanged += HandleLocationChanged;
+        await SetupNavigationLock();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await SetupNavigationLock();
+        }
+    }
+
+    private async Task SetupNavigationLock()
+    {
+        if (!isNavigationLocked)
+        {
+            isNavigationLocked = true;
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                window.onbeforeunload = function() {
+                    return 'You have an unverified account. Are you sure you want to leave?';
+                };
+            ");
+        }
+    }
+
+    private async Task RemoveNavigationLock()
+    {
+        if (isNavigationLocked)
+        {
+            isNavigationLocked = false;
+            await JSRuntime.InvokeVoidAsync("eval", "window.onbeforeunload = null;");
+        }
+    }
+
+    private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        if (!e.Location.Contains("/verify-otp"))
+        {
+            var confirmed = JSRuntime.InvokeAsync<bool>("confirm", 
+                "You have an unverified account. Are you sure you want to leave?").GetAwaiter().GetResult();
+            
+            if (!confirmed)
+            {
+                Navigation.NavigateTo($"/verify-otp?email={email}", false);
+            }
+            else
+            {
+                RemoveNavigationLock().GetAwaiter().GetResult();
+            }
+        }
+    }
+
+    private string ValidateOtp(string otp)
+    {
+        if (string.IsNullOrWhiteSpace(otp))
+            return "Verification code is required";
+        
+        if (otp.Length != 6)
+            return "Verification code must be 6 characters";
+        
+        return null;
+    }
+
+    private async Task HandleVerifyOtp()
+    {
+        // isLoading = true;
+        // isOtpValid = true;
+        // errorMessage = "";
+        // showResendSuccess = false;
+
+        // try
+        // {
+        //     var result = await IAuthService.VerifyOtp(email, otpCode);
+
+        //     if (!string.IsNullOrWhiteSpace(result.detail))
+        //     {
+        //         Console.WriteLine($"OTP Verification Error: {result.detail}");
+        //         isLoading = false;
+        //         isOtpValid = false;
+        //         errorMessage = result.detail;
+        //         StateHasChanged();
+        //         return;
+        //     }
+
+        //     await RemoveNavigationLock();
+        //     Navigation.NavigateTo("/login", true);
+        // }
+        // catch (Exception ex)
+        // {
+        //     Console.WriteLine($"OTP Verification Exception: {ex.Message}");
+        //     isLoading = false;
+        //     isOtpValid = false;
+        //     errorMessage = "An unexpected error occurred. Please try again.";
+        //     StateHasChanged();
+        // }
+    }
+
+    private void StartResendCountdown(int seconds)
+    {
+        resendCountdown = seconds;
+        countdownTimer?.Dispose();
+        
+        countdownTimer = new System.Threading.Timer(_ =>
+        {
+            if (resendCountdown > 0)
+            {
+                resendCountdown--;
+                InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                StopResendCountdown();
+            }
+        }, null, 1000, 1000);
+    }
+
+    private void StopResendCountdown()
+    {
+        countdownTimer?.Dispose();
+        countdownTimer = null;
+        resendCountdown = 0;
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
+        StopResendCountdown();
+        RemoveNavigationLock().GetAwaiter().GetResult();
+    }
+}

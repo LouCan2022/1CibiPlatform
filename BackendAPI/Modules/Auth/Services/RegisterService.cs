@@ -1,6 +1,4 @@
-﻿using Auth.Data.Entities;
-
-namespace Auth.Services;
+﻿namespace Auth.Services;
 
 public class RegisterService : IRegisterService
 {
@@ -92,6 +90,7 @@ public class RegisterService : IRegisterService
 		var user = new OtpVerification
 		{
 			Email = registerRequestDTO.Email,
+			OtpId = Guid.NewGuid(),
 			FirstName = registerRequestDTO.FirstName,
 			LastName = registerRequestDTO.LastName,
 			MiddleName = registerRequestDTO.MiddleName!,
@@ -114,7 +113,7 @@ public class RegisterService : IRegisterService
 			throw new Exception("Failed to store OTP verification record.");
 		}
 
-		var userOtpResponse = otpUser.Adapt<OtpVerificationResponse>();
+		var userOtpResponse = user.Adapt<OtpVerificationResponse>();
 
 		return userOtpResponse;
 	}

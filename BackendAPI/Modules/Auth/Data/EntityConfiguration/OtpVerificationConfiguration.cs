@@ -8,6 +8,8 @@ public class OtpVerificationConfiguration : IEntityTypeConfiguration<OtpVerifica
 
 		builder.Property(o => o.Id).ValueGeneratedOnAdd();
 
+		builder.Property(o => o.OtpId).IsRequired();
+
 		builder.Property(o => o.Email)
 			   .IsRequired()
 			   .HasMaxLength(255);

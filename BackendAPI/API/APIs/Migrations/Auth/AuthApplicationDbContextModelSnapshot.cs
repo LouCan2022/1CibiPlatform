@@ -299,6 +299,9 @@ namespace APIs.Migrations.Auth
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("OtpId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");

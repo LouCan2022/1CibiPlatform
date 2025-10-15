@@ -4,6 +4,8 @@ public class OtpVerification
 {
 	public long Id { get; set; }
 
+	public Guid OtpId { get; set; }
+
 	public string Email { get; set; } = string.Empty;
 
 	public string PasswordHash { get; set; } = string.Empty;

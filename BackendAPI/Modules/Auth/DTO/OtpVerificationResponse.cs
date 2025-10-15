@@ -3,6 +3,7 @@
 
 public record OtpVerificationResponse(
 	long Id,
+	Guid OtpId,
 	string Email,
 	string FirstName,
 	string MiddleName,

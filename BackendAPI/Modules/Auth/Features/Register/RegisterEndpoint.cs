@@ -12,15 +12,15 @@ public class RegisterEndpoint : ICarterModule
 		{
 			var command = new RegisterRequestCommand(request.register);
 
-			RegisterResult result = await sender.Send(command, cancellationToken);
+			var result = await sender.Send(command, cancellationToken);
 
 			RegisterResponse response = new RegisterResponse(result.otpVerificationResponse);
 
-			return Results.Ok(response);
+			return Results.Ok(response.otpVerificationResponse);
 		})
 		  .WithName("register")
 		  .WithTags("Authentication")
-		  .Produces<RegisterResponse>()
+		  .Produces<OtpVerificationResponse>()
 		  .ProducesProblem(StatusCodes.Status400BadRequest)
 		  .WithSummary("register")
 		  .WithDescription("register");

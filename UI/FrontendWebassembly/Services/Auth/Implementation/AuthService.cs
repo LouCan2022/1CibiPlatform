@@ -62,7 +62,7 @@ public class AuthService : IAuthService
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
 			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {errorContent!.Detail}");
-			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Unknown Error");
+			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Error");
 		}
 
 		Console.WriteLine("✅ Login successful. Reading success content...");
@@ -153,5 +153,41 @@ public class AuthService : IAuthService
 		Console.WriteLine("✅ Logout successful.");
 
 		return true;
+	}
+
+	public async Task<RegisterResponseDTO> Register(RegisterRequestDTO registerRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting registration request...");
+
+		var payload = new
+		{
+			register = new
+			{
+				email = registerRequestDTO.Email,
+				passwordHash = registerRequestDTO.PasswordHash,
+				firstName = registerRequestDTO.FirstName,
+				lastName = registerRequestDTO.LastName,
+				middleName = registerRequestDTO.MiddleName
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/register for email: {registerRequestDTO.Email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/register", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Registration failed. Reading error content...");
+
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+
+			return new RegisterResponseDTO(Guid.Empty, string.Empty, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ Registration successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationResponse>();
+
+		return new RegisterResponseDTO(successContent!.OtpId, successContent!.Email, string.Empty);
 	}
 }
