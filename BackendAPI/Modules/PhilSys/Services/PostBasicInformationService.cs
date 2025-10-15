@@ -21,7 +21,7 @@ public class PostBasicInformationService
 		string suffix,
 		DateTime birth_date,
 		string face_liveness_session_id,
-		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlOWQyYWJiMGQyZCIsImlhdCI6MTc2MDE1NDI4My43MjQyNzcsIm5iZiI6MTc2MDE1NDI4My43MjQyNzcsImV4cCI6MTc2MDE1NjA4My43MjQyNzd9.tR2Q1fwxnPKfNL_RCm-Rc_sG3vO7b3gkujuJZT490cs",
+		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlZjM4NGMyYTA4NiIsImlhdCI6MTc2MDUwNzk4MC4xNzIxNzEsIm5iZiI6MTc2MDUwNzk4MC4xNzIxNzEsImV4cCI6MTc2MDUwOTc4MC4xNzIxNzF9.JGMjzBo5DOiguO09173cmrbNepWtLqrF7JhJPTZt6jE",
 		CancellationToken ct = default
 		)
 	{
@@ -41,58 +41,114 @@ public class PostBasicInformationService
 
 		_httpClient.DefaultRequestHeaders.Authorization =
 			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-	
-		var response = await _httpClient.PostAsJsonAsync(endpoint, body, ct);
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
-		_logger.LogInformation("Basic Information Response: {Response}", responseBody);
+		var response = await _httpClient.PostAsJsonAsync(endpoint, body, ct);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			_logger.LogError("Basic Information request failed: {Status} - {Body}", response.StatusCode, responseBody);
-			throw new HttpRequestException($"PhilSys token request failed: {response.StatusCode} - {responseBody}");
+			_logger.LogError("Basic Information request failed: {Status}", response.StatusCode);
+
+			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>(ct);
+
+			return new BasicInformationOrPCNResponseDTO(
+				code: "",
+				token: "",
+				reference: "",
+				face_url: "",
+				full_name: "",
+				first_name: "",
+				middle_name: "",
+				last_name: "",
+				suffix: "",
+				gender: "",
+				marital_status: "",
+				blood_type: "",
+				email: "",
+				mobile_number: "",
+				birth_date: "",
+				full_address: "",
+				address_line_1: "",
+				address_line_2: "",
+				barangay: "",
+				municipality: "",
+				province: "",
+				country: "",
+				postal_code: "",
+				present_full_address: "",
+				present_address_line_1: "",
+				present_address_line_2: "",
+				present_barangay: "",
+				present_municipality: "",
+				present_province: "",
+				present_country: "",
+				present_postal_code: "",
+				residency_status: "",
+				place_of_birth: "",
+				pob_municipality: "",
+				pob_province: "",
+				pob_country: "",
+				error: errorResponse?.error,
+				message: errorResponse?.message,
+				error_description: errorResponse?.error_description
+			);
 		}
 
-		var tokenData = responseBody!.data;
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
+		if (responseBody is null || responseBody.data is null)
+		{
+			throw new InvalidOperationException("Response body or data is null.");
+		}
+
+		var tokenData = responseBody.data;
+
+		return ReturnData(tokenData);
+
+	}
+
+	private static BasicInformationOrPCNResponseDTO ReturnData(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
+	{
 		return new BasicInformationOrPCNResponseDTO(
-			tokenData.code,
-			tokenData.token,
-			tokenData.reference,
-			tokenData.face_url,
-			tokenData.full_name,
-			tokenData.first_name,
-			tokenData.middle_name,
-			tokenData.last_name,
-			tokenData.suffix,
-			tokenData.gender,
-			tokenData.marital_status,
-			tokenData.blood_type,
-			tokenData.email,
-			tokenData.mobile_number,
-			tokenData.birth_date,
-			tokenData.full_address,
-			tokenData.address_line_1,
-			tokenData.address_line_2,
-			tokenData.barangay,
-			tokenData.municipality,
-			tokenData.province,
-			tokenData.country,
-			tokenData.postal_code,
-			tokenData.present_full_address,
-			tokenData.present_address_line_1,
-			tokenData.present_address_line_2,
-			tokenData.present_barangay,
-			tokenData.present_municipality,
-			tokenData.present_province,
-			tokenData.present_country,
-			tokenData.present_postal_code,
-			tokenData.residency_status,
-			tokenData.place_of_birth,
-			tokenData.pob_municipality,
-			tokenData.pob_province,
-			tokenData.pob_country
-		);
+			BasicInformationOrPCNResponseDTO.code,
+			BasicInformationOrPCNResponseDTO.token,
+			BasicInformationOrPCNResponseDTO.reference,
+			BasicInformationOrPCNResponseDTO.face_url,
+			BasicInformationOrPCNResponseDTO.full_name,
+			BasicInformationOrPCNResponseDTO.first_name,
+			BasicInformationOrPCNResponseDTO.middle_name,
+			BasicInformationOrPCNResponseDTO.last_name,
+			BasicInformationOrPCNResponseDTO.suffix,
+			BasicInformationOrPCNResponseDTO.gender,
+			BasicInformationOrPCNResponseDTO.marital_status,
+			BasicInformationOrPCNResponseDTO.blood_type,
+			BasicInformationOrPCNResponseDTO.email,
+			BasicInformationOrPCNResponseDTO.mobile_number,
+			BasicInformationOrPCNResponseDTO.birth_date,
+			BasicInformationOrPCNResponseDTO.full_address,
+			BasicInformationOrPCNResponseDTO.address_line_1,
+			BasicInformationOrPCNResponseDTO.address_line_2,
+			BasicInformationOrPCNResponseDTO.barangay,
+			BasicInformationOrPCNResponseDTO.municipality,
+			BasicInformationOrPCNResponseDTO.province,
+			BasicInformationOrPCNResponseDTO.country,
+			BasicInformationOrPCNResponseDTO.postal_code,
+			BasicInformationOrPCNResponseDTO.present_full_address,
+			BasicInformationOrPCNResponseDTO.present_address_line_1,
+			BasicInformationOrPCNResponseDTO.present_address_line_2,
+			BasicInformationOrPCNResponseDTO.present_barangay,
+			BasicInformationOrPCNResponseDTO.present_municipality,
+			BasicInformationOrPCNResponseDTO.present_province,
+			BasicInformationOrPCNResponseDTO.present_country,
+			BasicInformationOrPCNResponseDTO.present_postal_code,
+			BasicInformationOrPCNResponseDTO.residency_status,
+			BasicInformationOrPCNResponseDTO.place_of_birth,
+			BasicInformationOrPCNResponseDTO.pob_municipality,
+			BasicInformationOrPCNResponseDTO.pob_province,
+			BasicInformationOrPCNResponseDTO.pob_country,
+			BasicInformationOrPCNResponseDTO.error,
+			BasicInformationOrPCNResponseDTO.message,
+			BasicInformationOrPCNResponseDTO.error_description
+			);
 	}
 
 	protected virtual async Task<HttpResponseMessage> SendRequestAsync(
