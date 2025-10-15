@@ -18,7 +18,6 @@ public class AuthInitialData
 				new Authusers
 				{
 					Id = this._Id,
-					Username = "admin",
 					Email = "john@example.com",
 					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 					FirstName = "Admin",
@@ -27,7 +26,6 @@ public class AuthInitialData
 				new Authusers
 				{
 					Id = Guid.NewGuid(),
-					Username = "cbblueadmin",
 					Email = "cb@example.com",
 					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 					FirstName = "CB",

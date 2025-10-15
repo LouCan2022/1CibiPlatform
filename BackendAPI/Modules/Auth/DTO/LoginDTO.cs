@@ -2,7 +2,6 @@
 
 public record LoginDTO(
 	Guid Id,
-	string Username,
 	string PasswordHash,
 	string Email,
 	string FirstName,
@@ -15,7 +14,6 @@ public record LoginDTO(
 
 public record UserDataDTO(
 	Guid Id,
-	string Username,
 	string PasswordHash,
 	string Email,
 	string FirstName,

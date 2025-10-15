@@ -75,7 +75,10 @@ public class EmailService : IEmailService
 	}
 
 
-	public async Task<string> SendOtpBody(string toEmail, string otpCode)
+	public async Task<string> SendOtpBody(
+		string toEmail,
+		string name,
+		string otpCode)
 	{
 		string body = $@"
                 <!DOCTYPE html>
@@ -105,7 +108,7 @@ public class EmailService : IEmailService
                             <h1>Email Verification</h1>
                         </div>
                         <div class='content'>
-                            <p>Hello,</p>
+                            <p>Hello {name},</p>
                             <p>Thank you for registering with us. Please use the following code to verify your email address:</p>
                             <div class='otp-box'>{otpCode}</div>
                             <p>This code will expire in {_expirationInMinutes} minutes.</p>

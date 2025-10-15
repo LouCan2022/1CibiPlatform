@@ -105,14 +105,14 @@
 
 			// produce access token
 			var loginDTO = userData.Adapt<LoginDTO>();
-			_logger.LogInformation("Generating JWT token for user: {Username}", userData.Username);
+			_logger.LogInformation("Generating JWT token for user: {Email}", userData.Email);
 			string jwtToken = this._jWTService.GetAccessToken(loginDTO);
 			SetAccessTokenCookie(jwtToken);
 
 			// reuse refresh token
 			var refreshTokenExist = _httpContextAccessor.HttpContext!.Request.Cookies[_cookieExpiryinMinutesKey!];
 
-			_logger.LogInformation("Reusing existing refresh token for user: {Username}", userData.Username);
+			_logger.LogInformation("Reusing existing refresh token for user: {Email}", userData.Email);
 			// reuse existing refresh token if not expired
 			return new LoginResponseWebDTO(
 				userData.Id.ToString()!,
@@ -120,7 +120,6 @@
 				refreshTokenExist!,
 				"bearer",
 				ExpireInMinutes(),
-				userData.Username,
 				appId,
 				subMenuId,
 				roleId,
