@@ -122,10 +122,9 @@
 			// Add DbContext
 			services.AddAuthInfrastructure(configuration);
 			services.AddCNXInfrastructure(configuration);
+			services.AddPhilSysInfrastructure(configuration);
 			return services;
 		}
-
-
 		#endregion
 
 		#region Carter Config

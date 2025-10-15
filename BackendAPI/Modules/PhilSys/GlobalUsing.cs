@@ -16,3 +16,7 @@ global using System.Net.Http.Json;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using System.Text.Json.Serialization;
+global using PhilSys.Data.Context;
+global using Microsoft.EntityFrameworkCore;
+global using PhilSys.Data.Entities;
+global using System.ComponentModel.DataAnnotations;

@@ -19,7 +19,7 @@ public class PartnerSystemEndpoint : ICarterModule
 			return Results.Ok(response.PartnerSystemResponseDTO);
 		})
 		  .WithName("PartnerSystemQuery")
-		  .WithTags("IDV")
+		  .WithTags("PhilSys")
 		  .Produces<PartnerSystemResponse>()
 		  .ProducesProblem(StatusCodes.Status400BadRequest)
 		  .WithSummary("Retrieve If Verified")
