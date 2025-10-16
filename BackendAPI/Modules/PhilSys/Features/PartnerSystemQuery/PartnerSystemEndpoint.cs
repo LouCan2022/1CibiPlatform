@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json;
+
 namespace PhilSys.Features.PartnerSystemQuery;
 
 public record PartnerSystemRequest(PartnerSystemRequestDTO PartnerSystemRequestDTO) : ICommand<PartnerSystemResponse>;	
@@ -16,7 +18,10 @@ public class PartnerSystemEndpoint : ICarterModule
 
 			var response = new PartnerSystemResponse(result.PartnerSystemResponseDTO);
 
-			return Results.Ok(response.PartnerSystemResponseDTO);
+			return Results.Json(response, new JsonSerializerOptions
+			{
+				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+			});
 		})
 		  .WithName("PartnerSystemQuery")
 		  .WithTags("PhilSys")

@@ -1,6 +1,6 @@
 ﻿
 @layout PhilSysLayout
-@page "/philsys/idv/liveness"
+@page "/philsys/idv/liveness/{Tid:Guid}"
 @using MudBlazor
 @inject IJSRuntime JS
   
@@ -36,7 +36,14 @@ else
 }
 
 @code {
+    [Parameter]
+    public required string Tid { get; set; }
+
     private bool _completed = false;
+
+    [SupplyParameterFromQuery(Name = "session")]
+
+    public string? SessionId { get; set; }
 
     private async Task StartLiveness()
     {
@@ -48,6 +55,12 @@ else
         {
             Console.WriteLine($"Error calling eKYC: {ex.Message}");
         }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        Guid.TryParse(Tid, out var tidGuid);
+        return base.OnInitializedAsync();
     }
     protected override void OnAfterRender(bool firstRender)
     {

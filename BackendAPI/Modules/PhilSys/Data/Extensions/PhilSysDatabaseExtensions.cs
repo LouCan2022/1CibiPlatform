@@ -5,6 +5,6 @@ public static class PhilSysDatabaseExtensions
 	{
 		using var scope = app.Services.CreateScope();
 		var context = scope.ServiceProvider.GetRequiredService<PhilSysDBContext>();
-		context.Database.MigrateAsync().GetAwaiter().GetResult();
+		await context.Database.MigrateAsync();
 	}
 }

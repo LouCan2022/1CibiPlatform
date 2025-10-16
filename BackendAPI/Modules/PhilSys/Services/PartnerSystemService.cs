@@ -1,4 +1,4 @@
-﻿using PhilSys.Data.Repository;
+﻿
 
 namespace PhilSys.Services;
 
@@ -9,10 +9,10 @@ public class PartnerSystemService
 	private readonly IPhilSysRepository _repository;
 
 	public PartnerSystemService(
-		IHttpClientFactory httpClientFactory,
+		//IHttpClientFactory httpClientFactory,
 		ILogger<PartnerSystemService> logger, IPhilSysRepository repository)
 	{
-		_httpClientFactory = httpClientFactory.CreateClient("PhilSys");
+		//_httpClientFactory = httpClientFactory.CreateClient("PhilSys");
 		_logger = logger;
 		_repository = repository;
 	}
@@ -20,7 +20,7 @@ public class PartnerSystemService
 	{
 		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
-		var livenessUrl = $"http://localhost:5123/philsys/idv/liveness?tid={transaction.Tid}";
+		
 		if (PartnerSystemRequestDTO.InquiryType.Equals("name_dob", StringComparison.OrdinalIgnoreCase))
 		{
 			transaction = new PhilSysTransaction
@@ -46,13 +46,51 @@ public class PartnerSystemService
 			};
 		}
 
+		var livenessUrl = $"http://localhost:5123/philsys/idv/liveness/{transaction.Tid}";
+
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)
-			return new PartnerSystemResponseDTO { };
+			throw new InvalidOperationException("Failed");
 
-
-		
-
-		
+		return new PartnerSystemResponseDTO(
+			code: null,
+			token: null,
+			reference: null,
+			face_url: null,
+			full_name: null,
+			first_name: null,
+			middle_name: null,
+			last_name: null,
+			suffix: null,
+			gender: null,
+			marital_status: null,
+			blood_type: null,
+			email: null,
+			mobile_number: null,
+			birth_date: null,
+			full_address: null,
+			address_line_1: null,
+			address_line_2: null,
+			barangay: null,
+			municipality: null,
+			province: null,
+			country: null,
+			postal_code: null,
+			present_full_address: null,
+			present_address_line_1: null,
+			present_address_line_2: null,
+			present_barangay: null,
+			present_municipality: null,
+			present_province: null,
+			present_country: null,
+			present_postal_code: null,
+			residency_status: null,
+			place_of_birth: null,
+			pob_municipality: null,
+			pob_province: null,
+			pob_country: null,
+			face_liveness_session_id: livenessUrl,
+			isTransacted: false
+		);
 	}
 }
