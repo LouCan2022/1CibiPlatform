@@ -1,6 +1,6 @@
 ﻿namespace FrontendWebassembly.DTO.Auth;
 
-public record OtpVerificationResponse(
+public record OtpVerificationResponseDTO(
 long Id,
 Guid OtpId,
 string Email,

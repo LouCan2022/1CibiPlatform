@@ -11,6 +11,11 @@ public interface IAuthService
 
 	Task<RegisterResponseDTO> Register(RegisterRequestDTO registerRequestDTO);
 
+
+	Task<OtpSessionResponseDTO> IsOtpSessionValid(OtpSessionRequestDTO otpRequestDTO);
+
+	Task<OtpSessionResponseDTO> OtpVerification(OtpVerificationRequestDTO otpVerificationRequestDTO);
+
 	Task<bool> Logout();
 
 }

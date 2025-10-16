@@ -4,7 +4,6 @@ public record VerifiyOtpRequest(OtpRequestDTO OtpRequestDTO) : ICommand<VerifiyO
 
 public record VerifiyOtpResponse(bool IsVerified);
 
-
 public class VerifiyOtpEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)

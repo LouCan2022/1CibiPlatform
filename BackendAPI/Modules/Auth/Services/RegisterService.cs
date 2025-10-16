@@ -1,6 +1,4 @@
-﻿using Auth.Data.Entities;
-
-namespace Auth.Services;
+﻿namespace Auth.Services;
 
 public class RegisterService : IRegisterService
 {
@@ -142,7 +140,7 @@ public class RegisterService : IRegisterService
 			_logger.LogWarning("Invalid OTP provided for email: {Email}", email);
 			existingOtpRecord.AttemptCount += 1;
 			await _authRepository.UpdateVerificationCodeAsync(existingOtpRecord);
-			throw new Exception("Invalid OTP.");
+			throw new Exception("Invalid OTP");
 		}
 
 		if (existingOtpRecord.IsUsed)
@@ -155,7 +153,7 @@ public class RegisterService : IRegisterService
 		{
 			_logger.LogWarning("OTP expired for email: {Email}", email);
 			await this.ResendOtpAsync(existingOtpRecord);
-			throw new Exception("OTP has expired.");
+			throw new InvalidOperationException("Your OTP has expired. A new code has been sent to your email.");
 		}
 
 		existingOtpRecord.IsVerified = true;
@@ -252,4 +250,31 @@ public class RegisterService : IRegisterService
 
 		return true;
 	}
+
+	public async Task<bool> IsOtpSessionValidAsync(Guid userId, string email)
+	{
+		_logger.LogInformation("Checking if OTP is valid for email: {Email}", email);
+
+
+		var userDetail = new OtpVerificationRequestDTO(userId, email);
+
+		var existingOtpRecord = await _authRepository.OtpVerificationUserData(userDetail);
+
+		if (existingOtpRecord == null)
+		{
+			_logger.LogWarning("No OTP record found for email: {Email}", email);
+			return false;
+		}
+
+		if (existingOtpRecord.IsUsed)
+		{
+			_logger.LogWarning("OTP already used for email: {Email}", email);
+			return false;
+		}
+
+		return true;
+
+	}
+
+
 }

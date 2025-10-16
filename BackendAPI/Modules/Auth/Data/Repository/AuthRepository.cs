@@ -198,5 +198,15 @@ public class AuthRepository : IAuthRepository
 
 	}
 
-
+	public async Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerification)
+	{
+		return await _dbcontext.OtpVerification
+					 .Where(ov => ov.Email == otpVerification.email &&
+					        ov.OtpId == otpVerification.userId &&
+							ov.IsUsed == false &&
+							ov.IsVerified == false &&
+							ov.ExpiresAt > DateTime.UtcNow)
+					 .AsNoTracking()
+					 .FirstOrDefaultAsync();
+	 }
 }
