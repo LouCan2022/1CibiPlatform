@@ -48,6 +48,7 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<PostBasicInformationService>();
 		services.AddScoped<PostPCNService>();
 		services.AddScoped<PartnerSystemService>();
+		services.AddScoped<IPhilSysRepository, PhilSysRepository>();
 		return services;
 	}
 	#endregion
