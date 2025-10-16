@@ -20,3 +20,4 @@ global using PhilSys.Data.Context;
 global using Microsoft.EntityFrameworkCore;
 global using PhilSys.Data.Entities;
 global using System.ComponentModel.DataAnnotations;
+global using PhilSys.Data.Repository;
