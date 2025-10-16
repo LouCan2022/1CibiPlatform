@@ -1,4 +1,5 @@
 ﻿namespace Auth.Services;
+
 public class JWTService : IJWTService
 {
 	private readonly IConfiguration _configuration;
@@ -39,7 +40,6 @@ public class JWTService : IJWTService
 		return new List<Claim>
 		{
 			new Claim("userId", loginDTO.Id.ToString()),
-			new Claim("username", loginDTO.Username),
 			new Claim("email", loginDTO.Email),
 			new Claim("FullName", $"{loginDTO.FirstName} {loginDTO.MiddleName} {loginDTO.LastName}")
 		};

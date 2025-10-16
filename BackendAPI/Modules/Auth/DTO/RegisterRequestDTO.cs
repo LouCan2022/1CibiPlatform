@@ -1,9 +1,8 @@
 ﻿namespace Auth.DTO;
 
 public record RegisterRequestDTO(
-	string Username,
 	string Email,
-	string Password,
+	string PasswordHash,
 	string FirstName,
 	string LastName,
 	string? MiddleName);

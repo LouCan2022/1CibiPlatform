@@ -1,5 +1,4 @@
-﻿
-namespace Auth.Data.EntityConfiguration;
+﻿namespace Auth.Data.EntityConfiguration;
 
 public class OtpVerificationConfiguration : IEntityTypeConfiguration<OtpVerification>
 {
@@ -9,9 +8,25 @@ public class OtpVerificationConfiguration : IEntityTypeConfiguration<OtpVerifica
 
 		builder.Property(o => o.Id).ValueGeneratedOnAdd();
 
+		builder.Property(o => o.OtpId).IsRequired();
+
 		builder.Property(o => o.Email)
 			   .IsRequired()
 			   .HasMaxLength(255);
+
+		builder.Property(u => u.PasswordHash)
+			   .IsRequired();
+
+		builder.Property(u => u.FirstName)
+			   .IsRequired()
+			   .HasMaxLength(100);
+
+		builder.Property(u => u.LastName)
+			   .IsRequired()
+			   .HasMaxLength(100);
+
+		builder.Property(u => u.MiddleName)
+			   .HasMaxLength(100);
 
 		builder.Property(o => o.OtpCodeHash)
 			   .IsRequired();

@@ -1,6 +1,4 @@
-﻿using FrontendWebassembly.DTO.SharedDTO;
-
-namespace FrontendWebassembly.Services.Auth.Implementation;
+﻿namespace FrontendWebassembly.Services.Auth.Implementation;
 
 public class AuthService : IAuthService
 {
@@ -62,7 +60,7 @@ public class AuthService : IAuthService
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
 			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {errorContent!.Detail}");
-			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Unknown Error");
+			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Error");
 		}
 
 		Console.WriteLine("✅ Login successful. Reading success content...");
@@ -153,5 +151,106 @@ public class AuthService : IAuthService
 		Console.WriteLine("✅ Logout successful.");
 
 		return true;
+	}
+
+	public async Task<RegisterResponseDTO> Register(RegisterRequestDTO registerRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting registration request...");
+
+		var payload = new
+		{
+			register = new
+			{
+				email = registerRequestDTO.Email,
+				passwordHash = registerRequestDTO.PasswordHash,
+				firstName = registerRequestDTO.FirstName,
+				lastName = registerRequestDTO.LastName,
+				middleName = registerRequestDTO.MiddleName
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/register for email: {registerRequestDTO.Email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/register", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Registration failed. Reading error content...");
+
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+
+			return new RegisterResponseDTO(Guid.Empty, string.Empty, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ Registration successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationResponseDTO>();
+
+		return new RegisterResponseDTO(successContent!.OtpId, successContent!.Email, string.Empty);
+	}
+
+	public async Task<OtpSessionResponseDTO> IsOtpSessionValid(OtpSessionRequestDTO otpRequestDTO)
+	{
+
+		Console.WriteLine("🔹 Starting OTP validation request...");
+
+		var payload = new
+		{
+			OtpVerificationRequestDTO = new
+			{
+				userId = otpRequestDTO.userId,
+				email = otpRequestDTO.email
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/validate/otp for UserId: {otpRequestDTO.userId}, Email: {otpRequestDTO.email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/validate/otp", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ OTP validation failed. Reading error content...");
+
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+
+			return new OtpSessionResponseDTO(false, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ OTP validation successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationSessionResponseDTO>();
+
+		return new OtpSessionResponseDTO(successContent!.isOtpSessionValid, string.Empty);
+	}
+
+	public async Task<OtpSessionResponseDTO> OtpVerification(OtpVerificationRequestDTO otpVerificationRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting OTP verification request...");
+
+		var payload = new
+		{
+			OtpRequestDTO = new
+			{
+				Email = otpVerificationRequestDTO.Email,
+				Otp = otpVerificationRequestDTO.Otp,
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/verify/otp for Email: {otpVerificationRequestDTO.Email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/verify/otp", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ OTP verification failed. Reading error content...");
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+			return new OtpSessionResponseDTO(false, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ OTP verification successful.");
+
+		return new OtpSessionResponseDTO(true, string.Empty);
+
+
 	}
 }

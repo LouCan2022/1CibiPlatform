@@ -6,7 +6,6 @@ public record LoginResponseWebDTO
 	 string refresh_token,
 	 string Token_type = "bearer",
 	 int expires_in = 0,
-	 string UserName = default!,
 	 List<int> Appid = default!,
 	 List<List<int>> SubMenuid = default!,
 	 List<int> RoleId = default!,

@@ -1,5 +1,4 @@
-﻿
-namespace Auth.Data.Repository;
+﻿namespace Auth.Data.Repository;
 
 public class AuthRepository : IAuthRepository
 {
@@ -18,7 +17,6 @@ public class AuthRepository : IAuthRepository
 							  where user.Email == cred.Username && user.IsActive == true
 							  select new LoginDTO(
 							   user.Id,
-							   user.Username,
 							   user.PasswordHash,
 							   user.Email!,
 							   user.FirstName!,
@@ -38,6 +36,16 @@ public class AuthRepository : IAuthRepository
 	}
 
 
+	public async Task<bool> SaveUserAsync(Authusers user)
+	{
+		await _dbcontext.AuthUsers.AddAsync(user);
+
+		var result = await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
+
+
 	public async Task<UserDataDTO> GetNewUserDataAsync(Guid userId)
 	{
 		var userData = await (from user in _dbcontext.AuthUsers
@@ -49,7 +57,6 @@ public class AuthRepository : IAuthRepository
 							  user.IsActive == true && authRefreshToken.IsActive == true
 							  select new UserDataDTO(
 							   user.Id,
-							   user.Username,
 							   user.PasswordHash,
 							   user.Email!,
 							   user.FirstName!,
@@ -123,9 +130,8 @@ public class AuthRepository : IAuthRepository
 		var user = new Authusers
 		{
 			Id = Guid.NewGuid(),
-			Username = userDto.Username,
 			Email = userDto.Email,
-			PasswordHash = userDto.Password,
+			PasswordHash = userDto.PasswordHash,
 			FirstName = userDto.FirstName,
 			LastName = userDto.LastName,
 			MiddleName = userDto.MiddleName,
@@ -137,7 +143,6 @@ public class AuthRepository : IAuthRepository
 
 		return new RegisterResponseDTO(
 			user.Id,
-			user.Username!,
 			user.Email!,
 			user.PasswordHash!,
 			user.FirstName!,
@@ -148,20 +153,7 @@ public class AuthRepository : IAuthRepository
 	public async Task<bool> UpdateVerificationCodeAsync(OtpVerification otpVerification)
 	{
 
-		var otpEntity = new OtpVerification
-		{
-			Id = otpVerification.Id,
-			Email = otpVerification.Email,
-			OtpCodeHash = otpVerification.OtpCodeHash,
-			IsUsed = otpVerification.IsUsed,
-			AttemptCount = otpVerification.AttemptCount,
-			CreatedAt = otpVerification.CreatedAt,
-			ExpiresAt = otpVerification.ExpiresAt,
-			IsVerified = true,
-			VerifiedAt = DateTime.UtcNow
-		};
-
-		await _dbcontext.OtpVerification.AddAsync(otpEntity);
+		_dbcontext.OtpVerification.Update(otpVerification);
 
 		await _dbcontext.SaveChangesAsync();
 
@@ -169,22 +161,52 @@ public class AuthRepository : IAuthRepository
 
 	}
 
-	public async Task<OtpVerification> InsertOtpVerification(OtpVerificationDTO otpVerificationDTO)
+	public async Task<bool> InsertOtpVerification(OtpVerification otpVerification)
 	{
-		var otpEntity = new OtpVerification
-		{
-			Email = otpVerificationDTO.Email,
-			OtpCodeHash = otpVerificationDTO.OtpCodeHash,
-			IsUsed = otpVerificationDTO.IsUsed,
-			AttemptCount = otpVerificationDTO.AttemptCount,
-			CreatedAt = otpVerificationDTO.CreatedAt,
-			ExpiresAt = otpVerificationDTO.ExpiresAt,
-		};
 
-		var otpUser = await _dbcontext.OtpVerification.AddAsync(otpEntity);
+		var otpUser = await _dbcontext.OtpVerification.AddAsync(otpVerification);
 
 		await _dbcontext.SaveChangesAsync();
 
-		return otpEntity;
+		return true;
 	}
+
+	public async Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email)
+	{
+		return await _dbcontext.OtpVerification
+					 .Where(ov => ov.Email == email && ov.IsUsed == false)
+					 .FirstOrDefaultAsync();
+
+	}
+
+	public async Task<bool> UpdateValidateOtp(OtpVerification otpVerification)
+	{
+		_dbcontext.OtpVerification.Update(otpVerification);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
+
+	public async Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification)
+	{
+		_dbcontext.OtpVerification.Remove(otpVerification);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+
+	}
+
+	public async Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerification)
+	{
+		return await _dbcontext.OtpVerification
+					 .Where(ov => ov.Email == otpVerification.email &&
+					        ov.OtpId == otpVerification.userId &&
+							ov.IsUsed == false &&
+							ov.IsVerified == false &&
+							ov.ExpiresAt > DateTime.UtcNow)
+					 .AsNoTracking()
+					 .FirstOrDefaultAsync();
+	 }
 }
