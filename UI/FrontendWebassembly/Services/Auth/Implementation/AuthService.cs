@@ -184,8 +184,73 @@ public class AuthService : IAuthService
 
 		Console.WriteLine("✅ Registration successful. Reading success content...");
 
-		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationResponse>();
+		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationResponseDTO>();
 
 		return new RegisterResponseDTO(successContent!.OtpId, successContent!.Email, string.Empty);
+	}
+
+	public async Task<OtpSessionResponseDTO> IsOtpSessionValid(OtpSessionRequestDTO otpRequestDTO)
+	{
+
+		Console.WriteLine("🔹 Starting OTP validation request...");
+
+		var payload = new
+		{
+			OtpVerificationRequestDTO = new
+			{
+				userId = otpRequestDTO.userId,
+				email = otpRequestDTO.email
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/validate/otp for UserId: {otpRequestDTO.userId}, Email: {otpRequestDTO.email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/validate/otp", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ OTP validation failed. Reading error content...");
+
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+
+			return new OtpSessionResponseDTO(false, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ OTP validation successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationSessionResponseDTO>();
+
+		return new OtpSessionResponseDTO(successContent!.isOtpSessionValid, string.Empty);
+	}
+
+	public async Task<OtpSessionResponseDTO> OtpVerification(OtpVerificationRequestDTO otpVerificationRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting OTP verification request...");
+
+		var payload = new
+		{
+			OtpRequestDTO = new
+			{
+				Email = otpVerificationRequestDTO.Email,
+				Otp = otpVerificationRequestDTO.Otp,
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/verify/otp for Email: {otpVerificationRequestDTO.Email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/verify/otp", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ OTP verification failed. Reading error content...");
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+			return new OtpSessionResponseDTO(false, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ OTP verification successful.");
+
+		return new OtpSessionResponseDTO(true, string.Empty);
+
+
 	}
 }

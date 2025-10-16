@@ -29,4 +29,6 @@ public interface IAuthRepository
 
 	Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification);
 
+	Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO);
+
 }

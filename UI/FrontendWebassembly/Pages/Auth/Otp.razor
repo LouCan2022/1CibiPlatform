@@ -66,14 +66,6 @@
                         }
                    </ButtonComponent>
 
-                   <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Class="mb-2">
-                       @if (resendCountdown > 0)
-                       {
-                           <MudText Typo="Typo.body2" Color="Color.Default">
-                               Resend code in @resendCountdown seconds
-                           </MudText>
-                       }
-                   </MudStack>
                </MudForm>
    
                <div class="footer-links">
@@ -97,7 +89,7 @@ else
     public string? email { get; set; }
 
     [Parameter]
-    [SupplyParameterFromQuery(Name = "userid")]
+    [SupplyParameterFromQuery(Name = "userId")]
     public string? userId { get; set; }
 
     private MudForm form;
@@ -111,7 +103,6 @@ else
     private string errorMessage = "";
     private bool showResendSuccess = false;
 
-    private int resendCountdown = 0;
     private System.Threading.Timer? countdownTimer;
     private bool isNavigationLocked = false;
 
@@ -124,18 +115,19 @@ else
             return;
         }
 
-        var isAuthenticated = await IAuthService.IsAuthenticated();
+        var userOtpDetails = new OtpSessionRequestDTO(userId!, email!);
 
-        if (isAuthenticated)
+        var isUserOtpValidated = await IAuthService.IsOtpSessionValid(userOtpDetails);
+
+        if (!isUserOtpValidated.isValid)
         {
-            Navigation.NavigateTo("/", true);
+            Navigation.NavigateTo("/login", true);
             return;
         }
 
         _isLoading = false;
-        StartResendCountdown(10); 
         
-        Navigation.LocationChanged += HandleLocationChanged;
+        Navigation.LocationChanged += HandleLocationChanged!;
         await SetupNavigationLock();
     }
 
@@ -178,7 +170,7 @@ else
             
             if (!confirmed)
             {
-                Navigation.NavigateTo($"/verify-otp?email={email}", false);
+                Navigation.NavigateTo($"/verify-otp?userId={userId}&email={email}", false);
             }
             else
             {
@@ -200,68 +192,44 @@ else
 
     private async Task HandleVerifyOtp()
     {
-        // isLoading = true;
-        // isOtpValid = true;
-        // errorMessage = "";
-        // showResendSuccess = false;
+        isLoading = true;
+        isOtpValid = true;
+        errorMessage = "";
+        showResendSuccess = false;
 
-        // try
-        // {
-        //     var result = await IAuthService.VerifyOtp(email, otpCode);
-
-        //     if (!string.IsNullOrWhiteSpace(result.detail))
-        //     {
-        //         Console.WriteLine($"OTP Verification Error: {result.detail}");
-        //         isLoading = false;
-        //         isOtpValid = false;
-        //         errorMessage = result.detail;
-        //         StateHasChanged();
-        //         return;
-        //     }
-
-        //     await RemoveNavigationLock();
-        //     Navigation.NavigateTo("/login", true);
-        // }
-        // catch (Exception ex)
-        // {
-        //     Console.WriteLine($"OTP Verification Exception: {ex.Message}");
-        //     isLoading = false;
-        //     isOtpValid = false;
-        //     errorMessage = "An unexpected error occurred. Please try again.";
-        //     StateHasChanged();
-        // }
-    }
-
-    private void StartResendCountdown(int seconds)
-    {
-        resendCountdown = seconds;
-        countdownTimer?.Dispose();
-        
-        countdownTimer = new System.Threading.Timer(_ =>
+        try
         {
-            if (resendCountdown > 0)
-            {
-                resendCountdown--;
-                InvokeAsync(StateHasChanged);
-            }
-            else
-            {
-                StopResendCountdown();
-            }
-        }, null, 1000, 1000);
-    }
+            var otpDetails = new OtpVerificationRequestDTO(email!, otpCode);
 
-    private void StopResendCountdown()
-    {
-        countdownTimer?.Dispose();
-        countdownTimer = null;
-        resendCountdown = 0;
+            var result = await IAuthService.OtpVerification(otpDetails);
+
+            if (!result.isValid)
+            {
+                Console.WriteLine($"OTP Verification Error: {result.errorMessage}");
+                isLoading = false;
+                isOtpValid = false;
+                errorMessage = result.errorMessage;
+                StateHasChanged();
+                return;
+            }
+
+            await RemoveNavigationLock();
+
+            Navigation.NavigateTo("/login", true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"OTP Verification Exception: {ex.Message}");
+            isLoading = false;
+            isOtpValid = false;
+            errorMessage = "An unexpected error occurred. Please try again.";
+            StateHasChanged();
+        }
     }
 
     public void Dispose()
     {
         Navigation.LocationChanged -= HandleLocationChanged;
-        StopResendCountdown();
         RemoveNavigationLock().GetAwaiter().GetResult();
     }
 }
