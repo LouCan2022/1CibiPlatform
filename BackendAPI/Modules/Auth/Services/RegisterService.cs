@@ -37,7 +37,7 @@ public class RegisterService : IRegisterService
 
 		_logger.LogInformation("Starting registration process for email: {Email}", registerRequestDTO.Email);
 
-		var isUserEmailExist = await _authRepository.IsUserEmailExistInOtpVerificationAsync(registerRequestDTO.Email);
+		var isUserEmailExist = await _authRepository.IsUserEmailExistInOtpVerificationAsync(registerRequestDTO.Email, true);
 
 		if (isUserEmailExist != null)
 		{
@@ -123,7 +123,7 @@ public class RegisterService : IRegisterService
 	{
 		_logger.LogInformation("Starting OTP verification for email: {Email}", email);
 
-		var existingOtpRecord = await _authRepository.IsUserEmailExistInOtpVerificationAsync(email);
+		var existingOtpRecord = await _authRepository.IsUserEmailExistInOtpVerificationAsync(email, false);
 
 		if (existingOtpRecord == null)
 		{

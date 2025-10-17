@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.0.11109.219
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhilSys", "BackendAPI\Modul
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSO", "BackendAPI\Modules\SSO\SSO.csproj", "{A40D649A-C631-45BB-9A70-7FEBB4C414EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendWebassembly", "UI\FrontendWebassembly\FrontendWebassembly.csproj", "{5EBA9F6D-6B19-4285-963D-3BBF8F89C20C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendWebassembly", "UI\FrontendWebassembly\FrontendWebassembly.csproj", "{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,10 +76,10 @@ Global
 		{A40D649A-C631-45BB-9A70-7FEBB4C414EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A40D649A-C631-45BB-9A70-7FEBB4C414EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A40D649A-C631-45BB-9A70-7FEBB4C414EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5EBA9F6D-6B19-4285-963D-3BBF8F89C20C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5EBA9F6D-6B19-4285-963D-3BBF8F89C20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5EBA9F6D-6B19-4285-963D-3BBF8F89C20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5EBA9F6D-6B19-4285-963D-3BBF8F89C20C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,7 +95,7 @@ Global
 		{AC4D7CDA-8908-44B7-8853-21838589D79C} = {0BFEBC6C-E742-43DC-AAAB-65310DD2A4C7}
 		{B1AC58E4-32ED-4467-8D7D-C73E320EFF1B} = {0BFEBC6C-E742-43DC-AAAB-65310DD2A4C7}
 		{A40D649A-C631-45BB-9A70-7FEBB4C414EA} = {0BFEBC6C-E742-43DC-AAAB-65310DD2A4C7}
-		{5EBA9F6D-6B19-4285-963D-3BBF8F89C20C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46B8F5AC-4BB4-4C3A-84F6-2A39D72DC64B}

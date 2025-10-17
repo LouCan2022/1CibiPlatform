@@ -8,6 +8,8 @@ global using System.Text.Json;
 global using System.Text;
 global using MudBlazor;
 global using FrontendWebassembly.DTO.SharedDTO;
+global using Microsoft.AspNetCore.Components.WebAssembly.Http;
+global using FrontendWebassembly.Services.GeneralHandler;
 
 
 global using FrontendWebassembly.Services.Auth.Interfaces;
