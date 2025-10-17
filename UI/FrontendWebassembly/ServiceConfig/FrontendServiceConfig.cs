@@ -1,5 +1,4 @@
 ﻿
-
 namespace FrontendWebassembly.ServiceConfig;
 
 public static class FrontendServiceConfig
@@ -17,7 +16,6 @@ public static class FrontendServiceConfig
 		services.AddScoped<LocalStorageService>();
 		services.AddScoped<IAccessService, AccessService>();
 		services.AddScoped<IPhilSysService, PhilSysService>();
-
 		return services;
 	}
 }

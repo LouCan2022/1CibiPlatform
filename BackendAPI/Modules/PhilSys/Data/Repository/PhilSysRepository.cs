@@ -34,7 +34,7 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction!;
 	}
 
-	public async Task<bool> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId)
+	public async Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
 
@@ -42,6 +42,6 @@ public class PhilSysRepository : IPhilSysRepository
 
 		await _dbcontext.SaveChangesAsync();
 
-		return true;
+		return Tid;
 	}
 }

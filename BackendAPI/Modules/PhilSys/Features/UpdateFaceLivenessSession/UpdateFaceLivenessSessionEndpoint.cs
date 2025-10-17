@@ -6,7 +6,7 @@ namespace PhilSys.Features.PostFaceLivenessSession;
 
 public record UpdateFaceLivenessSessionRequest(Guid Tid, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
 
-public record UpdateFaceLivenessSessionResponse(bool Success);
+public record UpdateFaceLivenessSessionResponse(Guid Tid);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -18,7 +18,7 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 				request.FaceLivenessSessionId
 				);
 			UpdateFaceLivenessSessionResult result = await sender.Send(command, cancellationToken);
-			var response = new UpdateFaceLivenessSessionResponse(result.Success);
+			var response = new UpdateFaceLivenessSessionResponse(result.Tid);
 			return Results.Ok(response);
 		})
 		.WithName("UpdateFaceLivenessSession")

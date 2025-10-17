@@ -10,7 +10,7 @@ public class UpdateFaceLivenessSessionService
 		_philSysRepository = philSysRepository;
 		_logger = logger;
 	}
-	public async Task<bool> UpdateFaceLivenessSessionAsync(
+	public async Task<Guid?> UpdateFaceLivenessSessionAsync(
 		Guid Tid,
 		string FaceLivenessSessionId,
 		CancellationToken ct = default
@@ -19,13 +19,13 @@ public class UpdateFaceLivenessSessionService
 		_logger.LogInformation("Updating Face Liveness Session for Tid: {Tid}", Tid);
 
 		var result = await _philSysRepository.UpdateFaceLivenessSessionAsync(Tid, FaceLivenessSessionId);
-		if (!result)
+		if (result == null)
 		{
 			_logger.LogInformation("wdd updated Face Liveness Session for Tid: {Tid}", Tid);
-			return false;
+			return null;
 		}
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Tid: {Tid}", Tid);
-		return result;
+		return Tid;
 	}
 }

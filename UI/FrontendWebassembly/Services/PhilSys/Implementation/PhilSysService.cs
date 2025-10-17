@@ -1,7 +1,4 @@
-﻿
-using FrontendWebassembly.DTO.PhilSys;
-
-namespace FrontendWebassembly.Services.Auth.Implementation;
+﻿namespace FrontendWebassembly.Services.PhilSys.Implementation;
 
 public class PhilSysService : IPhilSysService
 {
@@ -11,7 +8,7 @@ public class PhilSysService : IPhilSysService
 	{
 		_httpClient = httpClient;
 	}
-	public async Task<bool> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession)
+	public async Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession)
 	{
 		var payload = new
 		{
@@ -24,12 +21,12 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Update Successfully");
-			return false;
+			return Tid;
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<UpdateFaceLivenessSessionResponseDTO>();
 		Console.WriteLine("✅ Update Successfully");
 
-		return successContent!.Success;
+		return successContent!.Tid;
 	}
 }

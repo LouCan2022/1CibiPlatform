@@ -1,6 +1,6 @@
-﻿namespace FrontendWebassembly.Services.Auth.Interfaces;
+﻿namespace FrontendWebassembly.Services.PhilSys.Interfaces;
 
 public interface IPhilSysService
 {
-	Task<bool> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession);
+	Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession);
 }
