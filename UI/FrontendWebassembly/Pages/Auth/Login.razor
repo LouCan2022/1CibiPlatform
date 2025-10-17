@@ -36,6 +36,7 @@
                                   RequiredError="Email is required"
                                   InputType="InputType.Email"
                                   Adornment="Adornment.Start"
+                                  Validation="@(new Func<string, string>(ValidateEmail))"
                                   AdornmentIcon="@Icons.Material.Filled.Email"
                                   Class="mb-4" />
 
@@ -124,6 +125,18 @@ else
         passwordIcon = isPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
     }
 
+    private string ValidateEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return "Email is required";
+
+        if (!email.Contains("@"))
+            return "Invalid email format";
+
+        return null;
+    }
+
+
     private async Task HandleLogin()
     {
         isLoading = true;
@@ -156,7 +169,5 @@ else
             StateHasChanged();
             return;
         }
-
-
     }
 }

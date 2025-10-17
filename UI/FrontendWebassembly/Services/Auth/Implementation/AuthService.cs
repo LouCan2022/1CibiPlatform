@@ -13,13 +13,14 @@ public class AuthService : IAuthService
 	private readonly string _subMenuKey;
 	private readonly string _roleIdKey;
 
-	public AuthService(HttpClient httpClient,
+	public AuthService(IHttpClientFactory httpClientFactory,
 		LocalStorageService localStorageService,
 		IConfiguration configuration)
 	{
-		this._httpClient = httpClient;
+		this._httpClient = httpClientFactory.CreateClient("API");
 		this._localStorageService = localStorageService;
 		this._configuration = configuration;
+
 
 		_httpRefreshTokenCookieOnly = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 		this._userNameKey = "Username";

@@ -25,6 +25,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
     ports:
       - "5050:8080"
     volumes:
@@ -36,6 +37,7 @@ services:
       - backend
     depends_on:
       - postgres
+
   # FOR PROD
   # frontendwebassembly:
   #   environment:

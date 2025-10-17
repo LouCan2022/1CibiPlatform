@@ -253,6 +253,7 @@ code {
     margin: 0 4px;
     transition: all 0.2s ease-in-out;
 }
+
 .mud-tab-slider {
     display: none !important;
 }
