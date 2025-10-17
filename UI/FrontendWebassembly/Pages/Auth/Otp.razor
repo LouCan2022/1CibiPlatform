@@ -29,12 +29,13 @@
                    </MudAlert>
                }
 
-               @if (showResendSuccess)
+               @if (showSuccessMessage)
                {
                    <MudAlert Severity="Severity.Success" Elevation="0" Variant="Variant.Filled" Class="mb-4">
-                       Verification code has been resent to your email
+                       Email verified successfully! Redirecting to login in @redirectCountdown seconds...
                    </MudAlert>
                }
+   
    
                <MudForm @ref="form" @bind-IsValid="@success">
                    <MudTextField @bind-Value="otpCode"
@@ -48,13 +49,14 @@
                                  AdornmentIcon="@Icons.Material.Filled.Pin"
                                  MaxLength="6"
                                  Class="mb-4"
+                                 Disabled="@isDone"
                                  InputType="InputType.Text"
                                  AutoFocus="true" />
               
                    <ButtonComponent ButtonType="ButtonType.Submit" 
                                     Style="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
                                     OnClick="HandleVerifyOtp"
-                                    Disabled="@(!success || isLoading)"
+                                    Disabled="@(!success || isLoading || isDone)"
                                     Class="rounded-5 mb-3">
                         @if (isLoading)
                         {
@@ -97,6 +99,7 @@ else
     private bool isLoading = false;
     private bool isResending = false;
     private bool _isLoading = true;
+    private bool isDone => showSuccessMessage;
 
     private string otpCode = "";
     private bool isOtpValid = true;
@@ -105,6 +108,9 @@ else
 
     private System.Threading.Timer? countdownTimer;
     private bool isNavigationLocked = false;
+
+    private bool showSuccessMessage = false;
+    private int redirectCountdown = 5;
 
     protected override async Task OnInitializedAsync()
     {
@@ -215,7 +221,29 @@ else
 
             await RemoveNavigationLock();
 
-            Navigation.NavigateTo("/login", true);
+             // Show success message and start countdown
+            isLoading = false;
+            showSuccessMessage = true;
+            StateHasChanged();
+
+            // Start countdown timer
+            countdownTimer = new System.Threading.Timer(async _ =>
+            {
+                redirectCountdown--;
+                
+                if (redirectCountdown <= 0)
+                {
+                    countdownTimer?.Dispose();
+                    await InvokeAsync(() =>
+                    {
+                        Navigation.NavigateTo("/login", true);
+                    });
+                }
+                else
+                {
+                    await InvokeAsync(StateHasChanged);
+                }
+            }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
         catch (Exception ex)
         {

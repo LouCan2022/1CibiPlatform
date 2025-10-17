@@ -171,10 +171,10 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
-	public async Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email)
+	public async Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email, bool isUsed)
 	{
 		return await _dbcontext.OtpVerification
-					 .Where(ov => ov.Email == email && ov.IsUsed == true)
+					 .Where(ov => ov.Email == email && ov.IsUsed == isUsed)
 					 .FirstOrDefaultAsync();
 
 	}

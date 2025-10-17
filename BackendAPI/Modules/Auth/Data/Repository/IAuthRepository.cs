@@ -19,7 +19,7 @@ public interface IAuthRepository
 
 	Task<Authusers> IsUserEmailExistAsync(string email);
 
-	Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email);
+	Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email, bool isUsed);
 
 	Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto);
 
