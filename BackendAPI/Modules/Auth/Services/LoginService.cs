@@ -75,7 +75,7 @@ public class LoginService : ILoginService
 		{
 			HttpOnly = true,
 			Secure = _isHttps,
-			SameSite = SameSiteMode.Strict,
+			SameSite = SameSiteMode.Lax,
 			Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_expiryinMinutesKey))
 		};
 
@@ -186,7 +186,7 @@ public class LoginService : ILoginService
 		{
 			HttpOnly = true,
 			Secure = _isHttps,
-			SameSite = SameSiteMode.Strict,
+			SameSite = SameSiteMode.Lax,
 			Expires = DateTime.UtcNow.AddMinutes(_expiryinMinutesKey)
 		};
 
@@ -217,7 +217,7 @@ public class LoginService : ILoginService
 		{
 			HttpOnly = true,
 			Secure = _isHttps,
-			SameSite = SameSiteMode.Strict,
+			SameSite = SameSiteMode.Lax,
 			Expires = isRememberMe ? DateTime.UtcNow.AddDays(_cookieExpiryinDaysKey) : DateTime.UtcNow.AddMinutes(Convert.ToInt32(_expiryinMinutesKey))
 		};
 

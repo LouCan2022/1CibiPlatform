@@ -138,7 +138,7 @@
 			{
 				HttpOnly = true,
 				Secure = _isHttps,
-				SameSite = SameSiteMode.Strict,
+				SameSite = SameSiteMode.None,
 				Expires = DateTime.UtcNow.AddMinutes(_expiryinMinutesKey)
 			};
 

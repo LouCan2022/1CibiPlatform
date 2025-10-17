@@ -1,27 +1,12 @@
-﻿@using MudBlazor
-<Router AppAssembly="@typeof(App).Assembly">
+﻿<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
-
     <NotFound>
-        <PageTitle>Page Not Found</PageTitle>
+        <PageTitle>Not found</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-
-            <MudPaper Elevation="0" Outlined="false"
-                      Class="p-6 text-center rounded-3"
-                      Style="background-color: transparent; box-shadow: none;">
-                <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Large" Color="Color.Error" Class="mb-4" />
-                <MudText Typo="Typo.h4" Class="mb-2">Oops! Page not found</MudText>
-                <MudText Typo="Typo.subtitle1" Class="mb-4">
-                    The page you're looking for doesn’t exist or has been moved.
-                </MudText>
-                <ButtonComponent Href="/" StartIcon="@Icons.Material.Filled.Home" Style="width: 155px;">
-                    Go Back Home
-                </ButtonComponent>
-            </MudPaper>
-
+            <p role="alert">Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>
 </Router>

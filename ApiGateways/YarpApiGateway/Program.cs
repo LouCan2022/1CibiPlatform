@@ -1,36 +1,26 @@
-using Yarp.ReverseProxy.Transforms;
-
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddReverseProxy()
-	.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
-	.AddTransforms(builderContext =>
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("DevCors", policy =>
 	{
-		// Enable WebSocket support for Blazor debugging
-		builderContext.AddRequestTransform(transformContext =>
-		{
-			var request = transformContext.HttpContext.Request;
-			
-			// Check if this is a WebSocket upgrade request
-			if (request.Headers.ContainsKey("Upgrade") && 
-			    request.Headers["Upgrade"].ToString().Contains("websocket", StringComparison.OrdinalIgnoreCase))
-			{
-				transformContext.ProxyRequest.Headers.TryAddWithoutValidation("Connection", "Upgrade");
-				transformContext.ProxyRequest.Headers.TryAddWithoutValidation("Upgrade", "websocket");
-			}
-
-			return ValueTask.CompletedTask;
-		});
+		policy.WithOrigins("http://localhost:5134")
+			  .AllowCredentials()
+			  .AllowAnyMethod()
+			  .AllowAnyHeader();
 	});
+});
+
+
+builder.Services.AddReverseProxy()
+	.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
 
-// Enable WebSockets middleware
-app.UseWebSockets(new WebSocketOptions
-{
-	KeepAliveInterval = TimeSpan.FromMinutes(2)
-});
+app.UseWebSockets();
 
 app.MapReverseProxy();
+
+app.UseCors("DevCors");
 
 app.Run();

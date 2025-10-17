@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>0db9b162-458d-4209-b4d9-6cb81c0be7ab</UserSecretsId>
@@ -34,8 +34,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Auth\Auth.csproj" />
     <ProjectReference Include="..\..\Modules\CNX\CNX.csproj" />
-	<ProjectReference Include="..\..\Modules\PhilSys\PhilSys.csproj" />
-	<ProjectReference Include="..\..\Modules\SSO\SSO.csproj" />
+    <ProjectReference Include="..\..\Modules\PhilSys\PhilSys.csproj" />
+    <ProjectReference Include="..\..\Modules\SSO\SSO.csproj" />
   </ItemGroup>
 
   <ItemGroup>
