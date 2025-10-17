@@ -1,9 +1,10 @@
 ﻿
 @layout PhilSysLayout
-@page "/philsys/idv/liveness/{Tid:Guid}"
+@page "/philsys/idv/liveness/{Tid:guid}"
 @using MudBlazor
 @inject IJSRuntime JS
-  
+@inject IPhilSysService IPhilSysService
+
 @if (!_completed)
 {
 <MudPaper Class="p-6 text-center background-color: var(--mud-palette-surface) !important; mx-auto p-6 mt-0 philsys-card form-container justify-center align-center"
@@ -37,45 +38,34 @@ else
 
 @code {
     [Parameter]
-    public required string Tid { get; set; }
-
-    private bool _completed = false;
+    public Guid Tid { get; set; } 
 
     [SupplyParameterFromQuery(Name = "session")]
-
     public string? SessionId { get; set; }
+
+    private bool _completed = false;
+    private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
 
     private async Task StartLiveness()
     {
-        try
-        {
-            await JS.InvokeVoidAsync("startLivenessInterop");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error calling eKYC: {ex.Message}");
-        }
-    }
-
-    protected override Task OnInitializedAsync()
-    {
-        Guid.TryParse(Tid, out var tidGuid);
-        return base.OnInitializedAsync();
-    }
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            JS.InvokeVoidAsync("addEventListener", "livenessCompleted",
-                DotNetObjectReference.Create(this), "OnLivenessCompleted");
-        }
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("startLivenessInterop", Tid, _dotNetRef);
     }
 
     [JSInvokable]
-    public void OnLivenessCompleted()
+    public void OnLivenessCompleted(string sessionId)
     {
+        SessionId = sessionId;
         _completed = true;
+
+        IPhilSysService.UpdateFaceLivenessSessionAsync(Tid, sessionId);
+        Console.WriteLine($"✅ Received session ID: {sessionId}");
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
     }
 }
 

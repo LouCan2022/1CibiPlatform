@@ -4,15 +4,12 @@ namespace PhilSys.Services;
 
 public class PartnerSystemService
 {
-	private readonly HttpClient _httpClientFactory;
 	private readonly ILogger<PartnerSystemService> _logger;
 	private readonly IPhilSysRepository _repository;
 
 	public PartnerSystemService(
-		//IHttpClientFactory httpClientFactory,
 		ILogger<PartnerSystemService> logger, IPhilSysRepository repository)
 	{
-		//_httpClientFactory = httpClientFactory.CreateClient("PhilSys");
 		_logger = logger;
 		_repository = repository;
 	}
@@ -89,7 +86,8 @@ public class PartnerSystemService
 			pob_municipality: null,
 			pob_province: null,
 			pob_country: null,
-			face_liveness_session_id: livenessUrl,
+			liveness_link: livenessUrl,
+			face_liveness_session_id: null,
 			isTransacted: false
 		);
 	}
