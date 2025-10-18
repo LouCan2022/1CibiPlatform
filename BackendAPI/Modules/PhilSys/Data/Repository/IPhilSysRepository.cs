@@ -6,4 +6,6 @@ public interface IPhilSysRepository
 	Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid, PhilSysTransaction PhilSysTransaction);
 
 	Task<PhilSysTransaction> GetTransactionDataByTidAsync(Guid Tid);
+
+	Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId);
 }
