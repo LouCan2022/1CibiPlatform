@@ -4,9 +4,9 @@ public class PhilSysService : IPhilSysService
 {
 	private readonly HttpClient _httpClient;
 
-	public PhilSysService(HttpClient httpClient)
+	public PhilSysService(IHttpClientFactory httpClientFactory)
 	{
-		_httpClient = httpClient;
+		_httpClient = httpClientFactory.CreateClient("API");
 	}
 	public async Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession)
 	{

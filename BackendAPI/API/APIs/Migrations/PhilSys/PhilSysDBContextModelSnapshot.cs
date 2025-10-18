@@ -40,6 +40,9 @@ namespace APIs.Migrations.PhilSys
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
 
+                    b.Property<string>("InquiryType")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsTransacted")
                         .HasColumnType("boolean");
 

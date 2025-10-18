@@ -2,7 +2,7 @@
 
 public record UpdateFaceLivenessSessionCommand(Guid Tid, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResult>;
 
-public record UpdateFaceLivenessSessionResult(Guid Tid);
+public record UpdateFaceLivenessSessionResult(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
 public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivenessSessionCommand, UpdateFaceLivenessSessionResult>
 {
 	private readonly UpdateFaceLivenessSessionService _updateFaceLivenessSessionService;
@@ -25,6 +25,6 @@ public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivene
 
 		_logger.LogInformation("Successfully retrieved the Response");
 
-		return new UpdateFaceLivenessSessionResult(command.Tid);
+		return new UpdateFaceLivenessSessionResult(result);
 	}
 }

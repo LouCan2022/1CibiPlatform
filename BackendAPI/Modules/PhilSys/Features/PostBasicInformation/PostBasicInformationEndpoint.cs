@@ -4,7 +4,8 @@ public record PostBasicInformationRequest(string first_name,
 										  string middle_name,
 										  string last_name,
 										  string suffix,
-										  DateTime birth_date,
+										  string birth_date,
+										  string bearer_token,
 										  string face_liveness_session_id) : ICommand<PostBasicInformationResponse>;
 
 public record PostBasicInformationResponse(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
@@ -20,6 +21,7 @@ public class PostBasicInformationEndpoint : ICarterModule
 				request.last_name,
 				request.suffix,
 				request.birth_date,
+				request.bearer_token,
 				request.face_liveness_session_id
 				);
 
