@@ -1,6 +1,7 @@
 ﻿namespace PhilSys.Features.PostPCN;
 
-public record PostPCNRequest(string value, 
+public record PostPCNRequest(string value,
+							 string bearer_token,
 							 string face_liveness_session_id) : ICommand<PostPCNResponse>;
 
 public record PostPCNResponse(BasicInformationOrPCNResponseDTO PCNResponseDTO);
@@ -12,6 +13,7 @@ public class PostPCNEndpoint : ICarterModule
 		{
 			var command = new PostPCNCommand(
 				request.value,
+				request.bearer_token,
 				request.face_liveness_session_id
 				);
 

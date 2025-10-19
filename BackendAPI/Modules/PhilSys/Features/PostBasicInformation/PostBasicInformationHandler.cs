@@ -5,7 +5,8 @@ public record PostBasicInformationCommand(string first_name,
 										  string middle_name,
 										  string last_name,
 										  string suffix,
-										  DateTime birth_date,
+										  string birth_date,
+										  string bearer_token,
 										  string face_liveness_session_id) : ICommand<PostBasicInformationResult>;
 public record PostBasicInformationResult(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
 public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationCommand, PostBasicInformationResult>
@@ -29,6 +30,7 @@ public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationC
 				command.last_name,
 				command.suffix,
 				command.birth_date,
+				command.bearer_token,
 				command.face_liveness_session_id
 			);
 
