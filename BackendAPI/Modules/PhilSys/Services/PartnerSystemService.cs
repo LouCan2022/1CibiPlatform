@@ -23,6 +23,7 @@ public class PartnerSystemService
 			transaction = new PhilSysTransaction
 			{
 				Tid = Guid.NewGuid(),
+				InquiryType = "name_dob",
 				FirstName = PartnerSystemRequestDTO.IdentityData.FirstName,
 				MiddleName = PartnerSystemRequestDTO.IdentityData.MiddleName,
 				LastName = PartnerSystemRequestDTO.IdentityData.LastName,
@@ -37,13 +38,14 @@ public class PartnerSystemService
 			transaction = new PhilSysTransaction
 			{
 				Tid = Guid.NewGuid(),
+				InquiryType = "pcn",
 				PCN = PartnerSystemRequestDTO.IdentityData.PCN,
 				IsTransacted = false,
 				CreatedAt = DateTime.UtcNow
 			};
 		}
 
-		var livenessUrl = $"http://localhost:5123/philsys/idv/liveness/{transaction.Tid}";
+		var livenessUrl = $"http://localhost:5134/philsys/idv/liveness/{transaction.Tid}";
 
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)

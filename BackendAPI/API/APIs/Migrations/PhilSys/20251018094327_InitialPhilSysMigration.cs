@@ -16,6 +16,7 @@ namespace APIs.Migrations.PhilSys
                 columns: table => new
                 {
                     Tid = table.Column<Guid>(type: "uuid", nullable: false),
+                    InquiryType = table.Column<string>(type: "text", nullable: true),
                     FirstName = table.Column<string>(type: "text", nullable: true),
                     MiddleName = table.Column<string>(type: "text", nullable: true),
                     LastName = table.Column<string>(type: "text", nullable: true),

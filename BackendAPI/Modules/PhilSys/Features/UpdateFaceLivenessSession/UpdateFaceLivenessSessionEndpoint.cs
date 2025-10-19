@@ -1,12 +1,8 @@
-﻿
-using PhilSys.Features.PostPCN;
-using PhilSys.Features.UpdateFaceLivenessSession;
-
-namespace PhilSys.Features.PostFaceLivenessSession;
+﻿namespace PhilSys.Features.PostFaceLivenessSession;
 
 public record UpdateFaceLivenessSessionRequest(Guid Tid, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
 
-public record UpdateFaceLivenessSessionResponse(Guid Tid);
+public record UpdateFaceLivenessSessionResponse(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -18,12 +14,14 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 				request.FaceLivenessSessionId
 				);
 			UpdateFaceLivenessSessionResult result = await sender.Send(command, cancellationToken);
-			var response = new UpdateFaceLivenessSessionResponse(result.Tid);
-			return Results.Ok(response);
+
+			var response = new UpdateFaceLivenessSessionResponse(result.BasicInformationOrPCNResponseDTO);
+
+			return Results.Ok(response.BasicInformationOrPCNResponseDTO);
 		})
 		.WithName("UpdateFaceLivenessSession")
 		.WithTags("PhilSys")
-		.Produces<PostPCNResponse>()
+		.Produces<UpdateFaceLivenessSessionResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.ProducesProblem(StatusCodes.Status401Unauthorized)
 		.WithSummary("Update Face Liveness Session Id");

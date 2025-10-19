@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace PhilSys.Services;
+﻿namespace PhilSys.Services;
 public class PostBasicInformationService
 {
 	private readonly HttpClient _httpClient;
@@ -19,9 +17,9 @@ public class PostBasicInformationService
 		string middle_name,
 		string last_name,
 		string suffix,
-		DateTime birth_date,
+		string birth_date,
 		string face_liveness_session_id,
-		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlZjM4NGMyYTA4NiIsImlhdCI6MTc2MDUwNzk4MC4xNzIxNzEsIm5iZiI6MTc2MDUwNzk4MC4xNzIxNzEsImV4cCI6MTc2MDUwOTc4MC4xNzIxNzF9.JGMjzBo5DOiguO09173cmrbNepWtLqrF7JhJPTZt6jE",
+		string bearer_token,
 		CancellationToken ct = default
 		)
 	{
@@ -33,14 +31,14 @@ public class PostBasicInformationService
 			middle_name,
 			last_name,
 			suffix,
-			birth_date = birth_date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+			birth_date,
 			face_liveness_session_id
 		};
 
 		_logger.LogInformation("Sending basic information request to PhilSys endpoint: {Endpoint}", endpoint);
 
 		_httpClient.DefaultRequestHeaders.Authorization =
-			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearer_token);
 
 		var response = await _httpClient.PostAsJsonAsync(endpoint, body, ct);
 
@@ -93,7 +91,7 @@ public class PostBasicInformationService
 			);
 		}
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponseDTO>(ct);
 
 		if (responseBody is null || responseBody.data is null)
 		{
