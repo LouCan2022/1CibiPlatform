@@ -8,7 +8,8 @@ public class PhilSysService : IPhilSysService
 	{
 		_httpClient = httpClientFactory.CreateClient("API");
 	}
-	public async Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession)
+
+	public async Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession)
 	{
 		var payload = new
 		{
@@ -21,12 +22,28 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Update Successfully");
-			return Tid;
+			return null!;
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<UpdateFaceLivenessSessionResponseDTO>();
 		Console.WriteLine("✅ Update Successfully");
 
-		return successContent!.Tid;
+		return successContent!;
+	}
+
+	public async Task<TransactionStatusResponse> GetTransactionStatus(Guid Tid)
+	{
+		var response = await _httpClient.PostAsJsonAsync("idv/validate/liveness", Tid);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Get the Status");
+			return null!;
+		}
+
+		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponse>();
+		Console.WriteLine("✅ Update Successfully");
+
+		return successContent!;
+
 	}
 }

@@ -2,5 +2,8 @@
 
 public interface IPhilSysService
 {
-	Task<Guid?> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession);
+	Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession);
+
+	Task<TransactionStatusResponse> GetTransactionStatus (Guid Tid);
+
 }

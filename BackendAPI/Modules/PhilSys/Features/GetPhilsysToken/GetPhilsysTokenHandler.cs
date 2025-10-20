@@ -19,8 +19,7 @@ public class GetPhilSysTokenHandler : ICommandHandler<GetPhilSysTokenCommand, Ge
 
 		var tokenResult = await _getTokenService.GetPhilsysTokenAsync(
 			command.client_id,
-			command.client_secret,
-			cancellationToken
+			command.client_secret
 		);
 
 		_logger.LogInformation("Successfully retrieved PhilSys token");

@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.PartnerSystemQuery;
 
-public record PartnerSystemCommand(PartnerSystemRequestDTO PartnerSystemRequestDTO) : ICommand<PartnerSystemResult>;
+public record PartnerSystemCommand(string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResult>;
 
 public record PartnerSystemResult(PartnerSystemResponseDTO PartnerSystemResponseDTO);
 
@@ -9,42 +9,37 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 {
 	public PartnerSystemCommandValidator()
 	{
-		RuleFor(x => x.PartnerSystemRequestDTO).NotNull();
-
 		// Always required fields
-		RuleFor(x => x.PartnerSystemRequestDTO.InquiryType)
+		RuleFor(x => x.inquiry_type)
 			.NotEmpty().WithMessage("inquiry_type is required.")
 			.Must(t => t == "name_dob" || t == "pcn")
 			.WithMessage("inquiry_type must be either 'name_dob' or 'pcn'.");
 
-		RuleFor(x => x.PartnerSystemRequestDTO.IdentityData)
-			.NotNull().WithMessage("identity_data is required.");
-
 		// When InquiryType = "name_dob"
-		When(x => x.PartnerSystemRequestDTO.InquiryType == "name_dob", () =>
+		When(x => x.inquiry_type == "name_dob", () =>
 		{
-			RuleFor(x => x.PartnerSystemRequestDTO.IdentityData.FirstName)
+			RuleFor(x => x.identity_data.FirstName)
 				.NotEmpty().WithMessage("First Name is required for 'name_dob' inquiry.")
 				.MaximumLength(50).WithMessage("First Name must not exceed 50 characters.");
 
-			RuleFor(x => x.PartnerSystemRequestDTO.IdentityData.MiddleName)
+			RuleFor(x => x.identity_data.MiddleName)
 				.NotEmpty().WithMessage("Middle Name is required for 'name_dob' inquiry.")
 				.MaximumLength(50).WithMessage("Middle Name must not exceed 50 characters.");
 
-			RuleFor(x => x.PartnerSystemRequestDTO.IdentityData.LastName)
+			RuleFor(x => x.identity_data.LastName)
 				.NotEmpty().WithMessage("Last Name is required for 'name_dob' inquiry.")
 				.MaximumLength(50).WithMessage("Last Name must not exceed 50 characters.");
 
-			RuleFor(x => x.PartnerSystemRequestDTO.IdentityData.BirthDate)
+			RuleFor(x => x.identity_data.BirthDate)
 				.NotEmpty().WithMessage("Birth Date is required for 'name_dob' inquiry.")
 				.Matches(@"^\d{4}-\d{2}-\d{2}$")
 				.WithMessage("Birth Date must be in format YYYY-MM-DD.");
 		});
 
 		// When InquiryType = "pcn"
-		When(x => x.PartnerSystemRequestDTO.InquiryType == "pcn", () =>
+		When(x => x.inquiry_type == "pcn", () =>
 		{
-			RuleFor(x => x.PartnerSystemRequestDTO.IdentityData.PCN)
+			RuleFor(x => x.identity_data.PCN)
 				.NotEmpty().WithMessage("PCN is required for 'pcn' inquiry.")
 				.Matches(@"^\d{16}$")
 				.WithMessage("PCN must be exactly 16 digits.");
@@ -63,7 +58,7 @@ public class PartnerSystemHandler : ICommandHandler<PartnerSystemCommand, Partne
 	}
 	public async Task<PartnerSystemResult> Handle(PartnerSystemCommand request, CancellationToken cancellationToken)
 	{
-		var result = await _partnerSystemService.PartnerSystemQueryAsync(request.PartnerSystemRequestDTO);
+		var result = await _partnerSystemService.PartnerSystemQueryAsync(request.inquiry_type, request.identity_data);
 
 		_logger.LogInformation("Successfully retrieved the Response");
 

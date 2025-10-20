@@ -42,13 +42,14 @@ public class UpdateFaceLivenessSessionService
 		}
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Tid: {Tid}", Tid);
-		var token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
 
-		var accessToken = token.access_token;
+		var token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
+		string accessToken = token.access_token;
+
+		
 		if (result.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
 			
-
 			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
 		
 			return responseBody!;
@@ -56,11 +57,14 @@ public class UpdateFaceLivenessSessionService
 
 		else if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
+			
 			var responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+			return responseBody!;
 		}
 
+		await UpdateTransactionStatus(Tid);
 
-			return new BasicInformationOrPCNResponseDTO(
+		return new BasicInformationOrPCNResponseDTO(
 				code: "",
 				token: "",
 				reference: "",
@@ -101,5 +105,17 @@ public class UpdateFaceLivenessSessionService
 				message: "",
 				error_description: ""
 			);
+	}
+
+	public async Task UpdateTransactionStatus(Guid Tid)
+	{
+		var transaction = await _philSysRepository.GetTransactionDataByTidAsync(Tid);
+		if (transaction == null)
+		{
+			_logger.LogInformation("Transaction not found for Tid: {Tid}", Tid);
+		}
+		transaction!.IsTransacted = true;
+		transaction.TransactedAt = DateTime.UtcNow;
+		await _philSysRepository.UpdateTransactionDataAsync(Tid, transaction);
 	}
 }

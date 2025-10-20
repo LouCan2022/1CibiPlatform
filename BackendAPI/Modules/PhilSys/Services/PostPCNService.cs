@@ -83,7 +83,7 @@ public class PostPCNService
 			);
 		}
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponseDTO>(ct);
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
 		if (responseBody is null || responseBody.data is null)
 		{

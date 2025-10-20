@@ -8,4 +8,6 @@ public interface IPhilSysRepository
 	Task<PhilSysTransaction> GetTransactionDataByTidAsync(Guid Tid);
 
 	Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId);
+
+	Task<TransactionStatusResponse> GetLivenessSessionStatus(Guid Tid);
 }

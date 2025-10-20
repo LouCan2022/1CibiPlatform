@@ -13,6 +13,7 @@ public class PhilSysTransaction
 	public string? PCN { get; set; }
 	public string? FaceLivenessSessionId { get; set; }
 	public bool IsTransacted { get; set; }
+	public DateTime ExpiresAt { get; set; }
 	public DateTime CreatedAt { get; set; }
 	public DateTime? TransactedAt { get; set; }
 }
