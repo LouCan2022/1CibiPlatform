@@ -37,6 +37,7 @@ public record PartnerSystemResponseDTO(
 	string? pob_municipality,
 	string? pob_province,
 	string? pob_country,
+	string? liveness_link,
 	string? face_liveness_session_id,
 	bool? isTransacted
 );

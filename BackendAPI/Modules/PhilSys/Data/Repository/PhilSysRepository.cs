@@ -3,35 +3,45 @@ namespace PhilSys.Data.Repository;
 
 public class PhilSysRepository : IPhilSysRepository
 {
-	private readonly PhilSysDBContext dbcontext;
+	private readonly PhilSysDBContext _dbcontext;
 
 	public PhilSysRepository(PhilSysDBContext dbcontext)
 	{
-		this.dbcontext = dbcontext;
+		_dbcontext = dbcontext;
 	}
 	public async Task<bool> AddTransactionDataAsync(PhilSysTransaction PhilSysTransaction)
 	{
-		await dbcontext.PhilSysTransactions.AddAsync(PhilSysTransaction);
-		await dbcontext.SaveChangesAsync();
+		await _dbcontext.PhilSysTransactions.AddAsync(PhilSysTransaction);
+		await _dbcontext.SaveChangesAsync();
 		return true;
 	}
 	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid, PhilSysTransaction PhilSysTransaction)
 	{
-		var transaction = dbcontext.PhilSysTransactions.FirstOrDefault(x => x.Tid == Tid);
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
 	
 		transaction!.IsTransacted = true;
 		transaction.TransactedAt = DateTime.UtcNow;
 
-		await dbcontext.SaveChangesAsync();
+		await _dbcontext.SaveChangesAsync();
 
 		return transaction;
 	}
 
 	public async Task<PhilSysTransaction> GetTransactionDataByTidAsync(Guid Tid)
 	{
-		var transaction = await dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
 
 		return transaction!;
 	}
 
+	public async Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId)
+	{
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+
+		transaction!.FaceLivenessSessionId = FaceLivenessSessionId;
+
+		await _dbcontext.SaveChangesAsync();
+
+		return transaction;
+	}
 }

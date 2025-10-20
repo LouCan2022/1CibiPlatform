@@ -4,15 +4,12 @@ namespace PhilSys.Services;
 
 public class PartnerSystemService
 {
-	private readonly HttpClient _httpClientFactory;
 	private readonly ILogger<PartnerSystemService> _logger;
 	private readonly IPhilSysRepository _repository;
 
 	public PartnerSystemService(
-		//IHttpClientFactory httpClientFactory,
 		ILogger<PartnerSystemService> logger, IPhilSysRepository repository)
 	{
-		//_httpClientFactory = httpClientFactory.CreateClient("PhilSys");
 		_logger = logger;
 		_repository = repository;
 	}
@@ -26,6 +23,7 @@ public class PartnerSystemService
 			transaction = new PhilSysTransaction
 			{
 				Tid = Guid.NewGuid(),
+				InquiryType = "name_dob",
 				FirstName = PartnerSystemRequestDTO.IdentityData.FirstName,
 				MiddleName = PartnerSystemRequestDTO.IdentityData.MiddleName,
 				LastName = PartnerSystemRequestDTO.IdentityData.LastName,
@@ -40,13 +38,14 @@ public class PartnerSystemService
 			transaction = new PhilSysTransaction
 			{
 				Tid = Guid.NewGuid(),
+				InquiryType = "pcn",
 				PCN = PartnerSystemRequestDTO.IdentityData.PCN,
 				IsTransacted = false,
 				CreatedAt = DateTime.UtcNow
 			};
 		}
 
-		var livenessUrl = $"http://localhost:5123/philsys/idv/liveness/{transaction.Tid}";
+		var livenessUrl = $"http://localhost:5134/philsys/idv/liveness/{transaction.Tid}";
 
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)
@@ -89,7 +88,8 @@ public class PartnerSystemService
 			pob_municipality: null,
 			pob_province: null,
 			pob_country: null,
-			face_liveness_session_id: livenessUrl,
+			liveness_link: livenessUrl,
+			face_liveness_session_id: null,
 			isTransacted: false
 		);
 	}

@@ -12,11 +12,11 @@ public class PostPCNService
 		_logger = logger;
 	}
 
-	public async Task<BasicInformationOrPCNResponseDTO> PostBasicInformationAsync(
+	public async Task<BasicInformationOrPCNResponseDTO> PostPCNAsync(
 		string value,
 		string face_liveness_session_id,
-		CancellationToken ct = default,
-		string bearerToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3dzLmV2ZXJpZnkuZ292LnBoIiwic3ViIjoiNDI1IiwianRpIjoiNjhlZjQ1MTcwODE1MiIsImlhdCI6MTc2MDUxMTI1NS4wMzMxMTEsIm5iZiI6MTc2MDUxMTI1NS4wMzMxMTEsImV4cCI6MTc2MDUxMzA1NS4wMzMxMTF9.-m1nZOBp08lXzUYymHoH_j56JtDfddFF2XtTOnVojx8"
+		string bearer_token,
+		CancellationToken ct = default
 		)
 	{
 		var endpoint = "query/qr";
@@ -30,7 +30,7 @@ public class PostPCNService
 		_logger.LogInformation("Sending PCN request to PhilSys endpoint: {Endpoint}", endpoint);
 
 		_httpClient.DefaultRequestHeaders.Authorization =
-			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearer_token);
 	
 		var response = await _httpClient.PostAsJsonAsync(endpoint, body, ct);
 
@@ -83,7 +83,7 @@ public class PostPCNService
 			);
 		}
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponseDTO>(ct);
 
 		if (responseBody is null || responseBody.data is null)
 		{
