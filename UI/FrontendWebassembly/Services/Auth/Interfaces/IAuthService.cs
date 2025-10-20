@@ -16,6 +16,8 @@ public interface IAuthService
 
 	Task<OtpSessionResponseDTO> OtpVerification(OtpVerificationRequestDTO otpVerificationRequestDTO);
 
+	Task<OTPResendResponseDTO> OtpResendAsync(OTPResendRequestDTO otpResendRequestDTO);
+
 	Task<bool> Logout();
 
 }

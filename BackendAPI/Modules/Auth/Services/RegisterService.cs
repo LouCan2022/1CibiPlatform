@@ -193,6 +193,47 @@ public class RegisterService : IRegisterService
 	}
 
 
+	public async Task<bool> ManualResendOtpCodeAsync(Guid userId, string email)
+	{
+		var otpVerification = await _authRepository.IsUserEmailExistInOtpVerificationAsync(email, false);
+
+		if (otpVerification == null)
+		{
+			_logger.LogWarning("No OTP record found for email: {Email}", email);
+			throw new Exception("No OTP record found for this email.");
+		}
+
+		var user = new OtpVerificationRequestDTO(otpVerification.OtpId, otpVerification.Email);
+
+		var isOtpValid = await _authRepository.OtpVerificationUserData(user);
+
+		if (isOtpValid == null)
+		{
+			_logger.LogWarning("No OTP record found for email: {Email}", otpVerification.Email);
+			throw new Exception("No OTP record found for this email.");
+		}
+
+		var userDetail = await _authRepository.IsUserEmailExistInOtpVerificationAsync(otpVerification.Email, false);
+
+		if (userDetail == null)
+		{
+			_logger.LogWarning("No OTP record found for email: {Email}", otpVerification.Email);
+			throw new Exception("No OTP record found for this email.");
+		}
+
+		var isSent = await ResendOtpAsync(otpVerification);
+
+		if (!isSent)
+		{
+			_logger.LogError("Failed to resend OTP email to: {Email}", otpVerification.Email);
+			throw new Exception("Failed to resend OTP email.");
+		}
+
+		_logger.LogInformation("Resent OTP email to: {Email}", otpVerification.Email);
+
+		return isSent;
+
+	}
 
 	public async Task<bool> ResendOtpAsync(OtpVerification otpVerification)
 	{

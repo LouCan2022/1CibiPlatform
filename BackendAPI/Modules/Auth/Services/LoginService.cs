@@ -296,6 +296,5 @@ public class LoginService : ILoginService
 		_logger.LogInformation("User is authenticated.");
 		return Task.FromResult(true);
 	}
-
 }
 
