@@ -29,15 +29,23 @@
                    </MudAlert>
                }
 
-               @if (showSuccessMessage)
+                @if (showSuccessMessage)
                {
                    <MudAlert Severity="Severity.Success" Elevation="0" Variant="Variant.Filled" Class="mb-4">
                        Email verified successfully! Redirecting to login in @redirectCountdown seconds...
                    </MudAlert>
                }
+
+
+                @if (isResendSuccess)
+                {
+                    <MudAlert Severity="Severity.Success" Elevation="0" Variant="Variant.Filled" Class="mb-4">
+                        New OTP has been sent to your email.
+                    </MudAlert>
+                }
    
    
-               <MudForm @ref="form" @bind-IsValid="@success">
+             <MudForm @ref="form" @bind-IsValid="@success">
                    <MudTextField @bind-Value="otpCode"
                                  Label="Verification Code"
                                  Variant="Variant.Outlined"
@@ -52,23 +60,42 @@
                                  Disabled="@isDone"
                                  InputType="InputType.Text"
                                  AutoFocus="true" />
-              
-                   <ButtonComponent ButtonType="ButtonType.Submit" 
-                                    Style="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
-                                    OnClick="HandleVerifyOtp"
-                                    Disabled="@(!success || isLoading || isDone)"
-                                    Class="rounded-5 mb-3">
-                        @if (isLoading)
-                        {
-                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                        }
-                        else
-                        {
-                            <span>Verify Email</span>
-                        }
-                   </ButtonComponent>
+                <MudGrid>
+                        <MudItem xs="6">
+                            <ButtonComponent ButtonType="ButtonType.Submit"       
+                                             OnClick="HandleResendOtp"
+                                             Disabled="@isResendLoading"
+                                             Color="MudBlazor.Color.Primary"
+                                             Variant="Variant.Outlined"
+                                             Class="h-100 shadow-sm">
+                                @if (isLoading)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>Resend OTP</span>
+                                }
+                            </ButtonComponent>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <ButtonComponent ButtonType="ButtonType.Submit"                                     
+                                             OnClick="HandleVerifyOtp"
+                                             Disabled="@(!success || isLoading || isDone)"
+                                             Class="@($"theme-button {(success ? "theme-button-active" : "theme-button-inactive")}")">
+                                @if (isLoading)
+                                {
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                }
+                                else
+                                {
+                                    <span>Verify Email</span>
+                                }
+                            </ButtonComponent>
+                        </MudItem>
+               </MudGrid>
 
-               </MudForm>
+             </MudForm>
    
                <div class="footer-links">
                    Wrong email? <a href="/register">Go back to registration</a>
@@ -100,6 +127,8 @@ else
     private bool isResending = false;
     private bool _isLoading = true;
     private bool isDone => showSuccessMessage;
+    private bool isResendLoading = false;    
+    private bool isResendSuccess = false;
 
     private string otpCode = "";
     private bool isOtpValid = true;
@@ -132,7 +161,7 @@ else
         }
 
         _isLoading = false;
-        
+
         Navigation.LocationChanged += HandleLocationChanged!;
         await SetupNavigationLock();
     }
@@ -173,7 +202,7 @@ else
         {
             var confirmed = JSRuntime.InvokeAsync<bool>("confirm", 
                 "You have an unverified account. Are you sure you want to leave?").GetAwaiter().GetResult();
-            
+
             if (!confirmed)
             {
                 Navigation.NavigateTo($"/verify-otp?userId={userId}&email={email}", false);
@@ -189,19 +218,16 @@ else
     {
         if (string.IsNullOrWhiteSpace(otp))
             return "Verification code is required";
-        
+
         if (otp.Length != 6)
             return "Verification code must be 6 characters";
-        
+
         return null;
     }
 
     private async Task HandleVerifyOtp()
     {
-        isLoading = true;
-        isOtpValid = true;
-        errorMessage = "";
-        showResendSuccess = false;
+        SetState();
 
         try
         {
@@ -214,6 +240,7 @@ else
                 Console.WriteLine($"OTP Verification Error: {result.errorMessage}");
                 isLoading = false;
                 isOtpValid = false;
+                isResending = false;
                 errorMessage = result.errorMessage;
                 StateHasChanged();
                 return;
@@ -221,7 +248,7 @@ else
 
             await RemoveNavigationLock();
 
-             // Show success message and start countdown
+            // Show success message and start countdown
             isLoading = false;
             showSuccessMessage = true;
             StateHasChanged();
@@ -230,7 +257,7 @@ else
             countdownTimer = new System.Threading.Timer(async _ =>
             {
                 redirectCountdown--;
-                
+
                 if (redirectCountdown <= 0)
                 {
                     countdownTimer?.Dispose();
@@ -255,9 +282,55 @@ else
         }
     }
 
+    private async void HandleResendOtp()
+    {
+        SetState();
+
+        try
+        {
+            var otpDetails = new OTPResendRequestDTO(Guid.Parse(userId!), email!);
+            var result = await IAuthService.OtpResendAsync(otpDetails);
+            if (!result.isSuccess)
+            {
+                Console.WriteLine($"Resend OTP Error: {result.errorMessage}");
+                isLoading = false;
+                isOtpValid = false;
+                isResendLoading = false;
+                errorMessage = result.errorMessage;
+                StateHasChanged();
+                return;
+            }
+            isLoading = false;
+            isResendLoading = false;
+            showResendSuccess = true;
+            isResendSuccess = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Resend OTP Exception: {ex.Message}");
+            isLoading = false;
+            isOtpValid = false;
+            isResendLoading = false;
+            errorMessage = "An unexpected error occurred. Please try again.";
+            StateHasChanged();
+        }
+    }
+
+    private void SetState()
+    {
+        isLoading = true;
+        isOtpValid = true;
+        isResendLoading = true;
+        errorMessage = "";
+        showResendSuccess = true;
+        isResendSuccess = false;
+    }
+
     public void Dispose()
     {
         Navigation.LocationChanged -= HandleLocationChanged;
         RemoveNavigationLock().GetAwaiter().GetResult();
     }
+
 }

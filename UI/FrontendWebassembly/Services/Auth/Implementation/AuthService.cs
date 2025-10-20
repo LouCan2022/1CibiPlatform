@@ -251,7 +251,34 @@ public class AuthService : IAuthService
 		Console.WriteLine("✅ OTP verification successful.");
 
 		return new OtpSessionResponseDTO(true, string.Empty);
+	}
 
+	public async Task<OTPResendResponseDTO> OtpResendAsync(OTPResendRequestDTO otpResendRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting resending email for OTP...");
 
+		var payload = new
+		{
+			OtpVerificationRequestDto = new
+			{
+				userId = otpResendRequestDTO.userId,
+				email = otpResendRequestDTO.email
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /auth/resend/otp for UserId: {otpResendRequestDTO.userId}, Email: {otpResendRequestDTO.email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/resend-otp", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Resending OTP failed. Reading error content...");
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+			return new OTPResendResponseDTO(false, errorContent!.Detail);
+		}
+
+		Console.WriteLine("✅ Resending OTP successful.");
+
+		return new OTPResendResponseDTO(true, string.Empty);
 	}
 }
