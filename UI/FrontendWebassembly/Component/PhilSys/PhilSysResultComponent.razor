@@ -1,5 +1,4 @@
-﻿@page "/philsys/result"
-
+﻿@layout PhilSysLayout
 @using MudBlazor
 <MudPaper Class="p-6 d-flex flex-wrap align-items-start gap-6 position-relative"
           Style="background-color: var(--mud-palette-surface); border-radius: 12px; padding: 20px 20px 60px 0px;">
@@ -22,10 +21,12 @@
             {
                 <tr>
                     <td style="width: 25%; padding: 6px 8px; vertical-align: top; color: var(--mud-palette-text-primary);">
-                        <MudText Typo="Typo.body1">@row.Label1</MudText>
+                        <MudText Typo="Typo.body1">@row.Label</MudText>
                     </td>
                     <td style="width: 25%; padding: 6px 8px;">
-                        <MudText Style="color: var(--mud-palette-text-primary);  font-weight: bold;" Typo="Typo.body1">@row.Value1</MudText>
+                        <MudText Style="color: var(--mud-palette-text-primary); font-weight: bold;" Typo="Typo.body1">
+                            @(string.IsNullOrWhiteSpace(row.Value) ? "No Data" : row.Value)
+                        </MudText>
                     </td>
                 </tr>
             }
@@ -41,22 +42,24 @@
 
 
 @code {
-    private List<(string Label1, string Value1)> InfoRows = new()
+    [Parameter]
+    public static UpdateFaceLivenessSessionResponseDTO VerificationResult { get; set; } 
+    private List<(string Label, string Value)> InfoRows = new()
     {
-        ("PhilSys Card Number", "1234123412341234"),
-        ("Digital ID Number", "AAA000"),
-        ("First Name", "JUAN"),
-        ("Middle Name", "SANTOS"),
-        ("Last Name", "DELA CRUZ"),
-        ("Suffix", "JR"),
-        ("Sex", "Male"),
-        ("Birth Date", "1989-09-12"),
-        ("Place of Birth", "QUEZON CITY, METRO MANILA"),
-        ("Permanent Address", "SOME FULL ADDRESS HERE"),
-        ("Present Address", "SOME FULL ADDRESS HERE"),
-        ("Marital Status", "Married"),
-        ("Mobile Number", "09661231231"),
-        ("Email", "jsdelacruz@email.com"),
-        ("Blood Type", "Unknown")
+        ("PhilSys Card Number", VerificationResult.reference),
+        ("Digital ID Number", VerificationResult.code),
+        ("First Name", VerificationResult.first_name),
+        ("Middle Name", VerificationResult.middle_name),
+        ("Last Name", VerificationResult.last_name),
+        ("Suffix", VerificationResult.suffix!),
+        ("Gender", VerificationResult.gender),
+        ("Birth Date", VerificationResult.birth_date),
+        ("Place of Birth", VerificationResult.place_of_birth),
+        ("Permanent Address", VerificationResult.full_address),
+        ("Present Address", VerificationResult.present_full_address),
+        ("Marital Status", VerificationResult.marital_status),
+        ("Mobile Number", VerificationResult.mobile_number),
+        ("Email", VerificationResult.email),
+        ("Blood Type", VerificationResult.blood_type)
     };
 }

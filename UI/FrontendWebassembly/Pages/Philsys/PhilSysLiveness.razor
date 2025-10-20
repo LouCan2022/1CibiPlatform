@@ -5,7 +5,15 @@
 @inject IJSRuntime JS
 @inject IPhilSysService IPhilSysService
 
-@if (!_completed)
+@if (!_status.Exists || _status.IsTransacted)
+{
+    <NotFoundComponent></NotFoundComponent>
+}
+else if (IsExpired)
+{
+    <ReTransactComponent></ReTransactComponent>
+}
+else if (!_completed)
 {
 <MudPaper Class="p-6 text-center background-color: var(--mud-palette-surface) !important; mx-auto p-6 mt-0 philsys-card form-container justify-center align-center"
                 Elevation="6"
@@ -28,15 +36,12 @@
 }
 else
 {
-    <MudText Typo="Typo.h4"
-                Align="Align.Center"
-                Class="fw-bold"
-                Style="font-size:40px;">
-        ✅ Liveness Check Completed Successfully!
-    </MudText>
+    <PhilSysResultComponent VerificationResult="information"></PhilSysResultComponent>
 }
 
 @code {
+    UpdateFaceLivenessSessionResponseDTO information;
+
     [Parameter]
     public Guid Tid { get; set; } 
 
@@ -44,7 +49,14 @@ else
     public string? SessionId { get; set; }
 
     private bool _completed = false;
+
+    private bool _showNotFound = false;
+
+    private bool IsExpired = false;
+
     private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
+
+    private TransactionStatusResponse _status;
 
     private async Task StartLiveness()
     {
@@ -52,14 +64,24 @@ else
         await JS.InvokeVoidAsync("startLivenessInterop", Tid, _dotNetRef);
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        _status = await IPhilSysService.GetTransactionStatus(Tid);
+        if (DateTime.UtcNow > _status.ExpiresAt)
+        {
+            IsExpired = true;
+        }
+    } 
+
     [JSInvokable]
-    public void OnLivenessCompleted(string sessionId)
+    public async Task OnLivenessCompleted(string sessionId)
     {
         SessionId = sessionId;
         _completed = true;
 
-        IPhilSysService.UpdateFaceLivenessSessionAsync(Tid, sessionId);
+        var response = await IPhilSysService.UpdateFaceLivenessSessionAsync(Tid, sessionId);
         Console.WriteLine($"✅ Received session ID: {sessionId}");
+        information = response;
         StateHasChanged();
     }
 

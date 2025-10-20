@@ -6,42 +6,49 @@ public class PartnerSystemService
 {
 	private readonly ILogger<PartnerSystemService> _logger;
 	private readonly IPhilSysRepository _repository;
-
+	private readonly IConfiguration _configuration;
+	private readonly int _livenessExpiryMinutes;
 	public PartnerSystemService(
-		ILogger<PartnerSystemService> logger, IPhilSysRepository repository)
+		ILogger<PartnerSystemService> logger, 
+		IPhilSysRepository repository,
+		IConfiguration configuration)
 	{
 		_logger = logger;
 		_repository = repository;
+		_configuration = configuration;
+		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessExpiryMinutes"] ?? "10");
 	}
-	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(PartnerSystemRequestDTO PartnerSystemRequestDTO)
+	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string inquiry_type, IdentityData identity_data)
 	{
 		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
 		
-		if (PartnerSystemRequestDTO.InquiryType.Equals("name_dob", StringComparison.OrdinalIgnoreCase))
+		if (inquiry_type.Equals("name_dob", StringComparison.OrdinalIgnoreCase))
 		{
 			transaction = new PhilSysTransaction
 			{
 				Tid = Guid.NewGuid(),
 				InquiryType = "name_dob",
-				FirstName = PartnerSystemRequestDTO.IdentityData.FirstName,
-				MiddleName = PartnerSystemRequestDTO.IdentityData.MiddleName,
-				LastName = PartnerSystemRequestDTO.IdentityData.LastName,
-				Suffix = PartnerSystemRequestDTO.IdentityData.Suffix,
-				BirthDate = PartnerSystemRequestDTO.IdentityData.BirthDate,
+				FirstName = identity_data.FirstName,
+				MiddleName = identity_data.MiddleName,
+				LastName = identity_data.LastName,
+				Suffix = identity_data.Suffix,
+				BirthDate = identity_data.BirthDate,
 				IsTransacted = false,
-				CreatedAt = DateTime.UtcNow
+				CreatedAt = DateTime.UtcNow,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(_livenessExpiryMinutes)
 			};
 		}
-		else if (PartnerSystemRequestDTO.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
+		else if (inquiry_type.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
 			transaction = new PhilSysTransaction
 			{
 				Tid = Guid.NewGuid(),
 				InquiryType = "pcn",
-				PCN = PartnerSystemRequestDTO.IdentityData.PCN,
+				PCN = identity_data.PCN,
 				IsTransacted = false,
-				CreatedAt = DateTime.UtcNow
+				CreatedAt = DateTime.UtcNow,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(_livenessExpiryMinutes)
 			};
 		}
 
@@ -49,8 +56,8 @@ public class PartnerSystemService
 
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)
-			throw new InvalidOperationException("Failed");
-
+			_logger.LogError("Failed to add transaction data for Tid: {Tid}", transaction.Tid);
+	
 		return new PartnerSystemResponseDTO(
 			code: null,
 			token: null,

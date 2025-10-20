@@ -18,8 +18,8 @@ public class PostBasicInformationService
 		string last_name,
 		string suffix,
 		string birth_date,
-		string face_liveness_session_id,
 		string bearer_token,
+		string face_liveness_session_id,
 		CancellationToken ct = default
 		)
 	{
@@ -91,7 +91,7 @@ public class PostBasicInformationService
 			);
 		}
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponseDTO>(ct);
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
 		if (responseBody is null || responseBody.data is null)
 		{

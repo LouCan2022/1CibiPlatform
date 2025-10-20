@@ -25,6 +25,7 @@ namespace APIs.Migrations.PhilSys
                     PCN = table.Column<string>(type: "text", nullable: true),
                     FaceLivenessSessionId = table.Column<string>(type: "text", nullable: true),
                     IsTransacted = table.Column<bool>(type: "boolean", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     TransactedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },

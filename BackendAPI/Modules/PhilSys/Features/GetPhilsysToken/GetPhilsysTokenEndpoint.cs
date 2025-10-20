@@ -6,7 +6,7 @@ public class GetPhilsysTokenEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("getphilsystoken", async (GetPhilSysTokenRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("getphilsystoken", async (GetPhilSysTokenRequest request, ISender sender) =>
 		{
 		
 			var command = new GetPhilSysTokenCommand(
@@ -14,7 +14,7 @@ public class GetPhilsysTokenEndpoint : ICarterModule
 				   request.client_secret
 			   );
 
-			GetCredentialResult result = await sender.Send(command, cancellationToken);
+			GetCredentialResult result = await sender.Send(command);
 
 			var response = new GetPhilSysTokenResponse(result.CredentialResponseDTO);
 
