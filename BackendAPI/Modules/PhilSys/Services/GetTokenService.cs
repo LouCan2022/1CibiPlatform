@@ -4,22 +4,18 @@ public class GetTokenService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<GetTokenService> _logger;
-    private readonly IConfiguration _configuration;
 
     public GetTokenService(
         IHttpClientFactory httpClientFactory,
-        ILogger<GetTokenService> logger,
-        IConfiguration configuration)
+        ILogger<GetTokenService> logger)
     {
         _httpClient = httpClientFactory.CreateClient("PhilSys");
         _logger = logger;
-        _configuration = configuration;
     }
 
     public async Task<CredentialResponseDTO> GetPhilsysTokenAsync(
         string clientId,
-        string clientSecret,
-        CancellationToken ct = default)
+        string clientSecret)
     {
         var endpoint = "auth";
 
@@ -31,9 +27,9 @@ public class GetTokenService
 
         _logger.LogInformation("Sending token request to PhilSys endpoint: {Endpoint}", endpoint);
 
-		var response = await SendRequestAsync(endpoint, body, ct);
+		var response = await SendRequestAsync(endpoint, body);
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PhilSysTokenResponse>(ct);
+		var responseBody = await response.Content.ReadFromJsonAsync<PhilSysTokenResponse>();
 		_logger.LogInformation("PhilSys Token Response: {Response}", responseBody);
 
 		if (!response.IsSuccessStatusCode)
@@ -53,9 +49,8 @@ public class GetTokenService
 
 	protected virtual async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
-		object body,
-		CancellationToken ct)
+		object body)
 	{
-		return await _httpClient.PostAsJsonAsync(endpoint, body, ct);
+		return await _httpClient.PostAsJsonAsync(endpoint, body);
 	}
 }

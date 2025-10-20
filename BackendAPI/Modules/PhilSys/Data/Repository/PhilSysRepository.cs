@@ -44,4 +44,23 @@ public class PhilSysRepository : IPhilSysRepository
 
 		return transaction;
 	}
+
+	public async Task<TransactionStatusResponse> GetLivenessSessionStatus(Guid Tid)
+	{
+		var transaction = await _dbcontext.PhilSysTransactions
+		.AsNoTracking()
+		.Where(t => t.Tid == Tid)
+		.Select(t => new { t.IsTransacted, t.ExpiresAt })
+		.FirstOrDefaultAsync();
+
+		if (transaction is null)
+			return new TransactionStatusResponse { Exists = false };
+
+		return new TransactionStatusResponse
+		{
+			Exists = true,
+			IsTransacted = transaction!.IsTransacted,
+			ExpiresAt = transaction.ExpiresAt
+		};
+	}
 }

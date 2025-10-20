@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace PhilSys.Features.PartnerSystemQuery;
 
-public record PartnerSystemRequest(PartnerSystemRequestDTO PartnerSystemRequestDTO) : ICommand<PartnerSystemResponse>;	
+public record PartnerSystemRequest(string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResponse>;	
 public record PartnerSystemResponse(PartnerSystemResponseDTO PartnerSystemResponseDTO);
 
 public class PartnerSystemEndpoint : ICarterModule
@@ -12,7 +12,7 @@ public class PartnerSystemEndpoint : ICarterModule
 	{
 		app.MapPost("partnersystemquery", async (PartnerSystemRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new PartnerSystemCommand(request.PartnerSystemRequestDTO);
+			var command = new PartnerSystemCommand(request.inquiry_type, request.identity_data);
 
 			PartnerSystemResult result = await sender.Send(command, cancellationToken);
 

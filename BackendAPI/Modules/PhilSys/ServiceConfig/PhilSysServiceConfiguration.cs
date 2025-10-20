@@ -49,6 +49,7 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<PostPCNService>();
 		services.AddScoped<PartnerSystemService>();
 		services.AddScoped<UpdateFaceLivenessSessionService>();
+		services.AddScoped<LivenessSessionService>();
 		services.AddScoped<IPhilSysRepository, PhilSysRepository>();
 		return services;
 	}

@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251018094327_InitialPhilSysMigration")]
+    [Migration("20251020134951_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
@@ -35,6 +35,9 @@ namespace APIs.Migrations.PhilSys
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FaceLivenessSessionId")

@@ -34,6 +34,9 @@ namespace APIs.Migrations.PhilSys
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FaceLivenessSessionId")
                         .HasColumnType("text");
 

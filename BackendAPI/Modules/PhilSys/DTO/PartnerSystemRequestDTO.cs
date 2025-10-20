@@ -1,9 +1,5 @@
 ﻿namespace PhilSys.DTO;
 
-public record PartnerSystemRequestDTO(
-	[property: JsonPropertyName("inquiry_type")] string InquiryType,
-	[property: JsonPropertyName("identity_data")] IdentityData IdentityData
-);
 
 public record IdentityData(
 	[property: JsonPropertyName("first_name")] string? FirstName,
