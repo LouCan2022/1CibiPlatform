@@ -58,11 +58,10 @@
                        <MudLink Href="/login" Color="Color.Primary" Typo="Typo.body2">Forgot password?</MudLink>
                    </MudStack>
               
-                   <ButtonComponent ButtonType="ButtonType.Submit" 
-                                    Style="@($"login-button {(success ? "login-button-active" : "login-button-inactive")}")"
+                   <ButtonComponent ButtonType="ButtonType.Submit"
                                     OnClick="HandleLogin"
                                     Disabled="@(!success || isLoading)"
-                                    Class="rounded-5">
+                                    Class="@($"theme-button {(success ? "theme-button-active " : "theme-button-inactive")}")">
                         @if (isLoading)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" />

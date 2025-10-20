@@ -9,4 +9,6 @@ public interface IRegisterService
 	Task<bool> ResendOtpAsync(OtpVerification otpVerification);
 
 	Task<bool> IsOtpSessionValidAsync(Guid userId, string email);
+
+	Task<bool> ManualResendOtpCodeAsync(Guid userId, string email);
 }

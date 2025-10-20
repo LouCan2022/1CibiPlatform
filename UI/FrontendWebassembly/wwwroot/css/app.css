@@ -130,21 +130,22 @@ code {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
-.login-button {
-    border-radius: 12px !important;
-    height: 48px !important;
-    font-weight: 600 !important;
+.theme-button {
+    background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
     text-transform: none !important;
     font-size: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
-.login-button-inactive {
+.theme-button-inactive {
     background: #cbd5e1 !important;
     cursor: not-allowed;
 }
 
-.login-button-active {
-    background: linear-gradient( 90deg, #102247 0%, #2a77ae 50%, #68c0d6 100% ) !important;
+.theme-button-active {
+    background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
+    color: white;
+    text-transform: none;
     box-shadow: 0 4px 15px rgba(16, 34, 71, 0.3) !important;
     color: white !important;
 }
