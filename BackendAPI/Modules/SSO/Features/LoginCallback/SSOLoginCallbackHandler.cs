@@ -54,11 +54,10 @@ public class SSOLoginCallbackHandler : ICommandHandler<SSOLoginCallbackCommand, 
 
 		_logger.LogInformation($"User authenticated via SAML: {email}");
 
+		// Sign in with cookie scheme
+		var principal = result!.Principal; // or create a new ClaimsPrincipal if needed
+		await httpContext!.SignInAsync("AppExternalScheme", principal); // Sign in with cookie scheme
 
-		// Sign out from temporary SAML cookie
-		await httpContext!.SignOutAsync("AppExternalScheme");
-
-
-		return new SSOLoginCallbackResult(new SSOLoginResponseDTO(email!, name!, true));
+		return new SSOLoginCallbackResult(new SSOLoginResponseDTO(nameIdentifier!, name!, true));
 	}
 }

@@ -6,12 +6,12 @@ public class SSOLoginEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("sso/login", async (ISender sender) =>
+		app.MapGet("sso/login", async (ISender sender) =>
 		{
 
-			var command = new SSOLoginRequest();
+			var command = new SSOLoginCommand();
 			await sender.Send(command);
-			return Results.Ok();
+			return Results.Empty;
 
 		}).WithTags("SSO")
 		  .WithName("SSOLogin")
