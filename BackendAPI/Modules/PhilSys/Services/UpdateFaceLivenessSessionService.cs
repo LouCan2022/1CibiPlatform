@@ -51,18 +51,19 @@ public class UpdateFaceLivenessSessionService
 		{
 			
 			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-		
+			await UpdateTransactionStatus(Tid);
 			return responseBody!;
 		}
 
-		else if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
+		if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
 			
 			var responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+			await UpdateTransactionStatus(Tid);
 			return responseBody!;
 		}
 
-		await UpdateTransactionStatus(Tid);
+		
 
 		return new BasicInformationOrPCNResponseDTO(
 				code: "",
@@ -109,13 +110,6 @@ public class UpdateFaceLivenessSessionService
 
 	public async Task UpdateTransactionStatus(Guid Tid)
 	{
-		var transaction = await _philSysRepository.GetTransactionDataByTidAsync(Tid);
-		if (transaction == null)
-		{
-			_logger.LogInformation("Transaction not found for Tid: {Tid}", Tid);
-		}
-		transaction!.IsTransacted = true;
-		transaction.TransactedAt = DateTime.UtcNow;
-		await _philSysRepository.UpdateTransactionDataAsync(Tid, transaction);
+		await _philSysRepository.UpdateTransactionDataAsync(Tid);
 	}
 }

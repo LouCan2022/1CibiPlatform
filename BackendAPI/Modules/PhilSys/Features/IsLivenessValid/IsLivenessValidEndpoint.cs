@@ -16,7 +16,7 @@ public class IsLivenessValidEndpoint : ICarterModule
 				);
 			IsLivenessValidResult result = await sender.Send(command);
 			var response = new IsLivenessValidResponse(result.TransactionStatusResponse);
-			return Results.Ok(response);
+			return Results.Ok(response.TransactionStatusResponse);
 		})
 		  .WithName("isLivenessVerified")
 		  .WithTags("PhilSys")

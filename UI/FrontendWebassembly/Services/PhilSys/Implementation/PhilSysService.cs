@@ -17,7 +17,7 @@ public class PhilSysService : IPhilSysService
 			FaceLivenessSessionId = FaceLivenessSession
 		};
 
-		var  response = await _httpClient.PostAsJsonAsync("philsys/idv/updatefacelivenesssession", payload);
+		var response = await _httpClient.PostAsJsonAsync("philsys/idv/updatefacelivenesssession", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
@@ -33,16 +33,26 @@ public class PhilSysService : IPhilSysService
 
 	public async Task<TransactionStatusResponse> GetTransactionStatus(Guid Tid)
 	{
-		var response = await _httpClient.PostAsJsonAsync("idv/validate/liveness", Tid);
+		var request = new { Tid };
+		var response = await _httpClient.PostAsJsonAsync("/philsys/idv/validate/liveness", request);
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Get the Status");
-			return null!;
+			return new TransactionStatusResponse
+			{
+				Exists = false
+			};
 		}
-
+		
 		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponse>();
-		Console.WriteLine("✅ Update Successfully");
 
+		if (successContent.ExpiresAt != null && successContent!.ExpiresAt < DateTime.UtcNow)
+		{;
+			successContent!.isExpired = true;
+		}
+		
+		
+		Console.WriteLine("✅ Update Successfully");
 		return successContent!;
 
 	}

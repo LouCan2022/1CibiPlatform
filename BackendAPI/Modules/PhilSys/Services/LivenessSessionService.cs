@@ -11,10 +11,7 @@ public class LivenessSessionService
 	public async Task<TransactionStatusResponse> IsLivenessUsedAsync(Guid Tid)
 	{
 		var status = await _philSysRepository.GetLivenessSessionStatus(Tid);
-		if (status == null)
-		{
-			return new TransactionStatusResponse{ };
-		}
+		
 		return status;
 	}
 }

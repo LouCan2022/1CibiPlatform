@@ -15,10 +15,9 @@ public class PhilSysRepository : IPhilSysRepository
 		await _dbcontext.SaveChangesAsync();
 		return true;
 	}
-	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid, PhilSysTransaction PhilSysTransaction)
+	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
-	
 		transaction!.IsTransacted = true;
 		transaction.TransactedAt = DateTime.UtcNow;
 
@@ -50,17 +49,16 @@ public class PhilSysRepository : IPhilSysRepository
 		var transaction = await _dbcontext.PhilSysTransactions
 		.AsNoTracking()
 		.Where(t => t.Tid == Tid)
-		.Select(t => new { t.IsTransacted, t.ExpiresAt })
+		.Select(t => new TransactionStatusResponse
+		{
+			Exists = true, // <-- ensure this is set correctly
+			IsTransacted = t.IsTransacted,
+			isExpired = false,
+			ExpiresAt = t.ExpiresAt
+		})
 		.FirstOrDefaultAsync();
 
-		if (transaction is null)
-			return new TransactionStatusResponse { Exists = false };
 
-		return new TransactionStatusResponse
-		{
-			Exists = true,
-			IsTransacted = transaction!.IsTransacted,
-			ExpiresAt = transaction.ExpiresAt
-		};
+		return transaction ?? new TransactionStatusResponse { Exists = false };
 	}
 }
