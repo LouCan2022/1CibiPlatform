@@ -26,7 +26,7 @@ public static class AppConfiguration
 	#region Custom Middlewares
 	public static WebApplication UseCustomMiddlewares(this WebApplication app)
 	{
-		app.MapCarter();
+		app.MapControllers();
 
 		app.UseExceptionHandler(options => { })
 		   .UseHttpsRedirection()
@@ -34,6 +34,8 @@ public static class AppConfiguration
 		   .UseAuthorization();
 
 		app.UseCors("CorsPolicy");
+
+		app.MapCarter();
 
 		return app;
 	}
