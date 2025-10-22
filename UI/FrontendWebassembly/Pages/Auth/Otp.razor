@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
 @inject IJSRuntime JSRuntime
+@inject LocalStorageService LocalStorageService
 @implements IDisposable
 
 @if (!_isLoading)
@@ -156,6 +157,8 @@ else
 
         if (!isUserOtpValidated.isValid)
         {
+            await LocalStorageService.RemoveItemAsync("tempUserId");
+            await LocalStorageService.RemoveItemAsync("tempUserEmail");
             Navigation.NavigateTo("/login", true);
             return;
         }
@@ -251,6 +254,8 @@ else
             // Show success message and start countdown
             isLoading = false;
             showSuccessMessage = true;
+            await LocalStorageService.RemoveItemAsync("tempUserId");
+            await LocalStorageService.RemoveItemAsync("tempUserEmail");
             StateHasChanged();
 
             // Start countdown timer
@@ -263,6 +268,7 @@ else
                     countdownTimer?.Dispose();
                     await InvokeAsync(() =>
                     {
+                     
                         Navigation.NavigateTo("/login", true);
                     });
                 }

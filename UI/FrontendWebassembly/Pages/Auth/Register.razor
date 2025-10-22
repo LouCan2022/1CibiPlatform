@@ -5,6 +5,7 @@
 @layout AuthLayout
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
+@inject LocalStorageService LocalStorageService
 
 @if (!_isLoading)
 {
@@ -158,6 +159,7 @@ else
 
         if (isAuthenticated)
         {
+
             Navigation.NavigateTo("/", true);
             return;
         }
@@ -239,7 +241,8 @@ else
                 StateHasChanged();
                 return;
             }
-
+            await LocalStorageService.SetItemAsync("tempUserId", result.id);
+            await LocalStorageService.SetItemAsync("tempUserEmail", result.email);
             Navigation.NavigateTo($"/verify-otp?userId={result.id}&email={result.email}", true);
         }
         catch (Exception ex)
