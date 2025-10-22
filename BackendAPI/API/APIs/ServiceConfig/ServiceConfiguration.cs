@@ -62,8 +62,8 @@
 
 		#region JWT Config
 		public static IServiceCollection AddJwtAuthentication(
-			this IServiceCollection services,
-			IConfiguration configuration)
+		  this IServiceCollection services,
+		  IConfiguration configuration)
 		{
 			// JWT Authentication
 			var jwtSettings = configuration.GetSection("Jwt");
@@ -71,14 +71,18 @@
 			var issuer = jwtSettings["Issuer"];
 			var audience = jwtSettings["Audience"];
 			var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]!);
-
-
 			var _httpCookieOnlyKey = configuration.GetValue<string>("HttpCookieOnlyKey");
+
+			// SAML2 Configuration
+			var spBaseUrl = configuration["Saml2:SpBaseUrl"];
+			var idpMetadataUrl = configuration["Saml2:IdpMetadataUrl"];
+			var idpEntityId = configuration["Saml2:IdpEntityId"];
 
 			services.AddAuthentication(x =>
 			{
 				x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 				x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				x.DefaultSignInScheme = "AppExternalScheme"; // Use cookie scheme for sign-in
 				x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 			})
 			.AddJwtBearer(options =>
@@ -98,7 +102,6 @@
 				{
 					OnMessageReceived = context =>
 					{
-						// Try to get token from cookie
 						if (context.Request.Cookies.TryGetValue(_httpCookieOnlyKey!, out var token))
 						{
 							context.Token = token;
@@ -106,7 +109,28 @@
 						return Task.CompletedTask;
 					}
 				};
+			})
+			.AddCookie("AppExternalScheme")
+			.AddSaml2(options =>
+			{
+				options.SPOptions.EntityId = new EntityId(spBaseUrl);
+				options.SPOptions.ReturnUrl = new Uri(spBaseUrl + "/sso/login/callback");
+
+				var identityProvider = new IdentityProvider(
+					new EntityId(idpEntityId),
+					options.SPOptions)
+				{
+					MetadataLocation = idpMetadataUrl,
+					LoadMetadata = true,
+					AllowUnsolicitedAuthnResponse = true
+				};
+
+				options.IdentityProviders.Add(identityProvider);
 			});
+
+			// ✅ ADD THIS HERE - Force eager initialization
+			services.AddOptions<Saml2Options>().ValidateOnStart();
+
 			services.AddAuthorization();
 
 			return services;
@@ -164,21 +188,9 @@
 			services.AddAuthServices();
 			services.AddCNXServices();
 			services.AddPhilSysServices();
+			services.AddSSOServices();
 			return services;
 		}
 		#endregion
-
-		#region SSO Config
-
-		public static IServiceCollection AddSSOConfiguration(
-			this IServiceCollection services,
-			IConfiguration configuration)
-		{
-			//services.AddSSOSamlConfiguration(configuration);
-			return services;
-		}
-
-		#endregion
-
 	}
 }

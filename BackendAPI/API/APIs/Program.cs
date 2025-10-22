@@ -1,10 +1,11 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
 builder.Services.ConfigureEnvironment(builder);
 
+builder.Services.AddControllers();
+
 builder.Services
-	.AddSSOConfiguration(builder.Configuration)
 	.AddModuleMediaTR()
 	.AddModuleCarter()
 	.AddModuleServices()
@@ -12,6 +13,7 @@ builder.Services
 	.AddModuleInfrastructure(builder.Configuration)
 	.AddEndpointsApiExplorer()
 	.AddSwaggerGen();
+
 
 var app = builder.Build();
 

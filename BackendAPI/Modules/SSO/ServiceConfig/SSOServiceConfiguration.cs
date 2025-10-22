@@ -32,35 +32,29 @@ public static class SSOServiceConfiguration
 		this IServiceCollection services,
 		IConfiguration configuration)
 	{
-		// Configure SAML2
 		var spBaseUrl = configuration["Saml2:SpBaseUrl"];
 		var idpMetadataUrl = configuration["Saml2:IdpMetadataUrl"];
 		var idpEntityId = configuration["Saml2:IdpEntityId"];
 
-		// Add SAML2 authentication (JWT will be sent to frontend)
-		services.AddAuthentication()
-				.AddCookie("AppExternalScheme") // Temporary cookie for SAML flow
-				.AddSaml2(sharedOptions =>
-				{
-					// Service Provider configuration
-					sharedOptions.SPOptions.EntityId = new EntityId(spBaseUrl + "/Saml2");
+		// Don't call AddAuthentication() - just add SAML2 to existing auth
+		var authBuilder = new AuthenticationBuilder(services);
 
-					// Register Identity Provider
-					var identityProvider = new IdentityProvider(
-						new EntityId(idpEntityId),
-						sharedOptions.SPOptions)
-					{
-						MetadataLocation = idpMetadataUrl,
-						LoadMetadata = false,
-						SingleSignOnServiceUrl = new Uri("https://keycloak.yourdomain.com/realms/yourrealm/protocol/saml"),
-						SingleLogoutServiceUrl = new Uri("https://keycloak.yourdomain.com/realms/yourrealm/protocol/saml"),
-						AllowUnsolicitedAuthnResponse = true
-					};
+		authBuilder.AddCookie("AppExternalScheme")
+				   .AddSaml2(options =>
+				   {
+					   options.SPOptions.EntityId = new EntityId(spBaseUrl);
 
-					sharedOptions.IdentityProviders.Add(identityProvider);
-				});
+					   var identityProvider = new IdentityProvider(
+						   new EntityId(idpEntityId),
+						   options.SPOptions)
+					   {
+						   MetadataLocation = idpMetadataUrl,
+						   LoadMetadata = true,
+						   AllowUnsolicitedAuthnResponse = true
+					   };
 
-
+					   options.IdentityProviders.Add(identityProvider);
+				   });
 
 		return services;
 	}

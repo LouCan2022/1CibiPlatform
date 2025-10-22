@@ -1,6 +1,6 @@
 ﻿namespace SSO.Features.LoginCallback;
 
-public record SSOLoginCallbackRequest(string ReturnUrl = "/") : ICommand<SSOLoginResponseDTO>;
+public record SSOLoginCallbackRequest(string? ReturnUrl = "/") : ICommand<SSOLoginResponseDTO>;
 
 public record SSOLoginCallbackResponse(SSOLoginResponseDTO Result);
 
@@ -9,19 +9,22 @@ public class SSOLoginCallbackEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapGet("sso/login/callback", async (string returnUrl, ISender sender, HttpContext httpContext, CancellationToken cancellationToken) =>
+		app.MapGet("sso/login/callback", async (string? returnUrl, ISender sender, HttpContext httpContext, CancellationToken cancellationToken) =>
 		{
-			var command = new SSOLoginCallbackRequest(returnUrl);
+			// Use default if returnUrl is null or empty
+			var safeReturnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
 
-			SSOLoginResponseDTO result = await sender.Send(command, cancellationToken);
+			var command = new SSOLoginCallbackCommand(safeReturnUrl);
 
-			var blazorAppUrl = $"https://localhost:7001/login-callback?&email={result.Email}&name={result.Name}";
+			SSOLoginCallbackResult result = await sender.Send(command, cancellationToken);
+
+			var blazorAppUrl = $"http://localhost:5134/sso/frontpage?&email={result.result.Email}&name={result.result.Name}";
 
 			return Results.Redirect(blazorAppUrl);
 
 		}).WithTags("SSO")
 		  .WithName("SSOLoginCallback")
-		  .Produces<SSOLoginResponseDTO>(StatusCodes.Status200OK)
+		  .Produces<SSOLoginCallbackResult>(StatusCodes.Status200OK)
 		  .ProducesProblem(StatusCodes.Status403Forbidden)
 		  .WithSummary("SSOLoginCallback")
 		  .WithDescription("SSOLoginCallback");

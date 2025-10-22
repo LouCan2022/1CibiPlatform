@@ -12,21 +12,20 @@ public class SSOLoginHandler : ICommandHandler<SSOLoginCommand>
 		_httpContextAccessor = httpContextAccessor;
 	}
 
-	public Task<Unit> Handle(
+	public async Task<Unit> Handle(
 		SSOLoginCommand request,
 		CancellationToken cancellationToken)
 	{
 		var httpContext = _httpContextAccessor.HttpContext;
-
 		var props = new AuthenticationProperties
 		{
-			RedirectUri = $"/saml/callback?returnUrl={request.ReturnUrl}",
+			RedirectUri = $"/sso/login/callback?returnUrl={request.ReturnUrl}",
 			IsPersistent = true
 		};
 
-		var result = Results.Challenge(props, new[] { Saml2Defaults.Scheme });
+		await httpContext!.ChallengeAsync(Saml2Defaults.Scheme, props);
 
-		return Task.FromResult(Unit.Value);
+		return Unit.Value;
 	}
 
 }
