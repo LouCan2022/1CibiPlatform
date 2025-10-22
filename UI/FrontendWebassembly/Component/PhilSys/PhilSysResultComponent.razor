@@ -7,13 +7,15 @@
     <div class="d-flex flex-column align-items-center" style="width: 220px;">
         <MudPaper Elevation="0"
                   Class="d-flex justify-center align-center mb-3"
-                  Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 0px;">
-            <MudImage Src="@(FaceUrl ?? "images/philsys/default_picture.jpg")"
-                      Alt="PhilSys Logo"
-                      Width="120" />
+                  Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 12px;">
+            <MudImage Src="@(FaceUrl ?? "images/generic/default_picture.jpg")"
+                      Alt="User Profile"
+                      Width="120" 
+                      Style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; outline: 2px solid black;" />
         </MudPaper>
 
-        <ButtonComponent StartIcon="@Icons.Material.Filled.Download" Style="width: 170px;">
+        <ButtonComponent StartIcon="@Icons.Material.Filled.Download" Style="width: 170px;"
+                         Class="theme-button theme-button-active">
             API Response
         </ButtonComponent>
     </div>
@@ -30,7 +32,7 @@
                         </td>
                         <td style="width: 25%; padding: 6px 8px;">
                             <MudText Style="color: var(--mud-palette-text-primary); font-weight: bold;" Typo="Typo.body1">
-                                @(string.IsNullOrWhiteSpace(row.Value) ? "No Data Found" : row.Value)
+                               @row.Value
                             </MudText>
                         </td>
                     </tr>
@@ -40,7 +42,8 @@
     </div>
 
     <div class="position-absolute" style="bottom: 16px; right: 16px;">
-        <ButtonComponent StartIcon="@Icons.Material.Filled.Search">
+        <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
+                         Class="theme-button theme-button-active">
             Search Again
         </ButtonComponent>
     </div>
@@ -58,33 +61,36 @@
 
 
     protected override void OnInitialized()
-{
-    if (VerificationResult == null)
     {
-        InfoRows = new List<(string, string)>
+        if (VerificationResult == null)
+        {
+            InfoRows = new List<(string, string)>
         {
             ("Error", "No data available")
         };
-        return;
-    }
+            return;
+        }
+        FaceUrl = VerificationResult.face_url;
+        InfoRows = new()
+        {
+            ("PhilSys Card Number", VerificationResult.reference ?? "No Data Found"),
+            ("Digital ID Number", VerificationResult.code ?? "No Data Found"),
+            ("First Name", VerificationResult.first_name ?? "No Data Found"),
+            ("Middle Name", VerificationResult.middle_name ?? "No Data Found"),
+            ("Last Name", VerificationResult.last_name ?? "No Data Found"),
+            ("Suffix", string.IsNullOrWhiteSpace(VerificationResult.suffix)
+                       ? (!string.IsNullOrWhiteSpace(VerificationResult.reference) ? "" : "No Data Found")
+                       : VerificationResult.suffix),
+            ("Gender", VerificationResult.gender ?? "No Data Found"),
+            ("Birth Date", VerificationResult.birth_date ?? "No Data Found"),
+            ("Place of Birth", VerificationResult.place_of_birth ?? "No Data Found"),
+            ("Permanent Address", VerificationResult.full_address ?? "No Data Found"),
+            ("Present Address", VerificationResult.present_full_address ?? "No Data Found"),
+            ("Marital Status", VerificationResult.marital_status ?? "No Data Found"),
+            ("Mobile Number", VerificationResult.mobile_number ?? "No Data Found"),
+            ("Email", VerificationResult.email ?? "No Data Found"),
+            ("Blood Type", VerificationResult.blood_type ?? "No Data Found")
+        };
 
-    InfoRows = new()
-    {
-        ("PhilSys Card Number", VerificationResult.reference ?? "No Data Found"),
-        ("Digital ID Number", VerificationResult.code ?? "No Data Found"),
-        ("First Name", VerificationResult.first_name ?? "No Data Found"),
-        ("Middle Name", VerificationResult.middle_name ?? "No Data Found"),
-        ("Last Name", VerificationResult.last_name ?? "No Data Found"),
-        ("Suffix", VerificationResult.suffix ?? "No Data Found"),
-        ("Gender", VerificationResult.gender ?? "No Data Found"),
-        ("Birth Date", VerificationResult.birth_date ?? "No Data Found"),
-        ("Place of Birth", VerificationResult.place_of_birth ?? "No Data Found"),
-        ("Permanent Address", VerificationResult.full_address ?? "No Data Found"),
-        ("Present Address", VerificationResult.present_full_address ?? "No Data Found"),
-        ("Marital Status", VerificationResult.marital_status ?? "No Data Found"),
-        ("Mobile Number", VerificationResult.mobile_number ?? "No Data Found"),
-        ("Email", VerificationResult.email ?? "No Data Found"),
-        ("Blood Type", VerificationResult.blood_type ?? "No Data Found")
-    };
 }
 }

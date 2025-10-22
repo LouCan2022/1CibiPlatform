@@ -16,7 +16,7 @@ public class PartnerSystemService
 		_logger = logger;
 		_repository = repository;
 		_configuration = configuration;
-		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessExpiryMinutes"] ?? "10");
+		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessExpiryMinutes"] ?? "1");
 	}
 	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string inquiry_type, IdentityData identity_data)
 	{

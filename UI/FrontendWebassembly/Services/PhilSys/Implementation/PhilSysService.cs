@@ -31,7 +31,7 @@ public class PhilSysService : IPhilSysService
 		return successContent!;
 	}
 
-	public async Task<TransactionStatusResponse> GetTransactionStatus(Guid Tid)
+	public async Task<TransactionStatusResponse> GetTransactionStatusAsync(Guid Tid)
 	{
 		var request = new { Tid };
 		var response = await _httpClient.PostAsJsonAsync("/philsys/idv/validate/liveness", request);
@@ -46,7 +46,7 @@ public class PhilSysService : IPhilSysService
 		
 		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponse>();
 
-		if (successContent.ExpiresAt != null && successContent!.ExpiresAt < DateTime.UtcNow)
+		if (successContent!.ExpiresAt < DateTime.UtcNow)
 		{;
 			successContent!.isExpired = true;
 		}
@@ -55,5 +55,20 @@ public class PhilSysService : IPhilSysService
 		Console.WriteLine("✅ Update Successfully");
 		return successContent!;
 
+	}
+
+	public async Task<bool> DeleteTransactionAsync(Guid Tid)
+	{
+		var request = new { Tid };
+		var response = await _httpClient.PostAsJsonAsync("/philsys/deletetransaction", request);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Update Successfully");
+			return false!;
+		}
+
+		var successContent = await response.Content.ReadFromJsonAsync<bool>();
+		Console.WriteLine("✅ Delete Successfully");
+		return successContent!;
 	}
 }

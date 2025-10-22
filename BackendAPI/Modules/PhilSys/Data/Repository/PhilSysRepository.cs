@@ -44,7 +44,7 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction;
 	}
 
-	public async Task<TransactionStatusResponse> GetLivenessSessionStatus(Guid Tid)
+	public async Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(Guid Tid)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions
 		.AsNoTracking()
@@ -60,5 +60,13 @@ public class PhilSysRepository : IPhilSysRepository
 
 
 		return transaction ?? new TransactionStatusResponse { Exists = false };
+	}
+
+	public async Task<bool> DeleteTrandsactionDataAsync(Guid Tid)
+	{
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+		_dbcontext.PhilSysTransactions.Remove(transaction!);
+		await _dbcontext.SaveChangesAsync();
+		return true;
 	}
 }

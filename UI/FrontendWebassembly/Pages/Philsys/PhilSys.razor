@@ -92,7 +92,8 @@
                                   Max="@DateTime.Today.ToString("yyyy-MM-dd")"          
                                   Class="mb-6 philsys-rounded-input" />
 
-                    <ButtonComponent OnClick="SubmitPersonalInfo">
+                    <ButtonComponent OnClick="SubmitPersonalInfo"
+                                     Class="theme-button theme-button-active">
                         Next
                     </ButtonComponent>
                 </MudForm>
@@ -111,7 +112,8 @@
                                 Variant="Variant.Outlined"
                                 Validation="@((string? value) => ValidatePCN(value!))" />
 
-                <ButtonComponent OnClick="SubmitPCN">
+                <ButtonComponent OnClick="SubmitPCN"
+                                 Class="theme-button theme-button-active">
                     Next
                 </ButtonComponent>
         </MudForm>

@@ -50,6 +50,7 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<PartnerSystemService>();
 		services.AddScoped<UpdateFaceLivenessSessionService>();
 		services.AddScoped<LivenessSessionService>();
+		services.AddScoped<DeleteTransactionService>();
 		services.AddScoped<IPhilSysRepository, PhilSysRepository>();
 		return services;
 	}

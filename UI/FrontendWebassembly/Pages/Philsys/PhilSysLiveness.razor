@@ -23,7 +23,7 @@ else if (!_completed)
         <MudText Typo="Typo.subtitle1" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
             Click the button below to start the liveness verification process.
         </MudText>
-        <ButtonComponent OnClick="StartLiveness" Style="width: 170px; color:white;">
+        <ButtonComponent OnClick="StartLiveness" Class="theme-button theme-button-active">
             <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
             Start Liveness
         </ButtonComponent>
@@ -49,7 +49,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _status = await IPhilSysService.GetTransactionStatus(Tid);
+        _status = await IPhilSysService.GetTransactionStatusAsync(Tid);
 
         if (_status == null)
         {
@@ -59,11 +59,33 @@ else
         isTransacted = _status.IsTransacted;
         Exists = _status.Exists;
         isExpired = _status.isExpired;
+        if (_status.isExpired)
+        {
+            await IPhilSysService.DeleteTransactionAsync(Tid);
+            return;
+        }
 
     }
 
     private async Task StartLiveness()
     {
+        _status = await IPhilSysService.GetTransactionStatusAsync(Tid);
+
+        if (_status == null)
+        {
+            Console.WriteLine("❌ No transaction found for this TID.");
+            return;
+        }
+
+        if (_status.isExpired)
+        {
+            isExpired = true;
+            await IPhilSysService.DeleteTransactionAsync(Tid);
+            StateHasChanged();
+            
+            return; 
+        }
+
         _dotNetRef = DotNetObjectReference.Create(this);
         await JS.InvokeVoidAsync("startLivenessInterop", Tid, _dotNetRef);
     }
@@ -71,11 +93,6 @@ else
     [JSInvokable]
     public async Task OnLivenessCompleted(string sessionId)
     {
-        //var status = await IPhilSysService.GetTransactionStatus(Tid);
-        // if (status.isExpired)
-        //{
-        //redirect & delete the record
-        //}
         SessionId = sessionId;
         _completed = true;
         information = await IPhilSysService.UpdateFaceLivenessSessionAsync(Tid, sessionId);

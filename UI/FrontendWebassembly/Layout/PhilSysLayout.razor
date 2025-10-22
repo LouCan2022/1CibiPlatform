@@ -1,22 +1,10 @@
 ﻿@using MudBlazor
-@inject LocalStorageService LocalStorageService
 @inherits LayoutComponentBase
 
-
-
 <style>
-    .mud-drawer {
-        border-radius: 30px 30px 30px 30px !important;
-    }
-
-    .mud-drawer.mud-drawer-open {
-        border-radius: 30px 30px 30px 30px !important;
-    }
-
-    .mud-appbar {
-        border-radius: 15px !important;
-    }
-
+.mud-appbar {
+    border-radius: 15px !important;
+}
 </style>
 
 
@@ -26,19 +14,18 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Style="@GetAppBarStyle()">            
+    <MudAppBar Style="background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;" >
         <MudImage Src="images/logo/cibi.png"
                       Alt="Cibi Logo"
                       Style="width: 125px; height:45px; filter: drop-shadow(0 0 1px white) drop-shadow(0 0 2px white) drop-shadow(0 0 3px white);" />
-     
         <MudSpacer />
-        <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                       Style="Color:Inherit"
-                       OnClick="@ToggleDarkMode" />
+       
     </MudAppBar>
 
     <MudMainContent>
-        <MudPaper Class="pa-5 ma-4" Elevation="2">
+        <MudPaper Class="d-flex justify-center align-center pa-5 ma-4"
+                  Style="min-height: 100vh;"
+                  Elevation="0">
             @Body
         </MudPaper>
     </MudMainContent>
@@ -82,23 +69,4 @@
         }
     };
 
-    private void DrawerToggle() => _drawerOpen = !_drawerOpen;
-    private async Task ToggleDarkMode()
-    {
-        _isDarkMode = !_isDarkMode;
-        await LocalStorageService.SetItemAsync("isDarkMode", _isDarkMode);
-    }
-
-    private string GetAppBarStyle()
-    {
-        return _isDarkMode
-            ? "background: linear-gradient(90deg, #68c0d6 0%, #2a77ae 50%, #102247 100%) !important;"
-            : "background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;";
-    }
-    private string GetMenuIconStyle()
-    {
-        return _isDarkMode
-            ? "color: #102247;"
-            : "color: white;";
-    }
 }

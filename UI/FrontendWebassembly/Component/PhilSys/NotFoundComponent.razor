@@ -1,9 +1,37 @@
 ﻿@layout PhilSysLayout
+@inject NavigationManager NavigationManager
 @using MudBlazor
 
-<MudPaper>
-    Not Found
-</MudPaper>
-@code {
 
+<MudPaper Elevation="6"
+          Class="d-flex flex-column justify-center align-center text-center mx-auto"
+          Style="height: 65vh; width: 30wh; padding: 40px 32px;
+                 border-radius: 16px; background-color: var(--mud-palette-surface);
+                 box-shadow: 0px 10px 35px rgba(0,0,0,0.1);">
+
+    <MudIcon Icon="@Icons.Material.Filled.ErrorOutline"
+             Size="Size.Large"
+             Style="font-size: 80px; color: #d9534f; margin-bottom: 20px;" />
+
+    <MudText Typo="Typo.h4" Style="font-weight: bold; margin-bottom: 10px;">
+        Session Not Found
+    </MudText>
+
+    <MudText Typo="Typo.subtitle1" Style="max-width: 360px; color: #555; margin-bottom: 20px;">
+        This liveness verification link has already been completed or is no longer valid.
+        Please request a new session to continue.
+    </MudText>
+
+    <ButtonComponent StartIcon="@Icons.Material.Filled.ArrowBack"
+                     OnClick="GoBack"
+                     Class="theme-button theme-button-active mt-3 w-50">
+        Go Back
+    </ButtonComponent>
+</MudPaper>
+
+@code {
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/philsys/idv"); 
+    }
 }
