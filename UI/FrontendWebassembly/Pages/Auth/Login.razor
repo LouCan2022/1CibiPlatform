@@ -5,6 +5,7 @@
 @layout AuthLayout
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
+@inject LocalStorageService LocalStorageService
 
 @if (!_isLoading)
 {
@@ -112,6 +113,14 @@ else
         {
             Navigation.NavigateTo("/", true);
             return;
+        }
+
+        var emailFromStorage = await LocalStorageService.GetItemAsync<string>("tempUserEmail");
+        var userIdFromStorage = await LocalStorageService.GetItemAsync<string>("tempUserId");
+
+        if (await LocalStorageService.GetItemAsync<string>("tempUserEmail") is not null)
+        {
+            Navigation.NavigateTo($"/verify-otp?userId={userIdFromStorage}&email={emailFromStorage}", true);
         }
 
         _isLoading = false;
