@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.DeleteTransaction;
 
-public record DeleteTransactionCommand(Guid Tid) : ICommand<DeleteTransactionResult>;
+public record DeleteTransactionCommand(string HashToken) : ICommand<DeleteTransactionResult>;
 public record DeleteTransactionResult(bool IsDeleted);
 public class DeleteTransactionHandler : ICommandHandler<DeleteTransactionCommand, DeleteTransactionResult>
 {
@@ -15,7 +15,7 @@ public class DeleteTransactionHandler : ICommandHandler<DeleteTransactionCommand
 	}
 	public async Task<DeleteTransactionResult> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
 	{
-		var deletedTransaction = await _deleteTransactionService.DeleteTransactionAsync(request.Tid);
+		var deletedTransaction = await _deleteTransactionService.DeleteTransactionAsync(request.HashToken);
 
 		return new DeleteTransactionResult(deletedTransaction);
 	}

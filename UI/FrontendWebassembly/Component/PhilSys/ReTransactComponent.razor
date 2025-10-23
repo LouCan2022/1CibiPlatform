@@ -2,10 +2,8 @@
 @inject NavigationManager NavigationManager
 
 <MudPaper Elevation="6"
-          Class="d-flex flex-column justify-center align-center text-center mx-auto"
-          Style="height: 65vh; width: 30wh; padding: 40px 32px;
-                 border-radius: 16px; background-color: var(--mud-palette-surface);
-                 box-shadow: 0px 10px 35px rgba(0,0,0,0.1);">
+          Class="p-10 text-center form-container d-flex flex-column justify-center align-center"
+          Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:500px; max-width:90%;">
 
     <MudIcon Icon="@Icons.Material.Filled.HourglassEmpty"
              Size="Size.Large"
@@ -15,14 +13,14 @@
         Session Expired
     </MudText>
 
-    <MudText Typo="Typo.subtitle1" Style="max-width: 420px; color: #555;">
+    <MudText Typo="Typo.subtitle1" Style="max-width: 420px; color: #555;  margin: 0px 10px 20px 10px;">
         Your liveness verification session has expired.
         Please start a new session to continue your PhilSys verification process.
     </MudText>
 
     <ButtonComponent StartIcon="@Icons.Material.Filled.Refresh"
                      OnClick="StartNewSession"
-                     Class="theme-button theme-button-active mt-3 w-50">
+                     Class="theme-button theme-button-active">
         Start New Session
     </ButtonComponent>
 </MudPaper>

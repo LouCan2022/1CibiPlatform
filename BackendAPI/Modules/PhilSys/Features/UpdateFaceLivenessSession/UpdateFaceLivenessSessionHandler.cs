@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.UpdateFaceLivenessSession;
 
-public record UpdateFaceLivenessSessionCommand(Guid Tid, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResult>;
+public record UpdateFaceLivenessSessionCommand(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResult>;
 
 public record UpdateFaceLivenessSessionResult(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
 public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivenessSessionCommand, UpdateFaceLivenessSessionResult>
@@ -15,10 +15,10 @@ public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivene
 	}
 	public async Task<UpdateFaceLivenessSessionResult> Handle(UpdateFaceLivenessSessionCommand command, CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Handling Philsys basic information request for client: {FirstName}", command.Tid);
+		_logger.LogInformation("Handling Philsys basic information request for client: {FirstName}", command.HashToken);
 
 		var result = await _updateFaceLivenessSessionService.UpdateFaceLivenessSessionAsync(
-				command.Tid,
+				command.HashToken,
 				command.FaceLivenessSessionId,
 				cancellationToken
 			);

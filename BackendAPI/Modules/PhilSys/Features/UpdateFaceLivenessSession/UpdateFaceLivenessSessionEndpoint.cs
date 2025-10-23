@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.PostFaceLivenessSession;
 
-public record UpdateFaceLivenessSessionRequest(Guid Tid, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
+public record UpdateFaceLivenessSessionRequest(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
 
 public record UpdateFaceLivenessSessionResponse(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
@@ -10,7 +10,7 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 		app.MapPost("updatefacelivenesssession", async (UpdateFaceLivenessSessionRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new UpdateFaceLivenessSessionCommand(
-				request.Tid,
+				request.HashToken,
 				request.FaceLivenessSessionId
 				);
 			UpdateFaceLivenessSessionResult result = await sender.Send(command, cancellationToken);

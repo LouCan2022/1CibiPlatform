@@ -9,11 +9,11 @@ public class PhilSysService : IPhilSysService
 		_httpClient = httpClientFactory.CreateClient("API");
 	}
 
-	public async Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession)
+	public async Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSession)
 	{
 		var payload = new
 		{
-			Tid,
+			HashToken,
 			FaceLivenessSessionId = FaceLivenessSession
 		};
 
@@ -26,14 +26,15 @@ public class PhilSysService : IPhilSysService
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<UpdateFaceLivenessSessionResponseDTO>();
+
 		Console.WriteLine("✅ Update Successfully");
 
 		return successContent!;
 	}
 
-	public async Task<TransactionStatusResponse> GetTransactionStatusAsync(Guid Tid)
+	public async Task<TransactionStatusResponse> GetTransactionStatusAsync(string HashToken)
 	{
-		var request = new { Tid };
+		var request = new { HashToken };
 		var response = await _httpClient.PostAsJsonAsync("/philsys/idv/validate/liveness", request);
 		if (!response.IsSuccessStatusCode)
 		{
@@ -57,9 +58,9 @@ public class PhilSysService : IPhilSysService
 
 	}
 
-	public async Task<bool> DeleteTransactionAsync(Guid Tid)
+	public async Task<bool> DeleteTransactionAsync(string HashToken)
 	{
-		var request = new { Tid };
+		var request = new { HashToken };
 		var response = await _httpClient.PostAsJsonAsync("/philsys/deletetransaction", request);
 		if (!response.IsSuccessStatusCode)
 		{
@@ -70,5 +71,38 @@ public class PhilSysService : IPhilSysService
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
 		Console.WriteLine("✅ Delete Successfully");
 		return successContent!;
+	}
+
+	public async Task<string> PostBasicInformationOrPCN(string inquiry_type, IdentityData identity_data)
+	{
+		if (DateTime.TryParse(identity_data.birth_date, out var parsedDate))
+		{
+			identity_data.birth_date = parsedDate.ToString("yyyy-MM-dd");
+		}
+		if (inquiry_type == "name_dob")
+		{
+			var requestInfo = new { inquiry_type = "name_dob", identity_data };
+			var responseInfo = await _httpClient.PostAsJsonAsync("philsys/idv", requestInfo);
+			if (!responseInfo.IsSuccessStatusCode)
+			{
+				Console.WriteLine("❌ Did not Update Successfully");
+				return "";
+			}
+
+			var successContentInfo = await responseInfo.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponseDTO>();
+			return successContentInfo!.liveness_link!;
+		}
+
+		var requestPcn = new { inquiry_type = "pcn", identity_data };
+		var responsePCn = await _httpClient.PostAsJsonAsync("philsys/idv", requestPcn);
+		if (!responsePCn.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Update Successfully");
+			return "";
+		}
+
+		var successContentPcn = await responsePCn.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponseDTO>();
+		return successContentPcn!.liveness_link!;
+
 	}
 }

@@ -2,10 +2,12 @@
 
 public interface IPhilSysService
 {
-	Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSession);
+	Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSession);
 
-	Task<TransactionStatusResponse> GetTransactionStatusAsync(Guid Tid);
+	Task<TransactionStatusResponse> GetTransactionStatusAsync(string HashToken);
 
-	Task<bool> DeleteTransactionAsync(Guid Tid);
+	Task<bool> DeleteTransactionAsync(string HashToken);
+
+	Task<string> PostBasicInformationOrPCN(string inquiry_type, IdentityData identity_data);
 
 }

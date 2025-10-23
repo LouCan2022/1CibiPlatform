@@ -15,9 +15,12 @@ public class PhilSysRepository : IPhilSysRepository
 		await _dbcontext.SaveChangesAsync();
 		return true;
 	}
-	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid)
+	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(PhilSysTransaction transaction)
 	{
-		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+		var entry = _dbcontext.Attach(transaction);
+		entry.Property(t => t.IsTransacted).IsModified = true;
+		entry.Property(t => t.TransactedAt).IsModified = true;
+
 		transaction!.IsTransacted = true;
 		transaction.TransactedAt = DateTime.UtcNow;
 
@@ -26,16 +29,16 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction;
 	}
 
-	public async Task<PhilSysTransaction> GetTransactionDataByTidAsync(Guid Tid)
+	public async Task<PhilSysTransaction> GetTransactionDataByTidAsync(string HashToken)
 	{
-		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 
 		return transaction!;
 	}
 
-	public async Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId)
+	public async Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSessionId)
 	{
-		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 
 		transaction!.FaceLivenessSessionId = FaceLivenessSessionId;
 
@@ -44,11 +47,11 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction;
 	}
 
-	public async Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(Guid Tid)
+	public async Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(string HashToken)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions
 		.AsNoTracking()
-		.Where(t => t.Tid == Tid)
+		.Where(t => t.HashToken == HashToken)
 		.Select(t => new TransactionStatusResponse
 		{
 			Exists = true, // <-- ensure this is set correctly
@@ -62,9 +65,9 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction ?? new TransactionStatusResponse { Exists = false };
 	}
 
-	public async Task<bool> DeleteTrandsactionDataAsync(Guid Tid)
+	public async Task<bool> DeleteTrandsactionDataAsync(string HashToken)
 	{
-		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.Tid == Tid);
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 		_dbcontext.PhilSysTransactions.Remove(transaction!);
 		await _dbcontext.SaveChangesAsync();
 		return true;

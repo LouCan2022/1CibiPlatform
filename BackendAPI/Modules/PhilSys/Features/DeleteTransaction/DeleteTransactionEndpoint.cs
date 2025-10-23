@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.DeleteTransaction;
 
-public record DeleteTransactionRequest(Guid Tid) : ICommand<DeleteTransactionResponse>;
+public record DeleteTransactionRequest(string HashToken) : ICommand<DeleteTransactionResponse>;
 public record DeleteTransactionResponse(bool IsDeleted);
 public class DeleteTransactionEndpoint : ICarterModule
 {
@@ -9,7 +9,7 @@ public class DeleteTransactionEndpoint : ICarterModule
 		app.MapPost("deletetransaction", async (DeleteTransactionCommand request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new DeleteTransactionCommand(
-				request.Tid
+				request.HashToken
 				);
 
 			DeleteTransactionResult result = await sender.Send(command, cancellationToken);

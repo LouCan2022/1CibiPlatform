@@ -8,9 +8,9 @@ public class DeleteTransactionService
 		_philSysRepository = philSysRepository;
 	}
 
-	public async Task<bool> DeleteTransactionAsync(Guid Tid)
+	public async Task<bool> DeleteTransactionAsync(string HashToken)
 	{
-		var deletedTransaction = await _philSysRepository.DeleteTrandsactionDataAsync(Tid);
+		var deletedTransaction = await _philSysRepository.DeleteTrandsactionDataAsync(HashToken);
 
 		return deletedTransaction;
 	}

@@ -8,9 +8,9 @@ public class LivenessSessionService
 	{
 		_philSysRepository = philSysRepository;
 	}
-	public async Task<TransactionStatusResponse> IsLivenessUsedAsync(Guid Tid)
+	public async Task<TransactionStatusResponse> IsLivenessUsedAsync(string HashToken)
 	{
-		var status = await _philSysRepository.GetLivenessSessionStatusAsync(Tid);
+		var status = await _philSysRepository.GetLivenessSessionStatusAsync(HashToken);
 		
 		return status;
 	}
