@@ -1,5 +1,7 @@
 ﻿@layout PhilSysLayout
 @using MudBlazor
+@inject IJSRuntime JS
+
 
 <MudPaper Class="p-6 d-flex flex-wrap align-items-start gap-6 position-relative"
           Style="background-color: var(--mud-palette-surface); border-radius: 12px; padding: 20px 20px 60px 0px;">
@@ -43,7 +45,8 @@
 
     <div class="position-absolute" style="bottom: 16px; right: 16px;">
         <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
-                         Class="theme-button theme-button-active">
+                         Class="theme-button theme-button-active"
+                         OnClick="DownloadApiResponse">
             Search Again
         </ButtonComponent>
     </div>
@@ -57,7 +60,24 @@
 
 
     private string? FaceUrl;
+  
+    private async Task DownloadApiResponse()
+    {
+        if (VerificationResult == null)
+            return;
 
+        var json = System.Text.Json.JsonSerializer.Serialize(
+            VerificationResult,
+            new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true // nicely formatted JSON
+            });
+
+        var fileName = $"ApiResponse_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+
+        // Call the JS interop helper to trigger the download
+        await JS.InvokeVoidAsync("downloadFileFromBlazor", fileName, "application/json", json);
+    }
 
 
     protected override void OnInitialized()
