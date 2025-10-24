@@ -1,5 +1,7 @@
 ﻿
 
+using BuildingBlocks.SharedServices.Interfaces;
+
 namespace PhilSys.Services;
 
 public class PartnerSystemService
@@ -7,22 +9,48 @@ public class PartnerSystemService
 	private readonly ILogger<PartnerSystemService> _logger;
 	private readonly IPhilSysRepository _repository;
 	private readonly IConfiguration _configuration;
+	private readonly IHashService _hashService;
+	private readonly ISecureToken _securetoken;
 	private readonly int _livenessExpiryMinutes;
 	public PartnerSystemService(
 		ILogger<PartnerSystemService> logger, 
 		IPhilSysRepository repository,
-		IConfiguration configuration)
+		IConfiguration configuration,
+		IHashService hashService,
+		ISecureToken securetoken)
 	{
 		_logger = logger;
 		_repository = repository;
 		_configuration = configuration;
-		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessExpiryMinutes"] ?? "10");
+		_hashService = hashService;
+		_securetoken = securetoken;
+		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessExpiryMinutes"] ?? "1");
 	}
 	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string inquiry_type, IdentityData identity_data)
 	{
 		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
-		
+
+		var token = _securetoken.GenerateSecureToken();
+
+		var identifier = !string.IsNullOrWhiteSpace(identity_data.PCN)
+							 ? identity_data.PCN
+							 : $"{identity_data.FirstName} {identity_data.LastName}".Trim();
+
+		if (token == null)
+		{
+			_logger.LogError("Failed to generate Token for identity: {Identifier}", identifier);
+			throw new Exception("Failed to generate Token.");
+		}
+
+		var HashToken = _hashService.Hash(token);
+
+		if (HashToken == null)
+		{
+			_logger.LogError("Failed to hash Token for identity: {Identifier}", identifier);
+			throw new Exception("Failed to hash Token.");
+		}
+
 		if (inquiry_type.Equals("name_dob", StringComparison.OrdinalIgnoreCase))
 		{
 			transaction = new PhilSysTransaction
@@ -35,6 +63,7 @@ public class PartnerSystemService
 				Suffix = identity_data.Suffix,
 				BirthDate = identity_data.BirthDate,
 				IsTransacted = false,
+				HashToken = HashToken,
 				CreatedAt = DateTime.UtcNow,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(_livenessExpiryMinutes)
 			};
@@ -47,56 +76,20 @@ public class PartnerSystemService
 				InquiryType = "pcn",
 				PCN = identity_data.PCN,
 				IsTransacted = false,
+				HashToken = HashToken,
 				CreatedAt = DateTime.UtcNow,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(_livenessExpiryMinutes)
 			};
 		}
 
-		var livenessUrl = $"http://localhost:5134/philsys/idv/liveness/{transaction.Tid}";
+		var livenessUrl = $"http://localhost:5134/philsys/idv/liveness/{transaction.HashToken}";
 
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)
 			_logger.LogError("Failed to add transaction data for Tid: {Tid}", transaction.Tid);
 	
 		return new PartnerSystemResponseDTO(
-			code: null,
-			token: null,
-			reference: null,
-			face_url: null,
-			full_name: null,
-			first_name: null,
-			middle_name: null,
-			last_name: null,
-			suffix: null,
-			gender: null,
-			marital_status: null,
-			blood_type: null,
-			email: null,
-			mobile_number: null,
-			birth_date: null,
-			full_address: null,
-			address_line_1: null,
-			address_line_2: null,
-			barangay: null,
-			municipality: null,
-			province: null,
-			country: null,
-			postal_code: null,
-			present_full_address: null,
-			present_address_line_1: null,
-			present_address_line_2: null,
-			present_barangay: null,
-			present_municipality: null,
-			present_province: null,
-			present_country: null,
-			present_postal_code: null,
-			residency_status: null,
-			place_of_birth: null,
-			pob_municipality: null,
-			pob_province: null,
-			pob_country: null,
 			liveness_link: livenessUrl,
-			face_liveness_session_id: null,
 			isTransacted: false
 		);
 	}

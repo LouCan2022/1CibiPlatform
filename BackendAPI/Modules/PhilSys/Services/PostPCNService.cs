@@ -14,8 +14,8 @@ public class PostPCNService
 
 	public async Task<BasicInformationOrPCNResponseDTO> PostPCNAsync(
 		string value,
-		string face_liveness_session_id,
 		string bearer_token,
+		string face_liveness_session_id,
 		CancellationToken ct = default
 		)
 	{

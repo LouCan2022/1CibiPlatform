@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251020134951_InitialPhilSysMigration")]
+    [Migration("20251023050124_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
@@ -44,6 +44,9 @@ namespace APIs.Migrations.PhilSys
                         .HasColumnType("text");
 
                     b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("HashToken")
                         .HasColumnType("text");
 
                     b.Property<string>("InquiryType")

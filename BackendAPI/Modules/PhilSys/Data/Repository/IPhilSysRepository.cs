@@ -3,11 +3,13 @@ public interface IPhilSysRepository
 {
 	Task<bool> AddTransactionDataAsync(PhilSysTransaction PhilSysTransaction);
 
-	Task<PhilSysTransaction> UpdateTransactionDataAsync(Guid Tid, PhilSysTransaction PhilSysTransaction);
+	Task<PhilSysTransaction> UpdateTransactionDataAsync(PhilSysTransaction transaction);
 
-	Task<PhilSysTransaction> GetTransactionDataByTidAsync(Guid Tid);
+	Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSessionId);
 
-	Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(Guid Tid, string FaceLivenessSessionId);
+	Task<PhilSysTransaction> GetTransactionDataByTidAsync(string HashToken);
 
-	Task<TransactionStatusResponse> GetLivenessSessionStatus(Guid Tid);
+	Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(string HashToken);
+
+	Task<bool> DeleteTrandsactionDataAsync(string HashToken);
 }

@@ -43,6 +43,9 @@ namespace APIs.Migrations.PhilSys
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
 
+                    b.Property<string>("HashToken")
+                        .HasColumnType("text");
+
                     b.Property<string>("InquiryType")
                         .HasColumnType("text");
 

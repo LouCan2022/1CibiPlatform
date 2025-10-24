@@ -1,5 +1,6 @@
 @page "/philsys/idv"
 @inject NavigationManager Navigation
+@inject IPhilSysService PhilSysService
 @using MudBlazor
 @using System.Text.RegularExpressions
 @using FrontendWebassembly.Component.Special
@@ -17,142 +18,147 @@
     <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; width: 200px; font-size: 18px;" />
 </MudTabs>
 
-   @if (!_showLiveness)
-   {
-        @if (_activeIndex == 0)
-        {
-            <MudForm @ref="personalForm" Class="mx-auto p-6 mt-0 philsys-card form-container">
-                    <MudGrid Class="mb-3">
-                        <MudItem xs="8" sm="8">
-                            <MudTextField @bind-Value="FirstName"
-                                          Label="First Name"
-                                          FullWidth="true"
-                                          Adornment="Adornment.Start"
-                                          Required="true"
-                                          RequiredError="First Name is required"
-                                          InputType="InputType.Text"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Class="philsys-rounded-input"
-                                          For="@(() => FirstName)" />
-                        </MudItem>
+    @if (_activeIndex == 0)
+    {
+        <MudForm @ref="personalForm" Class="mx-auto p-6 mt-0 philsys-card">
+            <MudGrid Class="mb-3">
+                <MudItem xs="8" sm="8">
+            <MudTextField @bind-Value="identityData!.first_name"
+                                    Label="First Name"
+                                    FullWidth="true"
+                                    Adornment="Adornment.Start"
+                                    Required="true"
+                                    RequiredError="First Name is required"
+                                    InputType="InputType.Text"
+                                    Variant="Variant.Outlined"
+                                    Margin="Margin.Dense"
+                                    Class="philsys-rounded-input"
+                                    For="@(() => identityData!.first_name)" />
+                </MudItem>
 
-                        <MudItem xs="4" sm="4" >
-                            <MudSelect T="string"
-                                       Label="Suffix"
-                                       @bind-Value="Suffix"
-                                       Margin="Margin.Dense"
-                                       Variant="Variant.Outlined"
-                                       Adornment="Adornment.Start"
-                                       Class="philsys-rounded-input">
-                                <MudSelectItem Value=@("N/A")>N/A</MudSelectItem>
-                                <MudSelectItem Value=@("Jr")>Jr.</MudSelectItem>
-                                <MudSelectItem Value=@("Sr")>Sr.</MudSelectItem>
-                                <MudSelectItem Value=@("II")>II</MudSelectItem>
-                                <MudSelectItem Value=@("III")>III</MudSelectItem>
-                            </MudSelect>
-                        </MudItem>
-                    </MudGrid>
-
-                    <MudTextField @bind-Value="MiddleName"
-                                  Label="Middle Name (Optional)"
-                                  Required="true"
-                                  RequiredError="Middle Name is required"
-                                  InputType="InputType.Text"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  FullWidth="true"
-                                  Adornment="Adornment.Start"
-                                  Class="mb-4 philsys-rounded-input" />
-
-                    <MudTextField @bind-Value="LastName"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
-                                  Label="Last Name"
-                                  Required="true"
-                                  Placeholder=" "
-                                  FullWidth="true"
-                                  InputType="InputType.Text"
-                                  Adornment="Adornment.Start"
-                                  RequiredError="Last Name is required"
-                                  For="@(() => LastName)"
-                                  Class="mb-4 philsys-rounded-input" />
-
-                    <MudTextField @bind-Value="BirthDate"
-                                  Label="Birth Date"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  InputType="InputType.Date"
-                                  FullWidth="true"
-                                  Required="true"
-                                  Adornment="Adornment.Start"
-                                  RequiredError="Birth Date is required"
-                                  For="@(() => BirthDate)"
-                                  Min="1900-01-01"
-                                  Max="@DateTime.Today.ToString("yyyy-MM-dd")"          
-                                  Class="mb-6 philsys-rounded-input" />
-
-                    <ButtonComponent OnClick="SubmitPersonalInfo">
-                        Next
-                    </ButtonComponent>
-                </MudForm>
- 
-        }
-        else if (_activeIndex == 1)
-        {
-        <MudForm @ref="pcnForm" Class="mx-auto p-6 mt-0 philsys-card  form-container" MaxWidth="500px">
-                <MudTextField @bind-Value="PCN"
-                                Label="PhilSys Card Number (16-Digits)"
-                                Required="true"
-                                Adornment="Adornment.Start"
+                <MudItem xs="4" sm="4" >
+                    <MudSelect T="string"
+                                Label="Suffix"
+                                @bind-Value=" identityData!.suffix"
                                 Margin="Margin.Dense"
-                                RequiredError="PhilSys Card Number is required"
-                                Class="mb-5 philsys-rounded-input"
                                 Variant="Variant.Outlined"
-                                Validation="@((string? value) => ValidatePCN(value!))" />
+                                Adornment="Adornment.Start"
+                                Class="philsys-rounded-input">
+                        <MudSelectItem Value=@("")>N/A</MudSelectItem>
+                        <MudSelectItem Value=@("Jr.")>Jr.</MudSelectItem>
+                        <MudSelectItem Value=@("Sr.")>Sr.</MudSelectItem>
+                        <MudSelectItem Value=@("II.")>II</MudSelectItem>
+                        <MudSelectItem Value=@("III.")>III</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
 
-                <ButtonComponent OnClick="SubmitPCN">
-                    Next
-                </ButtonComponent>
+            <MudTextField @bind-Value="identityData!.middle_name"
+                            Label="Middle Name"
+                            Required="true"
+                            RequiredError="Middle Name is required"
+                            InputType="InputType.Text"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense"
+                            FullWidth="true"
+                            Adornment="Adornment.Start"
+                            Class="mb-4 philsys-rounded-input"
+                            For="@(() => identityData!.middle_name)" />
+
+                <MudTextField @bind-Value="identityData!.last_name"
+                        Variant="Variant.Outlined"
+                        Margin="Margin.Dense"
+                            Label="Last Name"
+                            Required="true"
+                            Placeholder=" "
+                            FullWidth="true"
+                            InputType="InputType.Text"
+                            Adornment="Adornment.Start"
+                            RequiredError="Last Name is required"
+                            For="@(() => identityData!.last_name)"
+                            Class="mb-4 philsys-rounded-input" />
+
+            <MudTextField @bind-Value="identityData!.birth_date"
+                            Label="Birth Date"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense"
+                            InputType="InputType.Date"
+                            FullWidth="true"
+                            Required="true"
+                            Adornment="Adornment.Start"
+                            RequiredError="Birth Date is required"
+                            For="@(() => identityData!.last_name)"
+                            Min="1900-01-01"
+                            Max="@DateTime.Today.ToString("yyyy-MM-dd")"          
+                            Class="mb-6 philsys-rounded-input" />
+
+            <ButtonComponent OnClick="SubmitPersonalInfo"
+                             Class="theme-button theme-button-active"
+                             Style="border-radius: 4px">
+                Next
+            </ButtonComponent>
         </MudForm>
-      
-        }
+ 
     }
-else
-{
-    <PhilSysLiveness></PhilSysLiveness>
-}
-   
+    else if (_activeIndex == 1)
+    {
+    <MudForm @ref="pcnForm" Class="mx-auto p-6 mt-0 philsys-card MaxWidth="500px">
+            <MudTextField @bind-Value="identityData!.pcn"
+                            Label="PhilSys Card Number (16-Digits)"
+                            Required="true"
+                            Adornment="Adornment.Start"
+                            Margin="Margin.Dense"
+                            RequiredError="PhilSys Card Number is required"
+                            Class="mb-5 philsys-rounded-input"
+                            Variant="Variant.Outlined"
+                            For="@(() => identityData!.pcn)" />
+
+            <ButtonComponent OnClick="SubmitPCN"
+                             Class="theme-button theme-button-active"
+                             Style="border-radius: 4px">
+                Next
+            </ButtonComponent>
+    </MudForm>
+      
+    }
+  
+
 @code {
     private MudForm? personalForm;
     private MudForm? pcnForm;
-    private bool _showLiveness = false;
-    private string? FirstName { get; set; }
-    private string? MiddleName { get; set; }
-    private string? LastName { get; set; }
-    private string? BirthDate { get; set; }
+    private IdentityData? identityData;
     private string? Suffix { get; set; } = "N/A";
     private string? PCN { get; set; } = string.Empty;
     private int _activeIndex = 0;
 
+    protected override void OnInitialized()
+    {
+        identityData = new IdentityData();
+    }
 
     private async Task SubmitPersonalInfo()
     {
         await personalForm!.Validate();
-
-        if (personalForm.IsValid)
+        if (!personalForm.IsValid)
+            return;
+        
+        var livenessLink = await PhilSysService.PostBasicInformationOrPCN("name_dob", identityData!);
+        if (!string.IsNullOrEmpty(livenessLink))
         {
-            _showLiveness = true; 
+            Navigation.NavigateTo(livenessLink, forceLoad: true);
         }
     }
 
     private async Task SubmitPCN()
     {
         await pcnForm!.Validate();
+        if (!pcnForm.IsValid)
+            return;
 
-        if (pcnForm.IsValid)
+        var livenessLink = await PhilSysService.PostBasicInformationOrPCN("pcn", identityData!);
+        if (!string.IsNullOrEmpty(livenessLink))
         {
-            _showLiveness = true;
+            Navigation.NavigateTo(livenessLink, forceLoad: true);
         }
     }
     private void OnTabChanged(int index)

@@ -1,4 +1,7 @@
-﻿namespace PhilSys.ServiceConfig;
+﻿using BuildingBlocks.SharedServices.Implementations;
+using BuildingBlocks.SharedServices.Interfaces;
+
+namespace PhilSys.ServiceConfig;
 public static class PhilSysServiceConfiguration
 {
 	private const string assemblyName = "APIs";
@@ -50,6 +53,9 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<PartnerSystemService>();
 		services.AddScoped<UpdateFaceLivenessSessionService>();
 		services.AddScoped<LivenessSessionService>();
+		services.AddScoped<DeleteTransactionService>();
+		services.AddScoped<IHashService, HashService>();
+		services.AddScoped<ISecureToken, SecureToken>();
 		services.AddScoped<IPhilSysRepository, PhilSysRepository>();
 		return services;
 	}

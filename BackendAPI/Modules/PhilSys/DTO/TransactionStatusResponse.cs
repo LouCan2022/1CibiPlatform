@@ -1,7 +1,8 @@
 ﻿namespace PhilSys.DTO;
 public class TransactionStatusResponse
 {
-	public bool Exists { get; set; }
+	public bool Exists { get; set; } = true;
 	public bool IsTransacted { get; set; }
-	public DateTime? ExpiresAt { get; set; }
+	public bool isExpired { get; set; } = false;
+	public DateTime ExpiresAt { get; set; }
 }

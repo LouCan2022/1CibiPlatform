@@ -1,65 +1,150 @@
 ﻿@layout PhilSysLayout
 @using MudBlazor
-<MudPaper Class="p-6 d-flex flex-wrap align-items-start gap-6 position-relative"
-          Style="background-color: var(--mud-palette-surface); border-radius: 12px; padding: 20px 20px 60px 0px;">
+@inject IJSRuntime JS
+<MudPaper Class="p-8 text-center form-container"
+          Elevation="6"
+          Style="
+              position: relative;
+              border-radius: 20px;
+              padding: 25px;
+              box-shadow: 0px 10px 45px rgba(0,0,0,0.1);
+              width: 100%;
+              max-width: 950px;
+              margin: auto;
+              display: grid;
+              grid-template-columns: 250px 1fr 1fr;
+              grid-template-rows: auto auto;
+              gap: 30px 25px;
+              align-items: start;
+          ">
 
-    <div class="d-flex flex-column align-items-center" style="width: 220px;">
-        <MudPaper Elevation="0"
-                  Class="d-flex justify-center align-center mb-3"
-                  Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 0px;">
-            <MudIcon Icon="@Icons.Material.Filled.Image" Size="Size.Large" Color="Color.Secondary" />
-        </MudPaper>
-
-        <ButtonComponent StartIcon="@Icons.Material.Filled.Download" Style="width: 170px;">
-            API Response
-        </ButtonComponent>
+    <!-- COLUMN 1, ROW 1: Image + API Button -->
+    <div style="grid-column: 1; grid-row: 1;">
+        <div class="d-flex flex-column align-items-center">
+            <MudPaper Elevation="0"
+                      Class="d-flex justify-center align-center mb-3"
+                      Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 12px;">
+                <MudImage Src="@(string.IsNullOrWhiteSpace(FaceUrl) ? "images/generic/default_picture.jpg" : FaceUrl)"
+                          Alt="User Profile"
+                          Style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; outline: 2px solid #000;" />
+            </MudPaper>
+            @if (!string.IsNullOrEmpty(VerificationResult!.reference))
+            {
+                <ButtonComponent StartIcon="@Icons.Material.Filled.Download"
+                                 OnClick="DownloadApiResponse"
+                                 Class="theme-button theme-button-active"
+                                 Style="width: 180px;">
+                    API Response
+                </ButtonComponent>
+            }
+        </div>
     </div>
 
-    <div class="flex-grow-1" style="min-width: 500px;">
+    <!-- COLUMN 2, ROW 1: Labels -->
+    <div style="grid-column: 2; grid-row: 1;">
         <table style="width: 100%; border-collapse: collapse;">
-            @foreach (var row in InfoRows)
+            @if (InfoRows != null)
             {
-                <tr>
-                    <td style="width: 25%; padding: 6px 8px; vertical-align: top; color: var(--mud-palette-text-primary);">
-                        <MudText Typo="Typo.body1">@row.Label</MudText>
-                    </td>
-                    <td style="width: 25%; padding: 6px 8px;">
-                        <MudText Style="color: var(--mud-palette-text-primary); font-weight: bold;" Typo="Typo.body1">
-                            @(string.IsNullOrWhiteSpace(row.Value) ? "No Data" : row.Value)
-                        </MudText>
-                    </td>
-                </tr>
+                @foreach (var row in InfoRows)
+                {
+                    <tr>
+                        <td style="padding: 6px 8px; vertical-align: top;">
+                            <MudText Typo="Typo.body1" Style="text-align: left;">
+                                @row.Label
+                            </MudText>
+                        </td>
+                    </tr>
+                }
             }
         </table>
     </div>
 
-    <div class="position-absolute" style="bottom: 16px; right: 16px;">
-        <ButtonComponent StartIcon="@Icons.Material.Filled.Search" >
+    <!-- COLUMN 3, ROW 1: Values -->
+    <div style="grid-column: 3; grid-row: 1;">
+        <table style="width: 100%; border-collapse: collapse;">
+            @if (InfoRows != null)
+            {
+                @foreach (var row in InfoRows)
+                {
+                    <tr>
+                        <td style="padding: 6px 8px;">
+                            <MudText Typo="Typo.body1"
+                                     Style="color: var(--mud-palette-text-primary); font-weight: bold; text-align: left;">
+                                @((string.IsNullOrWhiteSpace(row.Value) ? "No Data Found" : row.Value))
+                            </MudText>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    </div>
+
+    <!-- COLUMN 3, ROW 2: Search Again button -->
+    <div style="grid-column: 3; grid-row: 2; display: flex; justify-content: flex-end;">
+        <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
+                         Class="theme-button theme-button-active"
+                         Style="width: 200px;">
             Search Again
         </ButtonComponent>
     </div>
+
 </MudPaper>
+
 
 
 @code {
     [Parameter]
-    public static UpdateFaceLivenessSessionResponseDTO VerificationResult { get; set; } 
-    private List<(string Label, string Value)> InfoRows = new()
+    public UpdateFaceLivenessSessionResponseDTO? VerificationResult { get; set; }
+
+    private List<(string Label, string Value)>? InfoRows;
+
+    private string? FaceUrl;
+
+    protected override void OnInitialized()
     {
-        ("PhilSys Card Number", VerificationResult.reference),
-        ("Digital ID Number", VerificationResult.code),
-        ("First Name", VerificationResult.first_name),
-        ("Middle Name", VerificationResult.middle_name),
-        ("Last Name", VerificationResult.last_name),
-        ("Suffix", VerificationResult.suffix!),
-        ("Gender", VerificationResult.gender),
-        ("Birth Date", VerificationResult.birth_date),
-        ("Place of Birth", VerificationResult.place_of_birth),
-        ("Permanent Address", VerificationResult.full_address),
-        ("Present Address", VerificationResult.present_full_address),
-        ("Marital Status", VerificationResult.marital_status),
-        ("Mobile Number", VerificationResult.mobile_number),
-        ("Email", VerificationResult.email),
-        ("Blood Type", VerificationResult.blood_type)
-    };
+        if (VerificationResult == null)
+        {
+            InfoRows = new List<(string, string)>
+        {
+            ("Error", "No data available")
+        };
+            return;
+        }
+        FaceUrl = VerificationResult.face_url;
+        InfoRows = new()
+        {
+            ("PhilSys Card Number", VerificationResult.reference ?? "No Data Found"),
+            ("Digital ID Number", VerificationResult.code ?? "No Data Found"),
+            ("First Name", VerificationResult.first_name ?? "No Data Found"),
+            ("Middle Name", VerificationResult.middle_name ?? "No Data Found"),
+            ("Last Name", VerificationResult.last_name ?? "No Data Found"),
+            ("Suffix",  VerificationResult.suffix ?? "No Data Found"),
+            ("Gender", VerificationResult.gender ?? "No Data Found"),
+            ("Birth Date", VerificationResult.birth_date ?? "No Data Found"),
+            ("Place of Birth", VerificationResult.place_of_birth ?? "No Data Found"),
+            ("Permanent Address", VerificationResult.full_address ?? "No Data Found"),
+            ("Present Address", VerificationResult.present_full_address ?? "No Data Found"),
+            ("Marital Status", VerificationResult.marital_status ?? "No Data Found"),
+            ("Mobile Number", VerificationResult.mobile_number ?? "No Data Found"),
+            ("Email", VerificationResult.email ?? "No Data Found"),
+            ("Blood Type", VerificationResult.blood_type ?? "No Data Found")
+        };
+    }
+  
+    private async Task DownloadApiResponse()
+    {
+        if (VerificationResult == null)
+            return;
+
+        var json = System.Text.Json.JsonSerializer.Serialize(
+            VerificationResult,
+            new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true 
+            });
+
+        var fileName = $"ApiResponse_{DateTime.Now:MM-dd-yyyy}.json";
+
+        await JS.InvokeVoidAsync("downloadFileFromBlazor", fileName, "application/json", json);
+    }
 }
