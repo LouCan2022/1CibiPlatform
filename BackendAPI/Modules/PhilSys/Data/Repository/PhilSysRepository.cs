@@ -29,7 +29,7 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction;
 	}
 
-	public async Task<PhilSysTransaction> GetTransactionDataByTidAsync(string HashToken)
+	public async Task<PhilSysTransaction> GetTransactionDataByHashTokenAsync(string HashToken)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 
@@ -54,7 +54,7 @@ public class PhilSysRepository : IPhilSysRepository
 		.Where(t => t.HashToken == HashToken)
 		.Select(t => new TransactionStatusResponse
 		{
-			Exists = true, // <-- ensure this is set correctly
+			Exists = true, 
 			IsTransacted = t.IsTransacted,
 			isExpired = false,
 			ExpiresAt = t.ExpiresAt
@@ -65,9 +65,8 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction ?? new TransactionStatusResponse { Exists = false };
 	}
 
-	public async Task<bool> DeleteTrandsactionDataAsync(string HashToken)
+	public async Task<bool> DeleteTrandsactionDataAsync(PhilSysTransaction transaction)
 	{
-		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 		_dbcontext.PhilSysTransactions.Remove(transaction!);
 		await _dbcontext.SaveChangesAsync();
 		return true;

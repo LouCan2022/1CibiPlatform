@@ -11,7 +11,7 @@ public class PartnerSystemService
 	private readonly IConfiguration _configuration;
 	private readonly IHashService _hashService;
 	private readonly ISecureToken _securetoken;
-	private readonly int _livenessExpiryMinutes;
+	private readonly double _livenessExpiryMinutes;
 	public PartnerSystemService(
 		ILogger<PartnerSystemService> logger, 
 		IPhilSysRepository repository,
@@ -24,7 +24,7 @@ public class PartnerSystemService
 		_configuration = configuration;
 		_hashService = hashService;
 		_securetoken = securetoken;
-		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessExpiryMinutes"] ?? "1");
+		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessSessionExpiryInMinutes"] ?? "1");
 	}
 	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string inquiry_type, IdentityData identity_data)
 	{

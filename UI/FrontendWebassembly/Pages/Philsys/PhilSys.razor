@@ -9,46 +9,50 @@
 @* philsys/idv *@
 @attribute [RequirePermission(2, 2)]
 
-<MudTabs Rounded="true" Centered="true" Elevation="0"
-            @bind-ActivePanelIndex="_activeIndex"
-            OnActivePanelIndexChanged="OnTabChanged"
-            DisableIndicator="true"
+<MudTabs Rounded="true" 
+         Centered="true" 
+         Elevation="0"
+         @bind-ActivePanelIndex="_activeIndex"
+         OnActivePanelIndexChanged="OnTabChanged"
          Class="philsys-custom-tabs mb-2">
-    <MudTabPanel Variant="Variant.Outlined" Text="Personal Information" Class="@GetTabClass(0)" Style="text-transform:none; width: 200px; font-size: 18px;" />
-    <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; width: 200px; font-size: 18px;" />
+    <MudTabPanel Text="Personal Information" Class="@GetTabClass(0)" Style="text-transform:none; width: 205px; font-size: 18px;" />
+    <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; width: 195px; font-size: 18px;" />
 </MudTabs>
 
     @if (_activeIndex == 0)
     {
         <MudForm @ref="personalForm" Class="mx-auto p-6 mt-0 philsys-card">
             <MudGrid Class="mb-3">
-                <MudItem xs="8" sm="8">
-            <MudTextField @bind-Value="identityData!.first_name"
-                                    Label="First Name"
-                                    FullWidth="true"
-                                    Adornment="Adornment.Start"
-                                    Required="true"
-                                    RequiredError="First Name is required"
-                                    InputType="InputType.Text"
-                                    Variant="Variant.Outlined"
-                                    Margin="Margin.Dense"
-                                    Class="philsys-rounded-input"
-                                    For="@(() => identityData!.first_name)" />
-                </MudItem>
+            <MudItem xs="12" sm="8">
+                <MudTextField @bind-Value="identityData!.first_name"
+                              Label="First Name"
+                              FullWidth="true"
+                              Adornment="Adornment.Start"
+                              Required="true"
+                              RequiredError="First Name is required"
+                              InputType="InputType.Text"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="philsys-rounded-input mb-0"
+                              For="@(() => identityData!.first_name)" />
+            </MudItem>
 
-                <MudItem xs="4" sm="4" >
+            <MudItem xs="12" sm="4">
                     <MudSelect T="string"
-                                Label="Suffix"
-                                @bind-Value=" identityData!.suffix"
-                                Margin="Margin.Dense"
-                                Variant="Variant.Outlined"
-                                Adornment="Adornment.Start"
-                                Class="philsys-rounded-input">
+                               Label="Suffix"
+                               @bind-Value=" identityData!.suffix"
+                               Margin="Margin.Dense"
+                               Variant="Variant.Outlined"
+                               Adornment="Adornment.Start"
+                               Class="philsys-rounded-input mt-0"
+                               FullWidth=" true">
                         <MudSelectItem Value=@("")>N/A</MudSelectItem>
                         <MudSelectItem Value=@("Jr.")>Jr.</MudSelectItem>
                         <MudSelectItem Value=@("Sr.")>Sr.</MudSelectItem>
-                        <MudSelectItem Value=@("II.")>II</MudSelectItem>
-                        <MudSelectItem Value=@("III.")>III</MudSelectItem>
+                        <MudSelectItem Value=@("II.")>II.</MudSelectItem>
+                        <MudSelectItem Value=@("III.")>III.</MudSelectItem>
+                        <MudSelectItem Value=@("IV.")>IV.</MudSelectItem>
+                        <MudSelectItem Value=@("V.")>V.</MudSelectItem>
                     </MudSelect>
                 </MudItem>
             </MudGrid>
@@ -70,7 +74,6 @@
                         Margin="Margin.Dense"
                             Label="Last Name"
                             Required="true"
-                            Placeholder=" "
                             FullWidth="true"
                             InputType="InputType.Text"
                             Adornment="Adornment.Start"
@@ -102,7 +105,7 @@
     }
     else if (_activeIndex == 1)
     {
-    <MudForm @ref="pcnForm" Class="mx-auto p-6 mt-0 philsys-card MaxWidth="500px">
+    <MudForm @ref="pcnForm" Class="mx-auto p-6 mt-0 philsys-card">
             <MudTextField @bind-Value="identityData!.pcn"
                             Label="PhilSys Card Number (16-Digits)"
                             Required="true"
@@ -183,6 +186,4 @@
 
         return null;
     }
-
- 
 }

@@ -229,6 +229,7 @@ code {
     backdrop-filter: blur(10px);
     background-color: var(--mud-palette-surface) !important;
     border-radius: 15px !important;
+    border: 1px solid gray;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
     padding: 15px;
 }
@@ -258,3 +259,4 @@ code {
 .mud-tab-slider {
     display: none !important;
 }
+
