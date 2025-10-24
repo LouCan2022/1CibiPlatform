@@ -1,94 +1,108 @@
-﻿
-@layout PhilSysLayout
-@page "/philsys/idv/liveness/{Tid:guid}"
+﻿@layout PhilSysLayout
+@page "/philsys/idv/liveness/{HashToken}"
 @using MudBlazor
 @inject IJSRuntime JS
 @inject IPhilSysService IPhilSysService
 
-@if (!_status.Exists || _status.IsTransacted)
+<div class="liveness-container">
+@if (_status == null || !Exists || isTransacted)
 {
     <NotFoundComponent></NotFoundComponent>
 }
-else if (IsExpired)
+else if (isExpired)
 {
     <ReTransactComponent></ReTransactComponent>
 }
 else if (!_completed)
 {
-<MudPaper Class="p-6 text-center background-color: var(--mud-palette-surface) !important; mx-auto p-6 mt-0 philsys-card form-container justify-center align-center"
-                Elevation="6"
-            Style="background-color: var(--mud-palette-surface) !important; border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%; ">
+  
+        <MudPaper Class="p-10 text-center form-container d-flex flex-column justify-center align-center"
+                  Elevation="6"
+                  Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%;">
+            <MudText Typo="Typo.h5" Class="mb-4">
+                Liveness Check
+            </MudText>
+            <MudText Typo="Typo.subtitle1" Class="mb-4">
+                Click the button below to start the liveness verification process.
+            </MudText>
+            <ButtonComponent OnClick="StartLiveness" Class="theme-button theme-button-active">
+                <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
+                Start Liveness
+            </ButtonComponent>
+        </MudPaper>
 
-        <MudText Typo="Typo.h5" Class="mb-4" Style="color: var(--mud-palette-text-primary);">
-            Liveness Check
-        </MudText>
-
-        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="color: var(--mud-palette-text-secondary);">
-            Click the button below to start the liveness verification process.
-        </MudText>
-
-        <ButtonComponent OnClick="StartLiveness" Style="width: 170px; color:white; ">
-            <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
-            Start Liveness
-        </ButtonComponent>
-
-    </MudPaper>
 }
 else
 {
     <PhilSysResultComponent VerificationResult="information"></PhilSysResultComponent>
 }
+</div>
 
 @code {
-    UpdateFaceLivenessSessionResponseDTO information;
-
-    [Parameter]
-    public Guid Tid { get; set; } 
-
-    [SupplyParameterFromQuery(Name = "session")]
-    public string? SessionId { get; set; }
-
+    [Parameter] public required string HashToken { get; set; }
+    [SupplyParameterFromQuery(Name = "session")] public string? SessionId { get; set; }
+    private UpdateFaceLivenessSessionResponseDTO? information;
+    private TransactionStatusResponse? _status;
     private bool _completed = false;
-
-    private bool _showNotFound = false;
-
     private bool IsExpired = false;
-
+    private bool isTransacted  = false;
+    private bool Exists = false;
+    private bool isExpired = false;
     private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
-
-    private TransactionStatusResponse _status;
-
-    private async Task StartLiveness()
-    {
-        _dotNetRef = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("startLivenessInterop", Tid, _dotNetRef);
-    }
 
     protected override async Task OnInitializedAsync()
     {
-        _status = await IPhilSysService.GetTransactionStatus(Tid);
-        if (DateTime.UtcNow > _status.ExpiresAt)
+        _status = await IPhilSysService.GetTransactionStatusAsync(HashToken);
+
+        if (_status == null)
         {
-            IsExpired = true;
+            Console.WriteLine($"❌ No transaction found for HashToken: {_status!.IsTransacted}");
+            return;
         }
-    } 
+
+        isTransacted = _status.IsTransacted;
+        Exists = _status.Exists;
+        isExpired = _status.isExpired;
+
+        if (_status.isExpired)
+        {
+            await IPhilSysService.DeleteTransactionAsync(HashToken);
+            return;
+        }
+    }
+
+    private async Task StartLiveness()
+    {
+        _status = await IPhilSysService.GetTransactionStatusAsync(HashToken);
+
+        if (_status == null)
+        {
+            Console.WriteLine("❌ No transaction found for this TID.");
+            return;
+        }
+
+        if (_status.isExpired)
+        {
+            isExpired = true;
+            await IPhilSysService.DeleteTransactionAsync(HashToken);
+            StateHasChanged();
+            
+            return; 
+        }
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("startLivenessInterop", HashToken, _dotNetRef);
+    }
 
     [JSInvokable]
     public async Task OnLivenessCompleted(string sessionId)
     {
         SessionId = sessionId;
         _completed = true;
-
-        var response = await IPhilSysService.UpdateFaceLivenessSessionAsync(Tid, sessionId);
+        information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
         Console.WriteLine($"✅ Received session ID: {sessionId}");
-        information = response;
         StateHasChanged();
     }
 
-    public void Dispose()
-    {
-        _dotNetRef?.Dispose();
-    }
+    public void Dispose() => _dotNetRef?.Dispose();
 }
-
-   

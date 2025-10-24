@@ -1,0 +1,8 @@
+﻿.liveness-container {
+    height: 100vh;
+    width: 100vw; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;
+}

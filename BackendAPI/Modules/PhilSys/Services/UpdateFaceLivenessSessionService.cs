@@ -9,7 +9,7 @@ public class UpdateFaceLivenessSessionService
 	private readonly PostPCNService _postPCNService;
 	private readonly GetTokenService _getTokenService;
 	private string client_id = "9ffe0ab6-1be1-47a8-bd3a-8560f1652a1a";
-	private string client_secret = "YnQpGs34mdlH2bumAzzEhRc0pJXAjfcX8qBSDZyMtdiU4HDVwx4SAsIFLuLxHt51";
+	private string client_secret = "YnQpGs34mdlH2bumAzzEhRc0pJXAjfcX8qBSDZyMtdiU4HDVwx4SAsIFLuLxHt51"; //use configuration later
 
 	public UpdateFaceLivenessSessionService(
 		IHttpClientFactory httpClientFactory,
@@ -27,21 +27,21 @@ public class UpdateFaceLivenessSessionService
 		_getTokenService = GetTokenService;
 	}
 	public async Task<BasicInformationOrPCNResponseDTO> UpdateFaceLivenessSessionAsync(
-		Guid Tid,
+		string HashToken,
 		string FaceLivenessSessionId,
 		CancellationToken ct = default
 		)
 	{
-		_logger.LogInformation("Updating Face Liveness Session for Tid: {Tid}", Tid);
+		_logger.LogInformation("Updating Face Liveness Session for HashToken: {HashToken}", HashToken);
 
-		var result = await _philSysRepository.UpdateFaceLivenessSessionAsync(Tid, FaceLivenessSessionId);
+		var result = await _philSysRepository.UpdateFaceLivenessSessionAsync(HashToken, FaceLivenessSessionId);
 		if (result == null)
 		{
-			_logger.LogInformation("wdd updated Face Liveness Session for Tid: {Tid}", Tid);
+			_logger.LogInformation("wdd updated Face Liveness Session for Tid: {Tid}", HashToken);
 			return null!;
 		}
 
-		_logger.LogInformation("Successfully updated Face Liveness Session for Tid: {Tid}", Tid);
+		_logger.LogInformation("Successfully updated Face Liveness Session for Tid: {Tid}", HashToken);
 
 		var token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
 		string accessToken = token.access_token;
@@ -51,19 +51,18 @@ public class UpdateFaceLivenessSessionService
 		{
 			
 			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-		
+			await UpdateTransactionStatus(HashToken);
 			return responseBody!;
 		}
 
-		else if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
+		if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
 			
 			var responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+			await UpdateTransactionStatus(HashToken);
 			return responseBody!;
 		}
-
-		await UpdateTransactionStatus(Tid);
-
+		
 		return new BasicInformationOrPCNResponseDTO(
 				code: "",
 				token: "",
@@ -107,15 +106,16 @@ public class UpdateFaceLivenessSessionService
 			);
 	}
 
-	public async Task UpdateTransactionStatus(Guid Tid)
+	public async Task UpdateTransactionStatus(string HashToken)
 	{
-		var transaction = await _philSysRepository.GetTransactionDataByTidAsync(Tid);
-		if (transaction == null)
+		var existingTransaction = await _philSysRepository.GetTransactionDataByTidAsync(HashToken);
+
+		if (existingTransaction == null)
 		{
-			_logger.LogInformation("Transaction not found for Tid: {Tid}", Tid);
+			_logger.LogWarning("Transaction with HashToken: {HashToken} not found.", HashToken);
+			throw new Exception("No Transaction record found for this hashtoken.");
 		}
-		transaction!.IsTransacted = true;
-		transaction.TransactedAt = DateTime.UtcNow;
-		await _philSysRepository.UpdateTransactionDataAsync(Tid, transaction);
+
+		await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
 	}
 }

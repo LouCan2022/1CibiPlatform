@@ -1,4 +1,4 @@
-﻿window.startLivenessInterop = (tid, dotNetHelper) => {
+﻿window.startLivenessInterop = (HashToken, dotNetHelper) => {
     if (!window.eKYC) {
         console.error("❌ eKYC SDK not loaded!");
         alert("Liveness SDK not loaded properly. Check script source.");

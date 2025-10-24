@@ -18,10 +18,7 @@ public class PartnerSystemEndpoint : ICarterModule
 
 			var response = new PartnerSystemResponse(result.PartnerSystemResponseDTO);
 
-			return Results.Json(response, new JsonSerializerOptions
-			{
-				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-			});
+			return Results.Json(response.PartnerSystemResponseDTO);
 		})
 		  .WithName("PartnerSystemQuery")
 		  .WithTags("PhilSys")
