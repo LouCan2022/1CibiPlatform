@@ -1,16 +1,7 @@
-﻿using BuildingBlocks.SharedServices.Interfaces;
-using System.Security.Cryptography;
-
-namespace BuildingBlocks.SharedServices.Implementations;
+﻿namespace BuildingBlocks.SharedServices.Implementations;
 
 public class OtpService : IOtpService
 {
-	private readonly ILogger<OtpService> _logger;
-
-	public OtpService(ILogger<OtpService> logger)
-	{
-		_logger = logger;
-	}
 	public string GenerateOtp(int length = 6)
 	{
 		using (var rng = RandomNumberGenerator.Create())
@@ -23,8 +14,6 @@ public class OtpService : IOtpService
 			{
 				otp += (tokenData[i] % 10).ToString();
 			}
-
-			_logger.LogInformation($"OTP generated successfully");
 			return otp;
 		}
 	}

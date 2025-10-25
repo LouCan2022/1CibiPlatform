@@ -1,5 +1,4 @@
-﻿using BuildingBlocks.SharedServices.Interfaces;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
 
@@ -75,8 +74,7 @@ public class EmailService : IEmailService
 	}
 
 
-	public async Task<string> SendOtpBody(
-		string toEmail,
+	public string SendOtpBody(
 		string name,
 		string otpCode)
 	{
@@ -127,7 +125,9 @@ public class EmailService : IEmailService
 	/// <summary>
 	/// Send password reset email
 	/// </summary>
-	public async Task<bool> SendPasswordResetEmailAsync(string toEmail, string resetLink)
+	public string SendPasswordResetBody(
+		string name,
+		string resetLink)
 	{
 		string subject = "Password Reset Request";
 		string body = $@"
@@ -170,7 +170,7 @@ public class EmailService : IEmailService
                 </body>
                 </html>";
 
-		return await SendEmailAsync(toEmail, subject, body, isHtml: true);
+		return body;
 	}
 }
 
