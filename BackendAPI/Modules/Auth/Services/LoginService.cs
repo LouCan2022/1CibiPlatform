@@ -34,11 +34,10 @@ public class LoginService : ILoginService
 		this._logger = logger;
 
 		_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
-		_expiryinMinutesKey = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value! ?? "");
-		_httpCookieOnlyRefreshTokenKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
-		_cookieExpiryinDaysKey = int.Parse(_configuration.GetSection("AuthWeb:CookieExpiryInDayIsRememberMe").Value! ?? "");
-		_isHttps = bool.Parse(_configuration.GetSection("AuthWeb:isHttps").Value!);
-
+		_expiryinMinutesKey = _configuration.GetValue<double>("Jwt:ExpiryInMinutes");
+		_httpCookieOnlyRefreshTokenKey = _configuration.GetValue<string>("AuthWeb:AuthWebHttpCookieOnlyKey") ?? "";
+		_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
+		_isHttps = _configuration.GetValue<bool>("AuthWeb:isHttps");
 	}
 
 

@@ -9,6 +9,14 @@ public class AuthRepository : IAuthRepository
 		this._dbcontext = dbcontext;
 	}
 
+	public async Task<Authusers> GetRawUserAsync(Guid id)
+	{
+		return await _dbcontext.AuthUsers
+					 .Where(au => au.Id == id && au.IsActive)
+					 .AsNoTracking()
+					 .FirstOrDefaultAsync();
+	}
+
 	public async Task<LoginDTO> GetUserDataAsync(LoginWebCred cred)
 	{
 		var userData = await (from user in _dbcontext.AuthUsers
@@ -33,16 +41,6 @@ public class AuthRepository : IAuthRepository
 
 
 		return userData!;
-	}
-
-
-	public async Task<bool> SaveUserAsync(Authusers user)
-	{
-		await _dbcontext.AuthUsers.AddAsync(user);
-
-		var result = await _dbcontext.SaveChangesAsync();
-
-		return true;
 	}
 
 
@@ -76,6 +74,16 @@ public class AuthRepository : IAuthRepository
 		return userData!;
 	}
 
+
+
+	public async Task<bool> SaveUserAsync(Authusers user)
+	{
+		await _dbcontext.AuthUsers.AddAsync(user);
+
+		var result = await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
 
 	public async Task<bool> SaveRefreshTokenAsync(
 		Guid userId,
@@ -208,5 +216,15 @@ public class AuthRepository : IAuthRepository
 							ov.ExpiresAt > DateTime.UtcNow)
 					 .AsNoTracking()
 					 .FirstOrDefaultAsync();
+	}
+
+	public async Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken)
+	{
+
+		await _dbcontext.PasswordResetToken.AddAsync(passwordResetToken);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
 	}
 }

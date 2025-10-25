@@ -1,15 +1,20 @@
-﻿namespace Auth.Data.Repository;
+﻿using Microsoft.AspNetCore.Identity.Data;
+
+namespace Auth.Data.Repository;
 
 public interface IAuthRepository
 {
 
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
 
+	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
+
+	Task<Authusers> GetRawUserAsync(Guid id);
+
 	Task<bool> SaveUserAsync(Authusers user);
 
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
 
-	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
 
 	Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason);
 
@@ -30,5 +35,7 @@ public interface IAuthRepository
 	Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification);
 
 	Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO);
+
+	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);
 
 }

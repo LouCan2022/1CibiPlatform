@@ -28,7 +28,7 @@ public class RegisterService : IRegisterService
 		this._otpService = otpService;
 		this._configuration = configuration;
 
-		this._otpExpiryMinutes = int.Parse(_configuration["Email:OtpExpirationInMinutes"] ?? "15");
+		this._otpExpiryMinutes = _configuration.GetValue<int>("Email:OtpExpirationInMinutes");
 
 	}
 
@@ -70,7 +70,7 @@ public class RegisterService : IRegisterService
 
 		var name = $"{registerRequestDTO.FirstName} {registerRequestDTO.LastName}";
 
-		var otpBody = await _emailService.SendOtpBody(registerRequestDTO.Email, name, otp);
+		var otpBody = _emailService.SendOtpBody(name, otp);
 
 		var isSent = await _emailService.SendEmailAsync(
 			toEmail: registerRequestDTO.Email,
@@ -271,7 +271,7 @@ public class RegisterService : IRegisterService
 
 		var name = $"{otpVerification.FirstName} {otpVerification.LastName}";
 
-		var otpBody = await _emailService.SendOtpBody(otpVerification.Email, name, otp);
+		var otpBody = _emailService.SendOtpBody(name, otp);
 
 		var isSent = await _emailService.SendEmailAsync(
 			toEmail: otpVerification.Email,
