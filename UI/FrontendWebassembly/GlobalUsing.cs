@@ -18,7 +18,7 @@ global using FrontendWebassembly.Services.Auth.Implementation;
 global using FrontendWebassembly.SharedService;
 global using FrontendWebassembly.DTO.Auth;
 global using FrontendWebassembly.DTO.PhilSys;
-global using System.Text.Json.Serialization;
+
 
 
 

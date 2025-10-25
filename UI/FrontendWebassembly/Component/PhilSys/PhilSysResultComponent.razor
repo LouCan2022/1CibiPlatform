@@ -1,6 +1,7 @@
 ﻿@layout PhilSysLayout
 @using MudBlazor
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 <MudPaper Class="p-8 text-center form-container"
           Elevation="6"
           Style="
@@ -15,19 +16,19 @@
               grid-template-columns: 250px 1fr 1fr;
               grid-template-rows: auto auto;
               gap: 30px 25px;
-              align-items: start;
-          ">
+              align-items: start;">
 
     <!-- COLUMN 1, ROW 1: Image + API Button -->
     <div style="grid-column: 1; grid-row: 1;">
         <div class="d-flex flex-column align-items-center">
             <MudPaper Elevation="0"
-                      Class="d-flex justify-center align-center mb-3"
+                      Class="d-flex justify-center align-center mb-2"
                       Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 12px;">
                 <MudImage Src="@(string.IsNullOrWhiteSpace(FaceUrl) ? "images/generic/default_picture.jpg" : FaceUrl)"
                           Alt="User Profile"
                           Style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; outline: 2px solid #000;" />
             </MudPaper>
+
             @if (!string.IsNullOrEmpty(VerificationResult!.reference))
             {
                 <ButtonComponent StartIcon="@Icons.Material.Filled.Download"
@@ -37,6 +38,7 @@
                     API Response
                 </ButtonComponent>
             }
+            
         </div>
     </div>
 
@@ -79,11 +81,51 @@
         </table>
     </div>
 
+    <!-- COLUMN 3, ROW 2: Verification Tag (Name Tag Style) -->
+    <div style="grid-column: 1; grid-row: 2; align-content: center;">
+        @if (!string.IsNullOrEmpty(VerificationResult!.reference))
+        {
+            <div style=" display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            background-color: #e8f5e9;
+                            color: #2e7d32;
+                            border-radius: 8px;
+                            padding: 6px 12px;
+                            font-weight: 600;
+                            font-size: 14px;
+                            margin-top: 10px;
+                                ">
+                <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Color="Color.Success" />
+                Verified
+            </div>
+        }
+        else
+        {
+            <div style="display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        background-color: #fdecea;
+                        color: #c62828;
+                        border-radius: 8px;
+                        padding: 6px 12px;
+                        font-weight: 600;
+                        font-size: 14px;
+                        margin-top: 10px;">
+                <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Color="Color.Error" />
+                Not Verified
+            </div>
+        }
+    </div>
+
     <!-- COLUMN 3, ROW 2: Search Again button -->
     <div style="grid-column: 3; grid-row: 2; display: flex; justify-content: flex-end;">
         <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
                          Class="theme-button theme-button-active"
-                         Style="width: 200px;">
+                         Style="width: 200px;"
+                         Onclick="SearchAgain">
             Search Again
         </ButtonComponent>
     </div>
@@ -146,5 +188,10 @@
         var fileName = $"ApiResponse_{DateTime.Now:MM-dd-yyyy}.json";
 
         await JS.InvokeVoidAsync("downloadFileFromBlazor", fileName, "application/json", json);
+    }
+
+    private void SearchAgain()
+    {
+        NavigationManager.NavigateTo("/philsys/idv");
     }
 }

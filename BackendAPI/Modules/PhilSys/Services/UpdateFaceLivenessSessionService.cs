@@ -8,8 +8,9 @@ public class UpdateFaceLivenessSessionService
 	private readonly PostBasicInformationService _postBasicInformationService;
 	private readonly PostPCNService _postPCNService;
 	private readonly GetTokenService _getTokenService;
-	private string client_id = "9ffe0ab6-1be1-47a8-bd3a-8560f1652a1a";
-	private string client_secret = "YnQpGs34mdlH2bumAzzEhRc0pJXAjfcX8qBSDZyMtdiU4HDVwx4SAsIFLuLxHt51"; //use configuration later
+	private readonly IConfiguration _configuration;
+	private readonly string client_id;
+	private readonly string client_secret;
 
 	public UpdateFaceLivenessSessionService(
 		IHttpClientFactory httpClientFactory,
@@ -17,7 +18,8 @@ public class UpdateFaceLivenessSessionService
 		ILogger<UpdateFaceLivenessSessionService> logger,
 		PostBasicInformationService PostBasicInformationService,
 		PostPCNService PostPCNService,
-		GetTokenService GetTokenService)
+		GetTokenService GetTokenService,
+		IConfiguration configuration)
 	{
 		_httpClient = httpClientFactory.CreateClient("IDVClient");
 		_philSysRepository = philSysRepository;
@@ -25,6 +27,9 @@ public class UpdateFaceLivenessSessionService
 		_postBasicInformationService = PostBasicInformationService;
 		_postPCNService = PostPCNService;
 		_getTokenService = GetTokenService;
+		_configuration = configuration;
+		client_id = _configuration["PhilSys:ClientID"]!;
+		client_secret = _configuration["PhilSys:ClientSecret"]!;
 	}
 	public async Task<BasicInformationOrPCNResponseDTO> UpdateFaceLivenessSessionAsync(
 		string HashToken,
@@ -108,7 +113,7 @@ public class UpdateFaceLivenessSessionService
 
 	public async Task UpdateTransactionStatus(string HashToken)
 	{
-		var existingTransaction = await _philSysRepository.GetTransactionDataByTidAsync(HashToken);
+		var existingTransaction = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
 
 		if (existingTransaction == null)
 		{
