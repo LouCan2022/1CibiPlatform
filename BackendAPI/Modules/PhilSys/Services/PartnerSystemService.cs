@@ -1,8 +1,4 @@
-﻿
-
-using BuildingBlocks.SharedServices.Interfaces;
-
-namespace PhilSys.Services;
+﻿namespace PhilSys.Services;
 
 public class PartnerSystemService
 {

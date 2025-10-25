@@ -1,4 +1,4 @@
-html,
+﻿html,
 body {
     font-family: Calibri, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
@@ -228,13 +228,7 @@ code {
     border: 1px solid gray;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }*/
-.philsys-custom-tabs .mud-tab {
-    margin-right: 12px; /* adjust space as needed */
-}
 
-    .philsys-custom-tabs .mud-tab:last-child {
-        margin-right: 0; /* remove spacing after last tab */
-    }
 .form-container {
     padding: 24px;
     border: 1px solid gray;
@@ -249,14 +243,30 @@ code {
 .philsys-rounded-input fieldset {
     border-radius: 12px !important;
 }
+.philsys-custom-tabs {
+    margin: 0px 0px 0px 0px;
+}
+/*
+.philsys-custom-tabs .mud-tabs-scroll-button {
+ Ill fix this later
+}*/
 
 .philsys-custom-tabs .mud-tab {
     border: 1px solid gray;
     border-radius: 12px;
-    margin: 0 4px;
+    padding: 0 14px;
+    max-height: 48px;
+    font-size: 14px;
+    margin: 0 8px;
+    width: 190px;
+    max-width: 220px;
     transition: all 0.2s ease-in-out;
+    min-width: 50px; /* allows shrink */
+    white-space: nowrap;
 }
-
+.philsys-form-container {
+    margin: 0 auto;
+}
 .mud-tab-slider {
     display: none !important;
 }

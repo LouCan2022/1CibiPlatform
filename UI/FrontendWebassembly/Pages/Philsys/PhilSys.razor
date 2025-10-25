@@ -12,11 +12,13 @@
 <MudGrid Justify="Justify.Center">
     <MudItem xs="12" sm="10" md="8" lg="6">
 
-        <MudPaper Elevation="1" Class="p-4" Style="border-radius: 10px;  border: 1px solid gray; max-width: 530px;">
+        <MudPaper Elevation="1" Class="p-4 philsys-form-container" Style="border-radius: 10px;  border: 1px solid gray; max-width: 530px;">
 
             <MudTabs Rounded="true"
                      Centered="true"
                      Elevation="0"
+                     ScrollButtons="false"
+                     OverflowBehavior="Scroll"
                      @bind-ActivePanelIndex="_activeIndex"
                      OnActivePanelIndexChanged="OnTabChanged"
                      Class="philsys-custom-tabs mb-3">
@@ -28,7 +30,7 @@
             {
                 <MudForm @ref="personalForm" >
 
-                    <MudGrid Class="mb-0" Spacing="2">
+                    <MudGrid Class="mb-2" Spacing="2">
                         <MudItem xs="12" sm="8">
                             <MudTextField @bind-Value="identityData!.first_name"
                                           Label="First Name"
