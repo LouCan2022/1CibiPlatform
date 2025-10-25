@@ -192,7 +192,6 @@ public class RegisterService : IRegisterService
 		return true;
 	}
 
-
 	public async Task<bool> ManualResendOtpCodeAsync(Guid userId, string email)
 	{
 		var otpVerification = await _authRepository.IsUserEmailExistInOtpVerificationAsync(email, false);
@@ -232,7 +231,6 @@ public class RegisterService : IRegisterService
 		_logger.LogInformation("Resent OTP email to: {Email}", otpVerification.Email);
 
 		return isSent;
-
 	}
 
 	public async Task<bool> ResendOtpAsync(OtpVerification otpVerification)
