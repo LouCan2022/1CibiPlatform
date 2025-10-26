@@ -205,7 +205,7 @@ code {
 }
 
 .philsys-tab-pannel {
-    border-radius: 15px;
+    border-radius: 4px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -219,23 +219,15 @@ code {
     color: black;
 }
 
-/*.philsys-card {
-    max-width: 420px;
-    height: 200%;
-    max-height: 80%;
-    backdrop-filter: blur(10px);
-    border-radius: 15px !important;
-    border: 1px solid gray;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-}*/
-
 .form-container {
     padding: 24px;
     border: 1px solid gray;
     border-radius: 8px;
     background-color: var(--mud-palette-surface);
 }
-
+.philsys-custom-tabs .mud-tabs-scroll-button {
+    display: none !important;
+}
 .philsys-rounded-input .mud-input-outlined {
     border-radius: 12px !important;
 }
@@ -243,27 +235,14 @@ code {
 .philsys-rounded-input fieldset {
     border-radius: 12px !important;
 }
-.philsys-custom-tabs {
-    margin: 0px 0px 0px 0px;
-}
-/*
-.philsys-custom-tabs .mud-tabs-scroll-button {
- Ill fix this later
-}*/
 
 .philsys-custom-tabs .mud-tab {
     border: 1px solid gray;
-    border-radius: 12px;
-    padding: 0 14px;
-    max-height: 48px;
-    font-size: 14px;
-    margin: 0 8px;
-    width: 190px;
-    max-width: 220px;
-    transition: all 0.2s ease-in-out;
-    min-width: 50px; /* allows shrink */
+    max-height: 45px;
+    font-size: clamp(12px, 2.5vw, 15px);
     white-space: nowrap;
 }
+
 .philsys-form-container {
     margin: 0 auto;
 }

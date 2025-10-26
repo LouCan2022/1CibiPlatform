@@ -11,20 +11,19 @@
 
 <MudGrid Justify="Justify.Center">
     <MudItem xs="12" sm="10" md="8" lg="6">
-
-        <MudPaper Elevation="1" Class="p-4 philsys-form-container" Style="border-radius: 10px;  border: 1px solid gray; max-width: 530px;">
-
-            <MudTabs Rounded="true"
-                     Centered="true"
-                     Elevation="0"
-                     ScrollButtons="false"
-                     OverflowBehavior="Scroll"
-                     @bind-ActivePanelIndex="_activeIndex"
-                     OnActivePanelIndexChanged="OnTabChanged"
-                     Class="philsys-custom-tabs mb-3">
-                <MudTabPanel Text="Personal Information" Class="@GetTabClass(0)" Style="text-transform:none; font-size: 18px;" />
-                <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; font-size: 18px;" />
-            </MudTabs>
+        <MudTabs Rounded="false"
+                 Scrollable="true"
+                 Centered="true"
+                 Elevation="0"
+                 AlwaysShowScrollButtons="true"
+                 @bind-ActivePanelIndex="_activeIndex"
+                 OnActivePanelIndexChanged="OnTabChanged"
+                 Class="philsys-custom-tabs mb-5">
+            <MudTabPanel Text="Personal Information" Class="@GetTabClass(0)" Style="text-transform:none; min-width:120px;" />
+            <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; min-width: 120px;" />
+        </MudTabs>
+        <MudPaper Elevation="1" Class="p-4 philsys-form-container" Style="border-radius: 10px;  border: 1px solid gray; max-width: 380px;">
+           
 
             @if (_activeIndex == 0)
             {
