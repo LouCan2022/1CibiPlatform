@@ -60,7 +60,7 @@
 
         <!-- VERIFICATION TAG -->
         <MudItem xs="12" md="4">
-            <div style="grid-column: 1; grid-row: 2; align-content: center;"> @if (!string.IsNullOrEmpty(VerificationResult!.reference)) {
+            <div style="grid-column: 1; grid-row: 2; align-content: center; margin-bottom: 12px;"> @if (!string.IsNullOrEmpty(VerificationResult!.reference)) {
             <div style=" display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; margin-top: 10px; "> <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Color="Color.Success" /> Verified </div>
                         } else
             {
