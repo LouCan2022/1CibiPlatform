@@ -6,5 +6,5 @@ public interface IEmailService
 
 	string SendOtpBody(string name, string otpCode);
 
-	string SendPasswordResetBody(string name, string resetLink);
+	string SendPasswordResetBody(string name, string resetLink, int expireMins);
 }

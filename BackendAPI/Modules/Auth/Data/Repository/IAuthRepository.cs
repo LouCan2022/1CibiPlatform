@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-
-namespace Auth.Data.Repository;
+﻿namespace Auth.Data.Repository;
 
 public interface IAuthRepository
 {
@@ -11,12 +9,15 @@ public interface IAuthRepository
 
 	Task<Authusers> GetRawUserAsync(Guid id);
 
+	Task<PasswordResetToken> GetUserTokenAsync(string token);
+
 	Task<bool> SaveUserAsync(Authusers user);
 
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
 
-
 	Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason);
+
+	Task<bool> UpdateAuthUserPassword(Authusers authusers);
 
 	Task<AuthRefreshToken> IsUserExistAsync(Guid userId);
 
@@ -37,5 +38,6 @@ public interface IAuthRepository
 	Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO);
 
 	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);
+
 
 }

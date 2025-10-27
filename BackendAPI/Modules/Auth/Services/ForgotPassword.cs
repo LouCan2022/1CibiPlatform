@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace Auth.Services;
+﻿namespace Auth.Services;
 
 public class ForgotPassword : IForgotPassword
 {
@@ -27,7 +25,7 @@ public class ForgotPassword : IForgotPassword
 		this._configuration = configuration;
 		this._secureToken = secureToken;
 		this._hashService = hashService;
-		this._frontendBaseUrl = _configuration.GetValue<string>("FrontendBaseUrl:Url") ?? "";
+		this._frontendBaseUrl = _configuration.GetValue<string>("FrontEndMetadata:ForgotPasswordUrl") ?? "";
 		this._passwordTokenExpiryMinutes = _configuration.GetValue<int>("Email:PasswordTokenExpirationInMinutes");
 	}
 
@@ -53,11 +51,11 @@ public class ForgotPassword : IForgotPassword
 
 		var hashedToken = _hashService.Hash(secureToken);
 
-		var resetLink = $"{_frontendBaseUrl}/reset-password?token={System.Net.WebUtility.UrlEncode(secureToken)}&email={System.Net.WebUtility.UrlEncode(email)}";
+		var resetLink = $"{_frontendBaseUrl}/reset-password?token={System.Net.WebUtility.UrlEncode(secureToken)}";
 
 		var name = $"{user.FirstName} {user.LastName}";
 
-		var emailBody = _emailService.SendPasswordResetBody(name, resetLink);
+		var emailBody = _emailService.SendPasswordResetBody(name, resetLink, this._passwordTokenExpiryMinutes);
 
 		var isSent = await _emailService.SendEmailAsync(
 			toEmail: email,
@@ -93,8 +91,47 @@ public class ForgotPassword : IForgotPassword
 		return user.Id;
 	}
 
-	public Task<bool> ResetPasswordAsync(Guid id, string otp, string newPassword)
+	// No endpoint yet
+	public async Task<bool> IsTokenValid(string tokeHash)
 	{
-		throw new NotImplementedException();
+		var token = await _authRepository.GetUserTokenAsync(tokeHash);
+
+		if (token == null || token.IsUsed || token.ExpiresAt < DateTime.UtcNow)
+		{
+			_logger.LogWarning("Invalid or expired token: {TokenHash}", tokeHash);
+			return false;
+		}
+
+		return true;
 	}
+
+	public async Task<bool> ResetPasswordAsync(Guid id, string newPassword)
+	{
+		_logger.LogInformation("ResetPasswordAsync called for user ID: {UserId}", id);
+
+		var userNewPassword = await _authRepository.GetRawUserAsync(id);
+
+		if (userNewPassword == null)
+		{
+			_logger.LogWarning("No user found with ID: {UserId}", id);
+			throw new NotFoundException("User not found.");
+		}
+
+		var newHashedPassword = _hashService.Hash(newPassword);
+
+		userNewPassword.PasswordHash = newHashedPassword;
+
+		var isUpdated = await _authRepository.UpdateAuthUserPassword(userNewPassword);
+
+		if (!isUpdated)
+		{
+			_logger.LogError("Failed to update password for user ID: {UserId}", id);
+			throw new Exception("Failed to update password.");
+		}
+
+		_logger.LogInformation("Password updated successfully for user ID: {UserId}", id);
+
+		return true;
+	}
+	// No endpoint yet
 }
