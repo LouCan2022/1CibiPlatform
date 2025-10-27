@@ -22,3 +22,4 @@ global using PhilSys.Data.Entities;
 global using System.ComponentModel.DataAnnotations;
 global using PhilSys.Data.Repository;
 global using PhilSys.Features.UpdateFaceLivenessSession;
+global using BuildingBlocks.SharedServices.Interfaces;
