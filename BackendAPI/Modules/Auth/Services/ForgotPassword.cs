@@ -1,4 +1,6 @@
-﻿namespace Auth.Services;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace Auth.Services;
 
 public class ForgotPassword : IForgotPassword
 {
@@ -38,7 +40,7 @@ public class ForgotPassword : IForgotPassword
 		if (user == null)
 		{
 			_logger.LogWarning("No user found with email: {Email}", email);
-			throw new ArgumentException("Email not found.");
+			throw new NotFoundException("Email not found.");
 		}
 
 		var secureToken = _secureToken.GenerateSecureToken();
