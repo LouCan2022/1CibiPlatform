@@ -8,6 +8,7 @@ public class ForgotPassword : IForgotPassword
 	private readonly IConfiguration _configuration;
 	private readonly ISecureToken _secureToken;
 	private readonly IHashService _hashService;
+	private readonly IPasswordHasherService _passwordHasherService;
 	private readonly string _frontendBaseUrl;
 	private readonly int _passwordTokenExpiryMinutes;
 
@@ -17,7 +18,8 @@ public class ForgotPassword : IForgotPassword
 		IEmailService emailService,
 		IConfiguration configuration,
 		ISecureToken secureToken,
-		IHashService hashService)
+		IHashService hashService,
+		IPasswordHasherService passwordHasherService)
 	{
 		this._authRepository = authRepository;
 		this._logger = logger;
@@ -25,6 +27,7 @@ public class ForgotPassword : IForgotPassword
 		this._configuration = configuration;
 		this._secureToken = secureToken;
 		this._hashService = hashService;
+		this._passwordHasherService = passwordHasherService;
 		this._frontendBaseUrl = _configuration.GetValue<string>("FrontEndMetadata:ForgotPasswordUrl") ?? "";
 		this._passwordTokenExpiryMinutes = _configuration.GetValue<int>("Email:PasswordTokenExpirationInMinutes");
 	}
@@ -91,7 +94,6 @@ public class ForgotPassword : IForgotPassword
 		return user.Id;
 	}
 
-	// No endpoint yet
 	public async Task<bool> IsTokenValid(string tokeHash)
 	{
 		var token = await _authRepository.GetUserTokenAsync(tokeHash);
@@ -105,8 +107,19 @@ public class ForgotPassword : IForgotPassword
 		return true;
 	}
 
-	public async Task<bool> ResetPasswordAsync(Guid id, string newPassword)
+	public async Task<bool> ResetPasswordAsync(
+		Guid id,
+		string tokenHash,
+		string newPassword)
 	{
+		var isTokenValid = this.IsTokenValid(tokenHash);
+
+		if (!isTokenValid.Result)
+		{
+			_logger.LogWarning("Invalid or expired token for user ID: {UserId}", id);
+			throw new UnauthorizedAccessException("Invalid or expired token.");
+		}
+
 		_logger.LogInformation("ResetPasswordAsync called for user ID: {UserId}", id);
 
 		var userNewPassword = await _authRepository.GetRawUserAsync(id);
@@ -117,7 +130,7 @@ public class ForgotPassword : IForgotPassword
 			throw new NotFoundException("User not found.");
 		}
 
-		var newHashedPassword = _hashService.Hash(newPassword);
+		var newHashedPassword = _passwordHasherService.HashPassword(newPassword);
 
 		userNewPassword.PasswordHash = newHashedPassword;
 
@@ -133,5 +146,4 @@ public class ForgotPassword : IForgotPassword
 
 		return true;
 	}
-	// No endpoint yet
 }
