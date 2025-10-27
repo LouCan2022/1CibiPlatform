@@ -2,6 +2,7 @@
 @using MudBlazor
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+
 <MudPaper Class="p-8 text-center philsys-form-wrapper"
           Elevation="6"
           Style="
@@ -18,7 +19,7 @@
         <MudItem xs="12" md="4">
             <div class="d-flex flex-column align-items-center">
                 <MudPaper Elevation="0"
-                          Class="d-flex justify-center align-center mb-2"
+                          Class="d-flex justify-center align-center mb-2 mt-2"
                           Style="width: 225px; height: 200px; border-radius: 12px;">
                     <MudImage Src="@(string.IsNullOrWhiteSpace(FaceUrl) ? "images/generic/default_picture.jpg" : FaceUrl)"
                               Alt="User Profile"
@@ -47,7 +48,7 @@
                             <MudText Typo="Typo.body1">@($"{@row.Label}:")</MudText>
                         </td>
 
-                        <td style="padding: 6px 8px; text-align:right;">
+                        <td style="padding: 6px 8px; text-align: center;">
                             <MudText Typo="Typo.body1" Style="font-weight: bold; margin-right: 20px;">
                                 @((string.IsNullOrWhiteSpace(row.Value) ? "No Data Found" : row.Value))
                             </MudText>

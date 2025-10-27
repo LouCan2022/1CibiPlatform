@@ -254,3 +254,11 @@ code {
     box-sizing: border-box;
 }
 
+.philsys-liveness-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;
+}
