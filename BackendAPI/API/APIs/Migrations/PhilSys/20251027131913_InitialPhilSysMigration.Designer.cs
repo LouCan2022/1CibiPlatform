@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251023050124_InitialPhilSysMigration")]
+    [Migration("20251027131913_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
@@ -69,6 +69,9 @@ namespace APIs.Migrations.PhilSys
 
                     b.Property<DateTime?>("TransactedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("WebHookUrl")
+                        .HasColumnType("text");
 
                     b.HasKey("Tid");
 

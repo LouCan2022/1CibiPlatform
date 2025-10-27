@@ -1,6 +1,6 @@
 ﻿
 namespace FrontendWebassembly.DTO.PhilSys;
-public class IdentityData
+public record IdentityData
 {
 	public string? first_name { get; set; }
 	public string? middle_name { get; set; }

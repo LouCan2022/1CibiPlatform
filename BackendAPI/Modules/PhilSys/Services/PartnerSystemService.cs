@@ -20,12 +20,14 @@ public class PartnerSystemService
 		_configuration = configuration;
 		_hashService = hashService;
 		_securetoken = securetoken;
-		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessSessionExpiryInMinutes"] ?? "1");
+		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessSessionExpiryInMinutes"] ?? "10");
 	}
-	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string inquiry_type, IdentityData identity_data)
+	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string callback_url, string inquiry_type, IdentityData identity_data)
 	{
 		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
+
+		Guid tid;
 
 		var token = _securetoken.GenerateSecureToken();
 
@@ -60,10 +62,12 @@ public class PartnerSystemService
 				BirthDate = identity_data.BirthDate,
 				IsTransacted = false,
 				HashToken = HashToken,
+				WebHookUrl = callback_url,
 				CreatedAt = DateTime.UtcNow,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(_livenessExpiryMinutes)
 			};
 		}
+
 		else if (inquiry_type.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
 			transaction = new PhilSysTransaction
@@ -73,6 +77,7 @@ public class PartnerSystemService
 				PCN = identity_data.PCN,
 				IsTransacted = false,
 				HashToken = HashToken,
+				WebHookUrl = callback_url,
 				CreatedAt = DateTime.UtcNow,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(_livenessExpiryMinutes)
 			};
@@ -83,8 +88,10 @@ public class PartnerSystemService
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)
 			_logger.LogError("Failed to add transaction data for Tid: {Tid}", transaction.Tid);
+			
 	
 		return new PartnerSystemResponseDTO(
+			idv_session_id: transaction.Tid.ToString(),
 			liveness_link: livenessUrl,
 			isTransacted: false
 		);

@@ -1,8 +1,10 @@
-﻿namespace PhilSys.Features.PostFaceLivenessSession;
+﻿using System.Text.Json;
+
+namespace PhilSys.Features.PostFaceLivenessSession;
 
 public record UpdateFaceLivenessSessionRequest(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
 
-public record UpdateFaceLivenessSessionResponse(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
+public record UpdateFaceLivenessSessionResponse(VerificationResponseDTO VerificationResponseDTO);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -15,9 +17,14 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 				);
 			UpdateFaceLivenessSessionResult result = await sender.Send(command, cancellationToken);
 
-			var response = new UpdateFaceLivenessSessionResponse(result.BasicInformationOrPCNResponseDTO);
+			var response = new UpdateFaceLivenessSessionResponse(result.VerificationResponseDTO);
 
-			return Results.Ok(response.BasicInformationOrPCNResponseDTO);
+			return Results.Json(response.VerificationResponseDTO,
+									new JsonSerializerOptions
+									{
+										DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+									}
+							   );
 		})
 		.WithName("UpdateFaceLivenessSession")
 		.WithTags("PhilSys")

@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.DTO;
-public class TransactionStatusResponse
+public record TransactionStatusResponse
 {
 	public bool Exists { get; set; } = true;
 	public bool IsTransacted { get; set; }

@@ -67,6 +67,9 @@ namespace APIs.Migrations.PhilSys
                     b.Property<DateTime?>("TransactedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("WebHookUrl")
+                        .HasColumnType("text");
+
                     b.HasKey("Tid");
 
                     b.ToTable("PhilSysTransactions");
