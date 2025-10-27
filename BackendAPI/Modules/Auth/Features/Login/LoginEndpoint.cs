@@ -27,6 +27,6 @@ public class LoginEndpoint : ICarterModule
 		  .Produces<LoginResponse>()
 		  .ProducesProblem(StatusCodes.Status400BadRequest)
 		  .WithSummary("Login")
-		  .WithDescription("Login");
+		  .WithDescription("Login User");
 	}
 }
