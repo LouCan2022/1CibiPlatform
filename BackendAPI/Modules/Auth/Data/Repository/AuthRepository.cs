@@ -74,6 +74,16 @@ public class AuthRepository : IAuthRepository
 		return userData!;
 	}
 
+	public async Task<PasswordResetToken> GetUserTokenAsync(string tokenHash)
+	{
+		var passwordResetToken = await _dbcontext.PasswordResetToken
+			.Where(prt => prt.TokenHash == tokenHash &&
+						  prt.IsUsed == false)
+			.AsNoTracking()
+			.FirstOrDefaultAsync();
+
+		return passwordResetToken!;
+	}
 
 
 	public async Task<bool> SaveUserAsync(Authusers user)
@@ -222,6 +232,15 @@ public class AuthRepository : IAuthRepository
 	{
 
 		await _dbcontext.PasswordResetToken.AddAsync(passwordResetToken);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
+
+	public async Task<bool> UpdateAuthUserPassword(Authusers authusers)
+	{
+		_dbcontext.AuthUsers.Update(authusers);
 
 		await _dbcontext.SaveChangesAsync();
 

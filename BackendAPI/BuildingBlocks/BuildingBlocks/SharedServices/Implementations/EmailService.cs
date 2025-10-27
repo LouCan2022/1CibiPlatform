@@ -127,7 +127,8 @@ public class EmailService : IEmailService
 	/// </summary>
 	public string SendPasswordResetBody(
 		string name,
-		string resetLink)
+		string resetLink,
+		int expireMins)
 	{
 		string subject = "Password Reset Request";
 		string body = $@"
@@ -157,10 +158,10 @@ public class EmailService : IEmailService
                             <h1>Password Reset</h1>
                         </div>
                         <div class='content'>
-                            <p>Hello,</p>
+                            <p>Hello {name},</p>
                             <p>We received a request to reset your password. Click the button below to reset it:</p>
                             <a href='{resetLink}' class='button'>Reset Password</a>
-                            <p>This link will expire in 30 minutes.</p>
+                            <p>This link will expire in {expireMins} minutes.</p>
                             <p>If you did not request this, please ignore this email.</p>
                         </div>
                         <div class='footer'>
