@@ -9,7 +9,7 @@ public class GetUserIdForForgotPasswordEndPoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("auth/forgot-password/user-id", async (GetUserIdForForgotPasswordRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("forgot-password/get-user-id", async (GetUserIdForForgotPasswordRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new GetUserIdForForgotPasswordCommand(request.GetUserIdForForgotPasswordRequestDTO);
 
