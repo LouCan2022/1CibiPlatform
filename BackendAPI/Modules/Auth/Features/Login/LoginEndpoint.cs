@@ -1,5 +1,4 @@
-﻿
-namespace Auth.Features.Login;
+﻿namespace Auth.Features.Login;
 
 public record LoginRequest(LoginCred LoginCred) : ICommand<LoginResponse>;
 
