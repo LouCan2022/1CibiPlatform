@@ -1,9 +1,5 @@
-﻿using System.Text.Json;
-
-namespace PhilSys.Features.PostFaceLivenessSession;
-
+﻿namespace PhilSys.Features.PostFaceLivenessSession;
 public record UpdateFaceLivenessSessionRequest(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
-
 public record UpdateFaceLivenessSessionResponse(VerificationResponseDTO VerificationResponseDTO);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {
@@ -19,18 +15,13 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 
 			var response = new UpdateFaceLivenessSessionResponse(result.VerificationResponseDTO);
 
-			return Results.Json(response.VerificationResponseDTO,
-									new JsonSerializerOptions
-									{
-										DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-									}
-							   );
+			return Results.Ok(response.VerificationResponseDTO);
 		})
 		.WithName("UpdateFaceLivenessSession")
 		.WithTags("PhilSys")
 		.Produces<UpdateFaceLivenessSessionResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
-		.ProducesProblem(StatusCodes.Status401Unauthorized)
-		.WithSummary("Update Face Liveness Session Id");
+		.WithSummary("Update Face Liveness Session and Process Verification")
+		.WithDescription("Updates the Face Liveness Session ID for an existing PhilSys transaction and triggers verification based on the inquiry type.");
 	}
 }

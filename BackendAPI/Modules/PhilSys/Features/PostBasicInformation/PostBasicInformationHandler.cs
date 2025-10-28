@@ -1,6 +1,4 @@
-﻿
-namespace PhilSys.Features.PostBasicInformation;
-
+﻿namespace PhilSys.Features.PostBasicInformation;
 public record PostBasicInformationCommand(string first_name,
 										  string middle_name,
 										  string last_name,
@@ -12,18 +10,12 @@ public record PostBasicInformationResult(BasicInformationOrPCNResponseDTO BasicI
 public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationCommand, PostBasicInformationResult>
 {
 	private readonly PostBasicInformationService _postBasicInformationService;
-	private readonly ILogger<PostBasicInformationHandler> _logger;
-
-	public PostBasicInformationHandler(PostBasicInformationService PostBasicInformationService, ILogger<PostBasicInformationHandler> logger)
+	public PostBasicInformationHandler(PostBasicInformationService PostBasicInformationService)
 	{
 		_postBasicInformationService = PostBasicInformationService;
-		_logger = logger;
 	}
-
 	public async Task<PostBasicInformationResult> Handle(PostBasicInformationCommand command, CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Handling Philsys basic information request for client: {FirstName}", command.first_name);
-
 		var result = await _postBasicInformationService.PostBasicInformationAsync(
 				command.first_name,
 				command.middle_name,
@@ -33,9 +25,6 @@ public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationC
 				command.bearer_token,
 				command.face_liveness_session_id
 			);
-
-		_logger.LogInformation("Successfully retrieved the Response");
-
 		return new PostBasicInformationResult(result);
 	}
 }

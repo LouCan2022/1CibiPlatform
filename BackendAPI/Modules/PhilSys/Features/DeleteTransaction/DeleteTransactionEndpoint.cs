@@ -1,5 +1,4 @@
 ﻿namespace PhilSys.Features.DeleteTransaction;
-
 public record DeleteTransactionRequest(string HashToken) : ICommand<DeleteTransactionResponse>;
 public record DeleteTransactionResponse(bool IsDeleted);
 public class DeleteTransactionEndpoint : ICarterModule
@@ -11,11 +10,8 @@ public class DeleteTransactionEndpoint : ICarterModule
 			var command = new DeleteTransactionCommand(
 				request.HashToken
 				);
-
 			DeleteTransactionResult result = await sender.Send(command, cancellationToken);
-
 			var response = new DeleteTransactionResponse(result.IsDeleted);
-
 			return Results.Ok(response.IsDeleted);
 		})
 		.WithName("DeleteTransaction")
@@ -24,6 +20,6 @@ public class DeleteTransactionEndpoint : ICarterModule
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.ProducesProblem(StatusCodes.Status401Unauthorized)
 		.WithSummary("Delete Transaction")
-		.WithDescription("Delete Transaction");
+		.WithDescription("Deletes an existing PhilSys transaction based on the provided unique hash token.");
 	}
 }
