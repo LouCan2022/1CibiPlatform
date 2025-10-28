@@ -23,8 +23,7 @@ public class PostBasicInformationService
 		CancellationToken ct = default
 		)
 	{
-		var endpoint = "query";
-
+	
 		var body = new
 		{
 			first_name,
@@ -35,18 +34,19 @@ public class PostBasicInformationService
 			face_liveness_session_id
 		};
 
-		_logger.LogInformation("Sending basic information request to PhilSys endpoint: {Endpoint}", endpoint);
+		_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearer_token);
 
-		_httpClient.DefaultRequestHeaders.Authorization =
-			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearer_token);
+		var response = await SendRequestAsync("query", body, ct);
 
-		var response = await _httpClient.PostAsJsonAsync(endpoint, body, ct);
+		_logger.LogInformation("Sending basic information request for {FirstName} {MiddleName} {LastName} {Suffix}",
+								first_name, middle_name, last_name, suffix);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			_logger.LogError("Basic Information request failed: {Status}", response.StatusCode);
 
 			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>(ct);
+
+			_logger.LogError("Basic Information request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
 			return new BasicInformationOrPCNResponseDTO(
 				code: "",
@@ -93,15 +93,9 @@ public class PostBasicInformationService
 
 		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
-		if (responseBody is null || responseBody.data is null)
-		{
-			throw new InvalidOperationException("Response body or data is null.");
-		}
-
-		var returnData = responseBody.data;
+		var returnData = responseBody!.data;
 
 		return ReturnData(returnData);
-
 	}
 
 	private static BasicInformationOrPCNResponseDTO ReturnData(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
@@ -149,7 +143,7 @@ public class PostBasicInformationService
 			);
 	}
 
-	protected virtual async Task<HttpResponseMessage> SendRequestAsync(
+	private async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
 		object body,
 		CancellationToken ct)

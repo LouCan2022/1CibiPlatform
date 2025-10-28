@@ -17,17 +17,15 @@ public class GetTokenService
         string clientId,
         string clientSecret)
     {
-        var endpoint = "auth";
-
         var body = new
         {
             client_id = clientId,
             client_secret = clientSecret
         };
 
-        _logger.LogInformation("Sending token request to PhilSys endpoint: {Endpoint}", endpoint);
+    	_logger.LogInformation("Requesting PhilSys token with client_id: {ClientId}", clientId);
 
-		var response = await SendRequestAsync(endpoint, body);
+		var response = await SendRequestAsync("auth", body);
 
 		var responseBody = await response.Content.ReadFromJsonAsync<PhilSysTokenResponse>();
 		_logger.LogInformation("PhilSys Token Response: {Response}", responseBody);
@@ -47,7 +45,7 @@ public class GetTokenService
 		);
 	}
 
-	protected virtual async Task<HttpResponseMessage> SendRequestAsync(
+	private async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
 		object body)
 	{
