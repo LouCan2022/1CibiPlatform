@@ -53,8 +53,8 @@ public class PhilSysService : IPhilSysService
 			successContent!.isExpired = true;
 		}
 		
-		
-		Console.WriteLine("✅ Update Successfully");
+		Console.WriteLine("✅ Retrieve the Status Successfully");
+		 
 		return successContent!;
 
 	}
