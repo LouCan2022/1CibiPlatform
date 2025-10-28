@@ -8,6 +8,7 @@ public class PartnerSystemService
 	private readonly IHashService _hashService;
 	private readonly ISecureToken _securetoken;
 	private readonly double _livenessExpiryMinutes;
+	private readonly string _livenessBaseUrl;
 	public PartnerSystemService(
 		ILogger<PartnerSystemService> logger, 
 		IPhilSysRepository repository,
@@ -21,13 +22,12 @@ public class PartnerSystemService
 		_hashService = hashService;
 		_securetoken = securetoken;
 		_livenessExpiryMinutes = int.Parse(_configuration["PhilSys:LivenessSessionExpiryInMinutes"] ?? "10");
+		_livenessBaseUrl = _configuration["PhilSys:LivenessBaseUrl"]!;
 	}
 	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string callback_url, string inquiry_type, IdentityData identity_data)
 	{
 		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
-
-		Guid tid;
 
 		var token = _securetoken.GenerateSecureToken();
 
@@ -83,7 +83,7 @@ public class PartnerSystemService
 			};
 		}
 
-		var livenessUrl = $"http://localhost:5134/philsys/idv/liveness/{transaction.HashToken}";
+		var livenessUrl = $"{_livenessBaseUrl}/philsys/idv/liveness/{transaction.HashToken}";
 
 		var result = await _repository.AddTransactionDataAsync(transaction);
 		if (result == false)
