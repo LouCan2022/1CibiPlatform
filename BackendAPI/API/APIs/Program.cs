@@ -1,4 +1,6 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Microsoft.AspNetCore.HttpOverrides;
+
+var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
 builder.Services.ConfigureEnvironment(builder);
@@ -9,11 +11,17 @@ builder.Services
 	.AddModuleMediaTR()
 	.AddModuleCarter()
 	.AddModuleServices()
-	.AddJwtAuthentication(builder.Configuration)
+	.AddJwtAuthentication(builder.Configuration, builder.Environment)
 	.AddModuleInfrastructure(builder.Configuration)
 	.AddEndpointsApiExplorer()
 	.AddSwaggerGen();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+	options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+	options.KnownNetworks.Clear();
+	options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
 
