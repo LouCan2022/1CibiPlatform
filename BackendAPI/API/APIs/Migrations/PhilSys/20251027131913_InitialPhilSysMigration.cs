@@ -24,6 +24,7 @@ namespace APIs.Migrations.PhilSys
                     BirthDate = table.Column<string>(type: "text", nullable: true),
                     PCN = table.Column<string>(type: "text", nullable: true),
                     FaceLivenessSessionId = table.Column<string>(type: "text", nullable: true),
+                    WebHookUrl = table.Column<string>(type: "text", nullable: true),
                     IsTransacted = table.Column<bool>(type: "boolean", nullable: false),
                     HashToken = table.Column<string>(type: "text", nullable: true),
                     ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

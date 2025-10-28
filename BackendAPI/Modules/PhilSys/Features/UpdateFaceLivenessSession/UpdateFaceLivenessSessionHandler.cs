@@ -2,7 +2,7 @@
 
 public record UpdateFaceLivenessSessionCommand(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResult>;
 
-public record UpdateFaceLivenessSessionResult(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
+public record UpdateFaceLivenessSessionResult(VerificationResponseDTO VerificationResponseDTO);
 public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivenessSessionCommand, UpdateFaceLivenessSessionResult>
 {
 	private readonly UpdateFaceLivenessSessionService _updateFaceLivenessSessionService;

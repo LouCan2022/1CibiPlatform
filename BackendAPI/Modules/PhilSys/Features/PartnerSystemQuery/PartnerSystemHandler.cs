@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.PartnerSystemQuery;
 
-public record PartnerSystemCommand(string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResult>;
+public record PartnerSystemCommand(string callback_url, string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResult>;
 
 public record PartnerSystemResult(PartnerSystemResponseDTO PartnerSystemResponseDTO);
 
@@ -10,6 +10,9 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 	public PartnerSystemCommandValidator()
 	{
 		// Always required fields
+		RuleFor(x => x.callback_url)
+			.NotEmpty().WithMessage("callback_url is required.");
+
 		RuleFor(x => x.inquiry_type)
 			.NotEmpty().WithMessage("inquiry_type is required.")
 			.Must(t => t == "name_dob" || t == "pcn")
@@ -58,7 +61,7 @@ public class PartnerSystemHandler : ICommandHandler<PartnerSystemCommand, Partne
 	}
 	public async Task<PartnerSystemResult> Handle(PartnerSystemCommand request, CancellationToken cancellationToken)
 	{
-		var result = await _partnerSystemService.PartnerSystemQueryAsync(request.inquiry_type, request.identity_data);
+		var result = await _partnerSystemService.PartnerSystemQueryAsync(request.callback_url, request.inquiry_type, request.identity_data);
 
 		_logger.LogInformation("Successfully retrieved the Response");
 

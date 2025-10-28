@@ -2,34 +2,35 @@
 @using MudBlazor
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+
 <MudPaper Class="p-8 text-center philsys-form-wrapper"
           Elevation="6"
           Style="
               border-radius: 20px;
               padding: 25px;
               box-shadow: 0px 10px 45px rgba(0,0,0,0.1);
-              width: 100%;
+              width: 95%;
               max-height: 650px;
               max-width: 950px;
-              margin: 4px;">
+              margin: 8px;">
 
     <MudGrid Spacing="3">
         <!-- IMAGE + API RESPONSE BUTTON -->
         <MudItem xs="12" md="4">
             <div class="d-flex flex-column align-items-center">
                 <MudPaper Elevation="0"
-                          Class="d-flex justify-center align-center mb-2"
+                          Class="d-flex justify-center align-center mb-2 mt-2"
                           Style="width: 225px; height: 200px; border-radius: 12px;">
                     <MudImage Src="@(string.IsNullOrWhiteSpace(FaceUrl) ? "images/generic/default_picture.jpg" : FaceUrl)"
                               Alt="User Profile"
                               Style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; outline: 2px solid #000;" />
                 </MudPaper>
 
-                @if (!string.IsNullOrEmpty(VerificationResult!.reference))
+                @if (!string.IsNullOrEmpty(VerificationResult?.data_subject?.national_id_number))
                 {
                     <ButtonComponent StartIcon="@Icons.Material.Filled.Download"
                                      OnClick="DownloadApiResponse"
-                                     Class="theme-button theme-button-active"
+                                     Class="theme-button theme-button-active mt-4"
                                      Style="width: 180px;">
                         API Response
                     </ButtonComponent>
@@ -47,7 +48,7 @@
                             <MudText Typo="Typo.body1">@($"{@row.Label}:")</MudText>
                         </td>
 
-                        <td style="padding: 6px 8px; text-align:right;">
+                        <td style="padding: 6px 8px; text-align: center;">
                             <MudText Typo="Typo.body1" Style="font-weight: bold; margin-right: 20px;">
                                 @((string.IsNullOrWhiteSpace(row.Value) ? "No Data Found" : row.Value))
                             </MudText>
@@ -60,14 +61,19 @@
 
         <!-- VERIFICATION TAG -->
         <MudItem xs="12" md="4">
-            <div style="grid-column: 1; grid-row: 2; align-content: center; margin-bottom: 12px;"> @if (!string.IsNullOrEmpty(VerificationResult!.reference)) {
-            <div style=" display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; margin-top: 10px; "> <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Color="Color.Success" /> Verified </div>
-                        } else
-            {
+                <div style="grid-column: 1; grid-row: 2; align-content: center; margin-bottom: 12px;"> 
+                    @if (!string.IsNullOrEmpty(VerificationResult?.data_subject?.digital_id) || VerificationResult!.verified.Equals(true)) 
+                    {
+                     <div style=" display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; margin-top: 10px; "> 
+                    <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Color="Color.Success" /> Verified </div>
+                    }
+                    
+                    else
+                    {
 
-                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #fdecea; color: #c62828; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; margin-top: 10px;"> <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Color="Color.Error" /> Not Verified </div>
-            }
- </div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #fdecea; color: #c62828; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 14px; margin-top: 10px;"> <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Color="Color.Error" /> Not Verified </div>
+                    }
+                </div>
         </MudItem>
 
         <!-- SEARCH AGAIN BUTTON -->
@@ -83,45 +89,33 @@
     </MudGrid>
 </MudPaper>
 
-
-
-
 @code {
     [Parameter]
     public UpdateFaceLivenessSessionResponseDTO? VerificationResult { get; set; }
-
     private List<(string Label, string Value)>? InfoRows;
 
     private string? FaceUrl;
 
     protected override void OnInitialized()
     {
-        if (VerificationResult == null)
-        {
-            InfoRows = new List<(string, string)>
-        {
-            ("Error", "No data available")
-        };
-            return;
-        }
-        FaceUrl = VerificationResult.face_url;
+        FaceUrl = VerificationResult?.data_subject?.face_image_url;
         InfoRows = new()
         {
-            ("PhilSys Card Number", VerificationResult.reference ?? "No Data Found"),
-            ("Digital ID Number", VerificationResult.code ?? "No Data Found"),
-            ("First Name", VerificationResult.first_name ?? "No Data Found"),
-            ("Middle Name", VerificationResult.middle_name ?? "No Data Found"),
-            ("Last Name", VerificationResult.last_name ?? "No Data Found"),
-            ("Suffix",  VerificationResult.suffix ?? "No Data Found"),
-            ("Gender", VerificationResult.gender ?? "No Data Found"),
-            ("Birth Date", VerificationResult.birth_date ?? "No Data Found"),
-            ("Place of Birth", VerificationResult.place_of_birth ?? "No Data Found"),
-            ("Permanent Address", VerificationResult.full_address ?? "No Data Found"),
-            ("Present Address", VerificationResult.present_full_address ?? "No Data Found"),
-            ("Marital Status", VerificationResult.marital_status ?? "No Data Found"),
-            ("Mobile Number", VerificationResult.mobile_number ?? "No Data Found"),
-            ("Email", VerificationResult.email ?? "No Data Found"),
-            ("Blood Type", VerificationResult.blood_type ?? "No Data Found")
+            ("PhilSys Card Number", VerificationResult?.data_subject?.national_id_number ?? "No Data Found"),
+            ("Digital ID Number", VerificationResult?.data_subject?.digital_id ?? "No Data Found"),
+            ("First Name", VerificationResult?.data_subject?.first_name ?? "No Data Found"),
+            ("Middle Name", VerificationResult?.data_subject?.middle_name ?? "No Data Found"),
+            ("Last Name", VerificationResult?.data_subject?.last_name ?? "No Data Found"),
+            ("Suffix",  VerificationResult?.data_subject?.suffix ?? "No Data Found"),
+            ("Gender", VerificationResult?.data_subject?.gender ?? "No Data Found"),
+            ("Birth Date", VerificationResult?.data_subject?.birth_date ?? "No Data Found"),
+            ("Place of Birth", VerificationResult?.data_subject?.place_of_birth!.full ?? "No Data Found"),
+            ("Permanent Address", VerificationResult?.data_subject?.address!.permanent ?? "No Data Found"),
+            ("Present Address", VerificationResult?.data_subject?.address!.present ?? "No Data Found"),
+            ("Marital Status", VerificationResult?.data_subject?.marital_status ?? "No Data Found"),
+            ("Mobile Number", VerificationResult?.data_subject?.mobile_number ?? "No Data Found"),
+            ("Email", VerificationResult?.data_subject?.email ?? "No Data Found"),
+            ("Blood Type", VerificationResult?.data_subject?.blood_type ?? "No Data Found")
         };
     }
   

@@ -22,7 +22,7 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Update Successfully");
-			return null!;
+			throw new Exception("Error in Updating Face Liveness Session");
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<UpdateFaceLivenessSessionResponseDTO>();
@@ -36,6 +36,7 @@ public class PhilSysService : IPhilSysService
 	{
 		var request = new { HashToken };
 		var response = await _httpClient.PostAsJsonAsync("/philsys/idv/validate/liveness", request);
+
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Get the Status");
@@ -81,7 +82,7 @@ public class PhilSysService : IPhilSysService
 		}
 		if (inquiry_type == "name_dob")
 		{
-			var requestInfo = new { inquiry_type = "name_dob", identity_data };
+			var requestInfo = new { callback_url = "/", inquiry_type = "name_dob", identity_data };
 			var responseInfo = await _httpClient.PostAsJsonAsync("philsys/idv", requestInfo);
 			if (!responseInfo.IsSuccessStatusCode)
 			{
@@ -93,7 +94,7 @@ public class PhilSysService : IPhilSysService
 			return successContentInfo!.liveness_link!;
 		}
 
-		var requestPcn = new { inquiry_type = "pcn", identity_data };
+		var requestPcn = new { callback_url = "/", inquiry_type = "pcn", identity_data };
 		var responsePCn = await _httpClient.PostAsJsonAsync("philsys/idv", requestPcn);
 		if (!responsePCn.IsSuccessStatusCode)
 		{

@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 @inject IPhilSysService IPhilSysService
 
-<div class="liveness-container">
+<div class="philsys-liveness-container">
 @if (_status == null || !Exists || isTransacted)
 {
     <NotFoundComponent></NotFoundComponent>
@@ -15,8 +15,8 @@ else if (isExpired)
 }
 else if (!_completed)
 {
-  
-        <MudPaper Class="p-10 text-center form-container d-flex flex-column justify-center align-center"
+
+        <MudPaper Class="p-10 text-center d-flex flex-column justify-center align-center"
                   Elevation="6"
                   Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%;">
             <MudText Typo="Typo.h5" Class="mb-4">
