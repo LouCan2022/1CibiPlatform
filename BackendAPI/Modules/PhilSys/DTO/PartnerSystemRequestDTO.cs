@@ -1,6 +1,5 @@
 ﻿namespace PhilSys.DTO;
 
-
 public record IdentityData(
 	[property: JsonPropertyName("first_name")] string? FirstName,
 	[property: JsonPropertyName("middle_name")] string? MiddleName,
