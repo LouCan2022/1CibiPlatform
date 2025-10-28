@@ -8,6 +8,7 @@
 		private static readonly Assembly _philsysAssembly = typeof(PhilSysMarker).Assembly;
 		private static readonly Assembly _ssoAssembly = typeof(SSOMarker).Assembly;
 
+
 		#region Environment Config
 
 		public static void ConfigureEnvironment(
@@ -62,8 +63,9 @@
 
 		#region JWT Config
 		public static IServiceCollection AddJwtAuthentication(
-		  this IServiceCollection services,
-		  IConfiguration configuration)
+			this IServiceCollection services,
+			IConfiguration configuration,
+			IHostEnvironment environment)
 		{
 			// JWT Authentication
 			var jwtSettings = configuration.GetSection("Jwt");
@@ -72,7 +74,7 @@
 			var audience = jwtSettings["Audience"];
 			var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]!);
 			var _httpCookieOnlyKey = configuration.GetValue<string>("HttpCookieOnlyKey");
-
+			var _signinScheme = configuration.GetValue<string>("SSOMetadata:SigninScheme");
 			// SAML2 Configuration
 			var spBaseUrl = configuration["Saml2:SpBaseUrl"];
 			var idpMetadataUrl = configuration["Saml2:IdpMetadataUrl"];
@@ -82,7 +84,7 @@
 			{
 				x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 				x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-				x.DefaultSignInScheme = "AppExternalScheme"; // Use cookie scheme for sign-in
+				x.DefaultSignInScheme = _signinScheme;
 				x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 			})
 			.AddJwtBearer(options =>
@@ -110,12 +112,33 @@
 					}
 				};
 			})
-			.AddCookie("AppExternalScheme")
+			.AddCookie(_signinScheme!, options =>
+			{
+				options.Cookie.Name = _signinScheme;
+				options.Cookie.HttpOnly = true;
+				options.Cookie.Path = "/";
+				options.ExpireTimeSpan = TimeSpan.FromHours(8);
+				options.SlidingExpiration = true;
+
+				// Environment-specific settings
+				if (environment.IsDevelopment())
+				{
+					// Development/Ngrok settings
+					options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+					options.Cookie.SameSite = SameSiteMode.None;
+				}
+				else
+				{
+					options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+					options.Cookie.SameSite = SameSiteMode.Lax;
+					// Optionally set domain for subdomain sharing
+					// options.Cookie.Domain = ".yourdomain.com";
+				}
+			})
 			.AddSaml2(options =>
 			{
 				options.SPOptions.EntityId = new EntityId(spBaseUrl);
 				options.SPOptions.ReturnUrl = new Uri(spBaseUrl + "/sso/login/callback");
-
 				var identityProvider = new IdentityProvider(
 					new EntityId(idpEntityId),
 					options.SPOptions)
@@ -124,15 +147,11 @@
 					LoadMetadata = true,
 					AllowUnsolicitedAuthnResponse = true
 				};
-
 				options.IdentityProviders.Add(identityProvider);
 			});
 
-			// ✅ ADD THIS HERE - Force eager initialization
 			services.AddOptions<Saml2Options>().ValidateOnStart();
-
 			services.AddAuthorization();
-
 			return services;
 		}
 		#endregion

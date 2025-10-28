@@ -6,13 +6,15 @@ public class SSOLogoutEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("sso/logout", async (SSOLogoutRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("sso/logout", async (
+			ISender sender,
+			CancellationToken cancellationToken) =>
 		{
 			var command = new SSOLogoutCommand();
 
 			await sender.Send(command, cancellationToken);
 
-			return Results.Redirect("https://localhost:7001/");
+			return Results.Ok();
 		})
 		  .WithName("SSO Logout")
 		  .WithTags("SSO")

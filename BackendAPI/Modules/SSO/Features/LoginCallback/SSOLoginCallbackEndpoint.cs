@@ -18,7 +18,7 @@ public class SSOLoginCallbackEndpoint : ICarterModule
 
 			SSOLoginCallbackResult result = await sender.Send(command, cancellationToken);
 
-			var blazorAppUrl = $"http://localhost:5134/sso/frontpage?&email={result.result.Email}&name={result.result.Name}";
+			var blazorAppUrl = $"http://localhost:5134/sso/frontpage";
 
 			return Results.Redirect(blazorAppUrl);
 
