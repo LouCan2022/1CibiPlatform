@@ -1,6 +1,6 @@
 ﻿namespace FrontendWebassembly.DTO.PhilSys;
 
-public class TransactionStatusResponse
+public record TransactionStatusResponse
 {
 	public bool Exists { get; set; }
 	public bool IsTransacted { get; set; }
