@@ -18,6 +18,10 @@ global using FrontendWebassembly.Services.Auth.Implementation;
 global using FrontendWebassembly.SharedService;
 global using FrontendWebassembly.DTO.Auth;
 global using FrontendWebassembly.DTO.PhilSys;
+global using FrontendWebassembly.Services.SSO.Interfaces;
+global using FrontendWebassembly.DTO.SSO;
+global using FrontendWebassembly.Services.SSO.Implementations;
+
 
 
 

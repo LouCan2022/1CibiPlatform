@@ -1,5 +1,8 @@
 ﻿@using MudBlazor
 @inject LocalStorageService LocalStorageService
+@inject ISSOService SSOService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 @inherits LayoutComponentBase
 
 
@@ -34,6 +37,9 @@
         <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Style="Color.Inherit"
                        OnClick="@ToggleDarkMode" />
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@LogoutAsync" Class="ml-2">
+            <MudIcon Icon="@Icons.Material.Filled.Logout" /> Logout
+        </MudButton>
     </MudAppBar>
 
     <MudMainContent>
@@ -109,5 +115,20 @@
         return _isDarkMode
             ? "color: #102247;"
             : "color: white;";
+    }
+
+    private async Task LogoutAsync()
+    {
+        try
+        {
+            var success = await SSOService.LogoutAsync();
+            await LocalStorageService.ClearAsync();
+            await JS.InvokeVoidAsync("location.reload");
+
+        }
+        catch (Exception ex)
+        {
+           
+        }
     }
 }
