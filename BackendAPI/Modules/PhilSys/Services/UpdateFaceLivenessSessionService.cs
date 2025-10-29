@@ -1,5 +1,5 @@
-﻿
-namespace PhilSys.Services;
+﻿namespace PhilSys.Services;
+
 public class UpdateFaceLivenessSessionService
 {
 	private readonly HttpClient _httpClient;
@@ -31,6 +31,7 @@ public class UpdateFaceLivenessSessionService
 		client_id = _configuration["PhilSys:ClientID"]!;
 		client_secret = _configuration["PhilSys:ClientSecret"]!;
 	}
+
 	public async Task<VerificationResponseDTO> UpdateFaceLivenessSessionAsync(
 		string HashToken,
 		string FaceLivenessSessionId,
@@ -42,19 +43,22 @@ public class UpdateFaceLivenessSessionService
 		var result = await _philSysRepository.UpdateFaceLivenessSessionAsync(HashToken, FaceLivenessSessionId);
 		if (result == null)
 		{
-			_logger.LogInformation("Failed to updated Face Liveness Session for Token: {HashToken}", HashToken);
-			throw new Exception($"Error in Updating Face Livenession for Token: {HashToken}");
+			_logger.LogWarning("No transaction found for HashToken: {HashToken}. Unable to update Face Liveness Session.", HashToken);
+			throw new Exception($"No transaction record found for HashToken: {HashToken}. Face Liveness Session update aborted.");
 		}
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {HashToken}", HashToken);
 
 		var token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
+		if (token == null)
+		{
+			_logger.LogWarning("Failed to generate the access token for {Token}", HashToken);
+			throw new Exception($"Failed to generate the access token for {HashToken}");
+		}
 		string accessToken = token.access_token;
-
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
-
 			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
 			await UpdateTransactionStatus(HashToken);
 
@@ -65,11 +69,8 @@ public class UpdateFaceLivenessSessionService
 
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
-			if (result.WebHookUrl != "/")
-			{
-				var sendToClient = await _httpClient.PostAsJsonAsync(result.WebHookUrl, convertedResponse);
-			}
-			
+			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
+
 			return convertedResponse!;
 		}
 
@@ -86,10 +87,7 @@ public class UpdateFaceLivenessSessionService
 
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
-			if (result.WebHookUrl != "/")
-			{
-				var sendToClient = await _httpClient.PostAsJsonAsync(result.WebHookUrl, convertedResponse);
-			}
+			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
 
 			return convertedResponse!;
 		}
@@ -98,7 +96,7 @@ public class UpdateFaceLivenessSessionService
 
 	}
 
-	public async Task UpdateTransactionStatus(string HashToken)
+	private async Task UpdateTransactionStatus(string HashToken)
 	{
 		var existingTransaction = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
 
@@ -111,7 +109,20 @@ public class UpdateFaceLivenessSessionService
 		await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
 	}
 
-	public VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
+	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
+	{
+		if (WebHook != "/")
+		{
+			var clientResponse = await _httpClient.PostAsJsonAsync(WebHook, VerificationResponseDTO);
+			if (!clientResponse.IsSuccessStatusCode)
+			{
+				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
+							      WebHook, clientResponse.StatusCode, clientResponse);
+			}
+		}
+	}
+
+	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
 	{
 		if (string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.reference))
 		{

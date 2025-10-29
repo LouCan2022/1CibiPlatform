@@ -19,6 +19,8 @@ public interface IAuthRepository
 
 	Task<bool> UpdateAuthUserPassword(Authusers authusers);
 
+	Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken);
+
 	Task<AuthRefreshToken> IsUserExistAsync(Guid userId);
 
 	Task<bool> InsertOtpVerification(OtpVerification otpVerification);

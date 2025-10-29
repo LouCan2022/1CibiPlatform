@@ -6,17 +6,19 @@ public interface IAuthService
 
 	Task<bool> IsAuthenticated();
 
-	Task<string> GetUserInfoIfAuthenticated();
-
-
 	Task<RegisterResponseDTO> Register(RegisterRequestDTO registerRequestDTO);
-
 
 	Task<OtpSessionResponseDTO> IsOtpSessionValid(OtpSessionRequestDTO otpRequestDTO);
 
 	Task<OtpSessionResponseDTO> OtpVerification(OtpVerificationRequestDTO otpVerificationRequestDTO);
 
 	Task<OTPResendResponseDTO> OtpResendAsync(OTPResendRequestDTO otpResendRequestDTO);
+
+	Task<GetUserIdForForgotPasswordResponseDTO> ForgotPasswordGetUserId(GetUserIdForForgotPasswordRequestDTO getUserIdForForgotPasswordRequestDTO);
+
+	Task<IsChangePasswordTokenValidResponseDTO> IsForgotPasswordTokenValid(ForgotPasswordTokenRequestDTO forgotPasswordTokenRequestDTO);
+
+	Task<UpdatePasswordResponseDTO> UpdatePassword(UpdatePasswordRequestDTO updatePasswordRequestDTO);
 
 	Task<bool> Logout();
 

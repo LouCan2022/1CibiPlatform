@@ -8,7 +8,7 @@ public class IsChangePasswordTokenValidEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("/is-change-password-token-valid",
+		app.MapPost("is-change-password-token-valid",
 			async (IsChangePasswordTokenValidRequest request,
 				  ISender sender,
 				  CancellationToken cancellationToken) =>

@@ -49,12 +49,12 @@ public class PhilSysService : IPhilSysService
 		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponse>();
 
 		if (successContent!.ExpiresAt < DateTime.UtcNow)
-		{;
+		{
 			successContent!.isExpired = true;
 		}
 		
-		
-		Console.WriteLine("✅ Update Successfully");
+		Console.WriteLine("✅ Retrieve the Status Successfully");
+		 
 		return successContent!;
 
 	}

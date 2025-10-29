@@ -8,7 +8,7 @@ public class UpdatePasswordEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("update-password",
+		app.MapPost("change-password",
 			async (UpdatePasswordRequest request,
 				  ISender sender,
 				  CancellationToken cancellationToken) =>
