@@ -4,7 +4,7 @@ public class PhilSysTransactionResult
 	public int Trid { get; init; }
 	public Guid idv_session_id { get; init; }
 	public bool verified { get; init; }
-	public DataSubject? data_subject { get; init; }
+	public DataSubject data_subject { get; init; }
 	public string? error { get; init; }
 	public string? message { get; init; }
 	public string? error_description { get; init; }
@@ -26,8 +26,8 @@ public class DataSubjectEntity
 	public string? email { get; init; }
 	public string? mobile_number { get; init; }
 	public string? blood_type { get; init; }
-	public AddressEntity? address { get; init; }
-	public PlaceOfBirthEntity? place_of_birth { get; init; }
+	public AddressEntity address { get; init; }
+	public PlaceOfBirthEntity place_of_birth { get; init; }
 }
 
 public class AddressEntity

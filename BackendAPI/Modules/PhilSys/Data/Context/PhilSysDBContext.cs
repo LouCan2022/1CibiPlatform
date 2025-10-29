@@ -11,6 +11,19 @@ public class PhilSysDBContext : DbContext
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.ApplyConfigurationsFromAssembly(typeof(PhilSysDBContext).Assembly);
+
+		modelBuilder.Entity<PhilSysTransactionResult>(builder =>
+		{
+			// Make DataSubject owned
+			builder.OwnsOne(e => e.data_subject, ds =>
+			{
+				// DataSubject’s nested owned types
+				ds.OwnsOne(d => d.address);
+				ds.OwnsOne(d => d.place_of_birth);
+			});
+		});
+
+
 		base.OnModelCreating(modelBuilder);
 	}
 }

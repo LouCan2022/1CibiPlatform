@@ -136,9 +136,11 @@ public class UpdateFaceLivenessSessionService
 	private async Task AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
 	{
 		var philsysTransactionResult = VerificationResponseDTO.Adapt<PhilSysTransactionResult>();
-		await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
-
-
+		var result = await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
+		if (result == false)
+		{
+			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table");
+		}
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
