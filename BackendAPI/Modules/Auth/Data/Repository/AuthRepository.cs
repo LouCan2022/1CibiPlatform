@@ -246,4 +246,13 @@ public class AuthRepository : IAuthRepository
 
 		return true;
 	}
+
+	public async Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken)
+	{
+		_dbcontext.PasswordResetToken.Update(passwordResetToken);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
 }
