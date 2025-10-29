@@ -36,6 +36,8 @@ public class PhilSysRepository : IPhilSysRepository
 
 		transaction!.FaceLivenessSessionId = FaceLivenessSessionId;
 
+		transaction.UpdatedLivenessIdAt = DateTime.UtcNow;
+
 		await _dbcontext.SaveChangesAsync();
 
 		return transaction;
@@ -56,6 +58,7 @@ public class PhilSysRepository : IPhilSysRepository
 		.Select(t => new TransactionStatusResponse
 		{
 			Exists = true, 
+			WebHookURl = t.WebHookUrl,
 			IsTransacted = t.IsTransacted,
 			isExpired = false,
 			ExpiresAt = t.ExpiresAt

@@ -1,9 +1,12 @@
-﻿namespace PhilSys.Services;
+﻿using Mapster;
+
+namespace PhilSys.Services;
 
 public class UpdateFaceLivenessSessionService
 {
 	private readonly HttpClient _httpClient;
 	private readonly IPhilSysRepository _philSysRepository;
+	private readonly IPhilSysResultRepository _philSysResultRepository;
 	private readonly ILogger<UpdateFaceLivenessSessionService> _logger;
 	private readonly PostBasicInformationService _postBasicInformationService;
 	private readonly PostPCNService _postPCNService;
@@ -15,6 +18,7 @@ public class UpdateFaceLivenessSessionService
 	public UpdateFaceLivenessSessionService(
 		IHttpClientFactory httpClientFactory,
 		IPhilSysRepository philSysRepository,
+		IPhilSysResultRepository philSysResultRepository,
 		ILogger<UpdateFaceLivenessSessionService> logger,
 		PostBasicInformationService PostBasicInformationService,
 		PostPCNService PostPCNService,
@@ -23,6 +27,7 @@ public class UpdateFaceLivenessSessionService
 	{
 		_httpClient = httpClientFactory.CreateClient("IDVClient");
 		_philSysRepository = philSysRepository;
+		_philSysResultRepository = philSysResultRepository;
 		_logger = logger;
 		_postBasicInformationService = PostBasicInformationService;
 		_postPCNService = PostPCNService;
@@ -60,7 +65,6 @@ public class UpdateFaceLivenessSessionService
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
 			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-			await UpdateTransactionStatus(HashToken);
 
 			if (!string.IsNullOrEmpty(responseBody.error))
 			{
@@ -71,6 +75,10 @@ public class UpdateFaceLivenessSessionService
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
 
+			await UpdateTransactionStatus(HashToken);
+
+			await AddConvertedResponseToDbAsync(convertedResponse);
+
 			return convertedResponse!;
 		}
 
@@ -78,7 +86,6 @@ public class UpdateFaceLivenessSessionService
 		{
 
 			var responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
-			await UpdateTransactionStatus(HashToken);
 
 			if (!string.IsNullOrEmpty(responseBody.error))
 			{
@@ -88,6 +95,10 @@ public class UpdateFaceLivenessSessionService
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
+
+			await UpdateTransactionStatus(HashToken);
+
+			await AddConvertedResponseToDbAsync(convertedResponse);
 
 			return convertedResponse!;
 		}
@@ -120,6 +131,14 @@ public class UpdateFaceLivenessSessionService
 							      WebHook, clientResponse.StatusCode, clientResponse);
 			}
 		}
+	}
+
+	private async Task AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
+	{
+		var philsysTransactionResult = VerificationResponseDTO.Adapt<PhilSysTransactionResult>();
+		await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
+
+
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)

@@ -19,7 +19,6 @@
             currentUrl.searchParams.set("session", sessionId);
             window.history.replaceState({}, "", currentUrl.toString());
 
-            alert("✅ Liveness Check Completed Successfully!");
         } else {
             console.warn("⚠️ No session_id found in SDK result:", data);
         }
