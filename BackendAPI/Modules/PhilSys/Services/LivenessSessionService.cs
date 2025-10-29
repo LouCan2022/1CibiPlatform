@@ -21,7 +21,7 @@ public class LivenessSessionService
 		if (status == null)
 		{
 			_logger.LogWarning("There is no transaction for {Token}", HashToken);
-			throw new Exception("There is no such transaction for this token");
+			throw new Exception($"There is no such transaction for Token: {HashToken}");
 		}
 
 		var hashTokenChecker = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
@@ -29,7 +29,7 @@ public class LivenessSessionService
 		if (hashTokenChecker == null)
 		{
 			_logger.LogWarning("There is no transaction for {Token}", HashToken);
-			throw new Exception("There is no such transaction for this Token");
+			throw new Exception($"There is no such transaction for Token: {HashToken}");
 		}
 
 		var isTokenValid = _hashService.Verify(HashToken, hashTokenChecker.HashToken!);

@@ -19,7 +19,6 @@ public class PostPCNService
 		CancellationToken ct = default
 		)
 	{
-		var endpoint = "query/qr";
 
 		var body = new
 		{
@@ -27,18 +26,17 @@ public class PostPCNService
 			face_liveness_session_id
 		};
 
-		_logger.LogInformation("Sending PCN request to PhilSys endpoint: {Endpoint}", endpoint);
-
-		_httpClient.DefaultRequestHeaders.Authorization =
-			new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearer_token);
+		_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearer_token);
 	
-		var response = await _httpClient.PostAsJsonAsync(endpoint, body, ct);
+		var response = await SendRequestAsync("query/qr", body, ct);
+
+		_logger.LogInformation("Sending PCN request for {PCN}", value);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			_logger.LogError("PCN request failed: {Status}", response.StatusCode);
-
 			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>(ct);
+
+			_logger.LogError("PCN request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
 			return new BasicInformationOrPCNResponseDTO(
 				code: "",
@@ -85,12 +83,7 @@ public class PostPCNService
 
 		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
-		if (responseBody is null || responseBody.data is null)
-		{
-			throw new InvalidOperationException("Response body or data is null.");
-		}
-
-		var returnData = responseBody.data;
+		var returnData = responseBody!.data;
 
 		return ReturnData(returnData);
 
@@ -141,8 +134,7 @@ public class PostPCNService
 			);
 	}
 
-
-	protected virtual async Task<HttpResponseMessage> SendRequestAsync(
+	private async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
 		object body,
 		CancellationToken ct)

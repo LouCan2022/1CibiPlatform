@@ -1,4 +1,5 @@
 ﻿namespace PhilSys.DTO;
+
 public record TransactionStatusResponse
 {
 	public bool Exists { get; set; } = true;

@@ -1,9 +1,7 @@
 ﻿namespace PhilSys.Features.PostPCN;
-
 public record PostPCNRequest(string value,
 							 string bearer_token,
 							 string face_liveness_session_id) : ICommand<PostPCNResponse>;
-
 public record PostPCNResponse(BasicInformationOrPCNResponseDTO PCNResponseDTO);
 public class PostPCNEndpoint : ICarterModule
 {
@@ -18,9 +16,7 @@ public class PostPCNEndpoint : ICarterModule
 				);
 
 			PostPCNResult result = await sender.Send(command, cancellationToken);
-
 			var response = new PostPCNResponse(result.PCNResponseDTO);
-
 			return Results.Ok(response.PCNResponseDTO);
 		})
 		.WithName("PostPCN")
@@ -28,7 +24,7 @@ public class PostPCNEndpoint : ICarterModule
 		.Produces<PostPCNResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.ProducesProblem(StatusCodes.Status401Unauthorized)
-		.WithSummary("Retrieve If Verified")
-		.WithDescription("Retrieves an the verify response from the PhilSys API using client credentials.");
+		.WithSummary("Submit PCN For Identity Verification")
+		.WithDescription("Sends a request to the PhilSys API to submit Philsys Card Number for identity verification.");
 	}
 }
