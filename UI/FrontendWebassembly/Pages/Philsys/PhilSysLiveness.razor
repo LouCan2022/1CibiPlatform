@@ -16,25 +16,33 @@ else if (isExpired)
 else if (!_completed)
 {
 
-        <MudPaper Class="p-10 text-center d-flex flex-column justify-center align-center"
-                  Elevation="6"
-                  Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%;">
-            <MudText Typo="Typo.h5" Class="mb-4">
-                Liveness Check
-            </MudText>
-            <MudText Typo="Typo.subtitle1" Class="mb-4">
-                Click the button below to start the liveness verification process.
-            </MudText>
-            <ButtonComponent OnClick="StartLiveness" Class="theme-button theme-button-active">
-                <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
-                Start Liveness
-            </ButtonComponent>
-        </MudPaper>
+    <MudPaper Class="p-10 text-center d-flex flex-column justify-center align-center"
+                Elevation="6"
+                Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%;">
+        <MudText Typo="Typo.h5" Class="mb-4">
+            Liveness Check
+        </MudText>
+        <MudText Typo="Typo.subtitle1" Class="mb-4">
+            Click the button below to start the liveness verification process.
+        </MudText>
+        <ButtonComponent OnClick="StartLiveness" Class="theme-button theme-button-active">
+            <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
+            Start Liveness
+        </ButtonComponent>
+    </MudPaper>
 
 }
 else
 {
+ 
     <PhilSysResultComponent VerificationResult="information"></PhilSysResultComponent>
+
+}
+
+@if (showLoader)
+{
+
+    <PhilSysLoaderComponent></PhilSysLoaderComponent>
 }
 </div>
 
@@ -48,6 +56,7 @@ else
     private bool isTransacted  = false;
     private bool Exists = false;
     private bool isExpired = false;
+    private bool showLoader = false;
     private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
 
     protected override async Task OnInitializedAsync()
@@ -98,10 +107,24 @@ else
     public async Task OnLivenessCompleted(string sessionId)
     {
         SessionId = sessionId;
-        _completed = true;
-        information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
-        Console.WriteLine($"✅ Received session ID: {sessionId}");
+        showLoader = true;
         StateHasChanged();
+
+        try
+        {
+            information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
+            _completed = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error while updating liveness session: {ex.Message}");
+        }
+        finally
+        {
+            showLoader = false;
+            Console.WriteLine($"✅ Received session ID: {sessionId}");
+            StateHasChanged();
+        }
     }
 
     public void Dispose() => _dotNetRef?.Dispose();
