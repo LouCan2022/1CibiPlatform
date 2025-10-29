@@ -30,11 +30,6 @@ public class AuthService : IAuthService
 		this._roleIdKey = "RoleId";
 	}
 
-	public Task<string> GetUserInfoIfAuthenticated()
-	{
-		return Task.FromResult("sample");
-	}
-
 	public async Task<AuthResponseDTO> Login(LoginCred cred)
 	{
 		Console.WriteLine("🔹 Starting login request...");
@@ -146,7 +141,6 @@ public class AuthService : IAuthService
 		}
 
 
-		// Clear local storage
 		await this._localStorageService.ClearAsync();
 
 		Console.WriteLine("✅ Logout successful.");
@@ -280,5 +274,102 @@ public class AuthService : IAuthService
 		Console.WriteLine("✅ Resending OTP successful.");
 
 		return new OTPResendResponseDTO(true, string.Empty);
+	}
+
+	public async Task<GetUserIdForForgotPasswordResponseDTO> ForgotPasswordGetUserId(GetUserIdForForgotPasswordRequestDTO getUserIdForForgotPasswordRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting Forgot Password - Get User ID request...");
+
+		var payload = new
+		{
+			getUserIdForForgotPasswordRequestDTO = new
+			{
+				email = getUserIdForForgotPasswordRequestDTO.email
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /forgot-password/get-user-id for Email: {getUserIdForForgotPasswordRequestDTO.email}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/forgot-password/get-user-id", payload);
+
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Forgot Password - Get User ID failed. Reading error content...");
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+			Console.WriteLine($"Error: {errorContent!.Detail}");
+			return new GetUserIdForForgotPasswordResponseDTO(Guid.Empty, errorContent.Detail);
+		}
+
+		Console.WriteLine("✅ Forgot Password - Get User ID successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<GetUserIdForForgotPasswordResponseDTO>();
+
+		return successContent!;
+
+	}
+
+	public async Task<IsChangePasswordTokenValidResponseDTO> IsForgotPasswordTokenValid(ForgotPasswordTokenRequestDTO forgotPasswordTokenRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting Forgot Password - Validate Token request...");
+
+		var payload = new
+		{
+			forgotPasswordTokenRequestDTO = new
+			{
+				tokenHash = forgotPasswordTokenRequestDTO.tokenHash
+			}
+		};
+
+		Console.WriteLine($"➡️ Sending POST to /forgot-password/validate-token for TokenHash: {forgotPasswordTokenRequestDTO.tokenHash}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/forgot-password/is-change-password-token-valid", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Forgot Password - Validate Token failed. Reading error content...");
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+			Console.WriteLine($"Error: {errorContent!.Detail}");
+			return new IsChangePasswordTokenValidResponseDTO(false, errorContent.Detail);
+		}
+
+		Console.WriteLine("✅ Forgot Password - Validate Token successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<IsChangePasswordTokenValidResponseDTO>();
+
+		return successContent!;
+
+	}
+
+	public async Task<UpdatePasswordResponseDTO> UpdatePassword(UpdatePasswordRequestDTO updatePasswordRequestDTO)
+	{
+		Console.WriteLine("🔹 Starting Update Password request...");
+
+		var payload = new
+		{
+			updatePasswordRequestDTO = new
+			{
+				userId = updatePasswordRequestDTO.userId,
+				hashToken = updatePasswordRequestDTO.hashToken,
+				newPassword = updatePasswordRequestDTO.newPassword
+			}
+		};
+		Console.WriteLine($"➡️ Sending POST to /auth/forgot-password/change-password for UserId: {updatePasswordRequestDTO.userId}");
+
+		var response = await _httpClient.PostAsJsonAsync("/auth/forgot-password/change-password", payload);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Update Password failed. Reading error content...");
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+			Console.WriteLine($"Error: {errorContent!.Detail}");
+			return new UpdatePasswordResponseDTO(false, errorContent.Detail);
+		}
+		Console.WriteLine("✅ Update Password successful. Reading success content...");
+
+		var successContent = await response.Content.ReadFromJsonAsync<UpdatePasswordResponseDTO>();
+
+		return successContent!;
+
 	}
 }

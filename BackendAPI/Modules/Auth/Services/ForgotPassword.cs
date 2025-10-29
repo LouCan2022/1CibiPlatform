@@ -54,7 +54,7 @@ public class ForgotPassword : IForgotPassword
 
 		var hashedToken = _hashService.Hash(secureToken);
 
-		var resetLink = $"{_frontendBaseUrl}/reset-password?token={System.Net.WebUtility.UrlEncode(secureToken)}";
+		var resetLink = $"{_frontendBaseUrl}/reset-password?token={System.Net.WebUtility.UrlEncode(hashedToken)}";
 
 		var name = $"{user.FirstName} {user.LastName}";
 
@@ -130,6 +130,8 @@ public class ForgotPassword : IForgotPassword
 			throw new NotFoundException("User not found.");
 		}
 
+		_logger.LogInformation("User found with ID: {UserId}", id);
+
 		var newHashedPassword = _passwordHasherService.HashPassword(newPassword);
 
 		userNewPassword.PasswordHash = newHashedPassword;
@@ -140,6 +142,23 @@ public class ForgotPassword : IForgotPassword
 		{
 			_logger.LogError("Failed to update password for user ID: {UserId}", id);
 			throw new Exception("Failed to update password.");
+		}
+
+		_logger.LogInformation("Password updated for user ID: {UserId}", id);
+
+		var token = await _authRepository.GetUserTokenAsync(tokenHash);
+
+		token.IsUsed = true;
+		token.UsedAt = DateTime.UtcNow;
+
+		var isTokenUpdated = await _authRepository.UpdatePasswordResetTokenAsUsedAsync(token);
+
+		_logger.LogInformation("Marking token as used for user ID: {UserId}", id);
+
+		if (!isTokenUpdated)
+		{
+			_logger.LogError("Failed to update password reset token for user ID: {UserId}", id);
+			throw new Exception("Failed to update password reset token.");
 		}
 
 		_logger.LogInformation("Password updated successfully for user ID: {UserId}", id);

@@ -14,7 +14,6 @@ public class AccessService : IAccessService
 
 	public async Task<bool> HasAccessAsync(int appId, int subMenuId)
 	{
-		// Example: check from local storage or call an API
 		var apps = JsonSerializer.Deserialize<List<int>>(await _localStorage.GetItemAsync<string>(_appIdKey));
 		var subMenus = JsonSerializer.Deserialize<List<List<int>>>(await _localStorage.GetItemAsync<string>(_subMenuKey));
 
