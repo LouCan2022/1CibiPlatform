@@ -1,4 +1,6 @@
-﻿namespace APIs.ServiceConfig
+﻿using Serilog;
+
+namespace APIs.ServiceConfig
 {
 	public static class ServiceConfiguration
 	{
@@ -8,6 +10,31 @@
 		private static readonly Assembly _philsysAssembly = typeof(PhilSysMarker).Assembly;
 		private static readonly Assembly _ssoAssembly = typeof(SSOMarker).Assembly;
 
+
+		#region Logging Config
+
+		public static IServiceCollection AddLoggingConfiguration(
+			this IServiceCollection services,
+			IConfiguration configuration)
+		{
+			Log.Logger = new LoggerConfiguration()
+				.MinimumLevel.Debug()
+				.Enrich.FromLogContext()
+				.WriteTo.Console(
+					outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"
+				)
+				.CreateLogger();
+
+			services.AddLogging(builder =>
+			{
+				builder.ClearProviders();
+				builder.AddSerilog(dispose: true);
+				builder.AddDebug();
+			});
+
+			return services;
+		}
+		#endregion
 
 		#region Environment Config
 

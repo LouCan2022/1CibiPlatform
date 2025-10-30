@@ -41,7 +41,7 @@ public class JWTService : IJWTService
 		{
 			new Claim("userId", loginDTO.Id.ToString()),
 			new Claim("email", loginDTO.Email),
-			new Claim("FullName", $"{loginDTO.FirstName} {loginDTO.MiddleName} {loginDTO.LastName}")
+			new Claim("fullName", $"{loginDTO.FirstName} {loginDTO.MiddleName} {loginDTO.LastName}")
 		};
 	}
 }
