@@ -1,0 +1,110 @@
+﻿@using MudBlazor
+@inject NavigationManager Navigation
+@inject IPhilSysService PhilSysService
+
+<MudForm @ref="personalForm" >
+    <MudGrid Class="mb-2" Spacing="2">
+        <MudItem xs="12" sm="8">
+            <MudTextField @bind-Value="identityData!.first_name"
+                            Label="First Name"
+                            FullWidth="true"
+                            Required="true"
+                            RequiredError="First Name is required"
+                            Adornment="Adornment.Start"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense"
+                            MaxLength="100"
+                            Class="philsys-rounded-input philsys-uppercase-input" />
+        </MudItem>
+
+        <MudItem xs="12" sm="4">
+            <MudSelect @bind-Value="identityData!.suffix"
+                        Label="Suffix"
+                        FullWidth="true"
+                        Adornment="Adornment.Start"
+                        Variant="Variant.Outlined"
+                        Margin="Margin.Dense"
+                        Class="philsys-rounded-input">
+                <MudSelectItem Value=@("")>N/A</MudSelectItem>
+                <MudSelectItem Value=@("Jr.")>Jr.</MudSelectItem>
+                <MudSelectItem Value=@("Sr.")>Sr.</MudSelectItem>
+                <MudSelectItem Value=@("III.")>III.</MudSelectItem>
+                <MudSelectItem Value=@("IV.")>IV.</MudSelectItem>
+                <MudSelectItem Value=@("V.")>V.</MudSelectItem>
+                <MudSelectItem Value=@("VI.")>VI.</MudSelectItem>
+                <MudSelectItem Value=@("VII.")>VII.</MudSelectItem>
+                <MudSelectItem Value=@("VIII.")>VIII.</MudSelectItem>
+                <MudSelectItem Value=@("IX.")>IX.</MudSelectItem>
+                <MudSelectItem Value=@("X.")>X.</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid Spacing="2">
+        <MudItem xs="12">
+            <MudTextField @bind-Value="identityData!.middle_name"
+                            Label="Middle Name"
+                            Required="true"
+                            RequiredError="Middle Name is required"
+                            FullWidth="true"
+                            Adornment="Adornment.Start"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense"
+                            MaxLength="100"
+                            Class="philsys-rounded-input philsys-uppercase-input" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudTextField @bind-Value="identityData!.last_name"
+                            Label="Last Name"
+                            Required="true"
+                            FullWidth="true"
+                            RequiredError="Last Name is required"
+                            Adornment="Adornment.Start"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense"
+                            MaxLength="100"
+                            Class="philsys-rounded-input philsys-uppercase-input" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudTextField @bind-Value="identityData!.birth_date"
+                            Label="Birth Date"
+                            InputType="InputType.Date"
+                            FullWidth="true"
+                            Required="true"
+                            RequiredError="Birth Date is required"
+                            Adornment="Adornment.Start"
+                            Variant="Variant.Outlined"
+                            Margin="Margin.Dense"
+                            Min="1900-01-01"
+                            Max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                            Class="philsys-rounded-input" />
+        </MudItem>
+    </MudGrid>
+
+    <ButtonComponent OnClick="SubmitPersonalInfo"
+                        Class="theme-button theme-button-active mt-4"
+                        Style="border-radius: 4px;">
+        Next
+    </ButtonComponent>
+</MudForm>
+
+@code {
+    private IdentityData identityData = new();
+
+    private MudForm? personalForm;
+
+    private async Task SubmitPersonalInfo()
+    {
+        await personalForm!.Validate();
+        if (!personalForm.IsValid)
+            return;
+
+        var livenessLink = await PhilSysService.PostBasicInformationOrPCN("name_dob", identityData!);
+        if (!string.IsNullOrEmpty(livenessLink))
+        {
+            Navigation.NavigateTo(livenessLink, forceLoad: true);
+        }
+    }
+}

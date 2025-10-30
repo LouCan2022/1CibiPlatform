@@ -1,207 +1,104 @@
 @page "/philsys/idv"
 @inject NavigationManager Navigation
-@inject IPhilSysService PhilSysService
 @using MudBlazor
-@using System.Text.RegularExpressions
-@using FrontendWebassembly.Component.Special
-@using FrontendWebassembly.Services.Auth.Shared
+@inject IJSRuntime JS
 @inherits SecurePageBase
-@* philsys/idv *@
 @attribute [RequirePermission(2, 2)]
+@* philsys/idv *@
 
 <MudGrid Justify="Justify.Center">
     <MudItem xs="12" sm="10" md="8" lg="6">
-        <MudTabs Rounded="false"
-                 Scrollable="true"
-                 Centered="true"
-                 Elevation="0"
-                 AlwaysShowScrollButtons="true"
-                 @bind-ActivePanelIndex="_activeIndex"
-                 OnActivePanelIndexChanged="OnTabChanged"
-                 Class="philsys-custom-tabs mb-5">
-            <MudTabPanel Text="Personal Information" Class="@GetTabClass(0)" Style="text-transform:none; min-width:120px;" />
-            <MudTabPanel Text="PhilSys Card Number" Class="@GetTabClass(1)" Style="text-transform:none; min-width: 120px;" />
-        </MudTabs>
-        <MudPaper Elevation="1" Class="p-4 philsys-form-container" Style="border-radius: 10px;  border: 1px solid gray; max-width: 380px;">
-           
 
+        <PhilSysFormTabComponent ActiveTabChanged="ChangeActiveTab" ></PhilSysFormTabComponent>
+
+        <MudPaper Elevation="1" Class="p-4 philsys-form-container" Style="border-radius: 10px;  border: 1px solid gray; max-width: 380px;">
             @if (_activeIndex == 0)
             {
-                <MudForm @ref="personalForm" >
-
-                    <MudGrid Class="mb-2" Spacing="2">
-                        <MudItem xs="12" sm="8">
-                            <MudTextField @bind-Value="identityData!.first_name"
-                                          Label="First Name"
-                                          FullWidth="true"
-                                          Required="true"
-                                          RequiredError="First Name is required"
-                                          Adornment="Adornment.Start"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Class="philsys-rounded-input" />
-                        </MudItem>
-
-                        <MudItem xs="12" sm="4">
-                            <MudSelect @bind-Value="identityData!.suffix"
-                                       Label="Suffix"
-                                       FullWidth="true"
-                                       Adornment="Adornment.Start"
-                                       Variant="Variant.Outlined"
-                                       Margin="Margin.Dense"
-                                       Class="philsys-rounded-input">
-                                <MudSelectItem Value=@("")>N/A</MudSelectItem>
-                                <MudSelectItem Value=@("Jr.")>Jr.</MudSelectItem>
-                                <MudSelectItem Value=@("Sr.")>Sr.</MudSelectItem>
-                                <MudSelectItem Value=@("III.")>III.</MudSelectItem>
-                                <MudSelectItem Value=@("IV.")>IV.</MudSelectItem>
-                                <MudSelectItem Value=@("V.")>V.</MudSelectItem>
-                                <MudSelectItem Value=@("VI.")>VI.</MudSelectItem>
-                                <MudSelectItem Value=@("VII.")>VII.</MudSelectItem>
-                                <MudSelectItem Value=@("VIII.")>VIII.</MudSelectItem>
-                                <MudSelectItem Value=@("IX.")>IX.</MudSelectItem>
-                                <MudSelectItem Value=@("X.")>X.</MudSelectItem>
-                            </MudSelect>
-                        </MudItem>
-                    </MudGrid>
-
-                    <MudGrid Spacing="2">
-                        <MudItem xs="12">
-                            <MudTextField @bind-Value="identityData!.middle_name"
-                                          Label="Middle Name"
-                                          Required="true"
-                                          RequiredError="Middle Name is required"
-                                          FullWidth="true"
-                                          Adornment="Adornment.Start"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Class="philsys-rounded-input" />
-                        </MudItem>
-
-                        <MudItem xs="12">
-                            <MudTextField @bind-Value="identityData!.last_name"
-                                          Label="Last Name"
-                                          Required="true"
-                                          FullWidth="true"
-                                          RequiredError="Last Name is required"
-                                          Adornment="Adornment.Start"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Class="philsys-rounded-input" />
-                        </MudItem>
-
-                        <MudItem xs="12">
-                            <MudTextField @bind-Value="identityData!.birth_date"
-                                          Label="Birth Date"
-                                          InputType="InputType.Date"
-                                          FullWidth="true"
-                                          Required="true"
-                                          RequiredError="Birth Date is required"
-                                          Adornment="Adornment.Start"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Min="1900-01-01"
-                                          Max="@DateTime.Today.ToString("yyyy-MM-dd")"
-                                          Class="philsys-rounded-input" />
-                        </MudItem>
-                    </MudGrid>
-
-                    <ButtonComponent OnClick="SubmitPersonalInfo"
-                                     Class="theme-button theme-button-active mt-4"
-                                     Style="border-radius: 4px;">
-                        Next
-                    </ButtonComponent>
-                </MudForm>
+                <BasicInformationFormComponent/>
             }
             else if (_activeIndex == 1)
             {
-                <MudForm @ref="pcnForm">
-
-                    <MudGrid>
-                        <MudItem xs="12">
-                            <MudTextField @bind-Value="identityData!.pcn"
-                                          Label="PhilSys Card Number (16-Digits)"
-                                          Required="true"
-                                          FullWidth="true"
-                                          Adornment="Adornment.Start"
-                                          Variant="Variant.Outlined"
-                                          Margin="Margin.Dense"
-                                          Validation="ValidatePCN"
-                                          Class="philsys-rounded-input" />
-                        </MudItem>
-                    </MudGrid>
-
-                    <ButtonComponent OnClick="SubmitPCN"
-                                     Class="theme-button theme-button-active mt-4"
-                                     Style="border-radius: 4px;">
-                        Next
-                    </ButtonComponent>
-                </MudForm>
+                <PhilSysCardNumbeFormComponent/>
             }
-
         </MudPaper>
+
     </MudItem>
 </MudGrid>
 
 @code {
-    private MudForm? personalForm;
-    private MudForm? pcnForm;
-    private IdentityData? identityData;
-    private string? Suffix { get; set; } = "";
-    private string? PCN { get; set; } = string.Empty;
     private int _activeIndex = 0;
+    private bool isNavigationLocked = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        identityData = new IdentityData();
-    }
-
-    private async Task SubmitPersonalInfo()
-    {
-        await personalForm!.Validate();
-        if (!personalForm.IsValid)
-            return;
-        
-        var livenessLink = await PhilSysService.PostBasicInformationOrPCN("name_dob", identityData!);
-        if (!string.IsNullOrEmpty(livenessLink))
+        if (firstRender)
         {
-            Navigation.NavigateTo(livenessLink, forceLoad: true);
+            // Lock browser unload (close/reload/tab navigation)
+            await SetupNavigationLock();
+
+            // Subscribe to internal navigation changes
+            Navigation.LocationChanged += HandleLocationChanged;
         }
     }
 
-    private async Task SubmitPCN()
+    private async Task SetupNavigationLock()
     {
-        await pcnForm!.Validate();
-        if (!pcnForm.IsValid)
-            return;
-
-        var livenessLink = await PhilSysService.PostBasicInformationOrPCN("pcn", identityData!);
-        if (!string.IsNullOrEmpty(livenessLink))
+        if (!isNavigationLocked)
         {
-            Navigation.NavigateTo(livenessLink, forceLoad: true);
+            isNavigationLocked = true;
+            await JS.InvokeVoidAsync("eval", @"
+                window.onbeforeunload = function() {
+                    return 'You have an unverified account. Are you sure you want to leave?';
+                };
+            ");
         }
     }
-    private void OnTabChanged(int index)
+
+    private async Task RemoveNavigationLock()
     {
-        _activeIndex = index;
+        if (isNavigationLocked)
+        {
+            isNavigationLocked = false;
+            await JS.InvokeVoidAsync("eval", "window.onbeforeunload = null;");
+        }
     }
 
-    private string GetTabClass(int index)
+    private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        return _activeIndex == index
-            ? "philsys-tab-pannel philsys-tab-pannel-active"
-            : "philsys-tab-pannel philsys-tab-pannel-inactive";
+        // Avoid recursion
+        Navigation.LocationChanged -= HandleLocationChanged;
+
+        try
+        {
+            if (!e.Location.Contains("/verify-otp"))
+            {
+                // Ask confirmation for internal navigation
+                var confirmed = await JS.InvokeAsync<bool>(
+                    "confirm",
+                    "You have an unverified account. Are you sure you want to leave?"
+                );
+
+                if (!confirmed)
+                {
+                    // Cancel navigation by forcing back to current page
+                    Navigation.NavigateTo("philsys/idv", forceLoad: false);
+                }
+                else
+                {
+                    await RemoveNavigationLock();
+                }
+            }
+        }
+        finally
+        {
+            // Re-subscribe for next navigation attempt
+            Navigation.LocationChanged += HandleLocationChanged;
+        }
     }
 
-    private string? ValidatePCN(string? value)
+    private void ChangeActiveTab(int value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return "PhilSys Card Number is required";
-
-        if (!Regex.IsMatch(value, @"^\d{16}$"))
-            return "PhilSys Card Number must be exactly 16 digits";
-
-        return null;
+        _activeIndex = value;
     }
-
+ 
 }
