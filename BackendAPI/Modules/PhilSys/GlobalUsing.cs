@@ -19,7 +19,7 @@ global using System.Text.Json.Serialization;
 global using PhilSys.Data.Context;
 global using Microsoft.EntityFrameworkCore;
 global using PhilSys.Data.Entities;
-global using System.ComponentModel.DataAnnotations;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using PhilSys.Data.Repository;
 global using PhilSys.Features.UpdateFaceLivenessSession;
 global using BuildingBlocks.SharedServices.Interfaces;

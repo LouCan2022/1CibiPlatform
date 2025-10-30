@@ -60,6 +60,7 @@ public class UpdateFaceLivenessSessionService
 			_logger.LogWarning("Failed to generate the access token for {Token}", HashToken);
 			throw new Exception($"Failed to generate the access token for {HashToken}");
 		}
+
 		string accessToken = token.access_token;
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
@@ -117,7 +118,15 @@ public class UpdateFaceLivenessSessionService
 			throw new Exception("No Transaction record found for this hashtoken.");
 		}
 
-		await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
+		var updateStatus = await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
+
+		if (updateStatus == null)
+		{
+			_logger.LogError("Failed to Update the Transaction Status for {HashToken}.", HashToken);
+			throw new Exception($"Failed to Update the Transaction Status for {HashToken}.");
+		}
+
+		_logger.LogInformation("Updated the Transaction Status Successfully.");
 	}
 
 	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
@@ -129,7 +138,10 @@ public class UpdateFaceLivenessSessionService
 			{
 				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
 							      WebHook, clientResponse.StatusCode, clientResponse);
+				throw new Exception($"Failed to send verification response to client webhook: {WebHook}. Status Code:  {clientResponse.StatusCode}. Response Body {clientResponse}");
 			}
+
+			_logger.LogInformation("Successfully send the verification response to client webhook.");
 		}
 	}
 
@@ -139,8 +151,10 @@ public class UpdateFaceLivenessSessionService
 		var result = await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
 		if (result == false)
 		{
-			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table");
+			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table.");
+			throw new Exception("Failed to add the transaction.");
 		}
+		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)

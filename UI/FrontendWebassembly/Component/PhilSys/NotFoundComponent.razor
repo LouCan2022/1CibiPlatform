@@ -19,12 +19,16 @@
 
     <ButtonComponent StartIcon="@Icons.Material.Filled.ArrowBack"
                      OnClick="GoBack"
-                     Class="theme-button theme-button-active">
+                     Disabled="@(WebHookUrl == "/" ? false : true)"
+                     Class="@(WebHookUrl == "/" ? "theme-button theme-button-active" : "theme-button theme-button-inactive")">
         Go Back
     </ButtonComponent>
 </MudPaper>
 
 @code {
+    [Parameter]
+    public string? WebHookUrl { get; set; }
+
     private void GoBack()
     {
         NavigationManager.NavigateTo("/philsys/idv"); 

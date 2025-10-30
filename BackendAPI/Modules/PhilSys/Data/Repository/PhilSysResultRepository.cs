@@ -1,5 +1,4 @@
-﻿
-namespace PhilSys.Data.Repository;
+﻿namespace PhilSys.Data.Repository;
 
 public class PhilSysResultRepository : IPhilSysResultRepository
 {

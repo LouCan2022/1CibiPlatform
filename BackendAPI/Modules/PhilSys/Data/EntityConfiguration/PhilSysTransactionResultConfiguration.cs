@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace PhilSys.Data.EntityConfiguration;
+﻿namespace PhilSys.Data.EntityConfiguration;
 
 public class PhilSysTransactionResultConfiguration : IEntityTypeConfiguration<PhilSysTransactionResult>
 {
@@ -19,5 +17,14 @@ public class PhilSysTransactionResultConfiguration : IEntityTypeConfiguration<Ph
 
 		builder.Property(ptr => ptr.verified)
 			   .IsRequired();
+
+		builder.OwnsOne(ptr => ptr.data_subject, ds =>
+		{
+			ds.OwnsOne(a => a.address);
+			ds.Navigation(d => d.address).IsRequired(false);
+
+			ds.OwnsOne(pb => pb.place_of_birth);
+			ds.Navigation(d => d.place_of_birth).IsRequired(false);
+		});
 	}
 }

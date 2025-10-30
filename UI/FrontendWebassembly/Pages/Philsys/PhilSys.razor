@@ -53,10 +53,14 @@
                                 <MudSelectItem Value=@("")>N/A</MudSelectItem>
                                 <MudSelectItem Value=@("Jr.")>Jr.</MudSelectItem>
                                 <MudSelectItem Value=@("Sr.")>Sr.</MudSelectItem>
-                                <MudSelectItem Value=@("II.")>II.</MudSelectItem>
                                 <MudSelectItem Value=@("III.")>III.</MudSelectItem>
                                 <MudSelectItem Value=@("IV.")>IV.</MudSelectItem>
                                 <MudSelectItem Value=@("V.")>V.</MudSelectItem>
+                                <MudSelectItem Value=@("VI.")>VI.</MudSelectItem>
+                                <MudSelectItem Value=@("VII.")>VII.</MudSelectItem>
+                                <MudSelectItem Value=@("VIII.")>VIII.</MudSelectItem>
+                                <MudSelectItem Value=@("IX.")>IX.</MudSelectItem>
+                                <MudSelectItem Value=@("X.")>X.</MudSelectItem>
                             </MudSelect>
                         </MudItem>
                     </MudGrid>
@@ -119,10 +123,10 @@
                                           Label="PhilSys Card Number (16-Digits)"
                                           Required="true"
                                           FullWidth="true"
-                                          RequiredError="PhilSys Card Number is required"
                                           Adornment="Adornment.Start"
                                           Variant="Variant.Outlined"
                                           Margin="Margin.Dense"
+                                          Validation="ValidatePCN"
                                           Class="philsys-rounded-input" />
                         </MudItem>
                     </MudGrid>
@@ -139,13 +143,11 @@
     </MudItem>
 </MudGrid>
 
-
-
 @code {
     private MudForm? personalForm;
     private MudForm? pcnForm;
     private IdentityData? identityData;
-    private string? Suffix { get; set; } = "N/A";
+    private string? Suffix { get; set; } = "";
     private string? PCN { get; set; } = string.Empty;
     private int _activeIndex = 0;
 
@@ -191,7 +193,7 @@
             : "philsys-tab-pannel philsys-tab-pannel-inactive";
     }
 
-    private string? ValidatePCN(string value)
+    private string? ValidatePCN(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return "PhilSys Card Number is required";
@@ -201,4 +203,5 @@
 
         return null;
     }
+
 }

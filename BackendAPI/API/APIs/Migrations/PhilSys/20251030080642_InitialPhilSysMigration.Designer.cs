@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251029151019_InitialPhilSysMigration")]
+    [Migration("20251030080642_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
