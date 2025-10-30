@@ -126,7 +126,7 @@ public class UpdateFaceLivenessSessionService
 			throw new Exception($"Failed to Update the Transaction Status for {HashToken}.");
 		}
 
-		_logger.LogInformation("Updated the Transaction Status Successfully.");
+		_logger.LogInformation("Successfully Updated the Transaction Status.");
 	}
 
 	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
