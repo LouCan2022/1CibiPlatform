@@ -103,7 +103,7 @@
                     <ButtonComponent ButtonType="ButtonType.Submit"
                                      OnClick="HandleRegister"
                                      Disabled="@(!success || isLoading)"
-                                     Class="@($"theme-button {(success ? "theme-button-active" : "theme-button-inactive")}")">
+                                     Class="@($"theme-button {(success ? "theme-button-active" : "theme-button-inactive")} mb-4")">
                         @if (isLoading)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" />

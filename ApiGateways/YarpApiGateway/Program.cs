@@ -4,7 +4,8 @@ builder.Services.AddCors(options =>
 {
 	options.AddPolicy("DevCors", policy =>
 	{
-		policy.WithOrigins("http://localhost:5134")
+		policy.WithOrigins(
+			 "http://localhost:5134")
 			  .AllowCredentials()
 			  .AllowAnyMethod()
 			  .AllowAnyHeader();
@@ -19,8 +20,8 @@ var app = builder.Build();
 
 app.UseWebSockets();
 
-app.MapReverseProxy();
-
 app.UseCors("DevCors");
+
+app.MapReverseProxy();
 
 app.Run();
