@@ -6,6 +6,8 @@
 @attribute [RequirePermission(2, 2)]
 @* philsys/idv *@
 
+<PageTitle>Identity Verification System</PageTitle>
+
 <MudGrid Justify="Justify.Center">
     <MudItem xs="12" sm="10" md="8" lg="6">
 
@@ -14,11 +16,15 @@
         <MudPaper Elevation="1" Class="p-4 philsys-form-container" Style="border-radius: 10px;  border: 1px solid gray; max-width: 380px;">
             @if (_activeIndex == 0)
             {
-                <BasicInformationFormComponent/>
+                <BasicInformationFormComponent 
+                    OnFormSubmitted="HandleFormSubmitted"
+                    OnUnsavedChange="HandleUnsavedChange" />
             }
             else if (_activeIndex == 1)
             {
-                <PhilSysCardNumbeFormComponent/>
+                <PhilSysCardNumbeFormComponent 
+                    OnFormSubmitted="HandleFormSubmitted"
+                    OnUnsavedChange="HandleUnsavedChange" />
             }
         </MudPaper>
 
@@ -27,10 +33,92 @@
 
 @code {
     private int _activeIndex = 0;
- 
+    private bool hasUnsavedChanges = false;
+    private bool isNavigationLocked = false;
+
     private void ChangeActiveTab(int value)
     {
         _activeIndex = value;
     }
 
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += HandleLocationChanged;
+    }
+
+    private async Task HandleUnsavedChange(bool value)
+    {
+        hasUnsavedChanges = value;
+        if (value)
+        {
+            await SetupNavigationLock();
+        }
+    }
+
+    private async Task HandleFormSubmitted(bool value)
+    {
+        hasUnsavedChanges = value;
+        if (!value)
+        {
+            await RemoveNavigationLock();
+        }
+    }
+
+    private async Task SetupNavigationLock()
+    {
+        if (!isNavigationLocked)
+        {
+            isNavigationLocked = true;
+            await JS.InvokeVoidAsync("eval", @"
+                window.onbeforeunload = function() {
+                    return 'You have unsaved changes. If you leave this page, your progress will be lost. Are you sure you want to continue?';
+                };
+            ");
+        }
+    }
+
+    private async Task RemoveNavigationLock()
+    {
+        if (isNavigationLocked)
+        {
+            isNavigationLocked = false;
+            await JS.InvokeVoidAsync("eval", "window.onbeforeunload = null;");
+        }
+    }
+
+    private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
+
+        try
+        {
+            if (hasUnsavedChanges && !e.Location.Contains("/philsys/idv"))
+            {
+                var confirmed = await JS.InvokeAsync<bool>(
+                    "confirm",
+                    "You have unsaved changes. If you leave this page, your progress will be lost. Are you sure you want to continue?"
+                );
+
+                if (!confirmed)
+                {
+                    Navigation.NavigateTo("/philsys/idv", forceLoad: false);
+                }
+                else
+                {
+                    hasUnsavedChanges = false;
+                    await RemoveNavigationLock();
+                }
+            }
+        }
+        finally
+        {
+            Navigation.LocationChanged += HandleLocationChanged;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
+        await RemoveNavigationLock();
+    }
 }

@@ -6,15 +6,16 @@
     <MudGrid>
         <MudItem xs="12">
             <MudTextField @bind-Value="identityData!.pcn"
-                            Label="PhilSys Card Number (16-Digits)"
-                            Mask="@(new PatternMask("0000-0000-0000-0000"))"
-                            Required="true"
-                            FullWidth="true"
-                            Adornment="Adornment.Start"
-                            Variant="Variant.Outlined"
-                            Margin="Margin.Dense"
-                            Validation="ValidatePCN"
-                            Class="philsys-rounded-input" />
+                          @oninput="OnFormChanged"
+                          Label="PhilSys Card Number (16-Digits)"
+                          Mask="@(new PatternMask("0000-0000-0000-0000"))"
+                          Required="true"
+                          FullWidth="true"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Validation="ValidatePCN"
+                          Class="philsys-rounded-input" />
         </MudItem>
     </MudGrid>
 
@@ -27,14 +28,22 @@
 
 @code {
     private IdentityData identityData  = new();
-
     private MudForm? pcnForm;
+
+    [Parameter] 
+    public EventCallback<bool> OnUnsavedChange { get; set; }
+    [Parameter] 
+    public EventCallback<bool> OnFormSubmitted { get; set; }
+
+    private bool hasUnsavedChanges = false;
 
     private async Task SubmitPCN()
     {
         await pcnForm!.Validate();
         if (!pcnForm.IsValid)
             return;
+
+        await OnFormSubmitted.InvokeAsync(false);
 
         var livenessLink = await PhilSysService.PostBasicInformationOrPCN("pcn", identityData!);
         if (!string.IsNullOrEmpty(livenessLink))
@@ -57,4 +66,14 @@
 
         return null;
     }
+
+    private async Task OnFormChanged(ChangeEventArgs e)
+    {
+        if (!hasUnsavedChanges)
+        {
+            hasUnsavedChanges = true;
+            await OnUnsavedChange.InvokeAsync(true);
+        }
+    }
+
 }
