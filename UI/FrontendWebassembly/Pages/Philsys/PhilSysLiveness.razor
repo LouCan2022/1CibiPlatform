@@ -5,50 +5,34 @@
 @inject IPhilSysService IPhilSysService
 
 <div class="philsys-liveness-container">
-@if (_status == null || !Exists || isTransacted)
-{
-    <NotFoundComponent></NotFoundComponent>
-}
-else if (isExpired)
-{
-    <ReTransactComponent></ReTransactComponent>
-}
-else if (!_completed)
-{
 
-    <MudPaper Class="p-10 text-center d-flex flex-column justify-center align-center"
-                Elevation="6"
-                Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%;">
-        <MudText Typo="Typo.h5" Class="mb-4">
-            Liveness Check
-        </MudText>
-        <MudText Typo="Typo.subtitle1" Class="mb-4">
-            Click the button below to start the liveness verification process.
-        </MudText>
-        <ButtonComponent OnClick="StartLiveness" Class="theme-button theme-button-active">
-            <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
-            Start Liveness
-        </ButtonComponent>
-    </MudPaper>
+    @if (_status == null || !Exists || isTransacted)
+    {
+        <NotFoundComponent WebHookUrl="@webHookUrl"></NotFoundComponent>
+    }
+    else if (isExpired)
+    {
+        <ReTransactComponent WebHookUrl="@webHookUrl"></ReTransactComponent>
+    }
+    else if (!_completed)
+    {
+        <LivenessCheckComponent OnClick="StartLiveness"></LivenessCheckComponent>
+    }
+    else
+    {
+        <PhilSysResultComponent VerificationResult="information" WebHookUrl="@webHookUrl"></PhilSysResultComponent>
+    }
 
-}
-else
-{
- 
-    <PhilSysResultComponent VerificationResult="information"></PhilSysResultComponent>
+    @if (showLoader)
+    {
+        <PhilSysLoaderComponent></PhilSysLoaderComponent>
+    }
 
-}
-
-@if (showLoader)
-{
-
-    <PhilSysLoaderComponent></PhilSysLoaderComponent>
-}
 </div>
 
 @code {
-    [Parameter] public required string HashToken { get; set; }
-    [SupplyParameterFromQuery(Name = "session")] public string? SessionId { get; set; }
+    [Parameter] 
+    public required string HashToken { get; set; }
     private UpdateFaceLivenessSessionResponseDTO? information;
     private TransactionStatusResponse? _status;
     private bool _completed = false;
@@ -57,6 +41,7 @@ else
     private bool Exists = false;
     private bool isExpired = false;
     private bool showLoader = false;
+    private string? webHookUrl;
     private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
 
     protected override async Task OnInitializedAsync()
@@ -69,6 +54,7 @@ else
             return;
         }
 
+        webHookUrl = _status.WebHookUrl;
         isTransacted = _status.IsTransacted;
         Exists = _status.Exists;
         isExpired = _status.isExpired;
@@ -106,7 +92,6 @@ else
     [JSInvokable]
     public async Task OnLivenessCompleted(string sessionId)
     {
-        SessionId = sessionId;
         showLoader = true;
         StateHasChanged();
 

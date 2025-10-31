@@ -274,7 +274,7 @@ code {
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    overflow: hidden; /* prevent scrollbars during zoom */
+    overflow: hidden; 
 }
 
 .philsys-loader-grid {
@@ -309,7 +309,7 @@ code {
     letter-spacing: 0.3px;
     word-wrap: break-word;
     max-width: 100%;
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem) !important;
 }
 
 @keyframes fadeIn {
@@ -329,4 +329,8 @@ code {
         padding: 1.5rem;
         border-radius: 30px;
     }
+}
+
+.philsys-uppercase-input input.mud-input-slot {
+    text-transform: capitalize;
 }

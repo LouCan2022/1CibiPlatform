@@ -29,11 +29,11 @@ public class PartnerSystemService
 		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
 
-		var token = _securetoken.GenerateSecureToken();
-
 		var identifier = !string.IsNullOrWhiteSpace(identity_data.PCN)
 							 ? identity_data.PCN
 							 : $"{identity_data.FirstName} {identity_data.LastName}".Trim();
+
+		var token = _securetoken.GenerateSecureToken();
 
 		if (token == null)
 		{
@@ -89,9 +89,11 @@ public class PartnerSystemService
 
 		if (result == false)
 		{
-			_logger.LogError("Failed to add transaction data for Tid: {Tid}", transaction.Tid);
+			_logger.LogError("Failed to add transaction data record for Tid: {Tid}", transaction.Tid);
 			throw new Exception($"Failed to add transaction for Tid: {transaction.Tid}");
 		}
+
+		_logger.LogInformation("Succcessfully added the transaction data record for {Tid}.", transaction.Tid);
 			
 		return new PartnerSystemResponseDTO(
 			idv_session_id: transaction.Tid.ToString(),

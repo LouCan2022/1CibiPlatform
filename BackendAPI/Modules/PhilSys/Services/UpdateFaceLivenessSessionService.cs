@@ -1,9 +1,12 @@
-﻿namespace PhilSys.Services;
+﻿using Mapster;
+
+namespace PhilSys.Services;
 
 public class UpdateFaceLivenessSessionService
 {
 	private readonly HttpClient _httpClient;
 	private readonly IPhilSysRepository _philSysRepository;
+	private readonly IPhilSysResultRepository _philSysResultRepository;
 	private readonly ILogger<UpdateFaceLivenessSessionService> _logger;
 	private readonly PostBasicInformationService _postBasicInformationService;
 	private readonly PostPCNService _postPCNService;
@@ -15,6 +18,7 @@ public class UpdateFaceLivenessSessionService
 	public UpdateFaceLivenessSessionService(
 		IHttpClientFactory httpClientFactory,
 		IPhilSysRepository philSysRepository,
+		IPhilSysResultRepository philSysResultRepository,
 		ILogger<UpdateFaceLivenessSessionService> logger,
 		PostBasicInformationService PostBasicInformationService,
 		PostPCNService PostPCNService,
@@ -23,6 +27,7 @@ public class UpdateFaceLivenessSessionService
 	{
 		_httpClient = httpClientFactory.CreateClient("IDVClient");
 		_philSysRepository = philSysRepository;
+		_philSysResultRepository = philSysResultRepository;
 		_logger = logger;
 		_postBasicInformationService = PostBasicInformationService;
 		_postPCNService = PostPCNService;
@@ -55,12 +60,12 @@ public class UpdateFaceLivenessSessionService
 			_logger.LogWarning("Failed to generate the access token for {Token}", HashToken);
 			throw new Exception($"Failed to generate the access token for {HashToken}");
 		}
+
 		string accessToken = token.access_token;
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
 			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-			await UpdateTransactionStatus(HashToken);
 
 			if (!string.IsNullOrEmpty(responseBody.error))
 			{
@@ -71,6 +76,10 @@ public class UpdateFaceLivenessSessionService
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
 
+			await UpdateTransactionStatus(HashToken);
+
+			await AddConvertedResponseToDbAsync(convertedResponse);
+
 			return convertedResponse!;
 		}
 
@@ -78,7 +87,6 @@ public class UpdateFaceLivenessSessionService
 		{
 
 			var responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
-			await UpdateTransactionStatus(HashToken);
 
 			if (!string.IsNullOrEmpty(responseBody.error))
 			{
@@ -88,6 +96,10 @@ public class UpdateFaceLivenessSessionService
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
+
+			await UpdateTransactionStatus(HashToken);
+
+			await AddConvertedResponseToDbAsync(convertedResponse);
 
 			return convertedResponse!;
 		}
@@ -106,7 +118,15 @@ public class UpdateFaceLivenessSessionService
 			throw new Exception("No Transaction record found for this hashtoken.");
 		}
 
-		await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
+		var updateStatus = await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
+
+		if (updateStatus == null)
+		{
+			_logger.LogError("Failed to Update the Transaction Status for {HashToken}.", HashToken);
+			throw new Exception($"Failed to Update the Transaction Status for {HashToken}.");
+		}
+
+		_logger.LogInformation("Successfully Updated the Transaction Status.");
 	}
 
 	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
@@ -118,8 +138,23 @@ public class UpdateFaceLivenessSessionService
 			{
 				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
 							      WebHook, clientResponse.StatusCode, clientResponse);
+				throw new Exception($"Failed to send verification response to client webhook: {WebHook}. Status Code:  {clientResponse.StatusCode}. Response Body {clientResponse}");
 			}
+
+			_logger.LogInformation("Successfully send the verification response to client webhook.");
 		}
+	}
+
+	private async Task AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
+	{
+		var philsysTransactionResult = VerificationResponseDTO.Adapt<PhilSysTransactionResult>();
+		var result = await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
+		if (result == false)
+		{
+			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table.");
+			throw new Exception("Failed to add the transaction.");
+		}
+		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
