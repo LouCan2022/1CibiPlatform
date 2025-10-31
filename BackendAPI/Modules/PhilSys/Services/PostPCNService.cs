@@ -81,6 +81,8 @@ public class PostPCNService
 			);
 		}
 
+		_logger.LogInformation("Successful PCN Request.");
+
 		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
 		var returnData = responseBody!.data;

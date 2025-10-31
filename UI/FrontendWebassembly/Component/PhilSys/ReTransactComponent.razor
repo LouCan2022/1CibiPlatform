@@ -20,13 +20,17 @@
 
     <ButtonComponent StartIcon="@Icons.Material.Filled.Refresh"
                      OnClick="StartNewSession"
-                     Class="theme-button theme-button-active">
+                     Disabled="@(WebHookUrl == "/" ? false : true)"
+                     Class="@(WebHookUrl == "/" ? "theme-button theme-button-active" : "theme-button theme-button-inactive")">
         Start New Session
     </ButtonComponent>
 </MudPaper>
 
 
 @code {
+    [Parameter]
+    public string? WebHookUrl { get; set; }
+
     private void StartNewSession()
     {
         NavigationManager.NavigateTo("/philsys/idv"); 

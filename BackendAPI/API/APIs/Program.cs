@@ -8,6 +8,7 @@ builder.Services.ConfigureEnvironment(builder);
 builder.Services.AddControllers();
 
 builder.Services
+	.AddLoggingConfiguration(builder.Configuration)
 	.AddModuleMediaTR()
 	.AddModuleCarter()
 	.AddModuleServices()

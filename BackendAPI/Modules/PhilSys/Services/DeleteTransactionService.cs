@@ -29,6 +29,8 @@ public class DeleteTransactionService
 			throw new Exception("Failed to delete Transaction record.");
 		}
 
+		_logger.LogInformation("Successfully Deleted the Transaction record for {HashToken}.", HashToken);
+
 		return deletedTransaction;
 	}
 }

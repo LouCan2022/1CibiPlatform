@@ -2,7 +2,6 @@
 
 public class PhilSysTransaction
 {
-	[Key]
 	public Guid Tid { get; set; }
 	public string? InquiryType { get; set; }
 	public string? FirstName { get; set; }
@@ -15,6 +14,7 @@ public class PhilSysTransaction
 	public string? WebHookUrl { get; set; }
 	public bool IsTransacted { get; set; }
 	public string? HashToken { get; set; }
+	public DateTime? UpdatedLivenessIdAt { get; set; }
 	public DateTime ExpiresAt { get; set; }
 	public DateTime CreatedAt { get; set; }
 	public DateTime? TransactedAt { get; set; }

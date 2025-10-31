@@ -40,6 +40,8 @@ public class LivenessSessionService
 			throw new Exception("Invalid Token");
 		}
 
+		_logger.LogInformation("Successfully received the transaction record for {Token}.", HashToken);
+
 		return status;
 	}
 }

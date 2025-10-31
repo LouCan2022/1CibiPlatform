@@ -91,6 +91,8 @@ public class PostBasicInformationService
 			);
 		}
 
+		_logger.LogInformation("Successful Basic Information Request.");
+
 		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
 
 		var returnData = responseBody!.data;

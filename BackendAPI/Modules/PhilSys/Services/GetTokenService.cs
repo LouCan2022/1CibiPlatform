@@ -28,13 +28,14 @@ public class GetTokenService
 		var response = await SendRequestAsync("auth", body);
 
 		var responseBody = await response.Content.ReadFromJsonAsync<PhilSysTokenResponse>();
-		_logger.LogInformation("PhilSys Token Response: {Response}", responseBody);
 
 		if (!response.IsSuccessStatusCode)
 		{
 			_logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
 			throw new HttpRequestException($"PhilSys token request failed: {response.StatusCode} - {responseBody}");
 		}
+
+		_logger.LogInformation("Successful Request for Token.");
 
 		var tokenData = responseBody!.data;
 

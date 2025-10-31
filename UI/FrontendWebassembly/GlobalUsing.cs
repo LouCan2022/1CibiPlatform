@@ -21,8 +21,8 @@ global using FrontendWebassembly.DTO.PhilSys;
 global using FrontendWebassembly.Services.SSO.Interfaces;
 global using FrontendWebassembly.DTO.SSO;
 global using FrontendWebassembly.Services.SSO.Implementations;
-
-
-
+global using System.Text.RegularExpressions;
+global using FrontendWebassembly.Component.Special;
+global using FrontendWebassembly.Services.Auth.Shared;
 
 
