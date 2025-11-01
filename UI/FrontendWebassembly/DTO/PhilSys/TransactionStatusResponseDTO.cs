@@ -1,6 +1,6 @@
 ﻿namespace FrontendWebassembly.DTO.PhilSys;
 
-public record TransactionStatusResponse
+public record TransactionStatusResponseDTO
 {
 	public bool Exists { get; set; }
 	public string? WebHookUrl { get; set; }

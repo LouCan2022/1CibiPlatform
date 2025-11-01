@@ -23,3 +23,4 @@ global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using PhilSys.Data.Repository;
 global using PhilSys.Features.UpdateFaceLivenessSession;
 global using BuildingBlocks.SharedServices.Interfaces;
+global using Mapster;

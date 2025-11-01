@@ -37,7 +37,7 @@
     [Parameter] 
     public required string HashToken { get; set; }
     private UpdateFaceLivenessSessionResponseDTO? information;
-    private TransactionStatusResponse? _status;
+    private TransactionStatusResponseDTO? _status;
     private bool _completed = false;
     private bool IsExpired = false;
     private bool isTransacted  = false;
@@ -84,8 +84,15 @@
             isExpired = true;
             await IPhilSysService.DeleteTransactionAsync(HashToken);
             StateHasChanged();
-            
+
             return; 
+        }
+
+        if (_status.IsTransacted)
+        {
+            isTransacted = true;
+            StateHasChanged();
+            return;
         }
 
         _dotNetRef = DotNetObjectReference.Create(this);

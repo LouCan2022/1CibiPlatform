@@ -1,6 +1,4 @@
-﻿using Mapster;
-
-namespace PhilSys.Services;
+﻿namespace PhilSys.Services;
 
 public class UpdateFaceLivenessSessionService
 {
