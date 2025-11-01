@@ -63,7 +63,7 @@
                     @if (VerificationResult!.verified is null)
                     {
                         <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #fdecea; color: #c62828; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 16px; margin-top: 10px; height: 40px;">
-                        <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Medium" Color="Color.Error" /> Error </div>
+                        <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Medium" Color="Color.Error" /> ERROR </div>
                     }
                     @if (!string.IsNullOrEmpty(VerificationResult?.data_subject?.digital_id) || VerificationResult!.verified.Equals(true)) 
                     {
