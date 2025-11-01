@@ -157,15 +157,23 @@ public class UpdateFaceLivenessSessionService
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
 	{
+		if (string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.reference) && string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.error))
+		{
+			return new VerificationResponseDTO
+			{
+				idv_session_id = Tid.ToString(),
+				verified = null,
+				error = BasicInformationOrPCNResponseDTO.error,
+				message = BasicInformationOrPCNResponseDTO.message,
+				error_description = BasicInformationOrPCNResponseDTO.error_description
+			};
+		}
 		if (string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.reference))
 		{
 			return new VerificationResponseDTO
 			{
 				idv_session_id = Tid.ToString(),
-				verified = false,
-				error = BasicInformationOrPCNResponseDTO.error,
-				message = BasicInformationOrPCNResponseDTO.message,
-				error_description = BasicInformationOrPCNResponseDTO.error_description
+				verified = false
 			};
 		}
 		return new VerificationResponseDTO
