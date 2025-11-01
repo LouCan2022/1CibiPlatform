@@ -14,7 +14,6 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           MaxLength="100"
-                          @oninput="OnFormChanged"
                           Class="philsys-rounded-input philsys-uppercase-input" />
         </MudItem>
 
@@ -25,7 +24,6 @@
                         Adornment="Adornment.Start"
                         Variant="Variant.Outlined"
                         Margin="Margin.Dense"
-                        @oninput="OnFormChanged"
                         Class="philsys-rounded-input">
                 <MudSelectItem Value=@("")>N/A</MudSelectItem>
                 <MudSelectItem Value=@("Jr.")>Jr.</MudSelectItem>
@@ -53,7 +51,6 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           MaxLength="100"
-                          @oninput="OnFormChanged"
                           Class="philsys-rounded-input philsys-uppercase-input" />
         </MudItem>
 
@@ -67,7 +64,6 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           MaxLength="100"
-                          @oninput="OnFormChanged"
                           Class="philsys-rounded-input philsys-uppercase-input" />
         </MudItem>
 
@@ -83,7 +79,6 @@
                           Margin="Margin.Dense"
                           Min="1900-01-01"
                           Max="@DateTime.Today.ToString("yyyy-MM-dd")"
-                          @oninput="OnFormChanged"
                           Class="philsys-rounded-input" />
         </MudItem>
     </MudGrid>
@@ -99,34 +94,18 @@
     private IdentityData identityData = new();
     private MudForm? personalForm;
 
-    [Parameter]
-    public EventCallback<bool> OnUnsavedChange { get; set; }
-    [Parameter]
-    public EventCallback<bool> OnFormSubmitted { get; set; }
-
-    private bool hasUnsavedChanges = false;
-
     private async Task SubmitPersonalInfo()
     {
         await personalForm!.Validate();
         if (!personalForm.IsValid)
+        {
             return;
-
-        await OnFormSubmitted.InvokeAsync(false);
+        }
 
         var livenessLink = await PhilSysService.PostBasicInformationOrPCN("name_dob", identityData!);
         if (!string.IsNullOrEmpty(livenessLink))
         {
             Navigation.NavigateTo(livenessLink, forceLoad: true);
-        }
-    }
-
-    private async Task OnFormChanged(ChangeEventArgs e)
-    {
-        if (!hasUnsavedChanges)
-        {
-            hasUnsavedChanges = true;
-            await OnUnsavedChange.InvokeAsync(true);
         }
     }
 }

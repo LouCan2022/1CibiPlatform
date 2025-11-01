@@ -40,10 +40,7 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Get the Status");
-			return new TransactionStatusResponse
-			{
-				Exists = false
-			};
+			return new TransactionStatusResponse { Exists = false };
 		}
 		
 		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponse>();
