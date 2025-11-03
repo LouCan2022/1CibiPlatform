@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.IsLivenessValid;
 public record IsLivenessValidCommand(string HashToken) : ICommand<IsLivenessValidResult>;
-public record IsLivenessValidResult(TransactionStatusResponse TransactionStatusResponse);
+public record IsLivenessValidResult(TransactionStatusResponseDTO TransactionStatusResponseDTO);
 public class IsLivenessValidHandler : ICommandHandler<IsLivenessValidCommand, IsLivenessValidResult>
 {
 	private readonly LivenessSessionService _livenessSessionService;

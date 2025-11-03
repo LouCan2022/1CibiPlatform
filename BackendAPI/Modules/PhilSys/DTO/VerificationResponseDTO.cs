@@ -3,7 +3,7 @@
 public record VerificationResponseDTO
 {
 	public string? idv_session_id { get; init; }
-	public bool verified { get; init; }
+	public bool? verified { get; init; }
 	public DataSubject? data_subject { get; init; }
 	public string? error { get; init; }
 	public string? message { get; init; }

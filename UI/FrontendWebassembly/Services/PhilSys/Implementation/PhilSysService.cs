@@ -32,7 +32,7 @@ public class PhilSysService : IPhilSysService
 		return successContent!;
 	}
 
-	public async Task<TransactionStatusResponse> GetTransactionStatusAsync(string HashToken)
+	public async Task<TransactionStatusResponseDTO> GetTransactionStatusAsync(string HashToken)
 	{
 		var request = new { HashToken };
 		var response = await _httpClient.PostAsJsonAsync("/philsys/idv/validate/liveness", request);
@@ -40,13 +40,10 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Get the Status");
-			return new TransactionStatusResponse
-			{
-				Exists = false
-			};
+			return new TransactionStatusResponseDTO { Exists = false };
 		}
 		
-		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponse>();
+		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponseDTO>();
 
 		if (successContent!.ExpiresAt < DateTime.UtcNow)
 		{

@@ -4,7 +4,7 @@ public interface IPhilSysService
 {
 	Task<UpdateFaceLivenessSessionResponseDTO> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSession);
 
-	Task<TransactionStatusResponse> GetTransactionStatusAsync(string HashToken);
+	Task<TransactionStatusResponseDTO> GetTransactionStatusAsync(string HashToken);
 
 	Task<bool> DeleteTransactionAsync(string HashToken);
 

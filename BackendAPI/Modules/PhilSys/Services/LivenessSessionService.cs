@@ -1,4 +1,6 @@
-﻿namespace PhilSys.Services;
+﻿
+
+namespace PhilSys.Services;
 
 public class LivenessSessionService
 {
@@ -14,7 +16,7 @@ public class LivenessSessionService
 		_hashService = hashService;
 		_logger = logger;
 	}
-	public async Task<TransactionStatusResponse> IsLivenessUsedAsync(string HashToken)
+	public async Task<TransactionStatusResponseDTO> IsLivenessUsedAsync(string HashToken)
 	{
 		var status = await _philSysRepository.GetLivenessSessionStatusAsync(HashToken);
 
@@ -42,6 +44,6 @@ public class LivenessSessionService
 
 		_logger.LogInformation("Successfully received the transaction record for {Token}.", HashToken);
 
-		return status;
+		return status.Adapt<TransactionStatusResponseDTO>();
 	}
 }
