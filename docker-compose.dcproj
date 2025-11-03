@@ -15,5 +15,7 @@
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+    <None Include="monitoring\loki-config.yml" />
+    <None Include="monitoring\promtail-config.yml" />
   </ItemGroup>
 </Project>
