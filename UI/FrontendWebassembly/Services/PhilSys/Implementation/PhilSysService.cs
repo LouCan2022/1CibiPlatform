@@ -22,12 +22,20 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Update Successfully");
-			throw new Exception("Error in Updating Face Liveness Session");
-		}
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
+			return new UpdateFaceLivenessSessionResponseDTO
+			{
+				idv_session_id = string.Empty,
+				verified = null,
+				data_subject = null,
+				error_message = errorContent!.Detail,
+				trace_id = errorContent.TraceId,
+			};
+		}
 		var successContent = await response.Content.ReadFromJsonAsync<UpdateFaceLivenessSessionResponseDTO>();
 
-		Console.WriteLine("✅ Update Successfully");
+		Console.WriteLine("✅ Updated Successfully");
 
 		return successContent!;
 	}
@@ -40,7 +48,13 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Get the Status");
-			return new TransactionStatusResponseDTO { Exists = false };
+			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
+		
+			return new TransactionStatusResponseDTO 
+			{
+				error_message = errorContent!.Detail,
+				trace_id = errorContent.TraceId
+			};
 		}
 		
 		var successContent = await response.Content.ReadFromJsonAsync<TransactionStatusResponseDTO>();

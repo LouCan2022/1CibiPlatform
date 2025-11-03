@@ -5,9 +5,8 @@ public record UpdateFaceLivenessSessionResponseDTO
 	public string? idv_session_id { get; set; }
 	public bool? verified { get; set; }
 	public DataSubject? data_subject { get; set; }
-	public string? error { get; set; }
-	public string? message { get; set; }
-	public string? error_description { get; set; }
+	public string? trace_id { get; set; }
+	public string? error_message { get; set; }
 }
 public record DataSubject
 {

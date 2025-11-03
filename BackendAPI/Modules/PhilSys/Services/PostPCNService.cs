@@ -34,51 +34,11 @@ public class PostPCNService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>(ct);
+			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponseDTO>(ct);
 
 			_logger.LogError("PCN request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
-			return new BasicInformationOrPCNResponseDTO(
-				code: "",
-				token: "",
-				reference: "",
-				face_url: "",
-				full_name: "",
-				first_name: "",
-				middle_name: "",
-				last_name: "",
-				suffix: "",
-				gender: "",
-				marital_status: "",
-				blood_type: "",
-				email: "",
-				mobile_number: "",
-				birth_date: "",
-				full_address: "",
-				address_line_1: "",
-				address_line_2: "",
-				barangay: "",
-				municipality: "",
-				province: "",
-				country: "",
-				postal_code: "",
-				present_full_address: "",
-				present_address_line_1: "",
-				present_address_line_2: "",
-				present_barangay: "",
-				present_municipality: "",
-				present_province: "",
-				present_country: "",
-				present_postal_code: "",
-				residency_status: "",
-				place_of_birth: "",
-				pob_municipality: "",
-				pob_province: "",
-				pob_country: "",
-				error: errorResponse?.error,
-				message: errorResponse?.message,
-				error_description: errorResponse?.error_description
-			);
+			throw new HttpRequestException($"PCN request failed: {errorResponse!.message} Please contact the administrator.");
 		}
 
 		_logger.LogInformation("Successful PCN Request.");
@@ -129,10 +89,7 @@ public class PostPCNService
 			BasicInformationOrPCNResponseDTO.place_of_birth,
 			BasicInformationOrPCNResponseDTO.pob_municipality,
 			BasicInformationOrPCNResponseDTO.pob_province,
-			BasicInformationOrPCNResponseDTO.pob_country,
-			BasicInformationOrPCNResponseDTO.error,
-			BasicInformationOrPCNResponseDTO.message,
-			BasicInformationOrPCNResponseDTO.error_description
+			BasicInformationOrPCNResponseDTO.pob_country
 			);
 	}
 

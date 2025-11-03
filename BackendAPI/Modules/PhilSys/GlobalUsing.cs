@@ -24,3 +24,4 @@ global using PhilSys.Data.Repository;
 global using PhilSys.Features.UpdateFaceLivenessSession;
 global using BuildingBlocks.SharedServices.Interfaces;
 global using Mapster;
+global using BuildingBlocks.Exceptions;

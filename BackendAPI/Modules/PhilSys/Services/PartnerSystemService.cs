@@ -85,12 +85,14 @@ public class PartnerSystemService
 
 		var livenessUrl = $"{_livenessBaseUrl}/philsys/idv/liveness/{transaction.HashToken}";
 
-		var result = await _repository.AddTransactionDataAsync(transaction);
-
-		if (result == false)
+		try
+		{
+			var result = await _repository.AddTransactionDataAsync(transaction);
+		}
+		catch (Exception)
 		{
 			_logger.LogError("Failed to add transaction data record for Tid: {Tid}", transaction.Tid);
-			throw new Exception($"Failed to add transaction for Tid: {transaction.Tid}");
+			throw new Exception($"Failed to add transaction for Tid: {transaction.Tid}");;
 		}
 
 		_logger.LogInformation("Succcessfully added the transaction data record for {Tid}.", transaction.Tid);

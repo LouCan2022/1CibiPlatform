@@ -1,6 +1,4 @@
-﻿
-
-namespace PhilSys.Services;
+﻿namespace PhilSys.Services;
 
 public class LivenessSessionService
 {
@@ -23,7 +21,7 @@ public class LivenessSessionService
 		if (status == null)
 		{
 			_logger.LogWarning("There is no transaction for {Token}", HashToken);
-			throw new Exception($"There is no such transaction for Token: {HashToken}");
+			throw new InternalServerException($"There is no such transaction created for your liveness check.");
 		}
 
 		var hashTokenChecker = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
@@ -31,7 +29,7 @@ public class LivenessSessionService
 		if (hashTokenChecker == null)
 		{
 			_logger.LogWarning("There is no transaction for {Token}", HashToken);
-			throw new Exception($"There is no such transaction for Token: {HashToken}");
+			throw new InternalServerException($"There is no such transaction created for your liveness check.");
 		}
 
 		var isTokenValid = _hashService.Verify(HashToken, hashTokenChecker.HashToken!);
@@ -39,7 +37,7 @@ public class LivenessSessionService
 		if (!isTokenValid)
 		{
 			_logger.LogWarning("Invalid Token Provided: {Token}", HashToken);
-			throw new Exception("Invalid Token");
+			throw new InternalServerException("Unable to Proceed. Invalid Token provided.");
 		}
 
 		_logger.LogInformation("Successfully received the transaction record for {Token}.", HashToken);

@@ -5,9 +5,6 @@ public class PhilSysTransactionResult
 	public Guid idv_session_id { get; init; }
 	public bool verified { get; init; }
 	public DataSubject data_subject { get; init; }
-	public string? error { get; init; }
-	public string? message { get; init; }
-	public string? error_description { get; init; }
 }
 
 public class DataSubjectEntity
