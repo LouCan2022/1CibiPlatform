@@ -3,7 +3,7 @@
 public record UpdateFaceLivenessSessionResponseDTO
 {
 	public string? idv_session_id { get; set; }
-	public bool verified { get; set; }
+	public bool? verified { get; set; }
 	public DataSubject? data_subject { get; set; }
 	public string? error { get; set; }
 	public string? message { get; set; }

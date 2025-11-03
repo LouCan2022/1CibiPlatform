@@ -4,6 +4,8 @@
 @inject IJSRuntime JS
 @inject IPhilSysService IPhilSysService
 
+<PageTitle>Face Liveness Session</PageTitle>
+
 <div class="philsys-liveness-container">
 
     @if (_status == null || !Exists || isTransacted)
@@ -20,6 +22,7 @@
     }
     else
     {
+        <PageTitle>Verification Result</PageTitle>
         <PhilSysResultComponent VerificationResult="information" WebHookUrl="@webHookUrl"></PhilSysResultComponent>
     }
 
@@ -34,7 +37,7 @@
     [Parameter] 
     public required string HashToken { get; set; }
     private UpdateFaceLivenessSessionResponseDTO? information;
-    private TransactionStatusResponse? _status;
+    private TransactionStatusResponseDTO? _status;
     private bool _completed = false;
     private bool IsExpired = false;
     private bool isTransacted  = false;
@@ -81,8 +84,15 @@
             isExpired = true;
             await IPhilSysService.DeleteTransactionAsync(HashToken);
             StateHasChanged();
-            
+
             return; 
+        }
+
+        if (_status.IsTransacted)
+        {
+            isTransacted = true;
+            StateHasChanged();
+            return;
         }
 
         _dotNetRef = DotNetObjectReference.Create(this);
@@ -95,21 +105,17 @@
         showLoader = true;
         StateHasChanged();
 
-        try
+        information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
+        _completed = true;
+
+        if (information == null)
         {
-            information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
-            _completed = true;
+            Console.WriteLine("❌ Error while updating liveness session.");
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ Error while updating liveness session: {ex.Message}");
-        }
-        finally
-        {
-            showLoader = false;
-            Console.WriteLine($"✅ Received session ID: {sessionId}");
-            StateHasChanged();
-        }
+    
+        showLoader = false;
+        Console.WriteLine($"Successully Updated the session ID.");
+        StateHasChanged();
     }
 
     public void Dispose() => _dotNetRef?.Dispose();

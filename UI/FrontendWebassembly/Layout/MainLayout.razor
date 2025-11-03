@@ -1,45 +1,10 @@
 ﻿@using FrontendWebassembly.Component.Generic
 ﻿@using FrontendWebassembly.ShareData.Auth
 @using MudBlazor
-
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject IAuthService IAuthService
 @inject LocalStorageService LocalStorageService
-
-<style>
-    .mud-drawer {
-        border-radius: 30px 30px 30px 30px !important;
-    }
-
-    .mud-drawer.mud-drawer-open {
-        border-radius: 30px !important;
-    }
-
-    .mud-appbar {
-        border-radius: 15px !important;
-    }
-    
-    .nav-active-light {
-        background: white !important;
-        color: black !important;
-        border-radius: 8px;
-    }
-
-    .nav-active-dark {
-        background: linear-gradient(90deg, #102247 0%, #2a77ae 50%) !important;
-        color: white !important;
-        border-radius: 8px;
-    }
-    
-    .nav-active-light .mud-icon-root,
-    .nav-active-dark .mud-icon-root,
-    .nav-active-light .mud-nav-link-icon,
-    .nav-active-dark .mud-nav-link-icon {
-        color: inherit !important;
-    }
-
-</style>
 
 <MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
@@ -80,7 +45,7 @@
 
                             var subMenuIds = SubMenus[i];
 
-                            <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
+                            <MudNavGroup Title="@appDescription" Expanded="true" Icon="@appIcon">
                                 @foreach (var subId in subMenuIds)
                                 {
                                     var (subPath, subDescription, subIcon) = SubMenuList.List[subId];
