@@ -1,5 +1,4 @@
-﻿
-namespace PhilSys.Data.Repository;
+﻿namespace PhilSys.Data.Repository;
 
 public class PhilSysRepository : IPhilSysRepository
 {
@@ -9,12 +8,14 @@ public class PhilSysRepository : IPhilSysRepository
 	{
 		_dbcontext = dbcontext;
 	}
+
 	public async Task<bool> AddTransactionDataAsync(PhilSysTransaction PhilSysTransaction)
 	{
 		await _dbcontext.PhilSysTransactions.AddAsync(PhilSysTransaction);
 		await _dbcontext.SaveChangesAsync();
 		return true;
 	}
+
 	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(PhilSysTransaction transaction)
 	{
 		var entry = _dbcontext.Attach(transaction);
@@ -29,24 +30,26 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction;
 	}
 
-	public async Task<PhilSysTransaction> GetTransactionDataByHashTokenAsync(string HashToken)
-	{
-		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
-
-		return transaction!;
-	}
-
 	public async Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSessionId)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 
 		transaction!.FaceLivenessSessionId = FaceLivenessSessionId;
 
+		transaction.UpdatedLivenessIdAt = DateTime.UtcNow;
+
 		await _dbcontext.SaveChangesAsync();
 
 		return transaction;
 	}
 
+	public async Task<PhilSysTransaction> GetTransactionDataByHashTokenAsync(string HashToken)
+	{
+		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
+
+		return transaction!;
+	}
+	
 	public async Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(string HashToken)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions
@@ -55,12 +58,12 @@ public class PhilSysRepository : IPhilSysRepository
 		.Select(t => new TransactionStatusResponse
 		{
 			Exists = true, 
+			WebHookURl = t.WebHookUrl,
 			IsTransacted = t.IsTransacted,
 			isExpired = false,
 			ExpiresAt = t.ExpiresAt
 		})
 		.FirstOrDefaultAsync();
-
 
 		return transaction ?? new TransactionStatusResponse { Exists = false };
 	}

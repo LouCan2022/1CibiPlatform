@@ -1,6 +1,5 @@
 ﻿namespace PhilSys.DTO;
-
-public record TransactionStatusResponse
+public record TransactionStatusResponseDTO
 {
 	public bool Exists { get; set; } = true;
 	public string? WebHookURl { get; set; }

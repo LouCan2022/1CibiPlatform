@@ -1,15 +1,14 @@
 ﻿namespace PhilSys.Features.PartnerSystemQuery;
-
-public record PartnerSystemCommand(string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResult>;
-
+public record PartnerSystemCommand(string callback_url, string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResult>;
 public record PartnerSystemResult(PartnerSystemResponseDTO PartnerSystemResponseDTO);
-
-
 public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemCommand>
 {
 	public PartnerSystemCommandValidator()
 	{
 		// Always required fields
+		RuleFor(x => x.callback_url)
+			.NotEmpty().WithMessage("callback_url is required.");
+
 		RuleFor(x => x.inquiry_type)
 			.NotEmpty().WithMessage("inquiry_type is required.")
 			.Must(t => t == "name_dob" || t == "pcn")
@@ -49,19 +48,13 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 public class PartnerSystemHandler : ICommandHandler<PartnerSystemCommand, PartnerSystemResult>
 {
 	private readonly PartnerSystemService _partnerSystemService;
-	private readonly ILogger<PartnerSystemHandler> _logger;
-
-	public PartnerSystemHandler(PartnerSystemService PartnerSystemService, ILogger<PartnerSystemHandler> logger)
+	public PartnerSystemHandler(PartnerSystemService PartnerSystemService)
 	{
 		_partnerSystemService = PartnerSystemService;
-		_logger = logger;
 	}
 	public async Task<PartnerSystemResult> Handle(PartnerSystemCommand request, CancellationToken cancellationToken)
 	{
-		var result = await _partnerSystemService.PartnerSystemQueryAsync(request.inquiry_type, request.identity_data);
-
-		_logger.LogInformation("Successfully retrieved the Response");
-
+		var result = await _partnerSystemService.PartnerSystemQueryAsync(request.callback_url, request.inquiry_type, request.identity_data);
 		return new PartnerSystemResult(result);
 	}
 }

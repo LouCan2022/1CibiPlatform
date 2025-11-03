@@ -1,0 +1,60 @@
+﻿@using MudBlazor;
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+ <MudPaper Class="p-10 text-center d-flex flex-column justify-center align-center"
+           Elevation="6"
+           Style="border-radius:20px; padding: 15px; box-shadow:0px 10px 45px rgba(0,0,0,0.1); width:400px; max-width:90%;">
+    <MudText Typo="Typo.h5" Class="mb-4">
+        Liveness Check
+    </MudText>
+    <MudText Typo="Typo.subtitle1" Class="mb-4">
+        Click the button below to start the liveness verification process.
+    </MudText>
+    <ButtonComponent OnClick="@OnClick" Class="theme-button theme-button-active">
+        <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-2" />
+        Start Liveness
+    </ButtonComponent>
+</MudPaper>
+
+@code {
+    [Parameter] 
+    public EventCallback OnClick { get; set; }
+    private bool isNavigationLocked = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await SetupNavigationLock();
+        }
+    }
+
+    private async Task SetupNavigationLock()
+    {
+        if (!isNavigationLocked)
+        {
+            isNavigationLocked = true;
+            await JS.InvokeVoidAsync("eval", @"
+                window.onbeforeunload = function() {
+                    return 'You have an unfinished liveness check session. Leaving now could result in lost progress. Are you sure you want to continue?';
+                };
+            ");
+        }
+    }
+
+    private async Task RemoveNavigationLock()
+    {
+        if (isNavigationLocked)
+        {
+            isNavigationLocked = false;
+            await JS.InvokeVoidAsync("eval", "window.onbeforeunload = null;");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await RemoveNavigationLock();
+    }
+
+}

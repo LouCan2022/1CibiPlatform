@@ -1,6 +1,4 @@
-﻿
-
-namespace PhilSys.Data.Context;
+﻿namespace PhilSys.Data.Context;
 
 public class PhilSysDBContext : DbContext
 {
@@ -9,10 +7,11 @@ public class PhilSysDBContext : DbContext
 		
 	}
 	public DbSet<PhilSysTransaction> PhilSysTransactions { get; set; }
-
+	public DbSet<PhilSysTransactionResult> PhilSysTransactionResults { get; set; }
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.ApplyConfigurationsFromAssembly(typeof(PhilSysDBContext).Assembly);
+
 		base.OnModelCreating(modelBuilder);
 	}
 }

@@ -11,11 +11,8 @@ public class DeleteTransactionService
 		_logger = logger;
 	}
 
-
-
 	public async Task<bool> DeleteTransactionAsync(string HashToken)
 	{
-
 		var existingTransaction = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
 
 		if (existingTransaction == null)
@@ -25,6 +22,14 @@ public class DeleteTransactionService
 		}
 
 		var deletedTransaction = await _philSysRepository.DeleteTrandsactionDataAsync(existingTransaction);
+
+		if (deletedTransaction == false)
+		{
+			_logger.LogError("Failed to delete Transaction record for HashToken: {HashToken}", HashToken);
+			throw new Exception("Failed to delete Transaction record.");
+		}
+
+		_logger.LogInformation("Successfully Deleted the Transaction record for {HashToken}.", HashToken);
 
 		return deletedTransaction;
 	}

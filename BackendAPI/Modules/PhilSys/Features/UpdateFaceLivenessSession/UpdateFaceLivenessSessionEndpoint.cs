@@ -1,8 +1,6 @@
 ﻿namespace PhilSys.Features.PostFaceLivenessSession;
-
 public record UpdateFaceLivenessSessionRequest(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
-
-public record UpdateFaceLivenessSessionResponse(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO);
+public record UpdateFaceLivenessSessionResponse(VerificationResponseDTO VerificationResponseDTO);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -15,15 +13,15 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 				);
 			UpdateFaceLivenessSessionResult result = await sender.Send(command, cancellationToken);
 
-			var response = new UpdateFaceLivenessSessionResponse(result.BasicInformationOrPCNResponseDTO);
+			var response = new UpdateFaceLivenessSessionResponse(result.VerificationResponseDTO);
 
-			return Results.Ok(response.BasicInformationOrPCNResponseDTO);
+			return Results.Ok(response.VerificationResponseDTO);
 		})
 		.WithName("UpdateFaceLivenessSession")
 		.WithTags("PhilSys")
 		.Produces<UpdateFaceLivenessSessionResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
-		.ProducesProblem(StatusCodes.Status401Unauthorized)
-		.WithSummary("Update Face Liveness Session Id");
+		.WithSummary("Update Face Liveness Session and Process Verification")
+		.WithDescription("Updates the Face Liveness Session ID for an existing PhilSys transaction and triggers verification based on the inquiry type.");
 	}
 }

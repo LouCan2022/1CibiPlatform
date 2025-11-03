@@ -1,10 +1,6 @@
-﻿
-namespace PhilSys.Features.IsLivenessValid;
-
+﻿namespace PhilSys.Features.IsLivenessValid;
 public record IsLivenessValidRequest(string HashToken) : ICommand<IsLivenessValidResponse>;
-
-public record IsLivenessValidResponse(TransactionStatusResponse TransactionStatusResponse);
-
+public record IsLivenessValidResponse(TransactionStatusResponseDTO TransactionStatusResponseDTO);
 public class IsLivenessValidEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -15,14 +11,14 @@ public class IsLivenessValidEndpoint : ICarterModule
 				request.HashToken
 				);
 			IsLivenessValidResult result = await sender.Send(command);
-			var response = new IsLivenessValidResponse(result.TransactionStatusResponse);
-			return Results.Ok(response.TransactionStatusResponse);
+			var response = new IsLivenessValidResponse(result.TransactionStatusResponseDTO);
+			return Results.Ok(response.TransactionStatusResponseDTO);
 		})
 		  .WithName("isLivenessVerified")
 		  .WithTags("PhilSys")
 		  .Produces<IsLivenessValidResponse>()
 		  .ProducesProblem(StatusCodes.Status400BadRequest)
 		  .WithSummary("Liveness Session")
-		  .WithDescription("Liveness Session");
+		  .WithDescription("Validates whether a PhilSys liveness session associated with a given hash token has not expired or been transacted.");
 	}
 }

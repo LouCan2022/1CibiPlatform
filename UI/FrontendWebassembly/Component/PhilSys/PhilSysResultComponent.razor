@@ -2,141 +2,102 @@
 @using MudBlazor
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
-<MudPaper Class="p-8 text-center form-container"
+
+<MudPaper Class="p-8 text-center philsys-form-wrapper"
           Elevation="6"
-          Style="
-              position: relative;
-              border-radius: 20px;
+          Style="border-radius: 20px;
               padding: 25px;
               box-shadow: 0px 10px 45px rgba(0,0,0,0.1);
               width: 100%;
               max-width: 950px;
-              margin: auto;
-              display: grid;
-              grid-template-columns: 250px 1fr 1fr;
-              grid-template-rows: auto auto;
-              gap: 30px 25px;
-              align-items: start;">
+              max-height: 95%;
+              margin: 8px;">
 
-    <!-- COLUMN 1, ROW 1: Image + API Button -->
-    <div style="grid-column: 1; grid-row: 1;">
-        <div class="d-flex flex-column align-items-center">
-            <MudPaper Elevation="0"
-                      Class="d-flex justify-center align-center mb-2"
-                      Style="width: 200px; height: 200px; background-color: var(--mud-palette-background); border-radius: 12px;">
-                <MudImage Src="@(string.IsNullOrWhiteSpace(FaceUrl) ? "images/generic/default_picture.jpg" : FaceUrl)"
-                          Alt="User Profile"
-                          Style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; outline: 2px solid #000;" />
-            </MudPaper>
+    <MudGrid Spacing="3">
+        <!-- IMAGE + API RESPONSE BUTTON -->
+        <MudItem xs="12" md="4">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <MudPaper Elevation="0"
+                          Class="d-flex justify-center align-center mb-2 mt-2"
+                          Style="width: 225px; height: 200px; border-radius: 12px;">
+                    <MudImage Src="@(string.IsNullOrWhiteSpace(FaceUrl) ? "images/generic/default_picture.jpg" : FaceUrl)"
+                              Alt="User Profile"
+                              Style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; outline: 2px solid #000;" />
+                </MudPaper>
 
-            @if (!string.IsNullOrEmpty(VerificationResult!.reference))
-            {
-                <ButtonComponent StartIcon="@Icons.Material.Filled.Download"
-                                 OnClick="DownloadApiResponse"
-                                 Class="theme-button theme-button-active"
-                                 Style="width: 180px;">
-                    API Response
-                </ButtonComponent>
-            }
-            
-        </div>
-    </div>
-
-    <!-- COLUMN 2, ROW 1: Labels -->
-    <div style="grid-column: 2; grid-row: 1;">
-        <table style="width: 100%; border-collapse: collapse;">
-            @if (InfoRows != null)
-            {
-                @foreach (var row in InfoRows)
+                @if (!string.IsNullOrEmpty(VerificationResult?.data_subject?.national_id_number))
                 {
-                    <tr>
-                        <td style="padding: 6px 8px; vertical-align: top;">
-                            <MudText Typo="Typo.body1" Style="text-align: left;">
-                                @row.Label
-                            </MudText>
-                        </td>
-                    </tr>
+                    <ButtonComponent StartIcon="@Icons.Material.Filled.Download"
+                                     OnClick="DownloadApiResponse"
+                                     Class="theme-button theme-button-active mt-3"
+                                     Style="width: 180px;">
+                        API Response
+                    </ButtonComponent>
                 }
-            }
-        </table>
-    </div>
+            </div>
+        </MudItem>
 
-    <!-- COLUMN 3, ROW 1: Values -->
-    <div style="grid-column: 3; grid-row: 1;">
-        <table style="width: 100%; border-collapse: collapse;">
-            @if (InfoRows != null)
-            {
-                @foreach (var row in InfoRows)
+        <!-- LABELS & VALUES (Unified Table) -->
+        <MudItem xs="12" md="8">
+            <table style="width: 100%; border-collapse: collapse;">
+                @foreach (var row in InfoRows!)
                 {
                     <tr>
-                        <td style="padding: 6px 8px;">
-                            <MudText Typo="Typo.body1"
-                                     Style="color: var(--mud-palette-text-primary); font-weight: bold; text-align: left;">
+                        <td style="padding: 6px 8px; width: 45%; text-align:left;">
+                            <MudText Typo="Typo.body1">@($"{@row.Label}:")</MudText>
+                        </td>
+
+                        <td style="padding: 6px 8px; text-align: center;">
+                            <MudText Typo="Typo.body1" Style="font-weight: bold; margin-right: 20px;">
                                 @((string.IsNullOrWhiteSpace(row.Value) ? "No Data Found" : row.Value))
                             </MudText>
                         </td>
                     </tr>
                 }
-            }
-        </table>
-    </div>
+            </table>
+        </MudItem>
 
-    <!-- COLUMN 3, ROW 2: Verification Tag (Name Tag Style) -->
-    <div style="grid-column: 1; grid-row: 2; align-content: center;">
-        @if (!string.IsNullOrEmpty(VerificationResult!.reference))
-        {
-            <div style=" display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 6px;
-                            background-color: #e8f5e9;
-                            color: #2e7d32;
-                            border-radius: 8px;
-                            padding: 6px 12px;
-                            font-weight: 600;
-                            font-size: 14px;
-                            margin-top: 10px;
-                                ">
-                <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Color="Color.Success" />
-                Verified
-            </div>
-        }
-        else
-        {
-            <div style="display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 6px;
-                        background-color: #fdecea;
-                        color: #c62828;
-                        border-radius: 8px;
-                        padding: 6px 12px;
-                        font-weight: 600;
-                        font-size: 14px;
-                        margin-top: 10px;">
-                <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Color="Color.Error" />
-                Not Verified
-            </div>
-        }
-    </div>
+        <!-- VERIFICATION TAG -->
+        <MudItem xs="12" md="4">
+                <div style="grid-column: 1; grid-row: 2; align-content: center; margin-bottom: 12px;"> 
+                    @if (VerificationResult!.verified is null)
+                    {
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #fdecea; color: #c62828; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 16px; margin-top: 10px; height: 40px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Medium" Color="Color.Error" /> ERROR </div>
+                    }
+                    @if (!string.IsNullOrEmpty(VerificationResult?.data_subject?.digital_id) || VerificationResult!.verified.Equals(true)) 
+                    {
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 16px; margin-top: 10px; height: 40px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Medium" Color="Color.Success" /> Verified </div>
+                    }
+                    @if (VerificationResult!.verified.Equals(false))
+                    {
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #fdecea; color: #c62828; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 16px; margin-top: 10px; height: 40px;">
+                        <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Medium" Color="Color.Error" /> Not Verified </div>
+                    }
+                </div>
+        </MudItem>
 
-    <!-- COLUMN 3, ROW 2: Search Again button -->
-    <div style="grid-column: 3; grid-row: 2; display: flex; justify-content: flex-end;">
-        <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
-                         Class="theme-button theme-button-active"
-                         Style="width: 200px;"
-                         Onclick="SearchAgain">
-            Search Again
-        </ButtonComponent>
-    </div>
-
+        <!-- SEARCH AGAIN BUTTON -->
+            <MudItem xs="12" md="8" Class="d-flex justify-end align-center">
+                <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
+                                 Class="@(WebHookUrl == "/" ? "theme-button theme-button-active" : "theme-button theme-button-inactive")"
+                                 Style="width: 200px;"
+                                 Disabled="@(WebHookUrl == "/" ? false : true)"
+                                 Onclick="SearchAgain">
+                    Search Again
+                </ButtonComponent>
+            </MudItem>
+     
+       
+    </MudGrid>
 </MudPaper>
-
-
 
 @code {
     [Parameter]
     public UpdateFaceLivenessSessionResponseDTO? VerificationResult { get; set; }
+    [Parameter]
+    public string? WebHookUrl {get; set;}
 
     private List<(string Label, string Value)>? InfoRows;
 
@@ -144,32 +105,25 @@
 
     protected override void OnInitialized()
     {
-        if (VerificationResult == null)
-        {
-            InfoRows = new List<(string, string)>
-        {
-            ("Error", "No data available")
-        };
-            return;
-        }
-        FaceUrl = VerificationResult.face_url;
+   
+        FaceUrl = VerificationResult?.data_subject?.face_image_url;
         InfoRows = new()
         {
-            ("PhilSys Card Number", VerificationResult.reference ?? "No Data Found"),
-            ("Digital ID Number", VerificationResult.code ?? "No Data Found"),
-            ("First Name", VerificationResult.first_name ?? "No Data Found"),
-            ("Middle Name", VerificationResult.middle_name ?? "No Data Found"),
-            ("Last Name", VerificationResult.last_name ?? "No Data Found"),
-            ("Suffix",  VerificationResult.suffix ?? "No Data Found"),
-            ("Gender", VerificationResult.gender ?? "No Data Found"),
-            ("Birth Date", VerificationResult.birth_date ?? "No Data Found"),
-            ("Place of Birth", VerificationResult.place_of_birth ?? "No Data Found"),
-            ("Permanent Address", VerificationResult.full_address ?? "No Data Found"),
-            ("Present Address", VerificationResult.present_full_address ?? "No Data Found"),
-            ("Marital Status", VerificationResult.marital_status ?? "No Data Found"),
-            ("Mobile Number", VerificationResult.mobile_number ?? "No Data Found"),
-            ("Email", VerificationResult.email ?? "No Data Found"),
-            ("Blood Type", VerificationResult.blood_type ?? "No Data Found")
+            ("PhilSys Card Number", VerificationResult?.data_subject?.national_id_number ?? "No Data Found"),
+            ("Digital ID Number", VerificationResult?.data_subject?.digital_id ?? "No Data Found"),
+            ("First Name", VerificationResult?.data_subject?.first_name ?? "No Data Found"),
+            ("Middle Name", VerificationResult?.data_subject?.middle_name ?? "No Data Found"),
+            ("Last Name", VerificationResult?.data_subject?.last_name ?? "No Data Found"),
+            ("Suffix",  VerificationResult?.data_subject?.suffix ?? "No Data Found"),
+            ("Gender", VerificationResult?.data_subject?.gender ?? "No Data Found"),
+            ("Birth Date", VerificationResult?.data_subject?.birth_date ?? "No Data Found"),
+            ("Place of Birth", VerificationResult?.data_subject?.place_of_birth!.full ?? "No Data Found"),
+            ("Permanent Address", VerificationResult?.data_subject?.address!.permanent ?? "No Data Found"),
+            ("Present Address", VerificationResult?.data_subject?.address!.present ?? "No Data Found"),
+            ("Marital Status", VerificationResult?.data_subject?.marital_status ?? "No Data Found"),
+            ("Mobile Number", VerificationResult?.data_subject?.mobile_number ?? "No Data Found"),
+            ("Email", VerificationResult?.data_subject?.email ?? "No Data Found"),
+            ("Blood Type", VerificationResult?.data_subject?.blood_type ?? "No Data Found")
         };
     }
   
