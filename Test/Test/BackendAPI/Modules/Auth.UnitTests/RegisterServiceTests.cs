@@ -1,10 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using Auth.DTO;
 using Auth.Data.Entities;
 using FluentAssertions;
 using Moq;
-using Xunit;
 using Test.BackendAPI.Modules.Auth.UnitTests.Fixture;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests
@@ -80,7 +77,14 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 		{
 			// Arrange
 			var email = "user@example.com";
-			var existing = new OtpVerification { Email = email, OtpCodeHash = "existingHash", AttemptCount = 0, ExpiresAt = DateTime.UtcNow.AddMinutes(5) };
+			var existing = new OtpVerification
+			{
+				Email = email,
+				OtpCodeHash = "existingHash",
+				AttemptCount =0,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+			};
+
 			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
 				.ReturnsAsync(existing);
 
@@ -101,7 +105,14 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 		{
 			// Arrange
 			var email = "used@example.com";
-			var existing = new OtpVerification { Email = email, OtpCodeHash = "existingHash", IsUsed = true, ExpiresAt = DateTime.UtcNow.AddMinutes(5) };
+			var existing = new OtpVerification
+			{
+				Email = email,
+				OtpCodeHash = "existingHash",
+				IsUsed = true,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+			};
+
 			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
 				.ReturnsAsync(existing);
 			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
@@ -119,10 +130,16 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 		{
 			// Arrange
 			var email = "expire@example.com";
-			var existing = new OtpVerification { Email = email, OtpCodeHash = "existingHash", IsUsed = false, ExpiresAt = DateTime.UtcNow.AddMinutes(-5) };
+			var existing = new OtpVerification
+			{
+				Email = email,
+				OtpCodeHash = "existingHash",
+				IsUsed = false,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(-5)
+			};
+
 			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
 				.ReturnsAsync(existing);
-
 
 			_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("123456");
 			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
@@ -143,7 +160,14 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 		{
 			// Arrange
 			var email = "success@example.com";
-			var existing = new OtpVerification { Email = email, OtpCodeHash = "existingHash", AttemptCount = 0, ExpiresAt = DateTime.UtcNow.AddMinutes(5) };
+			var existing = new OtpVerification
+			{
+				Email = email,
+				OtpCodeHash = "existingHash",
+				AttemptCount =0,
+				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+			};
+
 			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
 				.ReturnsAsync(existing);
 
