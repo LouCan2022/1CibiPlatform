@@ -53,7 +53,7 @@ public class LoginService : ILoginService
 		// checking if client credentials are valid
 		if (userData == null)
 		{
-			_logger.LogWarning("Login failed: Invalid zusername or password for user: {Username}", cred.Username);
+			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
 			throw new NotFoundException("Invalid username or password.");
 		}
 

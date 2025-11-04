@@ -5,35 +5,76 @@ using BuildingBlocks.SharedServices.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 {
 	public class AuthServiceFixture : IDisposable
 	{
+		// Common mocks
 		public Mock<IEmailService> MockEmailService { get; private set; }
 		public Mock<IPasswordHasherService> MockPasswordHasherService { get; private set; }
 		public Mock<IAuthRepository> MockAuthRepository { get; private set; }
 		public Mock<IHashService> MockHashService { get; private set; }
 		public Mock<IOtpService> MockOtpService { get; private set; }
-		public IConfiguration Configuration { get; private set; }
-		public Mock<ILogger<RegisterService>> MockLogger { get; private set; }
+		public Mock<ISecureToken> MockSecureToken { get; private set; }
+		public Mock<IJWTService> MockJwtService { get; private set; }
+		public Mock<IRefreshTokenService> MockRefreshTokenService { get; private set; }
+		public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; private set; }
 
+		// Loggers
+		public Mock<ILogger<RegisterService>> MockRegisterLogger { get; private set; }
+		public Mock<ILogger<LoginService>> MockLoginLogger { get; private set; }
+		public Mock<ILogger<RefreshTokenService>> MockRefreshLogger { get; private set; }
+		public Mock<ILogger<ForgotPassword>> MockForgotLogger { get; private set; }
+
+		// Configuration
+		public IConfiguration Configuration { get; private set; }
+
+		// Service instances
 		public RegisterService RegisterService { get; private set; }
+		public LoginService LoginService { get; private set; }
+		public RefreshTokenService RefreshTokenService { get; private set; }
+		public ForgotPassword ForgotPasswordService { get; private set; }
+		public JWTService JwtService { get; private set; }
 
 		public AuthServiceFixture()
 		{
+			// init mocks
 			MockEmailService = new Mock<IEmailService>();
 			MockPasswordHasherService = new Mock<IPasswordHasherService>();
 			MockAuthRepository = new Mock<IAuthRepository>();
 			MockHashService = new Mock<IHashService>();
 			MockOtpService = new Mock<IOtpService>();
-			MockLogger = new Mock<ILogger<RegisterService>>();
+			MockSecureToken = new Mock<ISecureToken>();
+			MockJwtService = new Mock<IJWTService>();
+			MockRefreshTokenService = new Mock<IRefreshTokenService>();
+			MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 
-			// provide a real IConfiguration with the needed value because GetValue<T> is an extension method
+			MockRegisterLogger = new Mock<ILogger<RegisterService>>();
+			MockLoginLogger = new Mock<ILogger<LoginService>>();
+			MockRefreshLogger = new Mock<ILogger<RefreshTokenService>>();
+			MockForgotLogger = new Mock<ILogger<ForgotPassword>>();
+
+			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
-				.AddInMemoryCollection(new[] { new KeyValuePair<string, string>("Email:OtpExpirationInMinutes", "10") })
+				.AddInMemoryCollection(new[] {
+					new KeyValuePair<string,string>("Email:OtpExpirationInMinutes","10"),
+					new KeyValuePair<string,string>("FrontEndMetadata:ForgotPasswordUrl","https://app.local"),
+					new KeyValuePair<string,string>("Email:PasswordTokenExpirationInMinutes","60"),
+					new KeyValuePair<string,string>("HttpCookieOnlyKey","cookieKey"),
+					new KeyValuePair<string,string>("Jwt:ExpiryInMinutes","60"),
+					new KeyValuePair<string,string>("AuthWeb:AuthWebHttpCookieOnlyKey","refreshKey"),
+					new KeyValuePair<string,string>("AuthWeb:CookieExpiryInDayIsRememberMe","7"),
+					new KeyValuePair<string,string>("AuthWeb:isHttps","false")
+				})
 				.Build();
 
+			// setup http context for cookie operations
+			var ctx = new DefaultHttpContext();
+			MockHttpContextAccessor.SetupGet(x => x.HttpContext).Returns(ctx);
+
+			// create service instances using shared mocks
 			RegisterService = new RegisterService(
 				MockEmailService.Object,
 				MockPasswordHasherService.Object,
@@ -41,12 +82,39 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 				MockHashService.Object,
 				MockOtpService.Object,
 				Configuration,
-				MockLogger.Object);
+				MockRegisterLogger.Object);
+
+			LoginService = new LoginService(
+				MockAuthRepository.Object,
+				MockPasswordHasherService.Object,
+				Configuration,
+				MockJwtService.Object,
+				MockRefreshTokenService.Object,
+				MockHttpContextAccessor.Object,
+				MockLoginLogger.Object);
+
+			RefreshTokenService = new RefreshTokenService(
+				MockAuthRepository.Object,
+				MockHttpContextAccessor.Object,
+				MockJwtService.Object,
+				Configuration,
+				MockRefreshLogger.Object);
+
+			ForgotPasswordService = new ForgotPassword(
+				MockAuthRepository.Object,
+				MockForgotLogger.Object,
+				MockEmailService.Object,
+				Configuration,
+				MockSecureToken.Object,
+				MockHashService.Object,
+				MockPasswordHasherService.Object);
+
+			JwtService = new JWTService(Configuration);
 		}
 
 		public void Dispose()
 		{
-
+			// nothing to dispose currently
 		}
 	}
 }

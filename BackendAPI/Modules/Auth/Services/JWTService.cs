@@ -9,8 +9,7 @@ public class JWTService : IJWTService
 		_configuration = configuration;
 	}
 
-	public string GetAccessToken
-		(LoginDTO loginDTO)
+	public string GetAccessToken(LoginDTO loginDTO)
 	{
 		var jwtSettings = _configuration.GetSection("Jwt");
 		var key = jwtSettings["Key"];
@@ -37,11 +36,23 @@ public class JWTService : IJWTService
 
 	private IEnumerable<Claim> GetClaims(LoginDTO loginDTO)
 	{
+		// build a friendly full name and avoid null middle name
+		var middle = string.IsNullOrWhiteSpace(loginDTO.MiddleName) ? string.Empty : loginDTO.MiddleName.Trim();
+		var fullName = string.Join(' ', new[] { loginDTO.FirstName, middle, loginDTO.LastName }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
 		return new List<Claim>
 		{
+			// custom claims used by the app/tests
 			new Claim("userId", loginDTO.Id.ToString()),
 			new Claim("email", loginDTO.Email),
-			new Claim("fullName", $"{loginDTO.FirstName} {loginDTO.MiddleName} {loginDTO.LastName}")
+			new Claim("fullName", fullName),
+
+			// standard claims for interoperability
+			new Claim(ClaimTypes.NameIdentifier, loginDTO.Id.ToString()),
+			new Claim(ClaimTypes.Email, loginDTO.Email),
+			new Claim(ClaimTypes.Name, fullName),
+			new Claim(JwtRegisteredClaimNames.Sub, loginDTO.Id.ToString()),
+			new Claim(JwtRegisteredClaimNames.Email, loginDTO.Email)
 		};
 	}
 }
