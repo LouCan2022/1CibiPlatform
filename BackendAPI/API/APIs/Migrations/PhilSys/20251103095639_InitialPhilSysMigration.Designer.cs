@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251030080642_InitialPhilSysMigration")]
+    [Migration("20251103095639_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
@@ -104,17 +104,8 @@ namespace APIs.Migrations.PhilSys
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Trid"));
 
-                    b.Property<string>("error")
-                        .HasColumnType("text");
-
-                    b.Property<string>("error_description")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("idv_session_id")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("message")
-                        .HasColumnType("text");
 
                     b.Property<bool>("verified")
                         .HasColumnType("boolean");

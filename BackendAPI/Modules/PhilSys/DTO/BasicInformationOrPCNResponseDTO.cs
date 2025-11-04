@@ -35,10 +35,7 @@ public record BasicInformationOrPCNResponseDTO(
 	string place_of_birth,
 	string pob_municipality,
 	string pob_province,
-	string pob_country,
-    string? error,
-	string? message,
-	string? error_description
+	string pob_country
 );
 
 public record BasicInformationOrPCNMetaResponse(string tier_level, int result_grade);
@@ -46,11 +43,6 @@ public record BasicInformationOrPCNMetaResponse(string tier_level, int result_gr
 public record PostBasicInformationOrPCNResponse(
 	BasicInformationOrPCNResponseDTO data,
 	BasicInformationOrPCNMetaResponse meta,
-	ErrorResponse error
+	ErrorResponseDTO error
 );
 
-public record ErrorResponse(
-	string? error,
-	string? message,
-	string? error_description
-);
