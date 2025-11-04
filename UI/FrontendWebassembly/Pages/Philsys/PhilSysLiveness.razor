@@ -20,13 +20,17 @@
     {
         <LivenessCheckComponent OnClick="StartLiveness"></LivenessCheckComponent>
     }
+    else if (string.IsNullOrEmpty(livenessKey))
+    {
+        <ErrorDialogComponent Message="Liveness SDK is not configured." TraceID=""></ErrorDialogComponent>
+    }
     else if (!string.IsNullOrEmpty(_status?.trace_id))
     {
         <ErrorDialogComponent Message="@_status?.error_message" TraceID="@_status?.trace_id"></ErrorDialogComponent>
     }
     else if (!string.IsNullOrEmpty(information!.trace_id))
     {
-        <ErrorDialogComponent Message="@information.error_message" TraceID="@information.trace_id"></ErrorDialogComponent>
+        <ErrorDialogComponent Message="@information.error_message" TraceID="@information?.trace_id"></ErrorDialogComponent>
     }
     else
     {
@@ -51,6 +55,7 @@
     private bool isExpired = false;
     private bool showLoader = false;
     private string? webHookUrl;
+    private string? livenessKey;
     private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
 
     protected override async Task OnInitializedAsync()
@@ -106,8 +111,19 @@
             return;
         }
 
+        livenessKey = await IPhilSysService.GetLivenessKeyAsync();
+
+        if (string.IsNullOrEmpty(livenessKey))
+        {
+            _completed = true;
+            livenessKey = string.Empty;
+            Console.WriteLine("❌ Failed to retrieve Liveness Key.");
+            StateHasChanged();
+            return;
+        }
+
         _dotNetRef = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("startLivenessInterop", HashToken, _dotNetRef);
+        await JS.InvokeVoidAsync("startLivenessInterop", HashToken, _dotNetRef, livenessKey);
     }
 
     [JSInvokable]
