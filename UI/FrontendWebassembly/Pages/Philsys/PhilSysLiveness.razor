@@ -8,7 +8,7 @@
 
 <div class="philsys-liveness-container">
 
-    @if (_status == null || !Exists || isTransacted)
+    @if (isTransacted)
     {
         <NotFoundComponent WebHookUrl="@webHookUrl"></NotFoundComponent>
     }
@@ -19,6 +19,14 @@
     else if (!_completed)
     {
         <LivenessCheckComponent OnClick="StartLiveness"></LivenessCheckComponent>
+    }
+    else if (!string.IsNullOrEmpty(_status?.trace_id))
+    {
+        <ErrorDialogComponent Message="@_status?.error_message" TraceID="@_status?.trace_id"></ErrorDialogComponent>
+    }
+    else if (!string.IsNullOrEmpty(information!.trace_id))
+    {
+        <ErrorDialogComponent Message="@information.error_message" TraceID="@information.trace_id"></ErrorDialogComponent>
     }
     else
     {
@@ -39,9 +47,7 @@
     private UpdateFaceLivenessSessionResponseDTO? information;
     private TransactionStatusResponseDTO? _status;
     private bool _completed = false;
-    private bool IsExpired = false;
     private bool isTransacted  = false;
-    private bool Exists = false;
     private bool isExpired = false;
     private bool showLoader = false;
     private string? webHookUrl;
@@ -51,15 +57,17 @@
     {
         _status = await IPhilSysService.GetTransactionStatusAsync(HashToken);
 
-        if (_status == null)
+        if (!string.IsNullOrEmpty(_status.error_message))
         {
+            isTransacted = false;
+            isExpired = false;
+            _completed = true;
             Console.WriteLine($"❌ No transaction found for HashToken: {_status!.IsTransacted}");
             return;
         }
 
         webHookUrl = _status.WebHookUrl;
         isTransacted = _status.IsTransacted;
-        Exists = _status.Exists;
         isExpired = _status.isExpired;
 
         if (_status.isExpired)
@@ -73,9 +81,13 @@
     {
         _status = await IPhilSysService.GetTransactionStatusAsync(HashToken);
 
-        if (_status == null)
+        if (!string.IsNullOrEmpty(_status.trace_id))
         {
+            isTransacted = false;
+            isExpired = false;
+            _completed = true;
             Console.WriteLine("❌ No transaction found for this TID.");
+            StateHasChanged();
             return;
         }
 
@@ -84,7 +96,6 @@
             isExpired = true;
             await IPhilSysService.DeleteTransactionAsync(HashToken);
             StateHasChanged();
-
             return; 
         }
 
@@ -108,11 +119,6 @@
         information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
         _completed = true;
 
-        if (information == null)
-        {
-            Console.WriteLine("❌ Error while updating liveness session.");
-        }
-    
         showLoader = false;
         Console.WriteLine($"Successully Updated the session ID.");
         StateHasChanged();

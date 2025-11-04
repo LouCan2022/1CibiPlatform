@@ -41,33 +41,42 @@ public class UpdateFaceLivenessSessionService
 		CancellationToken ct = default
 		)
 	{
+		CredentialResponseDTO? token = null;
+		BasicInformationOrPCNResponseDTO responseBody = null!;
+
 		_logger.LogInformation("Updating Face Liveness Session for Token: {HashToken}", HashToken);
 
 		var result = await _philSysRepository.UpdateFaceLivenessSessionAsync(HashToken, FaceLivenessSessionId);
 		if (result == null)
 		{
 			_logger.LogWarning("No transaction found for HashToken: {HashToken}. Unable to update Face Liveness Session.", HashToken);
-			throw new Exception($"No transaction record found for HashToken: {HashToken}. Face Liveness Session update aborted.");
+			throw new InternalServerException($"No transaction record found for HashToken: {HashToken}. Face Liveness Session update aborted.");
 		}
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {HashToken}", HashToken);
 
-		var token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
-		if (token == null)
+		try
 		{
-			_logger.LogWarning("Failed to generate the access token for {Token}", HashToken);
-			throw new Exception($"Failed to generate the access token for {HashToken}");
+			token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
+		}
+		catch (HttpRequestException ex)
+		{
+			_logger.LogError("PhilSys token request failed at the calling function. {Exception}", ex);
+			throw new InternalServerException("PhilSys token request for verification process failed. Please contact the administrator.");
 		}
 
-		string accessToken = token.access_token;
+		string accessToken = token!.access_token;
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
-			var responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-
-			if (!string.IsNullOrEmpty(responseBody.error))
+			try
 			{
-				_logger.LogError("Error in PostBasicInformationAsync: {Error}", responseBody.error);
+				responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
+			}
+			catch (HttpRequestException ex)
+			{
+				_logger.LogError("Basic Information request failed: {Exception}", ex);
+				throw new InternalServerException("Basic Information request failed. Please contact the administrator.");
 			}
 
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
@@ -83,12 +92,14 @@ public class UpdateFaceLivenessSessionService
 
 		if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
-
-			var responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
-
-			if (!string.IsNullOrEmpty(responseBody.error))
+			try
 			{
-				_logger.LogError("Error in PostPCNAsync: {Error}", responseBody.error);
+				responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+			}
+			catch (HttpRequestException ex)
+			{
+				_logger.LogError("PhilSys Card Number request failed: {Exception}", ex);
+				throw new InternalServerException("PhilSys Card Number request failed. Please contact the administrator.");
 			}
 
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
@@ -113,7 +124,7 @@ public class UpdateFaceLivenessSessionService
 		if (existingTransaction == null)
 		{
 			_logger.LogWarning("Transaction with HashToken: {HashToken} not found.", HashToken);
-			throw new Exception("No Transaction record found for this hashtoken.");
+			throw new InternalServerException("No Transaction record found for this transaction. Please contact the administrator.");
 		}
 
 		var updateStatus = await _philSysRepository.UpdateTransactionDataAsync(existingTransaction);
@@ -121,7 +132,6 @@ public class UpdateFaceLivenessSessionService
 		if (updateStatus == null)
 		{
 			_logger.LogError("Failed to Update the Transaction Status for {HashToken}.", HashToken);
-			throw new Exception($"Failed to Update the Transaction Status for {HashToken}.");
 		}
 
 		_logger.LogInformation("Successfully Updated the Transaction Status.");
@@ -136,7 +146,7 @@ public class UpdateFaceLivenessSessionService
 			{
 				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
 							      WebHook, clientResponse.StatusCode, clientResponse);
-				throw new Exception($"Failed to send verification response to client webhook: {WebHook}. Status Code:  {clientResponse.StatusCode}. Response Body {clientResponse}");
+				throw new InternalServerException($"Failed to send verification response to client's webhook: {WebHook}. Please contact the administrator.");
 			}
 
 			_logger.LogInformation("Successfully send the verification response to client webhook.");
@@ -150,25 +160,13 @@ public class UpdateFaceLivenessSessionService
 		if (result == false)
 		{
 			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table.");
-			throw new Exception("Failed to add the transaction.");
 		}
 		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
 	{
-		if (string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.reference) && string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.error))
-		{
-			return new VerificationResponseDTO
-			{
-				idv_session_id = Tid.ToString(),
-				verified = null,
-				error = BasicInformationOrPCNResponseDTO.error,
-				message = BasicInformationOrPCNResponseDTO.message,
-				error_description = BasicInformationOrPCNResponseDTO.error_description
-			};
-		}
-		if (string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.reference))
+		if (string.IsNullOrEmpty(BasicInformationOrPCNResponseDTO.reference) )
 		{
 			return new VerificationResponseDTO
 			{

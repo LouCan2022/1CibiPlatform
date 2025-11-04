@@ -65,10 +65,7 @@ namespace APIs.Migrations.PhilSys
                     data_subject_place_of_birth_full = table.Column<string>(type: "text", nullable: true),
                     data_subject_place_of_birth_municipality = table.Column<string>(type: "text", nullable: true),
                     data_subject_place_of_birth_province = table.Column<string>(type: "text", nullable: true),
-                    data_subject_place_of_birth_country = table.Column<string>(type: "text", nullable: true),
-                    error = table.Column<string>(type: "text", nullable: true),
-                    message = table.Column<string>(type: "text", nullable: true),
-                    error_description = table.Column<string>(type: "text", nullable: true)
+                    data_subject_place_of_birth_country = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
