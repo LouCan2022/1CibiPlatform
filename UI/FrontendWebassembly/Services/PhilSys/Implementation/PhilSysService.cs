@@ -70,6 +70,18 @@ public class PhilSysService : IPhilSysService
 
 	}
 
+	public async Task<string> GetLivenessKeyAsync()
+	{
+		var response = await _httpClient.GetFromJsonAsync<string>("philsys/idv/getlivenesskey");
+		if (string.IsNullOrEmpty(response!))
+		{
+			Console.WriteLine("❌ Did not Get Liveness Key");
+			return string.Empty;
+		}
+		Console.WriteLine("✅ Retrieve Liveness Key Successfully");
+		return response;
+	}
+
 	public async Task<bool> DeleteTransactionAsync(string HashToken)
 	{
 		var request = new { HashToken };
