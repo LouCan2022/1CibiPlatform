@@ -54,6 +54,7 @@ public static class PhilSysServiceConfiguration
 		services.AddScoped<UpdateFaceLivenessSessionService>();
 		services.AddScoped<LivenessSessionService>();
 		services.AddScoped<DeleteTransactionService>();
+		services.AddScoped<GetLivenessKeyService>();
 		services.AddScoped<IHashService, HashService>();
 		services.AddScoped<ISecureToken, SecureToken>();
 		services.AddScoped<IPhilSysRepository, PhilSysRepository>();

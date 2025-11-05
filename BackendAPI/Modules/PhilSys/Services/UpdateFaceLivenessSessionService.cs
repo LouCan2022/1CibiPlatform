@@ -31,8 +31,8 @@ public class UpdateFaceLivenessSessionService
 		_postPCNService = PostPCNService;
 		_getTokenService = GetTokenService;
 		_configuration = configuration;
-		client_id = _configuration["PhilSys:ClientID"]!;
-		client_secret = _configuration["PhilSys:ClientSecret"]!;
+		client_id = _configuration["PhilSys:ClientID"] ?? "";
+		client_secret = _configuration["PhilSys:ClientSecret"] ?? "";
 	}
 
 	public async Task<VerificationResponseDTO> UpdateFaceLivenessSessionAsync(
