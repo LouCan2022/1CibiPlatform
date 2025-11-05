@@ -7,6 +7,11 @@ public static class AppConfiguration
 	{
 		app.UseForwardedHeaders();
 
+		if (app.Environment.IsEnvironment("Testing"))
+		{
+			return app;
+		}
+
 		if (app.Environment.IsDevelopment())
 		{
 			await DatabaseExtensions.IntializeDatabaseAsync(app);
