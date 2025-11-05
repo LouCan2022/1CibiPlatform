@@ -288,7 +288,7 @@ public class LoginService : ILoginService
 
 		if (string.IsNullOrEmpty(GetRefreshTokenFromCookie()))
 		{
-			_logger.LogWarning("Authentication check failed: zNo refresh token found in cookies.");
+			_logger.LogWarning("Authentication check failed: No refresh token found in cookies.");
 			return Task.FromResult(false);
 		}
 
