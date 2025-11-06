@@ -87,7 +87,7 @@ public class LoginService : ILoginService
 			jwtToken,
 			"bearer",
 			ExpireInMinutes(),
-			"admin",
+			userData.Email,
 			DateTime.Now.ToString(),
 			DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
 		);

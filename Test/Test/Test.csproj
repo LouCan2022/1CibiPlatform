@@ -9,12 +9,15 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="FluentAssertions" Version="[7.0.0]" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Moq.EntityFrameworkCore" Version="8.0.1.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.8.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +28,6 @@
     <Folder Include="BackendAPI\BuildingBlocks.UnitTests\" />
     <Folder Include="BackendAPI\Modules\CNX.UnitTests\" />
     <Folder Include="BackendAPI\Modules\CNX.IntegrationTests\" />
-    <Folder Include="BackendAPI\Modules\Auth.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\SSO.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\Philsys.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\SSO.UnitTests\" />
