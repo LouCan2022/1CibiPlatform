@@ -1,6 +1,5 @@
 ﻿namespace FrontendWebassembly.ShareData.Auth;
 
-
 public static class ApplicationListDescriptionIcon
 {
 	public static Dictionary<int, (string path, string Name, string Icon)> List => new()
