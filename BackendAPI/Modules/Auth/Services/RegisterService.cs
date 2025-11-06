@@ -140,7 +140,7 @@ public class RegisterService : IRegisterService
 			_logger.LogWarning("Invalid OTP provided for email: {Email}", email);
 			existingOtpRecord.AttemptCount += 1;
 			await _authRepository.UpdateVerificationCodeAsync(existingOtpRecord);
-			throw new Exception("Invalid OTP");
+			throw new Exception("Invalid OTP.");
 		}
 
 		if (existingOtpRecord.IsUsed)

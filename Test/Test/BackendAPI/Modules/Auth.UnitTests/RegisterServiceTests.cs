@@ -81,7 +81,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			{
 				Email = email,
 				OtpCodeHash = "existingHash",
-				AttemptCount =0,
+				AttemptCount = 0,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
 			};
 
@@ -96,7 +96,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "000000");
 
 			// Assert
-			await act.Should().ThrowAsync<System.Exception>().WithMessage("Invalid OTP");
+			await act.Should().ThrowAsync<Exception>().WithMessage("Invalid OTP.");
 			existing.AttemptCount.Should().Be(1);
 		}
 
@@ -164,7 +164,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			{
 				Email = email,
 				OtpCodeHash = "existingHash",
-				AttemptCount =0,
+				AttemptCount = 0,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
 			};
 
