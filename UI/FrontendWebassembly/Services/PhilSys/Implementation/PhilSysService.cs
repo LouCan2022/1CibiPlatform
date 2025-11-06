@@ -88,7 +88,7 @@ public class PhilSysService : IPhilSysService
 		var response = await _httpClient.PostAsJsonAsync("/philsys/deletetransaction", request);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Update Successfully");
+			Console.WriteLine("❌ Did not Delete Successfully");
 			return false!;
 		}
 
@@ -109,7 +109,7 @@ public class PhilSysService : IPhilSysService
 			var responseInfo = await _httpClient.PostAsJsonAsync("philsys/idv", requestInfo);
 			if (!responseInfo.IsSuccessStatusCode)
 			{
-				Console.WriteLine("❌ Did not Update Successfully");
+				Console.WriteLine("❌ Did not Verified Successfully");
 				return "";
 			}
 
@@ -121,7 +121,7 @@ public class PhilSysService : IPhilSysService
 		var responsePCn = await _httpClient.PostAsJsonAsync("philsys/idv", requestPcn);
 		if (!responsePCn.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Update Successfully");
+			Console.WriteLine("❌ Did not Verified Successfully");
 			return "";
 		}
 

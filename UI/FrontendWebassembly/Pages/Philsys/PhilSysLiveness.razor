@@ -20,17 +20,9 @@
     {
         <LivenessCheckComponent OnClick="StartLiveness"></LivenessCheckComponent>
     }
-    else if (string.IsNullOrEmpty(livenessKey))
+    else if (!string.IsNullOrEmpty(errorMessage))
     {
-        <ErrorDialogComponent Message="Liveness SDK is not configured." TraceID=""></ErrorDialogComponent>
-    }
-    else if (!string.IsNullOrEmpty(_status?.trace_id))
-    {
-        <ErrorDialogComponent Message="@_status?.error_message" TraceID="@_status?.trace_id"></ErrorDialogComponent>
-    }
-    else if (!string.IsNullOrEmpty(information!.trace_id))
-    {
-        <ErrorDialogComponent Message="@information.error_message" TraceID="@information?.trace_id"></ErrorDialogComponent>
+        <ErrorDialogComponent Message="@errorMessage"></ErrorDialogComponent>
     }
     else
     {
@@ -56,6 +48,7 @@
     private bool showLoader = false;
     private string? webHookUrl;
     private string? livenessKey;
+    private string errorMessage = string.Empty;
     private DotNetObjectReference<PhilSysLiveness>? _dotNetRef;
 
     protected override async Task OnInitializedAsync()
@@ -67,6 +60,7 @@
             isTransacted = false;
             isExpired = false;
             _completed = true;
+            errorMessage = _status.error_message;
             Console.WriteLine($"❌ No transaction found for HashToken: {_status!.IsTransacted}");
             return;
         }
@@ -91,6 +85,7 @@
             isTransacted = false;
             isExpired = false;
             _completed = true;
+            errorMessage = _status.error_message!;
             Console.WriteLine("❌ No transaction found for this TID.");
             StateHasChanged();
             return;
@@ -116,7 +111,7 @@
         if (string.IsNullOrEmpty(livenessKey))
         {
             _completed = true;
-            livenessKey = string.Empty;
+            errorMessage = "Liveness SDK is not configured. Please contact the administrator.";
             Console.WriteLine("❌ Failed to retrieve Liveness Key.");
             StateHasChanged();
             return;
@@ -134,6 +129,11 @@
 
         information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId);
         _completed = true;
+
+        if (!string.IsNullOrEmpty(information.error_message))
+        {
+            errorMessage = information.error_message!;
+        }
 
         showLoader = false;
         Console.WriteLine($"Successully Updated the session ID.");
