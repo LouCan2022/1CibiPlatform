@@ -1,4 +1,4 @@
-﻿@page "/userapproles"
+﻿@* @page "/userapproles"
 @using FrontendWebassembly.DTO.Auth
 
 <MudTable Items="@userAppRoles" Hover="true" Striped="true" Dense="true" Elevation="1"
@@ -21,7 +21,7 @@
             </MudButton>
         </MudTd>
     </RowTemplate>
-</MudTable>
+</MudTable> *@
 
 
     @* <MudDialog @bind-IsVisible="showEditDialog" MaxWidth="MaxWidth.Small">
@@ -64,11 +64,11 @@
 
 
 @code {
-    private List<UserAppRoleDto> userAppRoles = new();
-    private List<dynamic> apps = new();
-    private List<dynamic> roles = new();
-    private List<dynamic> submenus = new();
-    private List<dynamic> users = new();
+    // private List<UserAppRoleDto> userAppRoles = new();
+    // private List<dynamic> apps = new();
+    // private List<dynamic> roles = new();
+    // private List<dynamic> submenus = new();
+    // private List<dynamic> users = new();
 
     // private bool showEditDialog = false;
     // private EditUserAppRoleDto editModel = new();
@@ -84,14 +84,14 @@
     //     users = dropdowns.users.ToObject<List<dynamic>>();
     // }
 
-    private void Edit(UserAppRoleDto item)
-    {
-        // editModel = new EditUserAppRoleDto
-        // {
-        //     AppRoleId = item.AppRoleId
-        // };
-        // showEditDialog = true;
-    }
+    // private void Edit(UserAppRoleDto item)
+    // {
+    //     editModel = new EditUserAppRoleDto
+    //     {
+    //         AppRoleId = item.AppRoleId
+    //     };
+    //     showEditDialog = true;
+    // }
 
     // private async Task Save()
     // {
