@@ -4,7 +4,6 @@ using Test.BackendAPI.Modules.Auth.UnitTests.Fixture;
 using Moq;
 using Auth.DTO;
 using BuildingBlocks.Exceptions;
-using Microsoft.AspNetCore.Http;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests
 {
@@ -61,7 +60,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			Func<Task> act = async () => await service.GetNewAccessTokenAsync(userId, "anytoken");
 
 			// Assert
-			await act.Should().ThrowAsync<NotFoundException>().WithMessage("Refresh Token is not found");
+			await act.Should().ThrowAsync<NotFoundException>().WithMessage("Refresh Token is not found.");
 		}
 
 		[Fact]
@@ -72,7 +71,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			var userId = Guid.NewGuid();
 			// stored hash is for a different token
 			var storedHash = service.HashToken("storedtoken");
-			var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int>{1}, new List<List<int>>{ new List<int>{1} }, new List<int>{1});
+			var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
 
 			_fixture.MockAuthRepository.Setup(x => x.GetNewUserDataAsync(userId)).ReturnsAsync(userData);
 
@@ -91,7 +90,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			var userId = Guid.NewGuid();
 			var refreshToken = "refreshtoken";
 			var storedHash = service.HashToken(refreshToken);
-			var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int>{1}, new List<List<int>>{ new List<int>{1} }, new List<int>{1});
+			var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
 
 			_fixture.MockAuthRepository.Setup(x => x.GetNewUserDataAsync(userId)).ReturnsAsync(userData);
 			_fixture.MockJwtService.Setup(x => x.GetAccessToken(It.IsAny<LoginDTO>())).Returns("token");
@@ -106,7 +105,24 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 			// Assert
 			result.Should().NotBeNull();
 			result.Access_token.Should().Be("token");
-			result.refresh_token.Should().Be(refreshToken);
+			result.refresh_token.Should().NotBeNullOrEmpty();
+			result.Token_type.Should().Be("bearer");
+		}
+
+		[Fact]
+		public void ValidateHashToken_ShouldReturnTrue_ForUrlEncodedProvidedToken()
+		{
+			// Arrange
+			var service = _fixture.RefreshTokenService;
+			var token = "token+with/special=";
+			var hash = service.HashToken(token);
+			var encoded = WebUtility.UrlEncode(token);
+
+			// Act
+			var isValid = service.ValidateHashToken(encoded, hash);
+
+			// Assert
+			isValid.Should().BeTrue();
 		}
 	}
 }

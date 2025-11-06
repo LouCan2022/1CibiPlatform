@@ -10,9 +10,9 @@
 
 		private readonly string _httpCookieOnlyKey;
 		private readonly double _expiryinMinutesKey;
-		private readonly string _cookieExpiryinMinutesKey;
+		private readonly string _refreshTokenKey;
 		private readonly bool _isHttps;
-
+		private readonly int _cookieExpiryinDaysKey;
 
 		public RefreshTokenService(
 			IAuthRepository authRepository,
@@ -29,8 +29,9 @@
 
 			_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
 			_expiryinMinutesKey = double.Parse(_configuration.GetSection("Jwt:ExpiryInMinutes").Value! ?? "");
-			_cookieExpiryinMinutesKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
+			_refreshTokenKey = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 			_isHttps = bool.Parse(_configuration.GetSection("AuthWeb:isHttps").Value!);
+			_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
 		}
 
 
@@ -88,7 +89,7 @@
 			if (userData == null)
 			{
 				_logger.LogWarning("Refresh Token is not found or invalid.");
-				throw new NotFoundException("Refresh Token is not found");
+				throw new NotFoundException("Refresh Token is not found.");
 
 			}
 
@@ -110,14 +111,15 @@
 			SetAccessTokenCookie(jwtToken);
 
 			// reuse refresh token
-			var refreshTokenExist = _httpContextAccessor.HttpContext!.Request.Cookies[_cookieExpiryinMinutesKey!];
+			var (newRefreshToken, newRefreshTokenHash) = this.GenerateRefreshToken();
+			SetRefreshTokenCookie(newRefreshToken, false);
 
-			_logger.LogInformation("Reusing existing refresh token for user: {Email}", userData.Email);
+			_logger.LogInformation("Creating new refresh token for user: {Email}", userData.Email);
 			// reuse existing refresh token if not expired
 			return new LoginResponseWebDTO(
 				userData.Id.ToString()!,
 				jwtToken,
-				refreshTokenExist!,
+				newRefreshToken!,
 				"bearer",
 				ExpireInMinutes(),
 				appId,
@@ -126,7 +128,6 @@
 				DateTime.Now.ToString(),
 				DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
 			);
-
 		}
 
 
@@ -144,6 +145,25 @@
 
 
 			_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, accessToken, cookieAccessTokenOptions);
+		}
+
+
+		protected virtual void SetRefreshTokenCookie(
+			  string refreshToken,
+			  bool isRememberMe)
+		{
+			// set httpcookieonly
+
+			var cookieRefreshTokenOptions = new CookieOptions
+			{
+				HttpOnly = true,
+				Secure = _isHttps,
+				SameSite = SameSiteMode.Lax,
+				Expires = isRememberMe ? DateTime.UtcNow.AddDays(_cookieExpiryinDaysKey) : DateTime.UtcNow.AddMinutes(Convert.ToInt32(_expiryinMinutesKey))
+			};
+
+
+			_httpContextAccessor.HttpContext!.Response.Cookies.Append(_refreshTokenKey!, refreshToken, cookieRefreshTokenOptions);
 		}
 
 		protected virtual int ExpireInMinutes()

@@ -13,7 +13,6 @@ public class AuthRepository : IAuthRepository
 	{
 		return await _dbcontext.AuthUsers
 					 .Where(au => au.Id == id && au.IsActive)
-					 .AsNoTracking()
 					 .FirstOrDefaultAsync();
 	}
 
@@ -51,7 +50,7 @@ public class AuthRepository : IAuthRepository
 														 on user.Id equals authRefreshToken.UserId
 							  join userRole in _dbcontext.AuthUserAppRoles
 														 on user.Id equals userRole.UserId into userRolesGroup
-							  where user.Id == authRefreshToken.UserId &&
+							  where authRefreshToken.UserId == userId &&
 							  user.IsActive == true && authRefreshToken.IsActive == true
 							  select new UserDataDTO(
 							   user.Id,
@@ -79,7 +78,6 @@ public class AuthRepository : IAuthRepository
 		var passwordResetToken = await _dbcontext.PasswordResetToken
 			.Where(prt => prt.TokenHash == tokenHash &&
 						  prt.IsUsed == false)
-			.AsNoTracking()
 			.FirstOrDefaultAsync();
 
 		return passwordResetToken!;
@@ -193,6 +191,7 @@ public class AuthRepository : IAuthRepository
 	{
 		return await _dbcontext.OtpVerification
 					 .Where(ov => ov.Email == email && ov.IsUsed == isUsed)
+					 .OrderByDescending(ov => ov.CreatedAt)
 					 .FirstOrDefaultAsync();
 
 	}
