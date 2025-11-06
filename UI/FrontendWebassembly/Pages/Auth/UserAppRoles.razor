@@ -1,27 +1,28 @@
 ﻿@page "/userapproles"
+@using FrontendWebassembly.DTO.Auth
 
-<MudPaper Class="pa-4">
+<MudTable Items="@userAppRoles" Hover="true" Striped="true" Dense="true" Elevation="1"
+          Square="true">
+    <HeaderContent>
+        <MudTh>User</MudTh>
+        <MudTh>Application</MudTh>
+        <MudTh>SubMenu</MudTh>
+        <MudTh>Role</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="User">@context.UserEmail</MudTd>
+        <MudTd DataLabel="Application">@context.AppName</MudTd>
+        <MudTd DataLabel="SubMenu">@context.SubMenuName</MudTd>
+        <MudTd DataLabel="Role">@context.RoleName</MudTd>
+        <MudTd DataLabel="Action">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Edit(context))">
+                Edit
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
 
-    <MudTable Items="@userAppRoles" Hover="true" Striped="true" Dense="true">
-        <HeaderContent>
-            <MudTh>User</MudTh>
-            <MudTh>Application</MudTh>
-            <MudTh>SubMenu</MudTh>
-            <MudTh>Role</MudTh>
-            <MudTh>Action</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.UserEmail</MudTd>
-            <MudTd>@context.AppName</MudTd>
-            <MudTd>@context.SubMenuName</MudTd>
-            <MudTd>@context.RoleName</MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Edit(context))">
-                    Edit
-                </MudButton>
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
 
     @* <MudDialog @bind-IsVisible="showEditDialog" MaxWidth="MaxWidth.Small">
         <DialogContent>
@@ -61,7 +62,6 @@
         </DialogActions>
     </MudDialog> *@
 
-</MudPaper>
 
 @code {
     private List<UserAppRoleDto> userAppRoles = new();
