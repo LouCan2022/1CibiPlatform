@@ -9,6 +9,34 @@ public class AuthRepository : IAuthRepository
 		this._dbcontext = dbcontext;
 	}
 
+	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
+		PaginationRequest paginationRequest,
+		CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext.AuthUsers.LongCountAsync(cancellationToken);
+
+		var users = await _dbcontext.AuthUsers
+			.Where(au => au.IsActive)
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(au => new UsersDTO(
+					au.Id,
+					au.Email,
+					au.FirstName,
+					au.MiddleName!,
+					au.LastName))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<UsersDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  users
+			);
+	}
+
 	public async Task<Authusers> GetRawUserAsync(Guid id)
 	{
 		return await _dbcontext.AuthUsers
@@ -254,4 +282,6 @@ public class AuthRepository : IAuthRepository
 
 		return true;
 	}
+
+
 }

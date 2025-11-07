@@ -2,6 +2,7 @@
 
 public interface IAuthRepository
 {
+	Task<PaginatedResult<UsersDTO>> GetUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
 

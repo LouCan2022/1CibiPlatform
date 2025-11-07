@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.Logout;
 
-public record LogoutRequest(LogoutDTO logoutDTO) : ICommand<LogoutResponse>;
+public record LogoutRequest(LogoutDTO logoutDTO);
 
 public record LogoutResponse(bool IsLoggedOut);
 

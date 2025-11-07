@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.UpdatePassword;
 
-public record UpdatePasswordRequest(UpdatePasswordRequestDTO UpdatePasswordRequestDTO) : ICommand<UpdatePasswordResponse>;
+public record UpdatePasswordRequest(UpdatePasswordRequestDTO UpdatePasswordRequestDTO);
 
 public record UpdatePasswordResponse(bool IsSuccessful);
 

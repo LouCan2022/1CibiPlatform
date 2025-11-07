@@ -26,7 +26,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public Mock<ILogger<RegisterService>> MockRegisterLogger { get; private set; }
 		public Mock<ILogger<LoginService>> MockLoginLogger { get; private set; }
 		public Mock<ILogger<RefreshTokenService>> MockRefreshLogger { get; private set; }
-		public Mock<ILogger<ForgotPassword>> MockForgotLogger { get; private set; }
+		public Mock<ILogger<ForgotPasswordService>> MockForgotLogger { get; private set; }
 
 		// Configuration
 		public IConfiguration Configuration { get; private set; }
@@ -35,7 +35,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public RegisterService RegisterService { get; private set; }
 		public LoginService LoginService { get; private set; }
 		public RefreshTokenService RefreshTokenService { get; private set; }
-		public ForgotPassword ForgotPasswordService { get; private set; }
+		public ForgotPasswordService ForgotPasswordService { get; private set; }
 		public JWTService JwtService { get; private set; }
 
 		public AuthServiceFixture()
@@ -54,7 +54,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 			MockRegisterLogger = new Mock<ILogger<RegisterService>>();
 			MockLoginLogger = new Mock<ILogger<LoginService>>();
 			MockRefreshLogger = new Mock<ILogger<RefreshTokenService>>();
-			MockForgotLogger = new Mock<ILogger<ForgotPassword>>();
+			MockForgotLogger = new Mock<ILogger<ForgotPasswordService>>();
 
 			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
@@ -100,7 +100,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 				Configuration,
 				MockRefreshLogger.Object);
 
-			ForgotPasswordService = new ForgotPassword(
+			ForgotPasswordService = new ForgotPasswordService(
 				MockAuthRepository.Object,
 				MockForgotLogger.Object,
 				MockEmailService.Object,

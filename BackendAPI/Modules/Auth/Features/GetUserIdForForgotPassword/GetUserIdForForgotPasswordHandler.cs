@@ -16,8 +16,8 @@ public class GetUserIdForForgotPasswordCommandValidator : AbstractValidator<GetU
 
 public class GetUserIdForForgotPasswordHandler : ICommandHandler<GetUserIdForForgotPasswordCommand, GetUserIdForForgotPasswordResult>
 {
-	private readonly IForgotPassword _forgotPassword;
-	public GetUserIdForForgotPasswordHandler(IForgotPassword forgotPassword)
+	private readonly IForgotPasswordService _forgotPassword;
+	public GetUserIdForForgotPasswordHandler(IForgotPasswordService forgotPassword)
 	{
 		_forgotPassword = forgotPassword;
 	}

@@ -38,9 +38,9 @@ namespace Auth.ServiceConfig
 			services.AddScoped<IOtpService, OtpService>();
 			services.AddScoped<IHashService, HashService>();
 			services.AddScoped<IRegisterService, RegisterService>();
-			services.AddScoped<IForgotPassword, ForgotPassword>();
+			services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 			services.AddScoped<ISecureToken, SecureToken>();
-
+			services.AddScoped<IUserService, UserService>();
 
 			return services;
 		}

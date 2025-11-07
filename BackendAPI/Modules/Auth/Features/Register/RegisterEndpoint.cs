@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.Register;
 
-public record RegisterRequest(RegisterRequestDTO register) : ICommand<RegisterResponse>;
+public record RegisterRequest(RegisterRequestDTO register);
 
 public record RegisterResponse(OtpVerificationResponse otpVerificationResponse);
 
