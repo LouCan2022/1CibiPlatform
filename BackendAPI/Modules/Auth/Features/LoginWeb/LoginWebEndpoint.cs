@@ -2,7 +2,7 @@
 
 namespace Auth.Features.LoginWeb;
 
-public record LoginWebRequest(LoginWebCred loginWebCred) : ICommand<LoginWebResponse>;
+public record LoginWebRequest(LoginWebCred loginWebCred);
 
 public record LoginWebResponse(LoginResponseWebDTO loginResponseWebDTO);
 

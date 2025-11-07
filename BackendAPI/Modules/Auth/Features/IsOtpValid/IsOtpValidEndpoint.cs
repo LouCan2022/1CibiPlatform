@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.IsOtpValid;
 
-public record IsOtpValidRequest(OtpVerificationRequestDTO OtpVerificationRequestDto) : ICommand<IsOtpValidResponse>;
+public record IsOtpValidRequest(OtpVerificationRequestDTO OtpVerificationRequestDto);
 
 public record IsOtpValidResponse(bool isOtpSessionValid);
 

@@ -15,9 +15,9 @@ public sealed class IsChangePasswordTokenValidValidator : AbstractValidator<IsCh
 
 public class IsChangePasswordTokenValidHandler : ICommandHandler<IsChangePasswordTokenValidCommand, IsChangePasswordTokenValidResult>
 {
-	private readonly IForgotPassword _forgotPassword;
+	private readonly IForgotPasswordService _forgotPassword;
 
-	public IsChangePasswordTokenValidHandler(IForgotPassword forgotPassword)
+	public IsChangePasswordTokenValidHandler(IForgotPasswordService forgotPassword)
 	{
 		this._forgotPassword = forgotPassword;
 	}

@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.Login;
 
-public record LoginRequest(LoginCred LoginCred) : ICommand<LoginResponse>;
+public record LoginRequest(LoginCred LoginCred);
 
 public record LoginResponse(LoginResponseDTO LoginResponseDTO);
 

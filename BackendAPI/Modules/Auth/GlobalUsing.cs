@@ -33,3 +33,4 @@ global using BuildingBlocks.CQRS;
 global using BuildingBlocks.Exceptions.Handler;
 global using Auth.Data.DataSeed;
 global using BuildingBlocks.SharedServices.Interfaces;
+global using BuildingBlocks.Pagination;

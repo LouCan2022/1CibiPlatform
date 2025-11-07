@@ -1,9 +1,9 @@
 ﻿namespace Auth.Services;
 
-public class ForgotPassword : IForgotPassword
+public class ForgotPasswordService : IForgotPasswordService
 {
 	private readonly IAuthRepository _authRepository;
-	private readonly ILogger<ForgotPassword> _logger;
+	private readonly ILogger<ForgotPasswordService> _logger;
 	private readonly IEmailService _emailService;
 	private readonly IConfiguration _configuration;
 	private readonly ISecureToken _secureToken;
@@ -12,9 +12,9 @@ public class ForgotPassword : IForgotPassword
 	private readonly string _frontendBaseUrl;
 	private readonly int _passwordTokenExpiryMinutes;
 
-	public ForgotPassword(
+	public ForgotPasswordService(
 		IAuthRepository authRepository,
-		ILogger<ForgotPassword> logger,
+		ILogger<ForgotPasswordService> logger,
 		IEmailService emailService,
 		IConfiguration configuration,
 		ISecureToken secureToken,
