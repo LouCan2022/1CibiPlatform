@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.VerifyOtp;
 
-public record VerifiyOtpRequest(OtpRequestDTO OtpRequestDTO) : ICommand<VerifiyOtpResponse>;
+public record VerifiyOtpRequest(OtpRequestDTO OtpRequestDTO);
 
 public record VerifiyOtpResponse(bool IsVerified);
 

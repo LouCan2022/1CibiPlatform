@@ -1,7 +1,7 @@
 ﻿
 namespace Auth.Features.GetUserIdForForgotPassword;
 
-public record GetUserIdForForgotPasswordRequest(GetUserIdForForgotPasswordRequestDTO GetUserIdForForgotPasswordRequestDTO) : ICommand<GetUserIdForForgotPasswordResponse>;
+public record GetUserIdForForgotPasswordRequest(GetUserIdForForgotPasswordRequestDTO GetUserIdForForgotPasswordRequestDTO);
 
 public record GetUserIdForForgotPasswordResponse(Guid UserId);
 

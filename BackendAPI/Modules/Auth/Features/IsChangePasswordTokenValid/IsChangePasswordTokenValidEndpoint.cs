@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.IsChangePasswordTokenValid;
 
-public record IsChangePasswordTokenValidRequest(ForgotPasswordTokenRequestDTO ForgotPasswordTokenRequestDTO) : ICommand<IsChangePasswordTokenValidResponse>;
+public record IsChangePasswordTokenValidRequest(ForgotPasswordTokenRequestDTO ForgotPasswordTokenRequestDTO);
 
 public record IsChangePasswordTokenValidResponse(bool IsValid);
 

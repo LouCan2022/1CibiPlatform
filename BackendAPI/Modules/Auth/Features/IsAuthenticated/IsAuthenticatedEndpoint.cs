@@ -1,7 +1,7 @@
 ﻿
 namespace Auth.Features.IsAuthenticated;
 
-public record IsAuthenticatedRequest() : ICommand<IsAuthenticatedResponse>;
+public record IsAuthenticatedRequest();
 
 public record IsAuthenticatedResponse(bool IsAuthenticated);
 
