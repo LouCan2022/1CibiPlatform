@@ -18,6 +18,8 @@ public class UserService : IUserService
 	{
 		_logger.LogInformation("Fetching users with pagination: {@PaginationRequest}", paginationRequest);
 
-		return _authRepository.GetUserAsync(paginationRequest, cancellationToken);
+		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
+			_authRepository.GetUserAsync(paginationRequest, cancellationToken) :
+			_authRepository.SearchUserAsync(paginationRequest, cancellationToken);
 	}
 }
