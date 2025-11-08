@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.UserManagement.Query.GetUsers;
 
-public record GetUsersEndpointRequest(int? PageNumber = 1, int? PageSize = 10);
+public record GetUsersEndpointRequest(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null);
 
 public record GetUsersEndpointResponse(PaginatedResult<UsersDTO> Users);
 
@@ -13,7 +13,10 @@ public class GetUsersEndpoint : ICarterModule
 			ISender sender,
 			CancellationToken cancellationToken) =>
 		{
-			var command = new GetUsersQueryRequest(request.PageNumber, request.PageSize);
+			var command = new GetUsersQueryRequest(
+				request.PageNumber, 
+				request.PageSize , 
+				request.SearchTerm);
 
 			var users = await sender.Send(command, cancellationToken);
 

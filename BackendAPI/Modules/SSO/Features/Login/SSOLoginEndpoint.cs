@@ -1,6 +1,6 @@
 ﻿namespace SSO.Features.Login;
 
-public record SSOLoginRequest() : ICommand;
+public record SSOLoginRequest();
 
 public class SSOLoginEndpoint : ICarterModule
 {

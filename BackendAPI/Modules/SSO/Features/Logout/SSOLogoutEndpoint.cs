@@ -1,6 +1,6 @@
 ﻿namespace SSO.Features.Logout;
 
-public record SSOLogoutRequest() : ICommand;
+public record SSOLogoutRequest();
 
 public class SSOLogoutEndpoint : ICarterModule
 {
