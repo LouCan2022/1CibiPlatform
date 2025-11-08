@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.GetNewAccessToken;
 
-public record GetNewAccessTokenRequest(Guid userId, string RefreshToken) : ICommand<GetNewAccessTokenResponse>;
+public record GetNewAccessTokenRequest(Guid userId, string RefreshToken);
 
 public record GetNewAccessTokenResponse(LoginResponseWebDTO LoginResponseWebDTO);
 

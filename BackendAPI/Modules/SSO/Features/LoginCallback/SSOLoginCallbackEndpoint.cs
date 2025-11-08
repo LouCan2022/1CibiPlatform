@@ -1,6 +1,6 @@
 ﻿namespace SSO.Features.LoginCallback;
 
-public record SSOLoginCallbackRequest(string? ReturnUrl = "/") : ICommand<SSOLoginResponseDTO>;
+public record SSOLoginCallbackRequest(string? ReturnUrl = "/");
 
 public record SSOLoginCallbackResponse(SSOLoginResponseDTO Result);
 

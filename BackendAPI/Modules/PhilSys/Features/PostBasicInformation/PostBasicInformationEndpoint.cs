@@ -5,7 +5,7 @@ public record PostBasicInformationRequest(string first_name,
 										  string suffix,
 										  string birth_date,
 										  string bearer_token,
-										  string face_liveness_session_id) : ICommand<PostBasicInformationResponse>;
+										  string face_liveness_session_id);
 public record PostBasicInformationResponse(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
 public class PostBasicInformationEndpoint : ICarterModule
 {

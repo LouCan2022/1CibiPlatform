@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.Features.GetPhilSysToken;
-public record GetPhilSysTokenRequest(string client_id, string client_secret) : ICommand<GetPhilSysTokenResponse>;
+public record GetPhilSysTokenRequest(string client_id, string client_secret);
 public record GetPhilSysTokenResponse(CredentialResponseDTO CredentialResponseDTO);
 public class GetPhilsysTokenEndpoint : ICarterModule
 {

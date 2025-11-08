@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.ResendOTP;
 
-public record ResendOTPEndpointRequest(OtpVerificationRequestDTO OtpVerificationRequestDto) : ICommand<ResendOTPEndpointResponse>;
+public record ResendOTPEndpointRequest(OtpVerificationRequestDTO OtpVerificationRequestDto);
 
 public record ResendOTPEndpointResponse(bool IsSuccess);
 

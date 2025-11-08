@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.Features.IsLivenessValid;
-public record IsLivenessValidRequest(string HashToken) : ICommand<IsLivenessValidResponse>;
+public record IsLivenessValidRequest(string HashToken);
 public record IsLivenessValidResponse(TransactionStatusResponseDTO TransactionStatusResponseDTO);
 public class IsLivenessValidEndpoint : ICarterModule
 {

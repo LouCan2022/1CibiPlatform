@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.Features.DeleteTransaction;
-public record DeleteTransactionRequest(string HashToken) : ICommand<DeleteTransactionResponse>;
+public record DeleteTransactionRequest(string HashToken);
 public record DeleteTransactionResponse(bool IsDeleted);
 public class DeleteTransactionEndpoint : ICarterModule
 {
