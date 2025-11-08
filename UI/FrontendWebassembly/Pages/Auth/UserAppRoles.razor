@@ -1,0 +1,103 @@
+﻿@* @page "/userapproles"
+@using FrontendWebassembly.DTO.Auth
+
+<MudTable Items="@userAppRoles" Hover="true" Striped="true" Dense="true" Elevation="1"
+          Square="true">
+    <HeaderContent>
+        <MudTh>User</MudTh>
+        <MudTh>Application</MudTh>
+        <MudTh>SubMenu</MudTh>
+        <MudTh>Role</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="User">@context.UserEmail</MudTd>
+        <MudTd DataLabel="Application">@context.AppName</MudTd>
+        <MudTd DataLabel="SubMenu">@context.SubMenuName</MudTd>
+        <MudTd DataLabel="Role">@context.RoleName</MudTd>
+        <MudTd DataLabel="Action">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Edit(context))">
+                Edit
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable> *@
+
+
+    @* <MudDialog @bind-IsVisible="showEditDialog" MaxWidth="MaxWidth.Small">
+        <DialogContent>
+            <MudForm>
+                <MudSelect T="int" Label="User" @bind-Value="editModel.UserId">
+                    @foreach (var u in users)
+                    {
+                        <MudSelectItem Value="@u.UserId">@u.Email</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="int" Label="Application" @bind-Value="editModel.AppId">
+                    @foreach (var app in apps)
+                    {
+                        <MudSelectItem Value="@app.AppId">@app.AppName</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="int" Label="Submenu" @bind-Value="editModel.SubMenuId">
+                    @foreach (var sm in submenus)
+                    {
+                        <MudSelectItem Value="@sm.SubMenuId">@sm.SubMenuName</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="int" Label="Role" @bind-Value="editModel.RoleId">
+                    @foreach (var role in roles)
+                    {
+                        <MudSelectItem Value="@role.RoleId">@role.RoleName</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudForm>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color="Color.Primary" OnClick="Save">Save</MudButton>
+            <MudButton OnClick="() => showEditDialog = false">Cancel</MudButton>
+        </DialogActions>
+    </MudDialog> *@
+
+
+@code {
+    // private List<UserAppRoleDto> userAppRoles = new();
+    // private List<dynamic> apps = new();
+    // private List<dynamic> roles = new();
+    // private List<dynamic> submenus = new();
+    // private List<dynamic> users = new();
+
+    // private bool showEditDialog = false;
+    // private EditUserAppRoleDto editModel = new();
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     userAppRoles = await Http.GetFromJsonAsync<List<UserAppRoleDto>>("api/UserAppRoles");
+
+    //     var dropdowns = await Http.GetFromJsonAsync<dynamic>("api/UserAppRoles/dropdowns");
+    //     apps = dropdowns.apps.ToObject<List<dynamic>>();
+    //     roles = dropdowns.roles.ToObject<List<dynamic>>();
+    //     submenus = dropdowns.submenus.ToObject<List<dynamic>>();
+    //     users = dropdowns.users.ToObject<List<dynamic>>();
+    // }
+
+    // private void Edit(UserAppRoleDto item)
+    // {
+    //     editModel = new EditUserAppRoleDto
+    //     {
+    //         AppRoleId = item.AppRoleId
+    //     };
+    //     showEditDialog = true;
+    // }
+
+    // private async Task Save()
+    // {
+    //     await Http.PutAsJsonAsync($"api/UserAppRoles/{editModel.AppRoleId}", editModel);
+    //     showEditDialog = false;
+    //     userAppRoles = await Http.GetFromJsonAsync<List<UserAppRoleDto>>("api/UserAppRoles");
+    // }
+}
+
