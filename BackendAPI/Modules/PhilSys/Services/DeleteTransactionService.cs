@@ -18,13 +18,15 @@ public class DeleteTransactionService
 		if (existingTransaction == null)
 		{
 			_logger.LogWarning("Transaction with HashToken: {HashToken} not found.", HashToken);
+			throw new NotFoundException("Transaction record not found.");
 		}
 
-		var deletedTransaction = await _philSysRepository.DeleteTrandsactionDataAsync(existingTransaction);
+		var deletedTransaction = await _philSysRepository.DeleteTransactionDataAsync(existingTransaction);
 
 		if (deletedTransaction == false)
 		{
 			_logger.LogError("Failed to delete Transaction record for HashToken: {HashToken}", HashToken);
+			throw new Exception("Failed to delete the transaction record.");
 		}
 
 		_logger.LogInformation("Successfully Deleted the Transaction record for {HashToken}.", HashToken);

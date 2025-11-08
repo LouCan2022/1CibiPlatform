@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Configuration;
 
-namespace Test.BackendAPI.Modules.Philsys.UnitTests
+namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 {
 	public class PhilSysServiceFixture : IDisposable
 	{
@@ -15,11 +15,6 @@ namespace Test.BackendAPI.Modules.Philsys.UnitTests
 		public Mock<IPhilSysRepository> MockPhilSysRepository { get; private set; }
 		public Mock<IPhilSysResultRepository> MockPhilSysResultRepository { get; private set;}
 		public Mock<IHttpClientFactory> MockHttpClientFactory { get; private set; }
-
-		// Post
-		public Mock<GetTokenService> MockGetTokenService { get; private set; }
-		public Mock<PostBasicInformationService> MockPostBasicInformationService { get; private set; }
-		public Mock<PostPCNService> MockPostPCNService { get; private set; }
 
 		// Loggers
 		public Mock<ILogger<DeleteTransactionService>> MockDeleteTransactionLogger { get; private set; }
@@ -52,11 +47,6 @@ namespace Test.BackendAPI.Modules.Philsys.UnitTests
 			MockHttpClientFactory = new Mock<IHttpClientFactory>();
 			MockSecureToken = new Mock<ISecureToken>();
 
-			// Post
-			MockGetTokenService = new Mock<GetTokenService>();
-			MockPostBasicInformationService = new Mock<PostBasicInformationService>();
-			MockPostPCNService = new Mock<PostPCNService>();
-
 			MockDeleteTransactionLogger = new Mock<ILogger<DeleteTransactionService>>();
 			MockGetLivenessKeyLogger = new Mock<ILogger<GetLivenessKeyService>>();
 			MockGetTokenLogger = new Mock<ILogger<GetTokenService>>();
@@ -65,6 +55,11 @@ namespace Test.BackendAPI.Modules.Philsys.UnitTests
 			MockPostBasicInformationLogger = new Mock<ILogger<PostBasicInformationService>>();
 			MockPostPCNLogger = new Mock<ILogger<PostPCNService>>();
 			MockUpdateFaceLivenessSessionLogger = new Mock<ILogger<UpdateFaceLivenessSessionService>>();
+
+			// Post
+			GetTokenService = new GetTokenService(MockHttpClientFactory.Object, MockGetTokenLogger.Object);
+			PostBasicInformationService = new PostBasicInformationService(MockHttpClientFactory.Object, MockPostBasicInformationLogger.Object);
+			PostPCNService = new PostPCNService(MockHttpClientFactory.Object,MockPostPCNLogger.Object);
 
 			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
@@ -123,9 +118,9 @@ namespace Test.BackendAPI.Modules.Philsys.UnitTests
 				MockPhilSysRepository.Object,
 				MockPhilSysResultRepository.Object,
 				MockUpdateFaceLivenessSessionLogger.Object,
-				MockPostBasicInformationService.Object,
-				MockPostPCNService.Object,
-				MockGetTokenService.Object,
+				PostBasicInformationService,
+				PostPCNService,
+				GetTokenService,
 				Configuration
 			);
 		}
