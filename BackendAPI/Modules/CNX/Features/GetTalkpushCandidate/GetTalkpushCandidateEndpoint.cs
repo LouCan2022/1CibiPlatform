@@ -1,6 +1,6 @@
 ﻿namespace CNX.Features.GetTalkpushCandidate;
 
-public record GetTalkpushCandidateRequest(string request) : ICommand<GetTalkpushCandidateResponse>;
+public record GetTalkpushCandidateRequest(string request);
 
 public record GetTalkpushCandidateResponse(List<CandidateResponseDto> CandidateResponseDto);
 

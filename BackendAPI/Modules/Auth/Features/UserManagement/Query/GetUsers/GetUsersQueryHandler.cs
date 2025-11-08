@@ -1,6 +1,9 @@
 ﻿namespace Auth.Features.UserManagement.Query.GetUsers;
 
-public record GetUsersQueryRequest(int? PageNumber = 1, int? PageSize = 10) : IQuery<GetUsersQueryResult>;
+public record GetUsersQueryRequest(
+	int? PageNumber = 1, int?
+	PageSize = 10,
+	string? SearchTerm = null) : IQuery<GetUsersQueryResult>;
 
 public record GetUsersQueryResult(PaginatedResult<UsersDTO> Users);
 
@@ -32,7 +35,8 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQueryRequest, GetUsers
 
 		var paginationRequest = new PaginationRequest(
 			request.PageNumber ?? 1,
-			request.PageSize ?? 10);
+			request.PageSize ?? 10,
+			request.SearchTerm);
 
 		var userData = await this._userService.GetUsersAsync(
 			paginationRequest,

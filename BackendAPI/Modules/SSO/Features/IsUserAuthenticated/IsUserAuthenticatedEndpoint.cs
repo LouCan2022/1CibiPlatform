@@ -1,6 +1,6 @@
 ﻿namespace SSO.Features.IsUserAuthenticated;
 
-public record IsUserAuthenticatedRequest() : ICommand<IsUserAuthenticatedResponse>;
+public record IsUserAuthenticatedRequest();
 
 public record IsUserAuthenticatedResponse(bool IsAuthenticated);
 

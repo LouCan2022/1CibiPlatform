@@ -37,6 +37,41 @@ public class AuthRepository : IAuthRepository
 			);
 	}
 
+
+	public async Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+
+		var usersQuery = _dbcontext.AuthUsers
+			.Where(au => au.IsActive &&
+						(au.FirstName.Contains(paginationRequest.SearchTerm!) ||
+						 au.LastName.Contains(paginationRequest.SearchTerm!) ||
+						 au.Email.Contains(paginationRequest.SearchTerm!)));
+
+
+		var totalRecords = await usersQuery.CountAsync(cancellationToken);
+
+		var users = await usersQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(au => new UsersDTO(
+					au.Id,
+					au.Email,
+					au.FirstName,
+					au.MiddleName!,
+					au.LastName))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<UsersDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  users
+			);
+	}
+
+
 	public async Task<Authusers> GetRawUserAsync(Guid id)
 	{
 		return await _dbcontext.AuthUsers

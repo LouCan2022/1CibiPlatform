@@ -12,6 +12,8 @@ public interface IAuthRepository
 
 	Task<PasswordResetToken> GetUserTokenAsync(string token);
 
+	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+
 	Task<bool> SaveUserAsync(Authusers user);
 
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
