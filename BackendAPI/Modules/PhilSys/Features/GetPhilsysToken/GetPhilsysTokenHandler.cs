@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.GetPhilSysToken;
 public record GetPhilSysTokenCommand(string client_id, string client_secret) : ICommand<GetCredentialResult>;
-public record GetCredentialResult(CredentialResponseDTO CredentialResponseDTO);
+public record GetCredentialResult(string AccessToken);
 public class GetPhilSysTokenHandler : ICommandHandler<GetPhilSysTokenCommand, GetCredentialResult>
 {
 	private readonly GetTokenService _getTokenService;

@@ -13,7 +13,7 @@ public class GetTokenService
         _logger = logger;
     }
 
-    public async Task<CredentialResponseDTO> GetPhilsysTokenAsync(
+    public async Task<string> GetPhilsysTokenAsync(
         string clientId,
         string clientSecret)
     {
@@ -39,14 +39,10 @@ public class GetTokenService
 
 		var tokenData = responseBody!.data;
 
-		return new CredentialResponseDTO(
-			tokenData.access_token,
-			tokenData.token_type,
-			tokenData.expires_at
-		);
+		return tokenData.access_token;
 	}
 
-	private async Task<HttpResponseMessage> SendRequestAsync(
+	public virtual async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
 		object body)
 	{
