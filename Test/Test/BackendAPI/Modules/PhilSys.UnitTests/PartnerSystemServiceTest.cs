@@ -47,7 +47,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 		}
 
 		[Fact]
-		public async Task PartnerSystemService_ShouldReturnPartnerSystemResponse_WhenSuccessful()
+		public async Task PartnerSystemService_ShouldReturnLivenessLink_WhenSuccessful()
 		{
 			// Assert
 			var service = _fixture.PartnerSystemService;

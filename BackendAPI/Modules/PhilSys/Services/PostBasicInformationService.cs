@@ -47,7 +47,7 @@ public class PostBasicInformationService
 
 			_logger.LogError("Basic Information request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
-			throw new HttpRequestException($"Basic Information request failed: {errorResponse!.message} Please contact the administrator.");
+			throw new HttpRequestException("Basic Information request failed. Please contact the administrator.");
 		}
 
 		_logger.LogInformation("Successful Basic Information Request.");

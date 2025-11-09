@@ -32,7 +32,7 @@ public class GetTokenService
 		if (!response.IsSuccessStatusCode)
 		{
 			_logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
-			throw new HttpRequestException($"PhilSys token request failed.");
+			throw new HttpRequestException("PhilSys token request failed.");
 		}
 
 		_logger.LogInformation("Successful Request for Token.");

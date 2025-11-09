@@ -38,7 +38,7 @@ public class PostPCNService
 
 			_logger.LogError("PCN request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
-			throw new HttpRequestException($"PCN request failed: {errorResponse!.message} Please contact the administrator.");
+			throw new HttpRequestException("PCN request failed. Please contact the administrator.");
 		}
 
 		_logger.LogInformation("Successful PCN Request.");
