@@ -4,6 +4,8 @@ using BuildingBlocks.SharedServices.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Configuration;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 {
@@ -13,8 +15,9 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		public Mock<IHashService> MockHashService { get; private set; }
 		public Mock<ISecureToken> MockSecureToken { get; private set; }
 		public Mock<IPhilSysRepository> MockPhilSysRepository { get; private set; }
-		public Mock<IPhilSysResultRepository> MockPhilSysResultRepository { get; private set;}
+		public Mock<IPhilSysResultRepository> MockPhilSysResultRepository { get; private set; }
 		public Mock<IHttpClientFactory> MockHttpClientFactory { get; private set; }
+		public Mock<HttpClient> MockHttpClient { get; private set; }
 
 		// Loggers
 		public Mock<ILogger<DeleteTransactionService>> MockDeleteTransactionLogger { get; private set; }
@@ -23,7 +26,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		public Mock<ILogger<LivenessSessionService>> MockLivenessSessionLogger { get; private set; }
 		public Mock<ILogger<PartnerSystemService>> MockPartnerSystemLogger { get; private set; }
 		public Mock<ILogger<PostBasicInformationService>> MockPostBasicInformationLogger { get; private set; }
-		public Mock<ILogger<PostPCNService>> MockPostPCNLogger { get; private set; }	
+		public Mock<ILogger<PostPCNService>> MockPostPCNLogger { get; private set; }
 		public Mock<ILogger<UpdateFaceLivenessSessionService>> MockUpdateFaceLivenessSessionLogger { get; private set; }
 
 		// Configuration
@@ -33,7 +36,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		public DeleteTransactionService DeleteTransactionService { get; private set; }
 		public GetLivenessKeyService GetLivenessKeyService { get; private set; }
 		public GetTokenService GetTokenService { get; private set; }
-		public LivenessSessionService LivenessSessionService { get; private set; }	
+		public LivenessSessionService LivenessSessionService { get; private set; }
 		public PartnerSystemService PartnerSystemService { get; private set; }
 		public PostBasicInformationService PostBasicInformationService { get; private set; }
 		public PostPCNService PostPCNService { get; private set; }
@@ -45,6 +48,8 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 			MockPhilSysRepository = new Mock<IPhilSysRepository>();
 			MockPhilSysResultRepository = new Mock<IPhilSysResultRepository>();
 			MockHttpClientFactory = new Mock<IHttpClientFactory>();
+
+			MockHttpClient = new Mock<HttpClient>();
 			MockSecureToken = new Mock<ISecureToken>();
 
 			MockDeleteTransactionLogger = new Mock<ILogger<DeleteTransactionService>>();
@@ -55,11 +60,6 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 			MockPostBasicInformationLogger = new Mock<ILogger<PostBasicInformationService>>();
 			MockPostPCNLogger = new Mock<ILogger<PostPCNService>>();
 			MockUpdateFaceLivenessSessionLogger = new Mock<ILogger<UpdateFaceLivenessSessionService>>();
-
-			// Post
-			GetTokenService = new GetTokenService(MockHttpClientFactory.Object, MockGetTokenLogger.Object);
-			PostBasicInformationService = new PostBasicInformationService(MockHttpClientFactory.Object, MockPostBasicInformationLogger.Object);
-			PostPCNService = new PostPCNService(MockHttpClientFactory.Object,MockPostPCNLogger.Object);
 
 			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
@@ -78,7 +78,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 				MockPhilSysRepository.Object,
 				new Mock<ILogger<DeleteTransactionService>>().Object
 			);
-			
+
 			GetLivenessKeyService = new GetLivenessKeyService(
 				MockGetLivenessKeyLogger.Object,
 				Configuration
@@ -123,11 +123,58 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 				GetTokenService,
 				Configuration
 			);
+
+			var handlerStub = new DelegatingHandlerStub((request, ct) =>
+			{
+				if (request.RequestUri.AbsolutePath.Contains("auth"))
+				{
+					// Response for GetTokenService
+					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+					{
+						Content = JsonContent.Create(new { data = new { access_token = "mock-token" } })
+					});
+				}
+				else if (request.RequestUri.AbsolutePath.Contains("post-basic-info"))
+				{
+					// Response for PostBasicInformationService
+					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+					{
+						Content = JsonContent.Create(new { result = "success" })
+					});
+				}
+				else if (request.RequestUri.AbsolutePath.Contains("post-pcn"))
+				{
+					// Response for PostPCNService
+					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Created)
+					{
+						Content = JsonContent.Create(new { result = "created" })
+					});
+				}
+
+				// Default fallback
+				return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest));
+			});
+
 		}
+
 
 		public void Dispose()
 		{
 			// nothing to dispose currently
 		}
 	}
+
+	public class DelegatingHandlerStub : DelegatingHandler
+	{
+		private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _handlerFunc;
+		public DelegatingHandlerStub(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> handlerFunc)
+		{
+			_handlerFunc = handlerFunc;
+		}
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+		{
+			return _handlerFunc(request, cancellationToken);
+		}
+	}
+
 }

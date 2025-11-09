@@ -41,7 +41,7 @@ public class UpdateFaceLivenessSessionService
 		CancellationToken ct = default
 		)
 	{
-		CredentialResponseDTO? token = null;
+		string accessToken = string.Empty;
 		BasicInformationOrPCNResponseDTO responseBody = null!;
 
 		_logger.LogInformation("Updating Face Liveness Session for Token: {HashToken}", HashToken);
@@ -57,15 +57,13 @@ public class UpdateFaceLivenessSessionService
 
 		try
 		{
-			token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
+			accessToken = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
 		}
 		catch (HttpRequestException ex)
 		{
 			_logger.LogError("PhilSys token request failed at the calling function. {Exception}", ex);
 			throw new InternalServerException("PhilSys token request for verification process failed. Please contact the administrator.");
 		}
-
-		string accessToken = token!.access_token;
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
