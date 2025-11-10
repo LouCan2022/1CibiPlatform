@@ -171,7 +171,7 @@ public class PhilSysService : IPhilSysService
 			);
 	}
 
-	public virtual async Task<HttpResponseMessage> SendRequestAsync(
+	private async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
 		object body)
 	{

@@ -4,7 +4,6 @@ public record GetTalkpushCandidateRequest(string request);
 
 public record GetTalkpushCandidateResponse(List<CandidateResponseDto> CandidateResponseDto);
 
-
 public class GetTalkpushCandidateEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
