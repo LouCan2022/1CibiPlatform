@@ -13,12 +13,12 @@ public class GetUsersEndpoint : ICarterModule
 			ISender sender,
 			CancellationToken cancellationToken) =>
 		{
-			var command = new GetUsersQueryRequest(
-				request.PageNumber, 
-				request.PageSize , 
+			var query = new GetUsersQueryRequest(
+				request.PageNumber,
+				request.PageSize,
 				request.SearchTerm);
 
-			var users = await sender.Send(command, cancellationToken);
+			var users = await sender.Send(query, cancellationToken);
 
 			var result = new GetUsersEndpointResponse(users.Users);
 

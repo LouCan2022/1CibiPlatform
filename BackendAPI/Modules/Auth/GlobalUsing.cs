@@ -18,7 +18,7 @@ global using BuildingBlocks.Exceptions;
 global using FluentValidation;
 global using System.IdentityModel.Tokens.Jwt;
 global using Microsoft.Extensions.Logging;
-
+global using Microsoft.Extensions.Caching.Hybrid;
 
 // path
 global using Auth.Data.Entities;
