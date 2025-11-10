@@ -9,11 +9,73 @@ public class AuthRepository : IAuthRepository
 		this._dbcontext = dbcontext;
 	}
 
+	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
+		PaginationRequest paginationRequest,
+		CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext.AuthUsers.LongCountAsync(cancellationToken);
+
+		var users = await _dbcontext.AuthUsers
+			.Where(au => au.IsActive)
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(au => new UsersDTO(
+					au.Id,
+					au.Email,
+					au.FirstName,
+					au.MiddleName!,
+					au.LastName))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<UsersDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  users
+			);
+	}
+
+
+	public async Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+
+		var usersQuery = _dbcontext.AuthUsers
+				.Where(au => au.IsActive &&
+					(EF.Functions.ILike(au.FirstName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(au.LastName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(au.Email, $"%{paginationRequest.SearchTerm}%")));
+
+
+		var totalRecords = await usersQuery.CountAsync(cancellationToken);
+
+		var users = await usersQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(au => new UsersDTO(
+					au.Id,
+					au.Email,
+					au.FirstName,
+					au.MiddleName!,
+					au.LastName))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<UsersDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  users
+			);
+	}
+
+
 	public async Task<Authusers> GetRawUserAsync(Guid id)
 	{
 		return await _dbcontext.AuthUsers
 					 .Where(au => au.Id == id && au.IsActive)
-					 .AsNoTracking()
 					 .FirstOrDefaultAsync();
 	}
 
@@ -51,7 +113,7 @@ public class AuthRepository : IAuthRepository
 														 on user.Id equals authRefreshToken.UserId
 							  join userRole in _dbcontext.AuthUserAppRoles
 														 on user.Id equals userRole.UserId into userRolesGroup
-							  where user.Id == authRefreshToken.UserId &&
+							  where authRefreshToken.UserId == userId &&
 							  user.IsActive == true && authRefreshToken.IsActive == true
 							  select new UserDataDTO(
 							   user.Id,
@@ -79,7 +141,6 @@ public class AuthRepository : IAuthRepository
 		var passwordResetToken = await _dbcontext.PasswordResetToken
 			.Where(prt => prt.TokenHash == tokenHash &&
 						  prt.IsUsed == false)
-			.AsNoTracking()
 			.FirstOrDefaultAsync();
 
 		return passwordResetToken!;
@@ -193,6 +254,7 @@ public class AuthRepository : IAuthRepository
 	{
 		return await _dbcontext.OtpVerification
 					 .Where(ov => ov.Email == email && ov.IsUsed == isUsed)
+					 .OrderByDescending(ov => ov.CreatedAt)
 					 .FirstOrDefaultAsync();
 
 	}
@@ -255,4 +317,6 @@ public class AuthRepository : IAuthRepository
 
 		return true;
 	}
+
+
 }

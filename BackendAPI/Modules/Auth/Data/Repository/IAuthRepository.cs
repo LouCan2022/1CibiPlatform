@@ -2,6 +2,7 @@
 
 public interface IAuthRepository
 {
+	Task<PaginatedResult<UsersDTO>> GetUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
 
@@ -10,6 +11,8 @@ public interface IAuthRepository
 	Task<Authusers> GetRawUserAsync(Guid id);
 
 	Task<PasswordResetToken> GetUserTokenAsync(string token);
+
+	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 
 	Task<bool> SaveUserAsync(Authusers user);
 

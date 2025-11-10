@@ -22,4 +22,6 @@ global using SSO;
 global using Sustainsys.Saml2;
 global using Sustainsys.Saml2.Metadata;
 global using Sustainsys.Saml2.AspNetCore2;
-global using Sustainsys.Saml2.Configuration;
+global using Microsoft.Extensions.Caching.Hybrid;
+global using Serilog;
+global using Microsoft.AspNetCore.HttpOverrides;

@@ -27,9 +27,9 @@ public sealed class UpdatePasswordValidator : AbstractValidator<UpdatePasswordCo
 
 public class UpdatePasswordHandler : ICommandHandler<UpdatePasswordCommand, UpdatePasswordResult>
 {
-	private readonly IForgotPassword _forgotPassword;
+	private readonly IForgotPasswordService _forgotPassword;
 
-	public UpdatePasswordHandler(IForgotPassword forgotPassword)
+	public UpdatePasswordHandler(IForgotPasswordService forgotPassword)
 	{
 		this._forgotPassword = forgotPassword;
 	}
