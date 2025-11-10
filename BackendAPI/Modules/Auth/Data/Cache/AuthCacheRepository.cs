@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Hybrid;
-
-namespace Auth.Data.Cache;
+﻿namespace Auth.Data.Cache;
 
 public class AuthCacheRepository : IAuthRepository
 {
@@ -43,99 +41,98 @@ public class AuthCacheRepository : IAuthRepository
 			cancellationToken);
 	}
 
-	public Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification)
+	public async Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.DeleteOtpRecordIfExpired(otpVerification);
 	}
 
-	public Task<UserDataDTO> GetNewUserDataAsync(Guid userId)
+	public async Task<UserDataDTO> GetNewUserDataAsync(Guid userId)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.GetNewUserDataAsync(userId);
 	}
 
-	public Task<Authusers> GetRawUserAsync(Guid id)
+	public async Task<Authusers> GetRawUserAsync(Guid id)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.GetRawUserAsync(id);
 	}
 
-
-	public Task<LoginDTO> GetUserDataAsync(LoginWebCred cred)
+	public async Task<LoginDTO> GetUserDataAsync(LoginWebCred cred)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.GetUserDataAsync(cred);
 	}
 
-	public Task<PasswordResetToken> GetUserTokenAsync(string token)
+	public async Task<PasswordResetToken> GetUserTokenAsync(string token)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.GetUserTokenAsync(token);
 	}
 
-	public Task<bool> InsertOtpVerification(OtpVerification otpVerification)
+	public async Task<bool> InsertOtpVerification(OtpVerification otpVerification)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.InsertOtpVerification(otpVerification);
 	}
 
-	public Task<Authusers> IsUserEmailExistAsync(string email)
+	public async Task<Authusers> IsUserEmailExistAsync(string email)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.IsUserEmailExistAsync(email);
 	}
 
-	public Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email, bool isUsed)
+	public async Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email, bool isUsed)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.IsUserEmailExistInOtpVerificationAsync(email, isUsed);
 	}
 
-	public Task<AuthRefreshToken> IsUserExistAsync(Guid userId)
+	public async Task<AuthRefreshToken> IsUserExistAsync(Guid userId)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.IsUserExistAsync(userId);
 	}
 
-	public Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO)
+	public async Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.OtpVerificationUserData(otpVerificationRequestDTO);
 	}
 
-	public Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto)
+	public async Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.RegisterUserAsync(userDto);
 	}
 
-	public Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate)
+	public async Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.SaveRefreshTokenAsync(userId, hashToken, expiryDate);
 	}
 
-	public Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken)
+	public async Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.SaveToResetPasswordToken(passwordResetToken);
 	}
 
-	public Task<bool> SaveUserAsync(Authusers user)
+	public async Task<bool> SaveUserAsync(Authusers user)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.SaveUserAsync(user);
 	}
 
-	public Task<bool> UpdateAuthUserPassword(Authusers authusers)
+	public async Task<bool> UpdateAuthUserPassword(Authusers authusers)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.UpdateAuthUserPassword(authusers);
 	}
 
-	public Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken)
+	public async Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.UpdatePasswordResetTokenAsUsedAsync(passwordResetToken);
 	}
 
-	public Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason)
+	public async Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.UpdateRevokeReasonAsync(authRefreshToken, reason);
 	}
 
-	public Task<bool> UpdateValidateOtp(OtpVerification otpVerification)
+	public async Task<bool> UpdateValidateOtp(OtpVerification otpVerification)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.UpdateValidateOtp(otpVerification);
 	}
 
-	public Task<bool> UpdateVerificationCodeAsync(OtpVerification userDto)
+	public async Task<bool> UpdateVerificationCodeAsync(OtpVerification userDto)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.UpdateVerificationCodeAsync(userDto);
 	}
 }
