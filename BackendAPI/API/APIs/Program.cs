@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.HttpOverrides;
-
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
 builder.Services.ConfigureEnvironment(builder);
@@ -11,6 +9,7 @@ builder.Services
 	.AddLoggingConfiguration(builder.Configuration)
 	.AddModuleMediaTR()
 	.AddModuleCarter()
+	.AddHybridCaches()
 	.AddModuleServices()
 	.AddJwtAuthentication(builder.Configuration, builder.Environment)
 	.AddModuleInfrastructure(builder.Configuration)
