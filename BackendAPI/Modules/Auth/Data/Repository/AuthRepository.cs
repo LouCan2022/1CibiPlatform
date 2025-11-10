@@ -42,10 +42,10 @@ public class AuthRepository : IAuthRepository
 	{
 
 		var usersQuery = _dbcontext.AuthUsers
-			.Where(au => au.IsActive &&
-						(au.FirstName.Contains(paginationRequest.SearchTerm!) ||
-						 au.LastName.Contains(paginationRequest.SearchTerm!) ||
-						 au.Email.Contains(paginationRequest.SearchTerm!)));
+				.Where(au => au.IsActive &&
+					(EF.Functions.ILike(au.FirstName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(au.LastName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(au.Email, $"%{paginationRequest.SearchTerm}%")));
 
 
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);

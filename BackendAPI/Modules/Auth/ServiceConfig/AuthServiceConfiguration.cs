@@ -1,4 +1,5 @@
-﻿using BuildingBlocks.SharedServices.Implementations;
+﻿using Auth.Data.Cache;
+using BuildingBlocks.SharedServices.Implementations;
 
 namespace Auth.ServiceConfig
 {
@@ -42,6 +43,8 @@ namespace Auth.ServiceConfig
 			services.AddScoped<ISecureToken, SecureToken>();
 			services.AddScoped<IUserService, UserService>();
 
+			services.Decorate<IAuthRepository, AuthCacheRepository>();
+
 			return services;
 		}
 
@@ -64,5 +67,6 @@ namespace Auth.ServiceConfig
 		}
 
 		#endregion
+
 	}
 }
