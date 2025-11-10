@@ -15,17 +15,16 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		public Mock<IPhilSysRepository> MockPhilSysRepository { get; private set; }
 		public Mock<IPhilSysResultRepository> MockPhilSysResultRepository { get; private set; }
 		public Mock<IHttpClientFactory> MockHttpClientFactory { get; private set; }
+		public Mock<IPhilSysService> MockPhilSysService { get; private set; }
 		public Mock<HttpClient> MockHttpClient { get; private set; }
 
 		// Loggers
 		public Mock<ILogger<DeleteTransactionService>> MockDeleteTransactionLogger { get; private set; }
 		public Mock<ILogger<GetLivenessKeyService>> MockGetLivenessKeyLogger { get; private set; }
-		public Mock<ILogger<GetTokenService>> MockGetTokenLogger { get; private set; }
 		public Mock<ILogger<LivenessSessionService>> MockLivenessSessionLogger { get; private set; }
 		public Mock<ILogger<PartnerSystemService>> MockPartnerSystemLogger { get; private set; }
-		public Mock<ILogger<PostBasicInformationService>> MockPostBasicInformationLogger { get; private set; }
-		public Mock<ILogger<PostPCNService>> MockPostPCNLogger { get; private set; }
 		public Mock<ILogger<UpdateFaceLivenessSessionService>> MockUpdateFaceLivenessSessionLogger { get; private set; }
+		public Mock<ILogger<PhilSysService>> MockPhilSysServiceLogger { get; private set; }
 
 		// Configuration
 		public IConfiguration Configuration { get; private set; }
@@ -33,12 +32,10 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		// Service instances
 		public DeleteTransactionService DeleteTransactionService { get; private set; }
 		public GetLivenessKeyService GetLivenessKeyService { get; private set; }
-		public GetTokenService GetTokenService { get; private set; }
 		public LivenessSessionService LivenessSessionService { get; private set; }
 		public PartnerSystemService PartnerSystemService { get; private set; }
-		public PostBasicInformationService PostBasicInformationService { get; private set; }
-		public PostPCNService PostPCNService { get; private set; }
 		public UpdateFaceLivenessSessionService UpdateFaceLivenessSessionService { get; private set; }
+		public PhilSysService PhilSysService { get; private set; }
 		public PhilSysServiceFixture()
 		{
 			// init mocks
@@ -46,16 +43,15 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 			MockPhilSysRepository = new Mock<IPhilSysRepository>();
 			MockPhilSysResultRepository = new Mock<IPhilSysResultRepository>();
 			MockHttpClientFactory = new Mock<IHttpClientFactory>();
+			MockPhilSysService = new Mock<IPhilSysService>();
 			MockSecureToken = new Mock<ISecureToken>();
 
 			MockDeleteTransactionLogger = new Mock<ILogger<DeleteTransactionService>>();
 			MockGetLivenessKeyLogger = new Mock<ILogger<GetLivenessKeyService>>();
-			MockGetTokenLogger = new Mock<ILogger<GetTokenService>>();
 			MockLivenessSessionLogger = new Mock<ILogger<LivenessSessionService>>();
 			MockPartnerSystemLogger = new Mock<ILogger<PartnerSystemService>>();
-			MockPostBasicInformationLogger = new Mock<ILogger<PostBasicInformationService>>();
-			MockPostPCNLogger = new Mock<ILogger<PostPCNService>>();
 			MockUpdateFaceLivenessSessionLogger = new Mock<ILogger<UpdateFaceLivenessSessionService>>();
+			MockPhilSysServiceLogger = new Mock<ILogger<PhilSysService>>();
 
 			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
@@ -80,11 +76,6 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 				Configuration
 			);
 
-			GetTokenService = new GetTokenService(
-				MockHttpClientFactory.Object,
-				MockGetTokenLogger.Object
-			);
-
 			LivenessSessionService = new LivenessSessionService(
 				MockPhilSysRepository.Object,
 				MockHashService.Object,
@@ -99,24 +90,17 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 				MockSecureToken.Object
 			);
 
-			PostBasicInformationService = new PostBasicInformationService(
+			PhilSysService = new PhilSysService(
 				MockHttpClientFactory.Object,
-				MockPostBasicInformationLogger.Object
-			);
-
-			PostPCNService = new PostPCNService(
-				MockHttpClientFactory.Object,
-				MockPostPCNLogger.Object
-			);
+				MockPhilSysServiceLogger.Object
+				);
 
 			UpdateFaceLivenessSessionService = new UpdateFaceLivenessSessionService(
 				MockHttpClientFactory.Object,
 				MockPhilSysRepository.Object,
 				MockPhilSysResultRepository.Object,
 				MockUpdateFaceLivenessSessionLogger.Object,
-				PostBasicInformationService,
-				PostPCNService,
-				GetTokenService,
+				MockPhilSysService.Object,
 				Configuration
 			);
 		}

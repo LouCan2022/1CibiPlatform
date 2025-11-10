@@ -3,10 +3,6 @@ using FluentAssertions;
 using Moq;
 using PhilSys.Data.Entities;
 using PhilSys.DTO;
-using PhilSys.Services;
-using System.Net;
-using System.Net.Http.Json;
-using System.Text;
 using Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture;
 
 namespace Test.BackendAPI.Modules.PhilSys.UnitTests
@@ -80,7 +76,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 		{
 			// Arrange
 			var service = _fixture.UpdateFaceLivenessSessionService;
-			var hash_token = "vhash-token";
+			var hash_token = "hash-token";
 			var face_liveness_session_id = "valid-session-id";
 			_fixture.MockPhilSysRepository.Setup(x => x.UpdateFaceLivenessSessionAsync(
 				hash_token,
@@ -100,6 +96,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 		public async Task UpdateFaceLivenessSessionAsync_ShouldReturnData_WhenSuccessful()
 		{
 			// Arrange
+			var service = _fixture.UpdateFaceLivenessSessionService;
 			var hash_token = "hash-token";
 			var face_liveness_session_id = "valid-session-id";
 			var philsysTransaction = new PhilSysTransaction
@@ -112,9 +109,83 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 				CreatedAt = DateTime.UtcNow,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
 			};
+			var BasicInfoOrResponse = new BasicInformationOrPCNResponseDTO
+			(
+				code: "GASHJDG123",
+				token: "111111111111111111111111111111",
+				reference: "11111111111111111111",
+				face_url: "https://ekycbucket/link",
+				full_name: "JUAN BITAW DELA CRUZ",
+				first_name: "JUAN",
+				middle_name: "BITAW",
+				last_name: "DELA CRUZ",
+				suffix: null,
+				gender: "Male",
+				marital_status: "Single",
+				blood_type: "Unknown",
+				email: "N/A",
+				mobile_number: "09194224524",
+				birth_date: "2001-08-20",
+				full_address: "123 PUROK 7, BAGONG SILANG, QUEZON CITY, METRO MANILA, PHILIPPINES, 1101",
+				address_line_1: "123 PUROK 7",
+				address_line_2: null,
+				barangay: "Bagong Silang",
+				municipality: "Quezon City",
+				province: "Metro Manila",
+				country: "Philippines",
+				postal_code: "1101",
+				present_full_address: "45 PUROK 3, SAN ISIDRO, MAKATI CITY, METRO MANILA, PHILIPPINES, 1210",
+				present_address_line_1: "45 PUROK 3",
+				present_address_line_2: null,
+				present_barangay: "San Isidro",
+				present_municipality: "Makati City",
+				present_province: "Metro Manila",
+				present_country: "Philippines",
+				present_postal_code: "1210",
+				residency_status: "Filipino",
+				place_of_birth: "BACOLOD CITY, NEGROS OCCIDENTAL",
+				pob_municipality: "Bacolod City",
+				pob_province: "Negros Occidental",
+				pob_country: "Philippines"
+			);
 			var philsysTransactionResult = new VerificationResponseDTO
 			{
 				idv_session_id = Guid.NewGuid().ToString(),
+				verified = true,
+				data_subject = new DataSubject
+				{
+					digital_id = "DIG123456789",
+					national_id_number = "1234-5678-9012",
+					face_image_url = "https://example.com/images/face123.jpg",
+					full_name = "Juan Dela Cruz",
+					first_name = "Juan",
+					middle_name = "Santos",
+					last_name = "Dela Cruz",
+					suffix = "Jr.",
+					gender = "Male",
+					marital_status = "Single",
+					birth_date = "1990-05-15",
+					email = "juan.delacruz@example.com",
+					mobile_number = "+639171234567",
+					blood_type = "O+",
+					address = new Address
+					{
+						permanent = "123 Barangay Mabini, Calamba City, Laguna",
+						present = "Unit 5, Tower B, Makati City, Metro Manila"
+					},
+					place_of_birth = new PlaceOfBirth
+					{
+						full = "Calamba City, Laguna, Philippines",
+						municipality = "Calamba City",
+						province = "Laguna",
+						country = "Philippines"
+					}
+				}
+			};
+			var philsysTransactionResultforDB = new PhilSysTransactionResult
+			{
+				Trid = 1,
+				idv_session_id = Guid.NewGuid(),
 				verified = true,
 				data_subject = new DataSubject
 				{
@@ -150,24 +221,29 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 				hash_token
 			)).ReturnsAsync(philsysTransaction);
 			_fixture.MockPhilSysRepository.Setup(x => x.UpdateTransactionDataAsync(
-				philsysTransaction
+				It.IsAny<PhilSysTransaction>()
 			)).ReturnsAsync(philsysTransaction);
 			_fixture.MockPhilSysRepository
 			.Setup(x => x.UpdateFaceLivenessSessionAsync(hash_token, face_liveness_session_id))
 			.ReturnsAsync(philsysTransaction);
-			_fixture.GetTokenService
+			_fixture.MockPhilSysService
 			.Setup(x => x.GetPhilsysTokenAsync(It.IsAny<string>(), It.IsAny<string>()))
 			.ReturnsAsync("fake-access-token");
-			var service =  new UpdateFaceLivenessSessionService(
-				_fixture.MockHttpClientFactory.Object,
-				_fixture.MockPhilSysRepository.Object,
-				_fixture.MockPhilSysResultRepository.Object,
-				_fixture.MockUpdateFaceLivenessSessionLogger.Object,
-				_fixture.PostBasicInformationService,
-				_fixture.PostPCNService,
-				_fixture.GetTokenService,
-				_fixture.Configuration
-			);
+			_fixture.MockPhilSysService.Setup(x => x.PostBasicInformationAsync(It.IsAny<string>(), 
+				It.IsAny<string>(), 
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>()
+				))
+			.ReturnsAsync(BasicInfoOrResponse);
+			_fixture.MockPhilSysService.Setup(x => x.PostPCNAsync(It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>()
+				))
+			.ReturnsAsync(BasicInfoOrResponse);
+			_fixture.MockPhilSysResultRepository.Setup(x => x.AddTransactionResultDataAsync(It.IsAny<PhilSysTransactionResult>())).ReturnsAsync(true);
 
 			// Act
 			var result = await service.UpdateFaceLivenessSessionAsync(

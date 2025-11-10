@@ -1,17 +1,49 @@
 ﻿namespace PhilSys.Services;
-public class PostBasicInformationService
+
+public class PhilSysService : IPhilSysService
 {
 	private readonly HttpClient _httpClient;
-	private readonly ILogger<PostBasicInformationService> _logger;
-
-	public PostBasicInformationService(
-		IHttpClientFactory httpClientFactory,
-		ILogger<PostBasicInformationService> logger)
+	private readonly ILogger<PhilSysService> _logger;
+	public PhilSysService(
+	   IHttpClientFactory httpClientFactory,
+	   ILogger<PhilSysService> logger)
 	{
 		_httpClient = httpClientFactory.CreateClient("PhilSys");
 		_logger = logger;
 	}
 
+
+	// Get PhilSys Token
+	public async Task<string> GetPhilsysTokenAsync(
+		string clientId,
+		string clientSecret)
+	{
+		var body = new
+		{
+			client_id = clientId,
+			client_secret = clientSecret
+		};
+
+		_logger.LogInformation("Requesting PhilSys token with client_id: {ClientId}", clientId);
+
+		var response = await SendRequestAsync("auth", body);
+
+		var responseBody = await response.Content.ReadFromJsonAsync<PhilSysTokenResponse>();
+
+		if (!response.IsSuccessStatusCode)
+		{
+			_logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
+			throw new HttpRequestException("PhilSys token request failed.");
+		}
+
+		_logger.LogInformation("Successful Request for Token.");
+
+		var tokenData = responseBody!.data;
+
+		return tokenData.access_token;
+	}
+
+	// Post Basic Information
 	public async Task<BasicInformationOrPCNResponseDTO> PostBasicInformationAsync(
 		string first_name,
 		string middle_name,
@@ -19,11 +51,10 @@ public class PostBasicInformationService
 		string suffix,
 		string birth_date,
 		string bearer_token,
-		string face_liveness_session_id,
-		CancellationToken ct = default
+		string face_liveness_session_id
 		)
 	{
-	
+
 		var body = new
 		{
 			first_name,
@@ -36,14 +67,14 @@ public class PostBasicInformationService
 
 		_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearer_token);
 
-		var response = await SendRequestAsync("query", body, ct);
+		var response = await SendRequestAsync("query", body);
 
 		_logger.LogInformation("Sending basic information request for {FirstName} {MiddleName} {LastName} {Suffix}",
 								first_name, middle_name, last_name, suffix);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponseDTO>(ct);
+			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponseDTO>();
 
 			_logger.LogError("Basic Information request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
@@ -52,11 +83,50 @@ public class PostBasicInformationService
 
 		_logger.LogInformation("Successful Basic Information Request.");
 
-		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>(ct);
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>();
 
 		var returnData = responseBody!.data;
 
 		return ReturnData(returnData);
+	}
+
+	// Post PhilSys Card Number
+	public async Task<BasicInformationOrPCNResponseDTO> PostPCNAsync(
+		string value,
+		string bearer_token,
+		string face_liveness_session_id
+		)
+	{
+
+		var body = new
+		{
+			value,
+			face_liveness_session_id
+		};
+
+		_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearer_token);
+
+		var response = await SendRequestAsync("query/qr", body);
+
+		_logger.LogInformation("Sending PCN request for {PCN}", value);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponseDTO>();
+
+			_logger.LogError("PCN request failed: {Status} - {Body}", response.StatusCode, errorResponse);
+
+			throw new HttpRequestException("PCN request failed. Please contact the administrator.");
+		}
+
+		_logger.LogInformation("Successful PCN Request.");
+
+		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>();
+
+		var returnData = responseBody!.data;
+
+		return ReturnData(returnData);
+
 	}
 
 	private static BasicInformationOrPCNResponseDTO ReturnData(BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
@@ -101,11 +171,10 @@ public class PostBasicInformationService
 			);
 	}
 
-	private async Task<HttpResponseMessage> SendRequestAsync(
+	public virtual async Task<HttpResponseMessage> SendRequestAsync(
 		string endpoint,
-		object body,
-		CancellationToken ct)
+		object body)
 	{
-		return await _httpClient.PostAsJsonAsync(endpoint, body, ct);
+		return await _httpClient.PostAsJsonAsync(endpoint, body);
 	}
 }

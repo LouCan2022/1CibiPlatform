@@ -5,18 +5,17 @@ public record PostPCNCommand(string value,
 public record PostPCNResult(BasicInformationOrPCNResponseDTO PCNResponseDTO);
 public class PostPCNHandler : ICommandHandler<PostPCNCommand, PostPCNResult>
 {
-	private readonly PostPCNService _postPCNService;
-	public PostPCNHandler(PostPCNService postPCNService)
+	private readonly IPhilSysService _philsysService;
+	public PostPCNHandler(IPhilSysService philsysService)
 	{
-		_postPCNService = postPCNService;
+		_philsysService = philsysService;
 	}
 	public async Task<PostPCNResult> Handle(PostPCNCommand command, CancellationToken cancellationToken)
 	{
-		var result = await _postPCNService.PostPCNAsync(
+		var result = await _philsysService.PostPCNAsync(
 				command.value,
 				command.bearer_token,
-				command.face_liveness_session_id,
-				cancellationToken
+				command.face_liveness_session_id
 			);
 		return new PostPCNResult(result);
 	}

@@ -6,9 +6,7 @@ public class UpdateFaceLivenessSessionService
 	private readonly IPhilSysRepository _philSysRepository;
 	private readonly IPhilSysResultRepository _philSysResultRepository;
 	private readonly ILogger<UpdateFaceLivenessSessionService> _logger;
-	private readonly PostBasicInformationService _postBasicInformationService;
-	private readonly PostPCNService _postPCNService;
-	private readonly GetTokenService _getTokenService;
+	private readonly IPhilSysService _philSysService;
 	private readonly IConfiguration _configuration;
 	private readonly string client_id;
 	private readonly string client_secret;
@@ -18,18 +16,14 @@ public class UpdateFaceLivenessSessionService
 		IPhilSysRepository philSysRepository,
 		IPhilSysResultRepository philSysResultRepository,
 		ILogger<UpdateFaceLivenessSessionService> logger,
-		PostBasicInformationService PostBasicInformationService,
-		PostPCNService PostPCNService,
-		GetTokenService GetTokenService,
+		IPhilSysService philsysService,
 		IConfiguration configuration)
 	{
 		_httpClient = httpClientFactory.CreateClient("IDVClient");
 		_philSysRepository = philSysRepository;
 		_philSysResultRepository = philSysResultRepository;
 		_logger = logger;
-		_postBasicInformationService = PostBasicInformationService;
-		_postPCNService = PostPCNService;
-		_getTokenService = GetTokenService;
+		_philSysService = philsysService;
 		_configuration = configuration;
 		client_id = _configuration["PhilSys:ClientID"] ?? "";
 		client_secret = _configuration["PhilSys:ClientSecret"] ?? "";
@@ -57,7 +51,7 @@ public class UpdateFaceLivenessSessionService
 
 		try
 		{
-			accessToken = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
+			accessToken = await _philSysService.GetPhilsysTokenAsync(client_id, client_secret);
 		}
 		catch (HttpRequestException ex)
 		{
@@ -69,7 +63,7 @@ public class UpdateFaceLivenessSessionService
 		{
 			try
 			{
-				responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
+				responseBody = await _philSysService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
 			}
 			catch (HttpRequestException ex)
 			{
@@ -92,7 +86,7 @@ public class UpdateFaceLivenessSessionService
 		{
 			try
 			{
-				responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+				responseBody = await _philSysService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
 			}
 			catch (HttpRequestException ex)
 			{
@@ -153,7 +147,7 @@ public class UpdateFaceLivenessSessionService
 		}
 	}
 
-	private async Task AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
+	private async Task<bool> AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
 	{
 		var philsysTransactionResult = VerificationResponseDTO.Adapt<PhilSysTransactionResult>();
 		var result = await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
@@ -163,6 +157,7 @@ public class UpdateFaceLivenessSessionService
 			throw new InternalServerException("Failed to Add the Converted Response in PhilSys Transaction Results.");
 		}
 		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
+		return true;
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
