@@ -31,7 +31,6 @@
     <Folder Include="BackendAPI\Modules\SSO.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\PhilSys.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\SSO.UnitTests\" />
-    <Folder Include="BackendAPI\Modules\PhilSys.UnitTests\" />
     <Folder Include="UI\" />
   </ItemGroup>
 

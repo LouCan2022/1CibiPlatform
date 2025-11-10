@@ -50,7 +50,7 @@ public class UpdateFaceLivenessSessionService
 		if (result == null)
 		{
 			_logger.LogWarning("No transaction found for HashToken: {HashToken}. Unable to update Face Liveness Session.", HashToken);
-			throw new InternalServerException($"No transaction record found for HashToken: {HashToken}. Face Liveness Session update aborted.");
+			throw new InternalServerException("No transaction record found for your Token. Face Liveness Session update aborted.");
 		}
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {HashToken}", HashToken);
@@ -115,7 +115,7 @@ public class UpdateFaceLivenessSessionService
 
 	}
 
-	private async Task UpdateTransactionStatus(string HashToken)
+	private async Task<bool> UpdateTransactionStatus(string HashToken)
 	{
 		var existingTransaction = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
 
@@ -130,9 +130,11 @@ public class UpdateFaceLivenessSessionService
 		if (updateStatus == null)
 		{
 			_logger.LogError("Failed to Update the Transaction Status for {HashToken}.", HashToken);
+			return false;
 		}
 
 		_logger.LogInformation("Successfully Updated the Transaction Status.");
+		return true;
 	}
 
 	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
@@ -158,6 +160,7 @@ public class UpdateFaceLivenessSessionService
 		if (result == false)
 		{
 			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table.");
+			throw new InternalServerException("Failed to Add the Converted Response in PhilSys Transaction Results.");
 		}
 		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
 	}
@@ -170,7 +173,7 @@ public class UpdateFaceLivenessSessionService
 			{
 				idv_session_id = Tid.ToString(),
 				verified = false
-			};
+			}; 
 		}
 		return new VerificationResponseDTO
 		{

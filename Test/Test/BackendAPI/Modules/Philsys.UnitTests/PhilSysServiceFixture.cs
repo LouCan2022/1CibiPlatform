@@ -4,8 +4,6 @@ using BuildingBlocks.SharedServices.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Configuration;
-using System.Net;
-using System.Net.Http.Json;
 
 namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 {
@@ -48,8 +46,6 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 			MockPhilSysRepository = new Mock<IPhilSysRepository>();
 			MockPhilSysResultRepository = new Mock<IPhilSysResultRepository>();
 			MockHttpClientFactory = new Mock<IHttpClientFactory>();
-
-			MockHttpClient = new Mock<HttpClient>();
 			MockSecureToken = new Mock<ISecureToken>();
 
 			MockDeleteTransactionLogger = new Mock<ILogger<DeleteTransactionService>>();
@@ -123,41 +119,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 				GetTokenService,
 				Configuration
 			);
-
-			var handlerStub = new DelegatingHandlerStub((request, ct) =>
-			{
-				if (request.RequestUri.AbsolutePath.Contains("auth"))
-				{
-					// Response for GetTokenService
-					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-					{
-						Content = JsonContent.Create(new { data = new { access_token = "mock-token" } })
-					});
-				}
-				else if (request.RequestUri.AbsolutePath.Contains("post-basic-info"))
-				{
-					// Response for PostBasicInformationService
-					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-					{
-						Content = JsonContent.Create(new { result = "success" })
-					});
-				}
-				else if (request.RequestUri.AbsolutePath.Contains("post-pcn"))
-				{
-					// Response for PostPCNService
-					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Created)
-					{
-						Content = JsonContent.Create(new { result = "created" })
-					});
-				}
-
-				// Default fallback
-				return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest));
-			});
-
 		}
-
-
 		public void Dispose()
 		{
 			// nothing to dispose currently
