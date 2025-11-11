@@ -13,7 +13,10 @@ public class AuthRepository : IAuthRepository
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
 	{
-		var totalRecords = await _dbcontext.AuthUsers.LongCountAsync(cancellationToken);
+		var totalRecords = await _dbcontext
+			.AuthUsers
+			.Where(au => au.IsActive)
+			.LongCountAsync(cancellationToken);
 
 		var users = await _dbcontext.AuthUsers
 			.Where(au => au.IsActive)
