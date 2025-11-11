@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace Test.BackendAPI.Infrastructure;
+namespace Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
-public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>
+public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
 	private readonly IServiceScope _scope;
 	protected readonly ISender _sender;
@@ -27,6 +27,32 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
 		_dbContext = _scope.ServiceProvider.GetRequiredService<AuthApplicationDbContext>();
 		_httpContextAccessor = _scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
 		_configuration = _scope.ServiceProvider.GetRequiredService<IConfiguration>();
+	}
+
+	// Runs before each test. Ensures database tables used in tests are cleaned to avoid cross-test pollution.
+	public async Task InitializeAsync()
+	{
+		try
+		{
+			if (_dbContext is not null)
+			{
+				var users = _dbContext.AuthUsers.ToList();
+				if (users.Any())
+				{
+					_dbContext.AuthUsers.RemoveRange(users);
+					await _dbContext.SaveChangesAsync();
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			throw new Exception("Error during database cleanup in InitializeAsync: " + ex.Message, ex);
+		}
+	}
+
+	public Task DisposeAsync()
+	{
+		return Task.CompletedTask;
 	}
 }
 
