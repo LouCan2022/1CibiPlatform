@@ -31,8 +31,7 @@ public class UpdateFaceLivenessSessionService
 
 	public async Task<VerificationResponseDTO> UpdateFaceLivenessSessionAsync(
 		string HashToken,
-		string FaceLivenessSessionId,
-		CancellationToken ct = default
+		string FaceLivenessSessionId
 		)
 	{
 		string accessToken = string.Empty;
@@ -49,28 +48,13 @@ public class UpdateFaceLivenessSessionService
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {HashToken}", HashToken);
 
-		try
-		{
-			accessToken = await _philSysService.GetPhilsysTokenAsync(client_id, client_secret);
-		}
-		catch (HttpRequestException ex)
-		{
-			_logger.LogError("PhilSys token request failed at the calling function. {Exception}", ex);
-			throw new InternalServerException("PhilSys token request for verification process failed. Please contact the administrator.");
-		}
+		accessToken = await _philSysService.GetPhilsysTokenAsync(client_id, client_secret);
+	
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
-			try
-			{
-				responseBody = await _philSysService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-			}
-			catch (HttpRequestException ex)
-			{
-				_logger.LogError("Basic Information request failed: {Exception}", ex);
-				throw new InternalServerException("Basic Information request failed. Please contact the administrator.");
-			}
-
+			responseBody = await _philSysService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
+		
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
@@ -84,16 +68,8 @@ public class UpdateFaceLivenessSessionService
 
 		if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
-			try
-			{
-				responseBody = await _philSysService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
-			}
-			catch (HttpRequestException ex)
-			{
-				_logger.LogError("PhilSys Card Number request failed: {Exception}", ex);
-				throw new InternalServerException("PhilSys Card Number request failed. Please contact the administrator.");
-			}
-
+			responseBody = await _philSysService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+		
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
@@ -106,7 +82,6 @@ public class UpdateFaceLivenessSessionService
 		}
 
 		return new VerificationResponseDTO { };
-
 	}
 
 	private async Task<bool> UpdateTransactionStatus(string HashToken)

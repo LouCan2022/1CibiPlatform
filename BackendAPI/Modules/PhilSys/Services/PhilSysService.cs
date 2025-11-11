@@ -33,7 +33,7 @@ public class PhilSysService : IPhilSysService
 		if (!response.IsSuccessStatusCode)
 		{
 			_logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
-			throw new HttpRequestException("PhilSys token request failed.");
+			throw new InternalServerException("PhilSys token request failed.");
 		}
 
 		_logger.LogInformation("Successful Request for Token.");
@@ -78,7 +78,7 @@ public class PhilSysService : IPhilSysService
 
 			_logger.LogError("Basic Information request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
-			throw new HttpRequestException("Basic Information request failed. Please contact the administrator.");
+			throw new InternalServerException("Basic Information request failed. Please contact the administrator.");
 		}
 
 		_logger.LogInformation("Successful Basic Information Request.");
@@ -116,7 +116,7 @@ public class PhilSysService : IPhilSysService
 
 			_logger.LogError("PCN request failed: {Status} - {Body}", response.StatusCode, errorResponse);
 
-			throw new HttpRequestException("PCN request failed. Please contact the administrator.");
+			throw new InternalServerException("PCN request failed. Please contact the administrator.");
 		}
 
 		_logger.LogInformation("Successful PCN Request.");
