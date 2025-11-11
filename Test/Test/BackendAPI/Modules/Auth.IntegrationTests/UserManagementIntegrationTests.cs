@@ -1,7 +1,7 @@
 ﻿using Auth.Data.Entities;
 using Auth.Features.UserManagement.Query.GetUsers;
 using FluentAssertions;
-using Test.BackendAPI.Infrastructure;
+using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
 
@@ -44,7 +44,6 @@ public class UserManagementIntegrationTests : BaseIntegrationTest
 		result.Users.Count.Should().Be(1);
 		result.Users.Data.ElementAt(0).firstName.Should().Be("Admin1");
 		result.Users.Data.ElementAt(0).email.Should().Be("john@example1.com");
-
 	}
 
 	[Fact]

@@ -3,8 +3,8 @@ using Auth.Features.IsChangePasswordTokenValid;
 using Auth.Features.UpdatePassword;
 using Auth.Data.Entities;
 using FluentAssertions;
-using Test.BackendAPI.Infrastructure;
 using BuildingBlocks.Exceptions;
+using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
 

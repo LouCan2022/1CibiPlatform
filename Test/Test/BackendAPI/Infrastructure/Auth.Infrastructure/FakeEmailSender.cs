@@ -1,6 +1,6 @@
 ﻿using BuildingBlocks.SharedServices.Interfaces;
 
-namespace Test.BackendAPI.Infrastructure;
+namespace Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 public class FakeEmailSender : IEmailService
 {

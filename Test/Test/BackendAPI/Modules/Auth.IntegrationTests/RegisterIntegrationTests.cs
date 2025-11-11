@@ -2,8 +2,8 @@ using Auth.DTO;
 using Auth.Features.Register;
 using Auth.Data.Entities;
 using FluentAssertions;
-using Test.BackendAPI.Infrastructure;
 using Auth.Features.VerifyOtp;
+using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
 

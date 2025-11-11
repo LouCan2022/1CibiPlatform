@@ -3,7 +3,7 @@ using Auth.DTO;
 using Auth.Features.Login;
 using BuildingBlocks.Exceptions;
 using FluentAssertions;
-using Test.BackendAPI.Infrastructure;
+using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 using static Auth.Features.LoginWeb.LoginWebHandler;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;

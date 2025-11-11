@@ -4,8 +4,8 @@ using Auth.DTO;
 using Auth.Features.Logout;
 using Auth.Data.Entities;
 using FluentAssertions;
-using Test.BackendAPI.Infrastructure;
 using BuildingBlocks.Exceptions;
+using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
 
