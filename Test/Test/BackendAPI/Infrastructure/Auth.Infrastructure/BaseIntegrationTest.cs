@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace Test.BackendAPI.Infrastructure;
+namespace Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
-public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
+public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
 	private readonly IServiceScope _scope;
 	protected readonly ISender _sender;
