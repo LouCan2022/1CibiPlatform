@@ -4,313 +4,312 @@ using FluentAssertions;
 using Moq;
 using Test.BackendAPI.Modules.Auth.UnitTests.Fixture;
 
-namespace Test.BackendAPI.Modules.Auth.UnitTests
+namespace Test.BackendAPI.Modules.Auth.UnitTests;
+
+public class RegisterServiceTests : IClassFixture<AuthServiceFixture>
 {
-	public class RegisterServiceTests : IClassFixture<AuthServiceFixture>
+	private readonly AuthServiceFixture _fixture;
+
+	public RegisterServiceTests(AuthServiceFixture fixture)
 	{
-		private readonly AuthServiceFixture _fixture;
+		_fixture = fixture;
+	}
 
-		public RegisterServiceTests(AuthServiceFixture fixture)
+	[Fact]
+	public async Task RegisterAsync_ShouldThrow_WhenEmailAlreadyExists()
+	{
+		// Arrange
+		var request = new RegisterRequestDTO("test@example.com", "password", "John", "Doe", null);
+
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(request.Email, true))
+			.ReturnsAsync(new OtpVerification());
+
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.RegisterAsync(request);
+
+		// Assert
+		await act.Should().ThrowAsync<System.Exception>().WithMessage("Email already in use.");
+	}
+
+	[Fact]
+	public async Task RegisterAsync_ShouldReturnOtpResponse_WhenSuccessful()
+	{
+		// Arrange
+		var request = new RegisterRequestDTO("new@example.com", "password", "Jane", "Smith", null);
+
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(request.Email, true))
+			.ReturnsAsync((OtpVerification?)null);
+
+		_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("123456");
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
+		_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
+		_fixture.MockEmailService
+			.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+			.ReturnsAsync(true);
+		_fixture.MockPasswordHasherService.Setup(x => x.HashPassword(It.IsAny<string>())).Returns("hashedPassword");
+		_fixture.MockAuthRepository.Setup(x => x.InsertOtpVerification(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+
+		// Act
+		var result = await _fixture.RegisterService.RegisterAsync(request);
+
+		// Assert
+		result.Should().NotBeNull();
+		result.Email.Should().Be(request.Email);
+	}
+
+	[Fact]
+	public async Task VerifyOtpAsync_ShouldThrow_WhenNoRecord()
+	{
+		// Arrange
+		var email = "noone@example.com";
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync((OtpVerification?)null);
+
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
+
+		// Assert
+		await act.Should().ThrowAsync<System.Exception>().WithMessage("No OTP record found for this email.");
+	}
+
+	[Fact]
+	public async Task VerifyOtpAsync_ShouldThrow_WhenInvalidOtp()
+	{
+		// Arrange
+		var email = "user@example.com";
+		var existing = new OtpVerification
 		{
-			_fixture = fixture;
-		}
+			Email = email,
+			OtpCodeHash = "existingHash",
+			AttemptCount = 0,
+			ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+		};
 
-		[Fact]
-		public async Task RegisterAsync_ShouldThrow_WhenEmailAlreadyExists()
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync(existing);
+
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
+		_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(false);
+		_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "000000");
+
+		// Assert
+		await act.Should().ThrowAsync<Exception>().WithMessage("Invalid OTP.");
+		existing.AttemptCount.Should().Be(1);
+	}
+
+	[Fact]
+	public async Task VerifyOtpAsync_ShouldThrow_WhenOtpAlreadyUsed()
+	{
+		// Arrange
+		var email = "used@example.com";
+		var existing = new OtpVerification
 		{
-			// Arrange
-			var request = new RegisterRequestDTO("test@example.com", "password", "John", "Doe", null);
+			Email = email,
+			OtpCodeHash = "existingHash",
+			IsUsed = true,
+			ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+		};
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(request.Email, true))
-				.ReturnsAsync(new OtpVerification());
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync(existing);
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
+		_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(true);
 
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.RegisterAsync(request);
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
 
-			// Assert
-			await act.Should().ThrowAsync<System.Exception>().WithMessage("Email already in use.");
-		}
+		// Assert
+		await act.Should().ThrowAsync<System.Exception>().WithMessage("OTP already used.");
+	}
 
-		[Fact]
-		public async Task RegisterAsync_ShouldReturnOtpResponse_WhenSuccessful()
+	[Fact]
+	public async Task VerifyOtpAsync_ShouldThrow_WhenOtpExpired_AndResendCalled()
+	{
+		// Arrange
+		var email = "expire@example.com";
+		var existing = new OtpVerification
 		{
-			// Arrange
-			var request = new RegisterRequestDTO("new@example.com", "password", "Jane", "Smith", null);
+			Email = email,
+			OtpCodeHash = "existingHash",
+			IsUsed = false,
+			ExpiresAt = DateTime.UtcNow.AddMinutes(-5)
+		};
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(request.Email, true))
-				.ReturnsAsync((OtpVerification?)null);
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync(existing);
 
-			_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("123456");
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
-			_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
-			_fixture.MockEmailService
-				.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
-				.ReturnsAsync(true);
-			_fixture.MockPasswordHasherService.Setup(x => x.HashPassword(It.IsAny<string>())).Returns("hashedPassword");
-			_fixture.MockAuthRepository.Setup(x => x.InsertOtpVerification(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+		_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("123456");
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
+		_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(true);
+		_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+		_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
+		_fixture.MockEmailService.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(true);
 
-			// Act
-			var result = await _fixture.RegisterService.RegisterAsync(request);
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
 
-			// Assert
-			result.Should().NotBeNull();
-			result.Email.Should().Be(request.Email);
-		}
+		// Assert
+		await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Your OTP has expired. A new code has been sent to your email.");
+	}
 
-		[Fact]
-		public async Task VerifyOtpAsync_ShouldThrow_WhenNoRecord()
+	[Fact]
+	public async Task VerifyOtpAsync_ShouldReturnTrue_WhenSuccessful()
+	{
+		// Arrange
+		var email = "success@example.com";
+		var existing = new OtpVerification
 		{
-			// Arrange
-			var email = "noone@example.com";
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync((OtpVerification?)null);
+			Email = email,
+			OtpCodeHash = "existingHash",
+			AttemptCount = 0,
+			ExpiresAt = DateTime.UtcNow.AddMinutes(5)
+		};
 
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync(existing);
 
-			// Assert
-			await act.Should().ThrowAsync<System.Exception>().WithMessage("No OTP record found for this email.");
-		}
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
+		_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(true);
+		_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+		_fixture.MockAuthRepository.Setup(x => x.SaveUserAsync(It.IsAny<Authusers>())).ReturnsAsync(true);
 
-		[Fact]
-		public async Task VerifyOtpAsync_ShouldThrow_WhenInvalidOtp()
-		{
-			// Arrange
-			var email = "user@example.com";
-			var existing = new OtpVerification
-			{
-				Email = email,
-				OtpCodeHash = "existingHash",
-				AttemptCount = 0,
-				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
-			};
+		// Act
+		var result = await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync(existing);
+		// Assert
+		result.Should().BeTrue();
+	}
 
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
-			_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(false);
-			_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+	[Fact]
+	public async Task ResendOtpAsync_ShouldReturnTrue_WhenSuccessful()
+	{
+		// Arrange
+		var otpVerification = new OtpVerification { Email = "r@example.com", FirstName = "F", LastName = "L" };
+		_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("654321");
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
+		_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+		_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
+		_fixture.MockEmailService.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(true);
 
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "000000");
+		// Act
+		var result = await _fixture.RegisterService.ResendOtpAsync(otpVerification);
 
-			// Assert
-			await act.Should().ThrowAsync<Exception>().WithMessage("Invalid OTP.");
-			existing.AttemptCount.Should().Be(1);
-		}
+		// Assert
+		result.Should().BeTrue();
+	}
 
-		[Fact]
-		public async Task VerifyOtpAsync_ShouldThrow_WhenOtpAlreadyUsed()
-		{
-			// Arrange
-			var email = "used@example.com";
-			var existing = new OtpVerification
-			{
-				Email = email,
-				OtpCodeHash = "existingHash",
-				IsUsed = true,
-				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
-			};
+	[Fact]
+	public async Task ResendOtpAsync_ShouldThrow_WhenUpdateFails()
+	{
+		// Arrange
+		var otpVerification = new OtpVerification { Email = "r2@example.com", FirstName = "F", LastName = "L" };
+		_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("654321");
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
+		_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(false);
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync(existing);
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
-			_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(true);
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.ResendOtpAsync(otpVerification);
 
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
+		// Assert
+		await act.Should().ThrowAsync<System.Exception>().WithMessage("Failed to update OTP record.");
+	}
 
-			// Assert
-			await act.Should().ThrowAsync<System.Exception>().WithMessage("OTP already used.");
-		}
+	[Fact]
+	public async Task ManualResendOtpCodeAsync_ShouldReturnTrue_WhenSuccessful()
+	{
+		// Arrange
+		var userId = Guid.NewGuid();
+		var email = "manresend@example.com";
+		var otpRecord = new OtpVerification { Email = email, OtpId = Guid.NewGuid(), FirstName = "F", LastName = "L" };
 
-		[Fact]
-		public async Task VerifyOtpAsync_ShouldThrow_WhenOtpExpired_AndResendCalled()
-		{
-			// Arrange
-			var email = "expire@example.com";
-			var existing = new OtpVerification
-			{
-				Email = email,
-				OtpCodeHash = "existingHash",
-				IsUsed = false,
-				ExpiresAt = DateTime.UtcNow.AddMinutes(-5)
-			};
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync(otpRecord);
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync(existing);
+		_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
+			.ReturnsAsync(otpRecord);
 
-			_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("123456");
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
-			_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(true);
-			_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
-			_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
-			_fixture.MockEmailService.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(true);
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(otpRecord.Email, false))
+			.ReturnsAsync(otpRecord);
 
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
+		_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("999999");
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
+		_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
+		_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
+		_fixture.MockEmailService.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(true);
 
-			// Assert
-			await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Your OTP has expired. A new code has been sent to your email.");
-		}
+		// Act
+		var result = await _fixture.RegisterService.ManualResendOtpCodeAsync(userId, email);
 
-		[Fact]
-		public async Task VerifyOtpAsync_ShouldReturnTrue_WhenSuccessful()
-		{
-			// Arrange
-			var email = "success@example.com";
-			var existing = new OtpVerification
-			{
-				Email = email,
-				OtpCodeHash = "existingHash",
-				AttemptCount = 0,
-				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
-			};
+		// Assert
+		result.Should().BeTrue();
+	}
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync(existing);
+	[Fact]
+	public async Task ManualResendOtpCodeAsync_ShouldThrow_WhenNoRecord()
+	{
+		// Arrange
+		var userId = Guid.NewGuid();
+		var email = "missing@example.com";
+		_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
+			.ReturnsAsync((OtpVerification?)null);
 
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashOtp");
-			_fixture.MockHashService.Setup(x => x.Verify("hashOtp", existing.OtpCodeHash)).Returns(true);
-			_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
-			_fixture.MockAuthRepository.Setup(x => x.SaveUserAsync(It.IsAny<Authusers>())).ReturnsAsync(true);
+		// Act
+		Func<Task> act = async () => await _fixture.RegisterService.ManualResendOtpCodeAsync(userId, email);
 
-			// Act
-			var result = await _fixture.RegisterService.VerifyOtpAsync(email, "123456");
+		// Assert
+		await act.Should().ThrowAsync<System.Exception>().WithMessage("No OTP record found for this email.");
+	}
 
-			// Assert
-			result.Should().BeTrue();
-		}
+	[Fact]
+	public async Task IsOtpSessionValidAsync_ShouldReturnFalse_WhenNoRecord()
+	{
+		// Arrange
+		var userId = Guid.NewGuid();
+		var email = "novalid@example.com";
+		_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
+			.ReturnsAsync((OtpVerification?)null);
 
-		[Fact]
-		public async Task ResendOtpAsync_ShouldReturnTrue_WhenSuccessful()
-		{
-			// Arrange
-			var otpVerification = new OtpVerification { Email = "r@example.com", FirstName = "F", LastName = "L" };
-			_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("654321");
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
-			_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
-			_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
-			_fixture.MockEmailService.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(true);
+		// Act
+		var result = await _fixture.RegisterService.IsOtpSessionValidAsync(userId, email);
 
-			// Act
-			var result = await _fixture.RegisterService.ResendOtpAsync(otpVerification);
+		// Assert
+		result.Should().BeFalse();
+	}
 
-			// Assert
-			result.Should().BeTrue();
-		}
+	[Fact]
+	public async Task IsOtpSessionValidAsync_ShouldReturnFalse_WhenUsed()
+	{
+		// Arrange
+		var userId = Guid.NewGuid();
+		var email = "usedsession@example.com";
+		var record = new OtpVerification { Email = email, IsUsed = true };
+		_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
+			.ReturnsAsync(record);
 
-		[Fact]
-		public async Task ResendOtpAsync_ShouldThrow_WhenUpdateFails()
-		{
-			// Arrange
-			var otpVerification = new OtpVerification { Email = "r2@example.com", FirstName = "F", LastName = "L" };
-			_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("654321");
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
-			_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(false);
+		// Act
+		var result = await _fixture.RegisterService.IsOtpSessionValidAsync(userId, email);
 
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.ResendOtpAsync(otpVerification);
+		// Assert
+		result.Should().BeFalse();
+	}
 
-			// Assert
-			await act.Should().ThrowAsync<System.Exception>().WithMessage("Failed to update OTP record.");
-		}
+	[Fact]
+	public async Task IsOtpSessionValidAsync_ShouldReturnTrue_WhenValid()
+	{
+		// Arrange
+		var userId = Guid.NewGuid();
+		var email = "validsession@example.com";
+		var record = new OtpVerification { Email = email, IsUsed = false };
+		_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
+			.ReturnsAsync(record);
 
-		[Fact]
-		public async Task ManualResendOtpCodeAsync_ShouldReturnTrue_WhenSuccessful()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var email = "manresend@example.com";
-			var otpRecord = new OtpVerification { Email = email, OtpId = Guid.NewGuid(), FirstName = "F", LastName = "L" };
+		// Act
+		var result = await _fixture.RegisterService.IsOtpSessionValidAsync(userId, email);
 
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync(otpRecord);
-
-			_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
-				.ReturnsAsync(otpRecord);
-
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(otpRecord.Email, false))
-				.ReturnsAsync(otpRecord);
-
-			_fixture.MockOtpService.Setup(x => x.GenerateOtp(It.IsAny<int>())).Returns("999999");
-			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hashedOtp");
-			_fixture.MockAuthRepository.Setup(x => x.UpdateVerificationCodeAsync(It.IsAny<OtpVerification>())).ReturnsAsync(true);
-			_fixture.MockEmailService.Setup(x => x.SendOtpBody(It.IsAny<string>(), It.IsAny<string>())).Returns("body");
-			_fixture.MockEmailService.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(true);
-
-			// Act
-			var result = await _fixture.RegisterService.ManualResendOtpCodeAsync(userId, email);
-
-			// Assert
-			result.Should().BeTrue();
-		}
-
-		[Fact]
-		public async Task ManualResendOtpCodeAsync_ShouldThrow_WhenNoRecord()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var email = "missing@example.com";
-			_fixture.MockAuthRepository.Setup(x => x.IsUserEmailExistInOtpVerificationAsync(email, false))
-				.ReturnsAsync((OtpVerification?)null);
-
-			// Act
-			Func<Task> act = async () => await _fixture.RegisterService.ManualResendOtpCodeAsync(userId, email);
-
-			// Assert
-			await act.Should().ThrowAsync<System.Exception>().WithMessage("No OTP record found for this email.");
-		}
-
-		[Fact]
-		public async Task IsOtpSessionValidAsync_ShouldReturnFalse_WhenNoRecord()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var email = "novalid@example.com";
-			_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
-				.ReturnsAsync((OtpVerification?)null);
-
-			// Act
-			var result = await _fixture.RegisterService.IsOtpSessionValidAsync(userId, email);
-
-			// Assert
-			result.Should().BeFalse();
-		}
-
-		[Fact]
-		public async Task IsOtpSessionValidAsync_ShouldReturnFalse_WhenUsed()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var email = "usedsession@example.com";
-			var record = new OtpVerification { Email = email, IsUsed = true };
-			_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
-				.ReturnsAsync(record);
-
-			// Act
-			var result = await _fixture.RegisterService.IsOtpSessionValidAsync(userId, email);
-
-			// Assert
-			result.Should().BeFalse();
-		}
-
-		[Fact]
-		public async Task IsOtpSessionValidAsync_ShouldReturnTrue_WhenValid()
-		{
-			// Arrange
-			var userId = Guid.NewGuid();
-			var email = "validsession@example.com";
-			var record = new OtpVerification { Email = email, IsUsed = false };
-			_fixture.MockAuthRepository.Setup(x => x.OtpVerificationUserData(It.IsAny<OtpVerificationRequestDTO>()))
-				.ReturnsAsync(record);
-
-			// Act
-			var result = await _fixture.RegisterService.IsOtpSessionValidAsync(userId, email);
-
-			// Assert
-			result.Should().BeTrue();
-		}
+		// Assert
+		result.Should().BeTrue();
 	}
 }

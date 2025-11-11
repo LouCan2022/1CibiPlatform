@@ -54,15 +54,20 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 			// Replace email sender
 			services.RemoveAll<IEmailService>();
 			services.AddSingleton<IEmailService, FakeEmailSender>();
-
-			// Apply migrations once container is up
-			using var scope = services.BuildServiceProvider().CreateScope();
-			var db = scope.ServiceProvider.GetRequiredService<AuthApplicationDbContext>();
-			db.Database.Migrate();
 		});
 	}
 
-	public async Task InitializeAsync() => await _dbContainer.StartAsync();
+	public async Task InitializeAsync()
+	{
+		await _dbContainer.StartAsync();
 
-	public async Task DisposeAsync() => await _dbContainer.StopAsync();
+		using var scope = Services.CreateScope();
+		var db = scope.ServiceProvider.GetRequiredService<AuthApplicationDbContext>();
+		await db.Database.MigrateAsync();
+	}
+
+	public async Task DisposeAsync()
+	{
+		await _dbContainer.StopAsync();
+	}
 }

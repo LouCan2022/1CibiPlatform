@@ -1,12 +1,12 @@
 ﻿namespace Auth.Services;
 
-public class UserService : IUserService
+public class UserManagementService : IUserService
 {
 	private readonly IAuthRepository _authRepository;
-	private readonly ILogger<UserService> _logger;
+	private readonly ILogger<UserManagementService> _logger;
 
-	public UserService(IAuthRepository authRepository,
-					   ILogger<UserService> logger)
+	public UserManagementService(IAuthRepository authRepository,
+					   ILogger<UserManagementService> logger)
 	{
 		this._authRepository = authRepository;
 		this._logger = logger;
