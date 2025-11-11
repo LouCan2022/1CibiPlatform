@@ -3,8 +3,8 @@ using System.Text;
 using Auth.Features.GetNewAccessToken;
 using BuildingBlocks.Exceptions;
 using FluentAssertions;
-using Test.BackendAPI.Infrastructure;
 using Auth.Data.Entities;
+using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
 
