@@ -31,6 +31,6 @@ public class DeleteTransactionService
 
 		_logger.LogInformation("Successfully Deleted the Transaction record for {HashToken}.", HashToken);
 
-		return deletedTransaction;
+		return true;
 	}
 }

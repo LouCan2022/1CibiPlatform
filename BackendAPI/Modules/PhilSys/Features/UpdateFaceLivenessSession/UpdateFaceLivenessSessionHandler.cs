@@ -13,8 +13,7 @@ public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivene
 	{
 		var result = await _updateFaceLivenessSessionService.UpdateFaceLivenessSessionAsync(
 				command.HashToken,
-				command.FaceLivenessSessionId,
-				cancellationToken
+				command.FaceLivenessSessionId
 			);
 		return new UpdateFaceLivenessSessionResult(result);
 	}

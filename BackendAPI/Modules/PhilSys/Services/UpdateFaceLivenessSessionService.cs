@@ -115,7 +115,7 @@ public class UpdateFaceLivenessSessionService
 			{
 				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
 							      WebHook, clientResponse.StatusCode, clientResponse);
-				throw new InternalServerException($"Failed to send verification response to client's webhook: {WebHook}. Please contact the administrator.");
+				throw new InternalServerException($"Failed to send verification response to client's webhook. Please contact the administrator.");
 			}
 
 			_logger.LogInformation("Successfully send the verification response to client webhook.");

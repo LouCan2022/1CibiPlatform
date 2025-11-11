@@ -72,7 +72,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			var result = await service.PartnerSystemQueryAsync("/", "pcn", identity_data);
 
 			//Assert 
-			Assert.NotNull(result);
+			result.Should().NotBeNull();
 		}
 	}
 }
