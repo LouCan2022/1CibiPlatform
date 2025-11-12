@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.Features.PostFaceLivenessSession;
-public record UpdateFaceLivenessSessionRequest(string HashToken, string FaceLivenessSessionId) : ICommand<UpdateFaceLivenessSessionResponse>;
+public record UpdateFaceLivenessSessionRequest(string HashToken, string FaceLivenessSessionId);
 public record UpdateFaceLivenessSessionResponse(VerificationResponseDTO VerificationResponseDTO);
 public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {

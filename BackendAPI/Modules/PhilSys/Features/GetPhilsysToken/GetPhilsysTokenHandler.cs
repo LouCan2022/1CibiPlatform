@@ -1,16 +1,16 @@
 ﻿namespace PhilSys.Features.GetPhilSysToken;
 public record GetPhilSysTokenCommand(string client_id, string client_secret) : ICommand<GetCredentialResult>;
-public record GetCredentialResult(CredentialResponseDTO CredentialResponseDTO);
+public record GetCredentialResult(string AccessToken);
 public class GetPhilSysTokenHandler : ICommandHandler<GetPhilSysTokenCommand, GetCredentialResult>
 {
-	private readonly GetTokenService _getTokenService;
-	public GetPhilSysTokenHandler(GetTokenService getTokenService)
+	private readonly IPhilSysService _philsyService;
+	public GetPhilSysTokenHandler(IPhilSysService philSysService)
 	{
-		_getTokenService = getTokenService;
+		_philsyService = philSysService;
 	}
 	public async Task<GetCredentialResult> Handle(GetPhilSysTokenCommand command, CancellationToken cancellationToken)
 	{
-		var tokenResult = await _getTokenService.GetPhilsysTokenAsync(
+		var tokenResult = await _philsyService.GetPhilsysTokenAsync(
 			command.client_id,
 			command.client_secret
 		);

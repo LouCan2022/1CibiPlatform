@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.GetPhilSysToken;
-public record GetPhilSysTokenRequest(string client_id, string client_secret) : ICommand<GetPhilSysTokenResponse>;
-public record GetPhilSysTokenResponse(CredentialResponseDTO CredentialResponseDTO);
+public record GetPhilSysTokenRequest(string client_id, string client_secret);
+public record GetPhilSysTokenResponse(string AccessToken);
 public class GetPhilsysTokenEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
@@ -12,8 +12,8 @@ public class GetPhilsysTokenEndpoint : ICarterModule
 				   request.client_secret
 			   );
 			GetCredentialResult result = await sender.Send(command);
-			var response = new GetPhilSysTokenResponse(result.CredentialResponseDTO);
-			return Results.Ok(response.CredentialResponseDTO);
+			var response = new GetPhilSysTokenResponse(result.AccessToken);
+			return Results.Ok(response.AccessToken);
 		})
 		.WithName("GetPhilSysToken")
 		.WithTags("PhilSys")

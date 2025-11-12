@@ -1,0 +1,59 @@
+﻿//using PhilSys.Service;
+using BuildingBlocks.SharedServices.Interfaces;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PhilSys.Data.Context;
+
+namespace Test.BackendAPI.Infrastructure.PhilSys.Infrastracture
+{
+	public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
+	{
+		private readonly IServiceScope _scope;
+		protected readonly ISender _sender;
+		protected readonly IHashService _hashService;
+		protected readonly PhilSysDBContext _dbContext;
+		protected readonly IHttpContextAccessor _httpContextAccessor;
+		protected readonly IConfiguration _configuration;
+		protected readonly ISecureToken _generateToken;
+
+		protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
+		{
+			_scope = factory.Services.CreateScope();
+			_sender = _scope.ServiceProvider.GetRequiredService<ISender>();
+			_hashService = _scope.ServiceProvider.GetRequiredService<IHashService>();
+			_generateToken = _scope.ServiceProvider.GetRequiredService<ISecureToken>();
+			_dbContext = _scope.ServiceProvider.GetRequiredService<PhilSysDBContext>();
+			_httpContextAccessor = _scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+			_configuration = _scope.ServiceProvider.GetRequiredService<IConfiguration>();
+		}
+
+		// Runs before each test. Ensures database tables used in tests are cleaned to avoid cross-test pollution.
+		public async Task InitializeAsync()
+		{
+			try
+			{
+				if (_dbContext is not null)
+				{
+					var transactions = _dbContext.PhilSysTransactions.ToList();
+					if (transactions.Any())
+					{
+						_dbContext.PhilSysTransactions.RemoveRange(transactions);
+						await _dbContext.SaveChangesAsync();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Error during database cleanup in InitializeAsync: " + ex.Message, ex);
+			}
+		}
+
+		public Task DisposeAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+	}
+}

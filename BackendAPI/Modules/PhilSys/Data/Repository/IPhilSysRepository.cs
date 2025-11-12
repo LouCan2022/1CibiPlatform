@@ -11,5 +11,5 @@ public interface IPhilSysRepository
 
 	Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(string HashToken);
 
-	Task<bool> DeleteTrandsactionDataAsync(PhilSysTransaction HashToken);
+	Task<bool> DeleteTransactionDataAsync(PhilSysTransaction HashToken);
 }

@@ -160,10 +160,8 @@ public class RegisterIntegrationTests : BaseIntegrationTest
 		Func<Task> act = async () => { await _sender.Send(command); };
 
 		// Assert
-
 		await act.Should().ThrowAsync<Exception>().WithMessage("No OTP record found for this email.");
 	}
-
 
 	private async Task SeedOtpRecordAsync(OtpVerification otpRecord)
 	{
