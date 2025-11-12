@@ -1,9 +1,11 @@
-﻿using FluentAssertions;
+﻿using BuildingBlocks.Exceptions;
+using FluentAssertions;
 using PhilSys.DTO;
 using PhilSys.Services;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using Test.BackendAPI.Infrastructure.PhilSys.Infrastracture;
 using Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture;
 
 namespace Test.BackendAPI.Modules.PhilSys.UnitTests
@@ -27,7 +29,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			var client_secret = "YnQpGs34mdlH24234234EhRc0pJXAjQASDdASdjvihbujtuLxHt51";
 			_fixture.MockHttpClientFactory.Setup(f => f.CreateClient("PhilSys")).Returns(() =>
 			{
-				var handlerStub = new DelegatingHandlerStub((request, ct) =>
+				var handlerStub = new PhilSysTestHandler((request, ct) =>
 				{
 					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
 					{
@@ -48,7 +50,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			Func<Task> act = async () => await service.GetPhilsysTokenAsync(client_id, client_secret);
 
 			// Assert
-			await act.Should().ThrowAsync<HttpRequestException>().WithMessage("PhilSys token request failed.");
+			await act.Should().ThrowAsync<InternalServerException>().WithMessage("PhilSys token request failed.");
 		}
 
 		[Fact]
@@ -60,7 +62,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			var expectedToken = "fake-token";
 			_fixture.MockHttpClientFactory.Setup(f => f.CreateClient("PhilSys")).Returns(() =>
 			{
-				var handlerStub = new DelegatingHandlerStub((request, ct) =>
+				var handlerStub = new PhilSysTestHandler((request, ct) =>
 				{
 					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
 					{
@@ -99,7 +101,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			var face_liveness_session_id = "valid-session-id";
 			_fixture.MockHttpClientFactory.Setup(f => f.CreateClient("PhilSys")).Returns(() =>
 			{
-				var handlerStub = new DelegatingHandlerStub((request, ct) =>
+				var handlerStub = new PhilSysTestHandler((request, ct) =>
 				{
 					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
 					{
@@ -128,7 +130,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			);
 
 			// Assert
-			await act.Should().ThrowAsync<HttpRequestException>().WithMessage("Basic Information request failed. Please contact the administrator.");
+			await act.Should().ThrowAsync<InternalServerException>().WithMessage("Basic Information request failed. Please contact the administrator.");
 		}
 
 		[Fact]
@@ -183,7 +185,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			);
 			_fixture.MockHttpClientFactory.Setup(f => f.CreateClient("PhilSys")).Returns(() =>
 			{
-				var handlerStub = new DelegatingHandlerStub((request, ct) =>
+				var handlerStub = new PhilSysTestHandler((request, ct) =>
 				{
 					var responseBody = new
 					{
@@ -232,7 +234,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			var face_liveness_session_id = "valid-session-id";
 			_fixture.MockHttpClientFactory.Setup(f => f.CreateClient("PhilSys")).Returns(() =>
 			{
-				var handlerStub = new DelegatingHandlerStub((request, ct) =>
+				var handlerStub = new PhilSysTestHandler((request, ct) =>
 				{
 					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
 					{
@@ -257,7 +259,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 				);
 
 			// Assert
-			await act.Should().ThrowAsync<HttpRequestException>().WithMessage("PCN request failed. Please contact the administrator.");
+			await act.Should().ThrowAsync<InternalServerException>().WithMessage("PCN request failed. Please contact the administrator.");
 		}
 
 		[Fact]
@@ -308,7 +310,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 			);
 			_fixture.MockHttpClientFactory.Setup(f => f.CreateClient("PhilSys")).Returns(() =>
 			{
-				var handlerStub = new DelegatingHandlerStub((request, ct) =>
+				var handlerStub = new PhilSysTestHandler((request, ct) =>
 				{
 					var responseBody = new
 					{
