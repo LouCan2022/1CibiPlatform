@@ -9,14 +9,14 @@ public record PostBasicInformationCommand(string first_name,
 public record PostBasicInformationResult(BasicInformationOrPCNResponseDTO BasicInformationResponseDTO);
 public class PostBasicInformationHandler : ICommandHandler<PostBasicInformationCommand, PostBasicInformationResult>
 {
-	private readonly PostBasicInformationService _postBasicInformationService;
-	public PostBasicInformationHandler(PostBasicInformationService PostBasicInformationService)
+	private readonly IPhilSysService _philsysService;
+	public PostBasicInformationHandler(IPhilSysService philsysService)
 	{
-		_postBasicInformationService = PostBasicInformationService;
+		_philsysService = philsysService;
 	}
 	public async Task<PostBasicInformationResult> Handle(PostBasicInformationCommand command, CancellationToken cancellationToken)
 	{
-		var result = await _postBasicInformationService.PostBasicInformationAsync(
+		var result = await _philsysService.PostBasicInformationAsync(
 				command.first_name,
 				command.middle_name,
 				command.last_name,

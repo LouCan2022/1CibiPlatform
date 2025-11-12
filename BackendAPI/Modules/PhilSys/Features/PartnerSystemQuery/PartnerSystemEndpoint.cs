@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.Features.PartnerSystemQuery;
-public record PartnerSystemRequest(string callback_url, string inquiry_type, IdentityData identity_data) : ICommand<PartnerSystemResponse>;	
+public record PartnerSystemRequest(string callback_url, string inquiry_type, IdentityData identity_data);
 public record PartnerSystemResponse(PartnerSystemResponseDTO PartnerSystemResponseDTO);
 public class PartnerSystemEndpoint : ICarterModule
 {

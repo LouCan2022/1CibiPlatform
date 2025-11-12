@@ -68,7 +68,7 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction ?? new TransactionStatusResponse { Exists = false };
 	}
 
-	public async Task<bool> DeleteTrandsactionDataAsync(PhilSysTransaction transaction)
+	public async Task<bool> DeleteTransactionDataAsync(PhilSysTransaction transaction)
 	{
 		_dbcontext.PhilSysTransactions.Remove(transaction!);
 		await _dbcontext.SaveChangesAsync();

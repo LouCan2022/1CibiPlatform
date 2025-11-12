@@ -1,6 +1,6 @@
 ﻿namespace PhilSys.Features.GetLivenessKey;
 
-public record GetLivenessKeyRequest() : ICommand<GetLivenessKeyResponse>;
+public record GetLivenessKeyRequest();
 public record GetLivenessKeyResponse(string LivenessKey);
 public class GetLivenessKeyEndpoint : ICarterModule
 {

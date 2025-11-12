@@ -92,7 +92,7 @@ public class PartnerSystemService
 		catch (Exception)
 		{
 			_logger.LogError("Failed to add transaction data record for Tid: {Tid}", transaction.Tid);
-			throw new Exception($"Failed to add transaction for Tid: {transaction.Tid}");;
+			throw new InternalServerException($"Failed to add transaction.");;
 		}
 
 		_logger.LogInformation("Succcessfully added the transaction data record for {Tid}.", transaction.Tid);

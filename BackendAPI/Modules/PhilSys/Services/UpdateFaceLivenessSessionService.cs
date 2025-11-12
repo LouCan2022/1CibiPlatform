@@ -6,9 +6,7 @@ public class UpdateFaceLivenessSessionService
 	private readonly IPhilSysRepository _philSysRepository;
 	private readonly IPhilSysResultRepository _philSysResultRepository;
 	private readonly ILogger<UpdateFaceLivenessSessionService> _logger;
-	private readonly PostBasicInformationService _postBasicInformationService;
-	private readonly PostPCNService _postPCNService;
-	private readonly GetTokenService _getTokenService;
+	private readonly IPhilSysService _philSysService;
 	private readonly IConfiguration _configuration;
 	private readonly string client_id;
 	private readonly string client_secret;
@@ -18,18 +16,14 @@ public class UpdateFaceLivenessSessionService
 		IPhilSysRepository philSysRepository,
 		IPhilSysResultRepository philSysResultRepository,
 		ILogger<UpdateFaceLivenessSessionService> logger,
-		PostBasicInformationService PostBasicInformationService,
-		PostPCNService PostPCNService,
-		GetTokenService GetTokenService,
+		IPhilSysService philsysService,
 		IConfiguration configuration)
 	{
 		_httpClient = httpClientFactory.CreateClient("IDVClient");
 		_philSysRepository = philSysRepository;
 		_philSysResultRepository = philSysResultRepository;
 		_logger = logger;
-		_postBasicInformationService = PostBasicInformationService;
-		_postPCNService = PostPCNService;
-		_getTokenService = GetTokenService;
+		_philSysService = philsysService;
 		_configuration = configuration;
 		client_id = _configuration["PhilSys:ClientID"] ?? "";
 		client_secret = _configuration["PhilSys:ClientSecret"] ?? "";
@@ -37,11 +31,10 @@ public class UpdateFaceLivenessSessionService
 
 	public async Task<VerificationResponseDTO> UpdateFaceLivenessSessionAsync(
 		string HashToken,
-		string FaceLivenessSessionId,
-		CancellationToken ct = default
+		string FaceLivenessSessionId
 		)
 	{
-		CredentialResponseDTO? token = null;
+		string accessToken = string.Empty;
 		BasicInformationOrPCNResponseDTO responseBody = null!;
 
 		_logger.LogInformation("Updating Face Liveness Session for Token: {HashToken}", HashToken);
@@ -50,35 +43,18 @@ public class UpdateFaceLivenessSessionService
 		if (result == null)
 		{
 			_logger.LogWarning("No transaction found for HashToken: {HashToken}. Unable to update Face Liveness Session.", HashToken);
-			throw new InternalServerException($"No transaction record found for HashToken: {HashToken}. Face Liveness Session update aborted.");
+			throw new InternalServerException("No transaction record found for your Token. Face Liveness Session update aborted.");
 		}
 
 		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {HashToken}", HashToken);
 
-		try
-		{
-			token = await _getTokenService.GetPhilsysTokenAsync(client_id, client_secret);
-		}
-		catch (HttpRequestException ex)
-		{
-			_logger.LogError("PhilSys token request failed at the calling function. {Exception}", ex);
-			throw new InternalServerException("PhilSys token request for verification process failed. Please contact the administrator.");
-		}
-
-		string accessToken = token!.access_token;
+		accessToken = await _philSysService.GetPhilsysTokenAsync(client_id, client_secret);
+	
 
 		if (result!.InquiryType!.Equals("name_dob", StringComparison.CurrentCultureIgnoreCase))
 		{
-			try
-			{
-				responseBody = await _postBasicInformationService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
-			}
-			catch (HttpRequestException ex)
-			{
-				_logger.LogError("Basic Information request failed: {Exception}", ex);
-				throw new InternalServerException("Basic Information request failed. Please contact the administrator.");
-			}
-
+			responseBody = await _philSysService.PostBasicInformationAsync(result.FirstName!, result.MiddleName!, result.LastName!, result.Suffix!, result.BirthDate!, accessToken, FaceLivenessSessionId);
+		
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
@@ -92,16 +68,8 @@ public class UpdateFaceLivenessSessionService
 
 		if (result.InquiryType.Equals("pcn", StringComparison.OrdinalIgnoreCase))
 		{
-			try
-			{
-				responseBody = await _postPCNService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
-			}
-			catch (HttpRequestException ex)
-			{
-				_logger.LogError("PhilSys Card Number request failed: {Exception}", ex);
-				throw new InternalServerException("PhilSys Card Number request failed. Please contact the administrator.");
-			}
-
+			responseBody = await _philSysService.PostPCNAsync(result.PCN!, accessToken, result.FaceLivenessSessionId!);
+		
 			var convertedResponse = ConvertVerificationResponseDTO(result.Tid, responseBody!);
 
 			await SendToClientWebHookAsync(result.WebHookUrl!, convertedResponse);
@@ -114,10 +82,9 @@ public class UpdateFaceLivenessSessionService
 		}
 
 		return new VerificationResponseDTO { };
-
 	}
 
-	private async Task UpdateTransactionStatus(string HashToken)
+	private async Task<bool> UpdateTransactionStatus(string HashToken)
 	{
 		var existingTransaction = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
 
@@ -132,9 +99,11 @@ public class UpdateFaceLivenessSessionService
 		if (updateStatus == null)
 		{
 			_logger.LogError("Failed to Update the Transaction Status for {HashToken}.", HashToken);
+			return false;
 		}
 
 		_logger.LogInformation("Successfully Updated the Transaction Status.");
+		return true;
 	}
 
 	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
@@ -146,22 +115,24 @@ public class UpdateFaceLivenessSessionService
 			{
 				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
 							      WebHook, clientResponse.StatusCode, clientResponse);
-				throw new InternalServerException($"Failed to send verification response to client's webhook: {WebHook}. Please contact the administrator.");
+				throw new InternalServerException($"Failed to send verification response to client's webhook. Please contact the administrator.");
 			}
 
 			_logger.LogInformation("Successfully send the verification response to client webhook.");
 		}
 	}
 
-	private async Task AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
+	private async Task<bool> AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
 	{
 		var philsysTransactionResult = VerificationResponseDTO.Adapt<PhilSysTransactionResult>();
 		var result = await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
 		if (result == false)
 		{
 			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table.");
+			throw new InternalServerException("Failed to Add the Converted Response in PhilSys Transaction Results.");
 		}
 		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
+		return true;
 	}
 
 	private static VerificationResponseDTO ConvertVerificationResponseDTO(Guid Tid, BasicInformationOrPCNResponseDTO BasicInformationOrPCNResponseDTO)
@@ -172,7 +143,7 @@ public class UpdateFaceLivenessSessionService
 			{
 				idv_session_id = Tid.ToString(),
 				verified = false
-			};
+			}; 
 		}
 		return new VerificationResponseDTO
 		{

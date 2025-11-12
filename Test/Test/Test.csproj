@@ -29,9 +29,7 @@
     <Folder Include="BackendAPI\Modules\CNX.UnitTests\" />
     <Folder Include="BackendAPI\Modules\CNX.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\SSO.IntegrationTests\" />
-    <Folder Include="BackendAPI\Modules\Philsys.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\SSO.UnitTests\" />
-    <Folder Include="BackendAPI\Modules\Philsys.UnitTests\" />
     <Folder Include="UI\" />
   </ItemGroup>
 

@@ -1,5 +1,4 @@
 ﻿using BuildingBlocks.SharedServices.Implementations;
-using BuildingBlocks.SharedServices.Interfaces;
 
 namespace PhilSys.ServiceConfig;
 public static class PhilSysServiceConfiguration
@@ -47,14 +46,12 @@ public static class PhilSysServiceConfiguration
 			client.DefaultRequestHeaders.Accept.Add(
 				new MediaTypeWithQualityHeaderValue("application/json"));
 		});
-		services.AddScoped<GetTokenService>();
-		services.AddScoped<PostBasicInformationService>();
-		services.AddScoped<PostPCNService>();
 		services.AddScoped<PartnerSystemService>();
 		services.AddScoped<UpdateFaceLivenessSessionService>();
 		services.AddScoped<LivenessSessionService>();
 		services.AddScoped<DeleteTransactionService>();
 		services.AddScoped<GetLivenessKeyService>();
+		services.AddScoped<IPhilSysService, PhilSysService>();
 		services.AddScoped<IHashService, HashService>();
 		services.AddScoped<ISecureToken, SecureToken>();
 		services.AddScoped<IPhilSysRepository, PhilSysRepository>();
