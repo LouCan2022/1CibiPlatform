@@ -39,8 +39,32 @@ public class AuthRepository : IAuthRepository
 			  users
 			);
 	}
+	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext
+			.AuthSubmenu
+			.Where(asm => asm.IsActive)
+			.LongCountAsync(cancellationToken);
 
+		var applications = await _dbcontext.AuthSubmenu
+			.Where(au => au.IsActive)
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asm => new ApplicationsDTO(
+					asm.SubMenuId,
+					asm.SubMenuName,
+					asm.Description!))
+			.ToListAsync(cancellationToken);
 
+		return new PaginatedResult<ApplicationsDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  applications
+			);
+	}
 	public async Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 
@@ -74,6 +98,34 @@ public class AuthRepository : IAuthRepository
 			);
 	}
 
+	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var applicationsQuery = _dbcontext.AuthSubmenu
+				.Where(au => au.IsActive &&
+					(EF.Functions.ILike(au.SubMenuName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(au.Description!, $"%{paginationRequest.SearchTerm}%")));
+
+
+		var totalRecords = await applicationsQuery.CountAsync(cancellationToken);
+
+		var applications = await applicationsQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asm => new ApplicationsDTO(
+					asm.SubMenuId,
+					asm.SubMenuName,
+					asm.Description!))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<ApplicationsDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  applications
+			);
+	}
 
 	public async Task<Authusers> GetRawUserAsync(Guid id)
 	{
@@ -320,6 +372,4 @@ public class AuthRepository : IAuthRepository
 
 		return true;
 	}
-
-
 }
