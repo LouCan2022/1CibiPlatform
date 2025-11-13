@@ -118,8 +118,6 @@ jobs:
           file: ${{ matrix.service == 'apigateway' && 'ApiGateways/YarpApiGateway/Dockerfile' || matrix.service == 'apis' && 'BackendAPI/API/APIs/Dockerfile' || './UI/FrontendWebassembly/Dockerfile' }}
           push: true
           tags: loucan/oneplatform:${{ matrix.service }}${{ steps.tag.outputs.suffix }}
-          cache-from: type=registry,ref=loucan/oneplatform:${{ matrix.service }}${{ steps.tag.outputs.suffix }}
-          cache-to: type=registry,mode=max,ref=loucan/oneplatform:${{ matrix.service }}${{ steps.tag.outputs.suffix }}
 
       - name: Logout of Docker Hub
         run: docker logout
