@@ -31,7 +31,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
-      - ./monitoring/loki-data:/loki 
+      - ./monitoring/loki-data:/loki
     restart: unless-stopped
 
   grafana:
@@ -43,14 +43,14 @@ services:
       - loki
     restart: unless-stopped
 
-  # frontendwebassembly:
-  #   profiles: ["docker"]  
-  #   container_name: oneplatform-frontend
-  #   image: ${DOCKER_REGISTRY-}frontendwebassembly
-  #   build:
-  #     context: ./UI/FrontendWebassembly
-  #     dockerfile: /Dockerfile
-  
+  frontendwebassembly:
+    profiles: ["docker"]
+    container_name: oneplatform-frontend
+    image: ${DOCKER_REGISTRY-}frontendwebassembly
+    build:
+      context: ./UI/FrontendWebassembly
+      dockerfile: /Dockerfile
+
   postgres:
     container_name: postgres
     image: postgres:16
