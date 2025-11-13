@@ -135,4 +135,14 @@ public class AuthCacheRepository : IAuthRepository
 	{
 		return await _authRepository.UpdateVerificationCodeAsync(userDto);
 	}
+
+	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		return await _authRepository.GetApplicationsAsync(paginationRequest, cancellationToken);
+	}
+
+	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		return await _authRepository.SearchApplicationsAsync(paginationRequest, cancellationToken);
+	}
 }
