@@ -10,6 +10,7 @@
     <DockerServiceName>apis</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".github\workflows\build-test-push-pr.yml" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
