@@ -439,9 +439,9 @@ public class AuthRepository : IAuthRepository
 		return subMenu!;
 	}
 
-	public async Task<bool> DeleteApplicationAsync(int applicationId)
+	public async Task<bool> DeleteApplicationAsync(AuthApplication application)
 	{
-		var application = await GetApplicationAsync(applicationId);
+		
 		var isDeleted = _dbcontext.AuthApplications.Remove(application);
 		await _dbcontext.SaveChangesAsync();
 		return true;
@@ -463,13 +463,22 @@ public class AuthRepository : IAuthRepository
 
 	public async Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO)
 	{
-		var application = await GetApplicationAsync(applicationDTO.AppId);
+		var application = new AuthApplication
+		{
+			AppId = applicationDTO.AppId,   
+			AppName = applicationDTO.AppName!,
+			Description = applicationDTO.Description,
+			IsActive = applicationDTO.IsActive
+		};
 
-		application.AppName = applicationDTO.AppName!;
-		application.Description = applicationDTO.Description;
-		application.IsActive = applicationDTO.IsActive;
+		var entry = _dbcontext.Attach(application);
+
+		entry.Property(x => x.AppName).IsModified = true;
+		entry.Property(x => x.Description).IsModified = true;
+		entry.Property(x => x.IsActive).IsModified = true;
 
 		await _dbcontext.SaveChangesAsync();
+
 		return application;
 	}
 
@@ -487,9 +496,8 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
-	public async Task<bool> DeleteSubMenuAsync(int subMenuId)
+	public async Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu)
 	{
-		var subMenu = await GetSubMenuAsync(subMenuId);
 		var isDeleted = _dbcontext.AuthSubmenu.Remove(subMenu);
 		await _dbcontext.SaveChangesAsync();
 		return true;
@@ -497,13 +505,22 @@ public class AuthRepository : IAuthRepository
 
 	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
 	{
-		var subMenu = await GetSubMenuAsync(subMenuDTO.SubMenuId);
+		var subMenu = new AuthSubMenu
+		{
+			SubMenuId = subMenuDTO.SubMenuId,
+			SubMenuName = subMenuDTO.SubMenuName!,
+			Description = subMenuDTO.Description,
+			IsActive = subMenuDTO.IsActive
+		};
 
-		subMenu.SubMenuName = subMenuDTO.SubMenuName!;
-		subMenu.Description = subMenuDTO.Description;
-		subMenu.IsActive = subMenuDTO.IsActive;
+		var entry = _dbcontext.Attach(subMenu);
+
+		entry.Property(x => x.SubMenuName).IsModified = true;
+		entry.Property(x => x.Description).IsModified = true;
+		entry.Property(x => x.IsActive).IsModified = true;
 
 		await _dbcontext.SaveChangesAsync();
+
 		return subMenu;
 	}
 }

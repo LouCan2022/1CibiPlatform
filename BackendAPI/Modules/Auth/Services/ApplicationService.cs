@@ -25,8 +25,13 @@ public class ApplicationService : IApplicationService
 
 	public async Task<bool> DeleteApplicationAsync(int AppId)
 	{
-		var isDeleted = await _authRepository.DeleteApplicationAsync(AppId); 
-	
+		var application = await _authRepository.GetApplicationAsync(AppId);
+		if (application == null)
+		{
+			_logger.LogError("Application with ID {AppId} was not found during delete operation.", AppId);
+			throw new InternalServerException($"Application with ID {AppId} was not found.");
+		}
+		var isDeleted = await _authRepository.DeleteApplicationAsync(application); 
 		return isDeleted;
 	}
 
@@ -38,6 +43,12 @@ public class ApplicationService : IApplicationService
 
 	public async Task<ApplicationDTO> EditApplicationAsync(EditApplicationDTO applicationDTO)
 	{
+		var existingApplication = await _authRepository.GetApplicationAsync(applicationDTO.AppId);
+		if (existingApplication == null)
+		{
+			_logger.LogError("Application with ID {AppId} was not found during update operation.", applicationDTO.AppId);
+			throw new InternalServerException($"Application with ID {applicationDTO.AppId} was not found.");
+		}
 		var application = await _authRepository.EditApplicationAsync(applicationDTO);
 		return application.Adapt<ApplicationDTO>();
 	}

@@ -191,9 +191,9 @@ public class AuthCacheRepository : IAuthRepository
 		return await _authRepository.GetApplicationAsync(applicationId);
 	}
 
-	public async Task<bool> DeleteApplicationAsync(int applicationId)
+	public async Task<bool> DeleteApplicationAsync(AuthApplication application)
 	{
-		return await _authRepository.DeleteApplicationAsync(applicationId);
+		return await _authRepository.DeleteApplicationAsync(application);
 	}
 
 	public async Task<bool> AddApplicationAsync(AddApplicationDTO application)
@@ -211,13 +211,18 @@ public class AuthCacheRepository : IAuthRepository
 		return await _authRepository.AddSubMenuAsync(subMenu);
 	}
 
-	public async Task<bool> DeleteSubMenuAsync(int subMenuId)
+	public async Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu)
 	{
-		return await _authRepository.DeleteSubMenuAsync(subMenuId);
+		return await _authRepository.DeleteSubMenuAsync(subMenu);
 	}
 
 	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
 	{
 		return await _authRepository.EditSubMenuAsync(subMenuDTO);	
+	}
+
+	public async Task<AuthSubMenu> GetSubMenuAsync(int applicationId)
+	{
+		return await _authRepository.GetSubMenuAsync(applicationId);
 	}
 }

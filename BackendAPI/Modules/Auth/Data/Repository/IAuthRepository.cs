@@ -52,10 +52,11 @@ public interface IAuthRepository
 
 	Task<AuthApplication> GetApplicationAsync(int applicationId);
 
-	Task<bool> DeleteApplicationAsync(int applicationId);
+	Task<bool> DeleteApplicationAsync(AuthApplication application);
 	Task<bool> AddApplicationAsync(AddApplicationDTO application);
 	Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO);
 	Task<bool> AddSubMenuAsync(AddSubMenuDTO subMenu);
-	Task<bool> DeleteSubMenuAsync(int subMenuId);
+	Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu);
+	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
 	Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO);
 }

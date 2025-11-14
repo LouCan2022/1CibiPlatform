@@ -17,7 +17,7 @@ namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests
 			// Arrange
 			var expectedKey = _configuration["PhilSys:LivenessSDKPublicKey"] = "HabaL5avPCryiszlRKNU7Q9xClqKEq5h2FWNLdMNEpo";
 
-			var command = new GetLivenessKeyCommand();
+			var command = new GetLivenessKeyQueryRequest();
 
 			// Act
 			var result = await _sender.Send(command);
@@ -32,7 +32,7 @@ namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests
 			// Arrange
 			_configuration["PhilSys:LivenessSDKPublicKey"] = null;
 
-			var command = new GetLivenessKeyCommand();
+			var command = new GetLivenessKeyQueryRequest();
 
 			// Act
 			var result = await _sender.Send(command);

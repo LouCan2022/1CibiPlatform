@@ -10,8 +10,8 @@ public class GetLivenessKeyEndpoint : ICarterModule
 			ISender sender,
 			CancellationToken cancellationToken) =>
 		{
-			var command = new GetLivenessKeyCommand();
-			var result = sender.Send(command, cancellationToken);
+			var request = new GetLivenessKeyQueryRequest();
+			var result = sender.Send(request, cancellationToken);
 			var response = result.Result.Adapt<GetLivenessKeyResponse>();
 			return Results.Ok(response.LivenessKey);
 		})
