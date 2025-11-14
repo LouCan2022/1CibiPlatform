@@ -2,17 +2,30 @@
 
 public static class FrontendServiceConfig
 {
-	public static IServiceCollection AddFrontEndServices(this IServiceCollection services)
+	public static IServiceCollection AddFrontEndServices(this IServiceCollection services, IConfiguration configuration, Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment env)
 	{
+		// Allow configuration overrides
+		var apiBaseFromConfig = configuration["ApiBase"];
+		var ssoBaseFromConfig = configuration["SsoApiBase"];
+		var prodDomainFromConfig = configuration["ProdDomain"];
+
+		var apiBase = env.IsProduction()
+			? (apiBaseFromConfig ?? prodDomainFromConfig)
+			: apiBaseFromConfig;
+
+		var ssoBase = env.IsProduction()
+			? (ssoBaseFromConfig ?? prodDomainFromConfig)
+			: ssoBaseFromConfig;
+
 		services.AddHttpClient("API", client =>
 		{
-			client.BaseAddress = new Uri("http://localhost:4200");
+			client.BaseAddress = new Uri(apiBase);
 		})
 		 .AddHttpMessageHandler<CookieHandler>();
 
 		services.AddHttpClient("SSOAPI", client =>
 		{
-			client.BaseAddress = new Uri("https://aurelio-baronetical-micki.ngrok-free.dev");
+			client.BaseAddress = new Uri(ssoBase);
 		})
 		 .AddHttpMessageHandler<CookieHandler>();
 
