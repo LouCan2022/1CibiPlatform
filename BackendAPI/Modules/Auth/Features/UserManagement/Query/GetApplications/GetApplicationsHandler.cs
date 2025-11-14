@@ -25,7 +25,6 @@ public class GetApplicationsHandler : IQueryHandler<GetApplicationsQueryRequest,
 	}
 	public async Task<GetApplicationsQueryResult> Handle(GetApplicationsQueryRequest request, CancellationToken cancellationToken)
 	{
-
 		var paginationRequest = new PaginationRequest(
 			request.PageNumber ?? 1,
 			request.PageSize ?? 10,

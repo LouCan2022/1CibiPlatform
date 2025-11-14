@@ -48,5 +48,8 @@ public interface IAuthRepository
 
 	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);
 
+	Task<ApplicationsDTO?> GetApplicationAsync(int applicationId);
 
+	Task<bool> DeleteApplicationAsync(int applicationId);
+	Task<bool> AddApplicationAsync(ApplicationsDTO application);
 }

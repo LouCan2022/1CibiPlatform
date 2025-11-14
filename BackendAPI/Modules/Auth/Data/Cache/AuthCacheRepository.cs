@@ -40,6 +40,31 @@ public class AuthCacheRepository : IAuthRepository
 			null,
 			cancellationToken);
 	}
+	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"applications_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<ApplicationsDTO>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.GetApplicationsAsync(req, token),
+			null,
+			null,
+			cancellationToken);
+	}
+
+	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"applications_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}_search_{paginationRequest.SearchTerm}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<ApplicationsDTO>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.SearchApplicationsAsync(req, token),
+			null,
+			null,
+			cancellationToken);
+	}
 
 	public async Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification)
 	{
@@ -136,13 +161,18 @@ public class AuthCacheRepository : IAuthRepository
 		return await _authRepository.UpdateVerificationCodeAsync(userDto);
 	}
 
-	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	public Task<ApplicationsDTO?> GetApplicationAsync(int applicationId)
 	{
-		return await _authRepository.GetApplicationsAsync(paginationRequest, cancellationToken);
+		throw new NotImplementedException();
 	}
 
-	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	public Task<bool> DeleteApplicationAsync(int applicationId)
 	{
-		return await _authRepository.SearchApplicationsAsync(paginationRequest, cancellationToken);
+		throw new NotImplementedException();
+	}
+
+	public Task<bool> AddApplicationAsync(ApplicationsDTO application)
+	{
+		throw new NotImplementedException();
 	}
 }

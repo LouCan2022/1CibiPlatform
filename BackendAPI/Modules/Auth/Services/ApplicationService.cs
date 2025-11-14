@@ -22,4 +22,17 @@ public class ApplicationService : IApplicationService
 			_authRepository.GetApplicationsAsync(paginationRequest, cancellationToken) :
 			_authRepository.SearchApplicationsAsync(paginationRequest, cancellationToken);
 	}
+
+	public async Task<bool> DeleteApplicationAsync(int AppId)
+	{
+		var isDeleted = await _authRepository.DeleteApplicationAsync(AppId); 
+	
+		return isDeleted;
+	}
+
+	public Task<bool> AddApplicationAsync(ApplicationsDTO application)
+	{
+		var isAdded = _authRepository.AddApplicationAsync(application);
+		return isAdded;
+	}
 }

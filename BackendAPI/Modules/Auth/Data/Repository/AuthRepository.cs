@@ -43,18 +43,18 @@ public class AuthRepository : IAuthRepository
 	{
 		var totalRecords = await _dbcontext
 			.AuthSubmenu
-			.Where(asm => asm.IsActive)
+			.Where(aa => aa.IsActive)
 			.LongCountAsync(cancellationToken);
 
-		var applications = await _dbcontext.AuthSubmenu
-			.Where(au => au.IsActive)
+		var applications = await _dbcontext.AuthApplications
+			.Where(aa => aa.IsActive)
 			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 			.Take(paginationRequest.PageSize)
 			.AsNoTracking()
-			.Select(asm => new ApplicationsDTO(
-					asm.SubMenuId,
-					asm.SubMenuName,
-					asm.Description!))
+			.Select(aa => new ApplicationsDTO(
+					aa.AppId,
+					aa.AppName,
+					aa.Description!))
 			.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<ApplicationsDTO>
@@ -97,14 +97,12 @@ public class AuthRepository : IAuthRepository
 			  users
 			);
 	}
-
 	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
-		var applicationsQuery = _dbcontext.AuthSubmenu
+		var applicationsQuery = _dbcontext.AuthApplications
 				.Where(au => au.IsActive &&
-					(EF.Functions.ILike(au.SubMenuName, $"%{paginationRequest.SearchTerm}%") ||
+					(EF.Functions.ILike(au.AppName, $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(au.Description!, $"%{paginationRequest.SearchTerm}%")));
-
 
 		var totalRecords = await applicationsQuery.CountAsync(cancellationToken);
 
@@ -113,8 +111,8 @@ public class AuthRepository : IAuthRepository
 			.Take(paginationRequest.PageSize)
 			.AsNoTracking()
 			.Select(asm => new ApplicationsDTO(
-					asm.SubMenuId,
-					asm.SubMenuName,
+					asm.AppId,
+					asm.AppName,
 					asm.Description!))
 			.ToListAsync(cancellationToken);
 
@@ -370,6 +368,41 @@ public class AuthRepository : IAuthRepository
 
 		await _dbcontext.SaveChangesAsync();
 
+		return true;
+	}
+
+	public async Task<ApplicationsDTO?> GetApplicationAsync(int applicationId)
+	{
+		var application = await _dbcontext.AuthApplications.AsNoTracking()
+		.Where(a => a.AppId == applicationId)
+		 .Select(a => new ApplicationsDTO(
+			a.AppId,
+			a.AppName,
+			a.Description!
+		))
+		.FirstOrDefaultAsync();
+
+		return application;
+	}
+
+	public async Task<bool> DeleteApplicationAsync(int applicationId)
+	{
+		var application = await GetApplicationAsync(applicationId);
+		if (application != null)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public async Task<bool> AddApplicationAsync(ApplicationsDTO applications)
+	{
+		var addedApplication = new AuthApplication
+		{
+			AppName = applications.applicationName,
+			Description = applications.Description
+		};
+		var isAdded = await _dbcontext.AuthApplications.AddAsync(addedApplication);
 		return true;
 	}
 }
