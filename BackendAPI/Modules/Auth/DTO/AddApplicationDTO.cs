@@ -2,6 +2,10 @@
 
 public record AddApplicationDTO
 {
+<<<<<<< Updated upstream
+=======
+	public int AppId { get; set; }
+>>>>>>> Stashed changes
 	public string AppName { get; set; } = null!;
 	public string AppCode { get; set; } = null!;
 	public string? Description { get; set; }
