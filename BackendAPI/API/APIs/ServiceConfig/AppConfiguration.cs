@@ -23,6 +23,8 @@ public static class AppConfiguration
 		if (app.Environment.IsProduction())
 		{
 			await DatabaseExtensions.IntializeDatabaseAsync(app);
+			app.UseSwagger();
+			app.UseSwaggerUI();
 		}
 
 		return app;

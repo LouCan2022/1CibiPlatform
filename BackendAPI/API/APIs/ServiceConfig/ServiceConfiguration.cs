@@ -61,7 +61,7 @@ public static class ServiceConfiguration
 							 policy =>
 							 {
 								 policy.WithOrigins(
-									 "http://192.168.32.21:4200",
+									 "http://192.168.34.20:4200",
 									 "http://localhost:5055")
 									   .AllowAnyHeader()
 									   .AllowAnyMethod()
