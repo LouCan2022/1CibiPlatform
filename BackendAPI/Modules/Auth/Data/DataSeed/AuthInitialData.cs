@@ -64,13 +64,11 @@ public class AuthInitialData
 				new AuthApplication
 				{
 					AppName = "CNX",
-					AppCode = "1",
 					Description = "Concentrix API"
 				},
 				new AuthApplication
 				{
 					AppName = "Philsys",
-					AppCode = "2",
 					Description = "IDV"
 				}
 			};

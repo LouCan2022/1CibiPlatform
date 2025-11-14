@@ -42,6 +42,7 @@ namespace Auth.ServiceConfig
 			services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 			services.AddScoped<ISecureToken, SecureToken>();
 			services.AddScoped<IApplicationService, ApplicationService>();
+			services.AddScoped<ISubMenuService, SubMenuService>();
 			services.AddScoped<IUserService, UserManagementService>();
 
 			services.Decorate<IAuthRepository, AuthCacheRepository>();

@@ -7,5 +7,6 @@ public interface IApplicationService
 
 	Task<bool> DeleteApplicationAsync(int AppId);
 
-	Task<bool> AddApplicationAsync(ApplicationsDTO application);
+	Task<ApplicationDTO> EditApplicationAsync(EditApplicationDTO applicationDTO);
+	Task<bool> AddApplicationAsync(AddApplicationDTO application);
 }

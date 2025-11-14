@@ -1,8 +1,9 @@
 ﻿namespace Auth.DTO;
 
-public record AddApplicationDTO
+public record SubMenuDTO
 {
-	public string? AppName { get; set; }
+	public int SubMenuId { get; set; }
+	public string? SubMenuName { get; set; }
 	public string? Description { get; set; }
 	public bool IsActive { get; set; }
 }

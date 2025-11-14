@@ -8,15 +8,15 @@ public class ApplicationService : IApplicationService
 	public ApplicationService(IAuthRepository authRepository,
 					   ILogger<ApplicationService> logger)
 	{
-		this._authRepository = authRepository;
-		this._logger = logger;
+		_authRepository = authRepository;
+		_logger = logger;
 	}
 
 	public Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Fetching users with pagination: {@PaginationRequest}", paginationRequest);
+		_logger.LogInformation("Fetching application with pagination: {@PaginationRequest}", paginationRequest);
 
 		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
 			_authRepository.GetApplicationsAsync(paginationRequest, cancellationToken) :
@@ -30,9 +30,15 @@ public class ApplicationService : IApplicationService
 		return isDeleted;
 	}
 
-	public Task<bool> AddApplicationAsync(ApplicationsDTO application)
+	public async Task<bool> AddApplicationAsync(AddApplicationDTO application)
 	{
-		var isAdded = _authRepository.AddApplicationAsync(application);
+		var isAdded = await _authRepository.AddApplicationAsync(application);
 		return isAdded;
+	}
+
+	public async Task<ApplicationDTO> EditApplicationAsync(EditApplicationDTO applicationDTO)
+	{
+		var application = await _authRepository.EditApplicationAsync(applicationDTO);
+		return application.Adapt<ApplicationDTO>();
 	}
 }

@@ -1,5 +1,5 @@
 ﻿namespace Auth.Features.UserManagement.Command.AddApplication;
-public record AddApplicationCommand(ApplicationsDTO application) : ICommand<AddApplicationResult>;
+public record AddApplicationCommand(AddApplicationDTO application) : ICommand<AddApplicationResult>;
 public record AddApplicationResult(bool isAdded);
 public class AddApplicationHandler : ICommandHandler<AddApplicationCommand, AddApplicationResult>
 {

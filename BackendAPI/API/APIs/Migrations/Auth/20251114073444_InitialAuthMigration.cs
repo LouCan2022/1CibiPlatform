@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     /// <inheritdoc />
-    public partial class initialmigration : Migration
+    public partial class InitialAuthMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,6 @@ namespace APIs.Migrations.Auth
                     AppId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AppName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    AppCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "timezone('utc', now())")
@@ -187,12 +186,6 @@ namespace APIs.Migrations.Auth
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AuthApplications_AppCode",
-                table: "AuthApplications",
-                column: "AppCode",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuthApplications_AppName",

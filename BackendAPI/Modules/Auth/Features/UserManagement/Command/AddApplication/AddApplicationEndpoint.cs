@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.UserManagement.Command.AddApplication;
 
-public record AddApplicationRequest(ApplicationsDTO application);
+public record AddApplicationRequest(AddApplicationDTO application);
 public record AddApplicationResponse(bool isAdded);
 public class AddApplicationEndpoint : ICarterModule
 {

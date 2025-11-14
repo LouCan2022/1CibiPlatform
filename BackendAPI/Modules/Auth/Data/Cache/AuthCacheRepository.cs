@@ -28,6 +28,31 @@ public class AuthCacheRepository : IAuthRepository
 			cancellationToken);
 	}
 
+	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"submenus_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<SubMenusDTO>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.GetSubMenusAsync(req, token),
+			null,
+			null,
+			cancellationToken);
+	}
+
+	public async Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"submenus_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}_search_{paginationRequest.SearchTerm}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<SubMenusDTO>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.SearchSubMenusAsync(req, token),
+			null,
+			null,
+			cancellationToken);
+	}
 	public async Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var cacheKey = $"users_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}_search_{paginationRequest.SearchTerm}";
@@ -161,18 +186,38 @@ public class AuthCacheRepository : IAuthRepository
 		return await _authRepository.UpdateVerificationCodeAsync(userDto);
 	}
 
-	public Task<ApplicationsDTO?> GetApplicationAsync(int applicationId)
+	public async Task<AuthApplication> GetApplicationAsync(int applicationId)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.GetApplicationAsync(applicationId);
 	}
 
-	public Task<bool> DeleteApplicationAsync(int applicationId)
+	public async Task<bool> DeleteApplicationAsync(int applicationId)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.DeleteApplicationAsync(applicationId);
 	}
 
-	public Task<bool> AddApplicationAsync(ApplicationsDTO application)
+	public async Task<bool> AddApplicationAsync(AddApplicationDTO application)
 	{
-		throw new NotImplementedException();
+		return await _authRepository.AddApplicationAsync(application);
+	}
+
+	public async Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO)
+	{
+		return await _authRepository.EditApplicationAsync(applicationDTO);
+	}
+
+	public async Task<bool> AddSubMenuAsync(AddSubMenuDTO subMenu)
+	{
+		return await _authRepository.AddSubMenuAsync(subMenu);
+	}
+
+	public async Task<bool> DeleteSubMenuAsync(int subMenuId)
+	{
+		return await _authRepository.DeleteSubMenuAsync(subMenuId);
+	}
+
+	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
+	{
+		return await _authRepository.EditSubMenuAsync(subMenuDTO);	
 	}
 }
