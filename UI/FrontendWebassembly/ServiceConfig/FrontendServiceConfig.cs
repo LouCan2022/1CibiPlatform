@@ -6,7 +6,7 @@ public static class FrontendServiceConfig
 	{
 		services.AddHttpClient("API", client =>
 		{
-			client.BaseAddress = new Uri("http://localhost:5123");
+			client.BaseAddress = new Uri("http://localhost:4200");
 		})
 		 .AddHttpMessageHandler<CookieHandler>();
 
