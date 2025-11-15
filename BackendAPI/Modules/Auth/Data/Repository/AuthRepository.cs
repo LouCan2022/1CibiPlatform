@@ -42,19 +42,19 @@ public class AuthRepository : IAuthRepository
 	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var totalRecords = await _dbcontext
-			.AuthSubmenu
-			.Where(asm => asm.IsActive)
+			.AuthApplications
+			.Where(aa => aa.IsActive)
 			.LongCountAsync(cancellationToken);
 
-		var applications = await _dbcontext.AuthSubmenu
-			.Where(au => au.IsActive)
+		var applications = await _dbcontext.AuthApplications
+			.Where(aa => aa.IsActive)
 			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 			.Take(paginationRequest.PageSize)
 			.AsNoTracking()
-			.Select(asm => new ApplicationsDTO(
-					asm.SubMenuId,
-					asm.SubMenuName,
-					asm.Description!))
+			.Select(aa => new ApplicationsDTO(
+					aa.AppId,
+					aa.AppName,
+					aa.Description!))
 			.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<ApplicationsDTO>
@@ -63,6 +63,32 @@ public class AuthRepository : IAuthRepository
 			  paginationRequest.PageSize,
 			  totalRecords,
 			  applications
+			);
+	}
+	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext
+			.AuthSubmenu
+			.Where(asm => asm.IsActive)
+			.LongCountAsync(cancellationToken);
+
+		var subMenus = await _dbcontext.AuthSubmenu
+			.Where(asm => asm.IsActive)
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asm => new SubMenusDTO(
+					asm.SubMenuId,
+					asm.SubMenuName,
+					asm.Description!))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<SubMenusDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  subMenus
 			);
 	}
 	public async Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
@@ -97,14 +123,12 @@ public class AuthRepository : IAuthRepository
 			  users
 			);
 	}
-
 	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
-		var applicationsQuery = _dbcontext.AuthSubmenu
+		var applicationsQuery = _dbcontext.AuthApplications
 				.Where(au => au.IsActive &&
-					(EF.Functions.ILike(au.SubMenuName, $"%{paginationRequest.SearchTerm}%") ||
+					(EF.Functions.ILike(au.AppName, $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(au.Description!, $"%{paginationRequest.SearchTerm}%")));
-
 
 		var totalRecords = await applicationsQuery.CountAsync(cancellationToken);
 
@@ -113,8 +137,8 @@ public class AuthRepository : IAuthRepository
 			.Take(paginationRequest.PageSize)
 			.AsNoTracking()
 			.Select(asm => new ApplicationsDTO(
-					asm.SubMenuId,
-					asm.SubMenuName,
+					asm.AppId,
+					asm.AppName,
 					asm.Description!))
 			.ToListAsync(cancellationToken);
 
@@ -124,6 +148,33 @@ public class AuthRepository : IAuthRepository
 			  paginationRequest.PageSize,
 			  totalRecords,
 			  applications
+			);
+	}
+	public async Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var subMenusQuery = _dbcontext.AuthSubmenu
+				.Where(asm => asm.IsActive &&
+					(EF.Functions.ILike(asm.SubMenuName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(asm.Description!, $"%{paginationRequest.SearchTerm}%")));
+
+		var totalRecords = await subMenusQuery.CountAsync(cancellationToken);
+
+		var subMenus = await subMenusQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asm => new SubMenusDTO(
+					asm.SubMenuId,
+					asm.SubMenuName,
+					asm.Description!))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<SubMenusDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  subMenus
 			);
 	}
 
@@ -371,5 +422,105 @@ public class AuthRepository : IAuthRepository
 		await _dbcontext.SaveChangesAsync();
 
 		return true;
+	}
+
+	public async Task<AuthApplication> GetApplicationAsync(int applicationId)
+	{
+		var application = await _dbcontext.AuthApplications
+		.FirstOrDefaultAsync(x => x.AppId == applicationId);
+
+		return application!;
+	}
+	public async Task<AuthSubMenu> GetSubMenuAsync(int subMenuId)
+	{
+		var subMenu = await _dbcontext.AuthSubmenu
+		.FirstOrDefaultAsync(x => x.SubMenuId == subMenuId);
+
+		return subMenu!;
+	}
+
+	public async Task<bool> DeleteApplicationAsync(AuthApplication application)
+	{
+		
+		var isDeleted = _dbcontext.AuthApplications.Remove(application);
+		await _dbcontext.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<bool> AddApplicationAsync(AddApplicationDTO applications)
+	{
+		var addedApplication = new AuthApplication
+		{
+			AppName = applications.AppName!,
+			Description = applications.Description,
+			IsActive = applications.IsActive,
+			CreatedAt = DateTime.UtcNow
+		};
+		var isAdded = await _dbcontext.AuthApplications.AddAsync(addedApplication);
+		await _dbcontext.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO)
+	{
+		var application = new AuthApplication
+		{
+			AppId = applicationDTO.AppId,   
+			AppName = applicationDTO.AppName!,
+			Description = applicationDTO.Description,
+			IsActive = applicationDTO.IsActive
+		};
+
+		var entry = _dbcontext.Attach(application);
+
+		entry.Property(x => x.AppName).IsModified = true;
+		entry.Property(x => x.Description).IsModified = true;
+		entry.Property(x => x.IsActive).IsModified = true;
+
+		await _dbcontext.SaveChangesAsync();
+
+		return application;
+	}
+
+	public async Task<bool> AddSubMenuAsync(AddSubMenuDTO subMenu)
+	{
+		var authSubMenu = new AuthSubMenu
+		{
+			SubMenuName = subMenu.SubMenuName!,
+			Description = subMenu.Description,
+			IsActive = subMenu.IsActive,
+			CreatedAt = DateTime.UtcNow
+		};
+		var isAdded = await _dbcontext.AuthSubmenu.AddAsync(authSubMenu);
+		await _dbcontext.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu)
+	{
+		var isDeleted = _dbcontext.AuthSubmenu.Remove(subMenu);
+		await _dbcontext.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
+	{
+		var subMenu = new AuthSubMenu
+		{
+			SubMenuId = subMenuDTO.SubMenuId,
+			SubMenuName = subMenuDTO.SubMenuName!,
+			Description = subMenuDTO.Description,
+			IsActive = subMenuDTO.IsActive
+		};
+
+		var entry = _dbcontext.Attach(subMenu);
+
+		entry.Property(x => x.SubMenuName).IsModified = true;
+		entry.Property(x => x.Description).IsModified = true;
+		entry.Property(x => x.IsActive).IsModified = true;
+
+		await _dbcontext.SaveChangesAsync();
+
+		return subMenu;
 	}
 }

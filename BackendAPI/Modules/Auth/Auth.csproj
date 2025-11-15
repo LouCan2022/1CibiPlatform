@@ -25,9 +25,4 @@
     <ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <Folder Include="Features\UserManagement\Command\" />
-  </ItemGroup>
-
 </Project>

@@ -1,0 +1,17 @@
+﻿namespace Auth.Features.UserManagement.Command.DeleteApplication;
+public record DeleteApplicationCommand(int AppId) : ICommand<DeleteApplicationResult>;
+public record DeleteApplicationResult(bool IsDeleted);
+public class DeleteApplicationHandler : ICommandHandler<DeleteApplicationCommand, DeleteApplicationResult>
+{
+	private readonly IApplicationService _applicationService;
+
+	public DeleteApplicationHandler(IApplicationService applicationService)
+	{
+		_applicationService = applicationService;
+	}
+	public async Task<DeleteApplicationResult> Handle(DeleteApplicationCommand request, CancellationToken cancellationToken)
+	{
+		var deletedApplication = await _applicationService.DeleteApplicationAsync(request.AppId);
+		return new DeleteApplicationResult(deletedApplication);
+	}
+}
