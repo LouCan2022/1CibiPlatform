@@ -1,10 +1,10 @@
 ﻿
 namespace PhilSys.Features.GetLivenessKey;
 
-public record GetLivenessKeyCommand() : ICommand<GetLivenessKeyResult>;
+public record GetLivenessKeyQueryRequest() : IRequest<GetLivenessKeyResult>;
 
 public record GetLivenessKeyResult(string LivenessKey);
-public class GetLivenessKeyHandler : ICommandHandler<GetLivenessKeyCommand, GetLivenessKeyResult>
+public class GetLivenessKeyHandler : IRequestHandler<GetLivenessKeyQueryRequest, GetLivenessKeyResult>
 {
 	private readonly GetLivenessKeyService _getLivenessKeyService;
 
@@ -12,7 +12,7 @@ public class GetLivenessKeyHandler : ICommandHandler<GetLivenessKeyCommand, GetL
 	{
 		_getLivenessKeyService = GetLivenessKeyService;
 	}
-	public async Task<GetLivenessKeyResult> Handle(GetLivenessKeyCommand request, CancellationToken cancellationToken)
+	public async Task<GetLivenessKeyResult> Handle(GetLivenessKeyQueryRequest request, CancellationToken cancellationToken)
 	{
 		
 		var livenessKey = await _getLivenessKeyService.GetLivenessKey();

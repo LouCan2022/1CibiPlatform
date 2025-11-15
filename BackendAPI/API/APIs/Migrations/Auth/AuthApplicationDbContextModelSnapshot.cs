@@ -30,11 +30,6 @@ namespace APIs.Migrations.Auth
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AppId"));
 
-                    b.Property<string>("AppCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
                     b.Property<string>("AppName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -52,9 +47,6 @@ namespace APIs.Migrations.Auth
                         .HasColumnType("boolean");
 
                     b.HasKey("AppId");
-
-                    b.HasIndex("AppCode")
-                        .IsUnique();
 
                     b.HasIndex("AppName")
                         .IsUnique();

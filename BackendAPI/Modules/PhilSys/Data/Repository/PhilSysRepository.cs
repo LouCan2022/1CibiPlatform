@@ -18,12 +18,13 @@ public class PhilSysRepository : IPhilSysRepository
 
 	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(PhilSysTransaction transaction)
 	{
+		transaction.IsTransacted = true;
+		transaction.TransactedAt = DateTime.UtcNow;
+
 		var entry = _dbcontext.Attach(transaction);
+
 		entry.Property(t => t.IsTransacted).IsModified = true;
 		entry.Property(t => t.TransactedAt).IsModified = true;
-
-		transaction!.IsTransacted = true;
-		transaction.TransactedAt = DateTime.UtcNow;
 
 		await _dbcontext.SaveChangesAsync();
 
