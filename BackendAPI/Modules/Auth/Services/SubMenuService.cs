@@ -23,8 +23,8 @@ public class SubMenuService : ISubMenuService
 		var subMenu = await _authRepository.GetSubMenuAsync(SubMenuId);
 		if (subMenu == null)
 		{
-			_logger.LogError("SubMenu with ID {AppId} was not found during delete operation.", SubMenuId);
-			throw new InternalServerException($"SubMenu with ID {SubMenuId} was not found.");
+			_logger.LogError("SubMenu with ID {SubMenuId} was not found during delete operation.", SubMenuId);
+			throw new NotFoundException($"SubMenu with ID {SubMenuId} was not found.");
 		}
 
 		var isDeleted = await _authRepository.DeleteSubMenuAsync(subMenu);
@@ -37,8 +37,8 @@ public class SubMenuService : ISubMenuService
 		var existingSubMenu = await _authRepository.GetSubMenuAsync(subMenuDTO.SubMenuId);
 		if (existingSubMenu == null)
 		{
-			_logger.LogError("Application with ID {AppId} was not found during update operation.", existingSubMenu!.SubMenuId);
-			throw new InternalServerException($"Application with ID {existingSubMenu.SubMenuId} was not found.");
+			_logger.LogError("SubMenu with ID {SubMenuId} was not found during update operation.", subMenuDTO!.SubMenuId);
+			throw new NotFoundException($"SubMenu with ID {subMenuDTO.SubMenuId} was not found.");
 		}
 		var subMenu = await _authRepository.EditSubMenuAsync(subMenuDTO);
 		return subMenu.Adapt<SubMenuDTO>();
