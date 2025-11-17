@@ -18,19 +18,11 @@ public class AuthInitialData
 				new Authusers
 				{
 					Id = this._Id,
-					Email = "john@example.com",
+					Email = "admin@cibi.com",
 					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-					FirstName = "Admin",
-					LastName = ""
-				},
-				new Authusers
-				{
-					Id = Guid.NewGuid(),
-					Email = "cb@example.com",
-					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-					FirstName = "CB",
+					FirstName = "Super",
 					LastName = "Admin"
-				},
+				}
 			};
 	}
 
@@ -104,8 +96,8 @@ public class AuthInitialData
 			{
 				new AuthSubMenu
 				{
-					SubMenuName = "Dashboard",
-					Description = "Dashboard SubMenu"
+					SubMenuName = "CNX Dashboard",
+					Description = "List of Subjects"
 				},
 				new AuthSubMenu
 				{
