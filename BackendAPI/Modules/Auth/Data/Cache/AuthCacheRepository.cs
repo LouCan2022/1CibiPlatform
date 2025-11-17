@@ -13,6 +13,9 @@ public class AuthCacheRepository : IAuthRepository
 		this._hybridCache = hybridCache;
 	}
 
+	private const string SubMenusTag = "submenus";
+	private const string ApplicationsTag = "applications";
+
 	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
@@ -36,9 +39,8 @@ public class AuthCacheRepository : IAuthRepository
 			cacheKey,
 			paginationRequest,
 			async (req, token) => await _authRepository.GetSubMenusAsync(req, token),
-			null,
-			null,
-			cancellationToken);
+			tags: [SubMenusTag],
+			cancellationToken: cancellationToken);
 	}
 
 	public async Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
@@ -49,9 +51,8 @@ public class AuthCacheRepository : IAuthRepository
 			cacheKey,
 			paginationRequest,
 			async (req, token) => await _authRepository.SearchSubMenusAsync(req, token),
-			null,
-			null,
-			cancellationToken);
+			tags: [SubMenusTag],
+			cancellationToken: cancellationToken);
 	}
 	public async Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
@@ -73,9 +74,8 @@ public class AuthCacheRepository : IAuthRepository
 			cacheKey,
 			paginationRequest,
 			async (req, token) => await _authRepository.GetApplicationsAsync(req, token),
-			null,
-			null,
-			cancellationToken);
+			tags: [ApplicationsTag],
+			cancellationToken: cancellationToken);
 	}
 
 	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
@@ -86,9 +86,8 @@ public class AuthCacheRepository : IAuthRepository
 			cacheKey,
 			paginationRequest,
 			async (req, token) => await _authRepository.SearchApplicationsAsync(req, token),
-			null,
-			null,
-			cancellationToken);
+			tags: [ApplicationsTag],
+			cancellationToken: cancellationToken);
 	}
 
 	public async Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification)
@@ -193,32 +192,62 @@ public class AuthCacheRepository : IAuthRepository
 
 	public async Task<bool> DeleteApplicationAsync(AuthApplication application)
 	{
-		return await _authRepository.DeleteApplicationAsync(application);
+		var result = await _authRepository.DeleteApplicationAsync(application);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(ApplicationsTag);
+
+		return result;
 	}
 
 	public async Task<bool> AddApplicationAsync(AddApplicationDTO application)
 	{
-		return await _authRepository.AddApplicationAsync(application);
+		var result = await _authRepository.AddApplicationAsync(application);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(ApplicationsTag);
+
+		return result;
 	}
 
 	public async Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO)
 	{
-		return await _authRepository.EditApplicationAsync(applicationDTO);
+		var updated = await _authRepository.EditApplicationAsync(applicationDTO);
+
+		if (updated != null)
+			await _hybridCache.RemoveByTagAsync(ApplicationsTag);
+
+		return updated!;
 	}
 
 	public async Task<bool> AddSubMenuAsync(AddSubMenuDTO subMenu)
 	{
-		return await _authRepository.AddSubMenuAsync(subMenu);
+		var result = await _authRepository.AddSubMenuAsync(subMenu);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(SubMenusTag);
+
+		return result;
 	}
 
 	public async Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu)
 	{
-		return await _authRepository.DeleteSubMenuAsync(subMenu);
+		var result = await _authRepository.DeleteSubMenuAsync(subMenu);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(SubMenusTag);
+
+		return result;
 	}
 
 	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
 	{
-		return await _authRepository.EditSubMenuAsync(subMenuDTO);	
+		var updated = await _authRepository.EditSubMenuAsync(subMenuDTO);
+
+		if (updated != null)
+			await _hybridCache.RemoveByTagAsync(SubMenusTag);
+
+		return updated!;
 	}
 
 	public async Task<AuthSubMenu> GetSubMenuAsync(int applicationId)
