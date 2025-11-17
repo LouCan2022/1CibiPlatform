@@ -40,7 +40,11 @@ public class SubMenuService : ISubMenuService
 			_logger.LogError("SubMenu with ID {SubMenuId} was not found during update operation.", subMenuDTO!.SubMenuId);
 			throw new NotFoundException($"SubMenu with ID {subMenuDTO.SubMenuId} was not found.");
 		}
-		var subMenu = await _authRepository.EditSubMenuAsync(subMenuDTO);
+		existingSubMenu.SubMenuName = subMenuDTO.SubMenuName!;
+		existingSubMenu.Description = subMenuDTO!.Description;
+		existingSubMenu.IsActive = subMenuDTO.IsActive;
+
+		var subMenu = await _authRepository.EditSubMenuAsync(existingSubMenu);
 		return subMenu.Adapt<SubMenuDTO>();
 	}
 

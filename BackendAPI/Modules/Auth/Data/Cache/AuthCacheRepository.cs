@@ -210,9 +210,9 @@ public class AuthCacheRepository : IAuthRepository
 		return result;
 	}
 
-	public async Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO)
+	public async Task<AuthApplication> EditApplicationAsync(AuthApplication application)
 	{
-		var updated = await _authRepository.EditApplicationAsync(applicationDTO);
+		var updated = await _authRepository.EditApplicationAsync(application);
 
 		if (updated != null)
 			await _hybridCache.RemoveByTagAsync(ApplicationsTag);
@@ -240,9 +240,9 @@ public class AuthCacheRepository : IAuthRepository
 		return result;
 	}
 
-	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
+	public async Task<AuthSubMenu> EditSubMenuAsync(AuthSubMenu subMenu)
 	{
-		var updated = await _authRepository.EditSubMenuAsync(subMenuDTO);
+		var updated = await _authRepository.EditSubMenuAsync(subMenu);
 
 		if (updated != null)
 			await _hybridCache.RemoveByTagAsync(SubMenusTag);

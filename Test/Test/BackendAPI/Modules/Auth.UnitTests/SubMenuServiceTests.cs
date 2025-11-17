@@ -133,7 +133,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 				.ReturnsAsync(existingSubMenu);
 
 			_fixture.MockAuthRepository
-				.Setup(x => x.EditSubMenuAsync(editDto))
+				.Setup(x => x.EditSubMenuAsync(existingSubMenu))
 				.ReturnsAsync(updatedSubMenu);
 
 			// Act

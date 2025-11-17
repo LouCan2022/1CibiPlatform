@@ -175,7 +175,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests
 				.ReturnsAsync(existingApp);
 
 			_fixture.MockAuthRepository
-				.Setup(x => x.EditApplicationAsync(editDto))
+				.Setup(x => x.EditApplicationAsync(existingApp))
 				.ReturnsAsync(updatedApp);
 
 			// Act

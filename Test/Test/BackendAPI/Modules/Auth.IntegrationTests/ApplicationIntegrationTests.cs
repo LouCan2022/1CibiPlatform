@@ -1,6 +1,12 @@
 ﻿using Auth.Data.Entities;
-using Auth.Features.UserManagement.Query.GetUsers;
+using Auth.DTO;
+using Auth.Features.UserManagement.Command.AddApplication;
+using Auth.Features.UserManagement.Command.DeleteApplication;
+using Auth.Features.UserManagement.Command.EditApplication;
+using Auth.Features.UserManagement.Query.GetApplications;
+using BuildingBlocks.Exceptions;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
@@ -16,120 +22,173 @@ public class ApplicationIntegrationTests : BaseIntegrationTest
 	public async Task GetApplications_ShouldReturnPaginatedApplicationsList()
 	{
 		// Arrange
-		await SeedUserData();
+		await SeedApplicationData();
 
-		var query = new GetApplicationsQueryRequest(PageNumber: 1, PageSize: 4);
+		var query = new GetApplicationsQueryRequest(PageNumber: 1, PageSize: 3);
 
 		// Act
 		var result = await _sender.Send(query);
 
 		// Assert
 		result.Should().NotBeNull();
-		result.Users.Data.Count().Should().Be(4);
+		result.Applications.Data.Count().Should().Be(3);
 	}
 
 	[Fact]
-	public async Task GetUsers_ShouldReturnUserList_BasedOnSearchTerm()
+	public async Task GetApplications_ShouldReturnApplicationList_BasedOnSearchTerm()
 	{
 		// Arrange
-		await SeedUserData();
+		await SeedApplicationData();
 
-		var query = new GetUsersQueryRequest(PageNumber: 1, PageSize: 1, SearchTerm: "Admin1");
+		var query = new GetApplicationsQueryRequest(PageNumber: 1, PageSize: 1, SearchTerm: "CNX");
 
+		// Act
+		var result = await _sender.Send(query);
+
+		// Assert
+		result.Should().NotBeNull();
+
+		result.Applications.Count.Should().Be(1);
+		result.Applications.Data.ElementAt(0).applicationName.Should().Be("CNX");
+		result.Applications.Data.ElementAt(0).Description.Should().Be("CNX Dashboard");
+	}
+
+	[Fact]
+	public async Task GetApplications_ShouldReturnEmptyList_WhenNoApplicationsExist()
+	{
+		// Arrange
+		var query = new GetApplicationsQueryRequest(PageNumber: 1, PageSize: 5);
 		// Act
 		var result = await _sender.Send(query);
 		// Assert
 		result.Should().NotBeNull();
-
-		result.Users.Count.Should().Be(1);
-		result.Users.Data.ElementAt(0).firstName.Should().Be("Admin1");
-		result.Users.Data.ElementAt(0).email.Should().Be("john@example1.com");
+		result.Applications.Count.Should().Be(0);
 	}
 
 	[Fact]
-	public async Task GetUsers_ShouldReturnEmptyList_WhenNoUsersExist()
+	public async Task GetApplications_ShouldReturnCorrectPage_WhenPageNumberAndSizeAreSpecified()
 	{
 		// Arrange
-		var query = new GetUsersQueryRequest(PageNumber: 1, PageSize: 5);
-		// Act
-		var result = await _sender.Send(query);
-		// Assert
-		result.Should().NotBeNull();
-		result.Users.Count.Should().Be(0);
-	}
-
-	[Fact]
-	public async Task GetUsers_ShouldReturnCorrectPage_WhenPageNumberAndSizeAreSpecified()
-	{
-		// Arrange
-		await SeedUserData();
-		var query = new GetUsersQueryRequest(PageNumber: 1, PageSize: 2);
+		await SeedApplicationData();
+		var query = new GetApplicationsQueryRequest(PageNumber: 1, PageSize: 2);
 
 		// Act
 		var result = await _sender.Send(query);
 
 		// Assert
-		result.Users.PageIndex.Should().Be(1);
-		result.Users.PageSize.Should().Be(2);
+		result.Applications.PageIndex.Should().Be(1);
+		result.Applications.PageSize.Should().Be(2);
 	}
 
 	[Fact]
-	public async Task GetUsers_ShouldReturnEmptyList_WhenPageNumberExceedsTotalPages()
+	public async Task GetApplications_ShouldReturnEmptyList_WhenPageNumberExceedsTotalPages()
 	{
 		// Arrange
-		await SeedUserData();
+		await SeedApplicationData();
 
-		var query = new GetUsersQueryRequest(PageNumber: 3, PageSize: 2);
+		var query = new GetApplicationsQueryRequest(PageNumber: 3, PageSize: 2);
 
 		// Act
 		var result = await _sender.Send(query);
 
 		// Assert
-		result.Users.Data.Count().Should().Be(0);
+		result.Applications.Data.Count().Should().Be(0);
 	}
 
-
-
-	private async Task SeedUserData()
+	[Fact]
+	public async Task AddApplication_ShouldAddNewApplicationSuccessfully()
 	{
-		var users = new List<Authusers>
-		{
-			new Authusers
-			{
-				Id = Guid.NewGuid(),
-				Email = "john@example1.com",
-				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-				FirstName = "Admin1",
-				LastName = ""
-			},
-			new Authusers
-			{
-				Id = Guid.NewGuid(),
-				Email = "john@example2.com",
-				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-				FirstName = "Admin2",
-				LastName = ""
-			},
-			new Authusers
-			{
-				Id = Guid.NewGuid(),
-				Email = "john@example3.com",
-				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-				FirstName = "Admin3",
-				LastName = ""
-			},
-			new Authusers
-			{
-				Id = Guid.NewGuid(),
-				Email = "john@example4.com",
-				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-				FirstName = "Admin4",
-				LastName = ""
-			},
-
+		var application = new AddApplicationDTO {
+			AppName = "NewApp",
+			Description = "New Application",
+			IsActive = true
 		};
-		_dbContext.AuthUsers.AddRange(users);
-		await _dbContext.SaveChangesAsync();
+		// Arrange
+		var command = new AddApplicationCommand(application);
+
+		// Act
+		var result = await _sender.Send(command);
+
+		// Assert
+	
+		result.Should().NotBeNull();
+		result.isAdded.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task EditApplication_ShouldUpdateExistingApplicationSuccessfully()
+	{
+		// Arrange
+		await SeedApplicationData();
+
+		var existingApp = await _dbContext.AuthApplications
+			.AsNoTracking()
+			.FirstAsync(x => x.AppId == 2);
+
+		var application = new EditApplicationDTO
+		{
+			AppId = existingApp!.AppId,
+			AppName = existingApp.AppName + " Updated",
+			Description = existingApp.Description + " Updated",
+			IsActive = false
+		};
+
+		var command = new EditApplicationCommand(application);
+
+		// Act
+		var result = await _sender.Send(command);
+
+		// Assert
+		result.Should().NotBeNull();
+		result!.application.AppName.Should().Be(application.AppName);
+		result!.application.Description.Should().Be(application.Description); 
+		result!.application.IsActive.Should().BeFalse();
+	}
+
+	[Fact]
+	public async Task EditApplication_ShouldThrow_WhenApplicationDoesNotExist()
+	{
+		// Arrange
+		var application = new EditApplicationDTO
+		{
+			AppId = 1,
+			AppName = "CNX",
+			Description = "CNX Dashboard"
+		};
+		var command = new EditApplicationCommand(application);
+
+		// Act
+		Func<Task> act = async () => await _sender.Send(command);
+
+		// Assert
+		await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Application with ID {application.AppId} was not found."); ;
+	}
+
+	[Fact]
+	public async Task DeleteApplication_ShouldRemoveApplicationSuccessfully()
+	{
+		// Arrange
+		await SeedApplicationData();
+		var command = new DeleteApplicationCommand(1);
+
+		// Act
+		var result = await _sender.Send(command);
+
+		// Assert
+		result.IsDeleted.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task DeleteApplication_ShouldThrow_WhenApplicationDoesNotExist()
+	{
+		// Arrange
+		var command = new DeleteApplicationCommand(99); 
+
+		// Act
+		Func<Task> act = async () => await _sender.Send(command);
+
+		// Assert
+		await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Application with ID 99 was not found."); ;
 	}
 
 	private async Task SeedApplicationData()

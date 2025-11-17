@@ -49,7 +49,12 @@ public class ApplicationService : IApplicationService
 			_logger.LogError("Application with ID {AppId} was not found during update operation.", applicationDTO.AppId);
 			throw new NotFoundException($"Application with ID {applicationDTO.AppId} was not found.");
 		}
-		var application = await _authRepository.EditApplicationAsync(applicationDTO);
+
+		existingApplication.AppName = applicationDTO.AppName!;
+		existingApplication.Description = applicationDTO.Description;
+		existingApplication.IsActive = applicationDTO.IsActive;
+
+		var application = await _authRepository.EditApplicationAsync(existingApplication);
 		return application.Adapt<ApplicationDTO>();
 	}
 }
