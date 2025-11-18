@@ -7,27 +7,37 @@ public static class FrontendServiceConfig
 		// Allow configuration overrides
 		var apiBaseFromConfig = configuration["ApiBase"];
 		var ssoBaseFromConfig = configuration["SsoApiBase"];
-		var prodDomainFromConfig = configuration["ProdDomain"];
 
 		var isUat = string.Equals(env.Environment, "UAT", StringComparison.OrdinalIgnoreCase);
 
-		var apiBase = env.IsProduction() || isUat
-			? (apiBaseFromConfig ?? prodDomainFromConfig)
-			: apiBaseFromConfig;
-		
-		var ssoBase = env.IsProduction()
-			? (ssoBaseFromConfig ?? prodDomainFromConfig)
-			: ssoBaseFromConfig;
+		if (isUat)
+		{
+			apiBaseFromConfig ??= configuration["UatApiBase"];
+			ssoBaseFromConfig ??= configuration["UatSsoApiBase"];
+		}
+
+		if (env.IsProduction())
+		{
+			apiBaseFromConfig ??= configuration["ProdApiBase"];
+			ssoBaseFromConfig ??= configuration["ProdSsoApiBase"];
+		}
+
+		if (!env.IsProduction() && !isUat)
+		{
+			apiBaseFromConfig ??= configuration["DevApiBase"];
+			ssoBaseFromConfig ??= configuration["DevSsoApiBase"];
+		}
+
 
 		services.AddHttpClient("API", client =>
 		{
-			client.BaseAddress = new Uri(apiBase);
+			client.BaseAddress = new Uri(apiBaseFromConfig!);
 		})
 		 .AddHttpMessageHandler<CookieHandler>();
 
 		services.AddHttpClient("SSOAPI", client =>
 		{
-			client.BaseAddress = new Uri(ssoBase);
+			client.BaseAddress = new Uri(ssoBaseFromConfig!);
 		})
 		 .AddHttpMessageHandler<CookieHandler>();
 
