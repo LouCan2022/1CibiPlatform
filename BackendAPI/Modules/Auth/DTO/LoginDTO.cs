@@ -25,13 +25,6 @@ public record UserDataDTO(
 	List<int> roleId
 	);
 
-
-
-public record LoginCred(
-	string Username,
-	string Password);
-
-
 public record LoginWebCred(
 	string Username,
 	string Password,

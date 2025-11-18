@@ -24,7 +24,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		.ReturnsAsync((LoginDTO?)null);
 
 		// Act
-		Func<Task> act = async () => await service.LoginAsync(new LoginCred("bad", "bad"));
+		Func<Task> act = async () => await service.LoginAsync("bad", "bad");
 
 		// Assert
 		await act.Should().ThrowAsync<NotFoundException>().WithMessage("Invalid username or password.");
@@ -40,7 +40,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		_fixture.MockPasswordHasherService.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(false);
 
 		// Act
-		Func<Task> act = async () => await service.LoginAsync(new LoginCred("user", "wrong"));
+		Func<Task> act = async () => await service.LoginAsync("user", "wrong");
 
 		// Assert
 		await act.Should().ThrowAsync<NotFoundException>().WithMessage("Invalid username or password.");
@@ -57,7 +57,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		_fixture.MockJwtService.Setup(x => x.GetAccessToken(It.IsAny<LoginDTO>())).Returns("token");
 
 		// Act
-		var resp = await service.LoginAsync(new LoginCred("user", "pass"));
+		var resp = await service.LoginAsync("user", "pass");
 
 		// Assert
 		resp.Should().NotBeNull();

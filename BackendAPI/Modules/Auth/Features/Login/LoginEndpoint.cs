@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.Login;
 
-public record LoginRequest(LoginCred LoginCred);
+public record LoginRequest(string username, string password);
 
 public record LoginResponse(LoginResponseDTO LoginResponseDTO);
 
@@ -11,9 +11,8 @@ public class LoginEndpoint : ICarterModule
 	{
 		app.MapPost("login", async (LoginRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
-			LoginCred cred = request.LoginCred.Adapt<LoginCred>();
 
-			var command = new LoginCommand(cred);
+			var command = new LoginCommand(request.username, request.password);
 
 			LoginResult result = await sender.Send(command, cancellationToken);
 
