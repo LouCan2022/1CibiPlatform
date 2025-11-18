@@ -12,6 +12,11 @@ public static class AppConfiguration
 			return app;
 		}
 
+		if (app.Environment.IsEnvironment("UAT"))
+		{
+			await DatabaseExtensions.IntializeDatabaseAsync(app);
+		}
+
 		if (app.Environment.IsDevelopment())
 		{
 			await DatabaseExtensions.IntializeDatabaseAsync(app);
