@@ -12,20 +12,20 @@ public static class FrontendServiceConfig
 
 		if (isUat)
 		{
-			apiBaseFromConfig ??= configuration["UatApiBase"];
-			ssoBaseFromConfig ??= configuration["UatSsoApiBase"];
+			apiBaseFromConfig ??= configuration["ApiBase"];
+			ssoBaseFromConfig ??= configuration["SsoApiBase"];
 		}
 
 		if (env.IsProduction())
 		{
-			apiBaseFromConfig ??= configuration["ProdApiBase"];
-			ssoBaseFromConfig ??= configuration["ProdSsoApiBase"];
+			apiBaseFromConfig ??= configuration["ApiBase"];
+			ssoBaseFromConfig ??= configuration["SsoApiBase"];
 		}
 
 		if (!env.IsProduction() && !isUat)
 		{
-			apiBaseFromConfig ??= configuration["DevApiBase"];
-			ssoBaseFromConfig ??= configuration["DevSsoApiBase"];
+			apiBaseFromConfig ??= configuration["ApiBase"];
+			ssoBaseFromConfig ??= configuration["SsoApiBase"];
 		}
 
 
