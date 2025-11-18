@@ -9,10 +9,12 @@ public static class FrontendServiceConfig
 		var ssoBaseFromConfig = configuration["SsoApiBase"];
 		var prodDomainFromConfig = configuration["ProdDomain"];
 
-		var apiBase = env.IsProduction()
+		var isUat = string.Equals(env.Environment, "UAT", StringComparison.OrdinalIgnoreCase);
+
+		var apiBase = env.IsProduction() || isUat
 			? (apiBaseFromConfig ?? prodDomainFromConfig)
 			: apiBaseFromConfig;
-
+		
 		var ssoBase = env.IsProduction()
 			? (ssoBaseFromConfig ?? prodDomainFromConfig)
 			: ssoBaseFromConfig;
