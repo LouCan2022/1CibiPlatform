@@ -4,31 +4,31 @@ using PhilSys.Data.Entities;
 using PhilSys.Features.DeleteTransaction;
 using Test.BackendAPI.Infrastructure.PhilSys.Infrastracture;
 
-namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests
+namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests;
+
+public class DeleteTransactionIntegrationTests : BaseIntegrationTest
 {
-	public class DeleteTransactionIntegrationTests : BaseIntegrationTest
+	public DeleteTransactionIntegrationTests(IntegrationTestWebAppFactory factory) : base(factory)
 	{
-		public DeleteTransactionIntegrationTests(IntegrationTestWebAppFactory factory) : base(factory)
-		{
-		}
+	}
 
-		[Fact]
-		public async Task DeleteTransaction_ShouldThrow_WhenTransactionDataNotFound()
-		{
+	[Fact]
+	public async Task DeleteTransaction_ShouldThrow_WhenTransactionDataNotFound()
+	{
 
-			// Arrange
-			var token = "hash-token";
-			
-			var command = new DeleteTransactionCommand(token);
+		// Arrange
+		var token = "hash-token";
+		
+		var command = new DeleteTransactionCommand(token);
 
-			// Act
-			Func<Task> act = async () => { await _sender.Send(command); };
+		// Act
+		Func<Task> act = async () => { await _sender.Send(command); };
 
-			//Assert
-			await act.Should().ThrowAsync<NotFoundException>().WithMessage("Transaction record not found.");
-		}
+		//Assert
+		await act.Should().ThrowAsync<NotFoundException>().WithMessage("Transaction record not found.");
+	}
 
-		[Fact]
+	[Fact]
         public async Task DeleteTransaction_ShouldReturnTrue_WhenSuccessful()
         {
             // Arrange
@@ -55,5 +55,4 @@ namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests
             result.Should().NotBeNull();
             result.IsDeleted.Should().BeTrue();
         }
-	}
 }

@@ -9,119 +9,118 @@ using System.Text;
 using System.Text.Json;
 using Test.BackendAPI.Infrastructure.PhilSys.Infrastracture;
 
-namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests
+namespace Test.BackendAPI.Modules.PhilSys.IntegrationTests;
+
+public class UpdateFaceLivenessSessionIntegrationTests_CreateFactoryWithHandler : BaseIntegrationTest
 {
-	public class UpdateFaceLivenessSessionIntegrationTests_CreateFactoryWithHandler : BaseIntegrationTest
+	private readonly IntegrationTestWebAppFactory _factory;
+
+	public UpdateFaceLivenessSessionIntegrationTests_CreateFactoryWithHandler(IntegrationTestWebAppFactory factory) : base(factory)
 	{
-		private readonly IntegrationTestWebAppFactory _factory;
+		_factory = factory;
+	}
 
-		public UpdateFaceLivenessSessionIntegrationTests_CreateFactoryWithHandler(IntegrationTestWebAppFactory factory) : base(factory)
+	[Fact]
+	public async Task UpdateFaceLivenessSession_ShouldReturnVerified_WhenInquiryIsNameDob_UsingCreateFactoryWithHandler()
+	{
+		// Arrange - seed transaction into a scope of the custom factory
+		var plainToken = "valid-token-123";
+		var hashed = _hashService.Hash(plainToken);
+		var faceSessionId = "valid-session-id";
+
+		var transaction = new PhilSysTransaction
 		{
-			_factory = factory;
-		}
+			Tid = Guid.NewGuid(),
+			InquiryType = "name_dob",
+			FirstName = "Juan",
+			MiddleName = "Bitaw",
+			LastName = "Dela Cruz",
+			Suffix = null,
+			BirthDate = "2001-08-20",
+			WebHookUrl = "/", // noop webhook
+			IsTransacted = false,
+			HashToken = hashed,
+			ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+			CreatedAt = DateTime.UtcNow
+		};
 
-		[Fact]
-		public async Task UpdateFaceLivenessSession_ShouldReturnVerified_WhenInquiryIsNameDob_UsingCreateFactoryWithHandler()
+		// Prepare expected BasicInformation response used by the handler
+		var basicResponse = new BasicInformationOrPCNResponseDTO(
+			code: "GASHJDG123",
+			token: "111111111111111111111111111111",
+			reference: "11111111111111111111",
+			face_url: "https://ekycbucket/link",
+			full_name: "JUAN BITAW DELA CRUZ",
+			first_name: "JUAN",
+			middle_name: "BITAW",
+			last_name: "DELA CRUZ",
+			suffix: null,
+			gender: "Male",
+			marital_status: "Single",
+			blood_type: "Unknown",
+			email: "N/A",
+			mobile_number: "09194224524",
+			birth_date: "2001-08-20",
+			full_address: "123 PUROK 7, BAGONG SILANG, QUEZON CITY, METRO MANILA, PHILIPPINES, 1101",
+			address_line_1: "123 PUROK 7",
+			address_line_2: null,
+			barangay: "Bagong Silang",
+			municipality: "Quezon City",
+			province: "Metro Manila",
+			country: "Philippines",
+			postal_code: "1101",
+			present_full_address: "45 PUROK 3, SAN ISIDRO, MAKATI CITY, METRO MANILA, PHILIPPINES, 1210",
+			present_address_line_1: "45 PUROK 3",
+			present_address_line_2: null,
+			present_barangay: "San Isidro",
+			present_municipality: "Makati City",
+			present_province: "Metro Manila",
+			present_country: "Philippines",
+			present_postal_code: "1210",
+			residency_status: "Filipino",
+			place_of_birth: "BACOLOD CITY, NEGROS OCCIDENTAL",
+			pob_municipality: "Bacolod City",
+			pob_province: "Negros Occidental",
+			pob_country: "Philippines"
+		);
+
+		// Create a custom factory that intercepts external HTTP calls and returns deterministic responses
+		var customFactory = _factory.CreateFactoryWithHandler((req, ct) =>
 		{
-			// Arrange - seed transaction into a scope of the custom factory
-			var plainToken = "valid-token-123";
-			var hashed = _hashService.Hash(plainToken);
-			var faceSessionId = "valid-session-id";
-
-			var transaction = new PhilSysTransaction
+			// token endpoint
+			if (req.RequestUri != null && req.RequestUri.AbsolutePath.Contains("auth", StringComparison.OrdinalIgnoreCase))
 			{
-				Tid = Guid.NewGuid(),
-				InquiryType = "name_dob",
-				FirstName = "Juan",
-				MiddleName = "Bitaw",
-				LastName = "Dela Cruz",
-				Suffix = null,
-				BirthDate = "2001-08-20",
-				WebHookUrl = "/", // noop webhook
-				IsTransacted = false,
-				HashToken = hashed,
-				ExpiresAt = DateTime.UtcNow.AddMinutes(10),
-				CreatedAt = DateTime.UtcNow
-			};
-
-			// Prepare expected BasicInformation response used by the handler
-			var basicResponse = new BasicInformationOrPCNResponseDTO(
-				code: "GASHJDG123",
-				token: "111111111111111111111111111111",
-				reference: "11111111111111111111",
-				face_url: "https://ekycbucket/link",
-				full_name: "JUAN BITAW DELA CRUZ",
-				first_name: "JUAN",
-				middle_name: "BITAW",
-				last_name: "DELA CRUZ",
-				suffix: null,
-				gender: "Male",
-				marital_status: "Single",
-				blood_type: "Unknown",
-				email: "N/A",
-				mobile_number: "09194224524",
-				birth_date: "2001-08-20",
-				full_address: "123 PUROK 7, BAGONG SILANG, QUEZON CITY, METRO MANILA, PHILIPPINES, 1101",
-				address_line_1: "123 PUROK 7",
-				address_line_2: null,
-				barangay: "Bagong Silang",
-				municipality: "Quezon City",
-				province: "Metro Manila",
-				country: "Philippines",
-				postal_code: "1101",
-				present_full_address: "45 PUROK 3, SAN ISIDRO, MAKATI CITY, METRO MANILA, PHILIPPINES, 1210",
-				present_address_line_1: "45 PUROK 3",
-				present_address_line_2: null,
-				present_barangay: "San Isidro",
-				present_municipality: "Makati City",
-				present_province: "Metro Manila",
-				present_country: "Philippines",
-				present_postal_code: "1210",
-				residency_status: "Filipino",
-				place_of_birth: "BACOLOD CITY, NEGROS OCCIDENTAL",
-				pob_municipality: "Bacolod City",
-				pob_province: "Negros Occidental",
-				pob_country: "Philippines"
-			);
-
-			// Create a custom factory that intercepts external HTTP calls and returns deterministic responses
-			var customFactory = _factory.CreateFactoryWithHandler((req, ct) =>
-			{
-				// token endpoint
-				if (req.RequestUri != null && req.RequestUri.AbsolutePath.Contains("auth", StringComparison.OrdinalIgnoreCase))
-				{
-					var tokenBody = new { data = new { access_token = "integration-fake-token" } };
-					var tokenJson = JsonSerializer.Serialize(tokenBody);
-					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-					{
-						Content = new StringContent(tokenJson, Encoding.UTF8, "application/json")
-					});
-				}
-
-				// basic information / pcn endpoints
-				var responseBody = new { data = basicResponse, meta = new { tier_level = "Tier II", result_grade = 1 }, error = (object?)null };
-				var json = JsonSerializer.Serialize(responseBody);
+				var tokenBody = new { data = new { access_token = "integration-fake-token" } };
+				var tokenJson = JsonSerializer.Serialize(tokenBody);
 				return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
 				{
-					Content = new StringContent(json, Encoding.UTF8, "application/json")
+					Content = new StringContent(tokenJson, Encoding.UTF8, "application/json")
 				});
+			}
+
+			// basic information / pcn endpoints
+			var responseBody = new { data = basicResponse, meta = new { tier_level = "Tier II", result_grade = 1 }, error = (object?)null };
+			var json = JsonSerializer.Serialize(responseBody);
+			return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+			{
+				Content = new StringContent(json, Encoding.UTF8, "application/json")
 			});
-			
-			_dbContext.PhilSysTransactions.Add(transaction);
-			await _dbContext.SaveChangesAsync();
+		});
+		
+		_dbContext.PhilSysTransactions.Add(transaction);
+		await _dbContext.SaveChangesAsync();
 
-			// Act - resolve the mediator from the custom factory and send command
-			using var actionScope = customFactory.Services.CreateScope();
-			var sender = actionScope.ServiceProvider.GetRequiredService<ISender>();
+		// Act - resolve the mediator from the custom factory and send command
+		using var actionScope = customFactory.Services.CreateScope();
+		var sender = actionScope.ServiceProvider.GetRequiredService<ISender>();
 
-			var command = new UpdateFaceLivenessSessionCommand(transaction.HashToken!, faceSessionId);
-			var result = await sender.Send(command);
+		var command = new UpdateFaceLivenessSessionCommand(transaction.HashToken!, faceSessionId);
+		var result = await sender.Send(command);
 
-			// Assert
-			result.Should().NotBeNull();
-			result.VerificationResponseDTO.Should().NotBeNull();
-			result.VerificationResponseDTO.verified.Should().BeTrue();
-			result.VerificationResponseDTO.idv_session_id.Should().Be(transaction.Tid.ToString());
-		}
+		// Assert
+		result.Should().NotBeNull();
+		result.VerificationResponseDTO.Should().NotBeNull();
+		result.VerificationResponseDTO.verified.Should().BeTrue();
+		result.VerificationResponseDTO.idv_session_id.Should().Be(transaction.Tid.ToString());
 	}
 }

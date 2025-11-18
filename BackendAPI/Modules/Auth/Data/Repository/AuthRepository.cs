@@ -461,22 +461,9 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
-	public async Task<AuthApplication> EditApplicationAsync(EditApplicationDTO applicationDTO)
+	public async Task<AuthApplication> EditApplicationAsync(AuthApplication application)
 	{
-		var application = new AuthApplication
-		{
-			AppId = applicationDTO.AppId,   
-			AppName = applicationDTO.AppName!,
-			Description = applicationDTO.Description,
-			IsActive = applicationDTO.IsActive
-		};
-
-		var entry = _dbcontext.Attach(application);
-
-		entry.Property(x => x.AppName).IsModified = true;
-		entry.Property(x => x.Description).IsModified = true;
-		entry.Property(x => x.IsActive).IsModified = true;
-
+		_dbcontext.AuthApplications.Update(application);
 		await _dbcontext.SaveChangesAsync();
 
 		return application;
@@ -503,22 +490,9 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
-	public async Task<AuthSubMenu> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
+	public async Task<AuthSubMenu> EditSubMenuAsync(AuthSubMenu subMenu)
 	{
-		var subMenu = new AuthSubMenu
-		{
-			SubMenuId = subMenuDTO.SubMenuId,
-			SubMenuName = subMenuDTO.SubMenuName!,
-			Description = subMenuDTO.Description,
-			IsActive = subMenuDTO.IsActive
-		};
-
-		var entry = _dbcontext.Attach(subMenu);
-
-		entry.Property(x => x.SubMenuName).IsModified = true;
-		entry.Property(x => x.Description).IsModified = true;
-		entry.Property(x => x.IsActive).IsModified = true;
-
+		_dbcontext.AuthSubmenu.Update(subMenu);
 		await _dbcontext.SaveChangesAsync();
 
 		return subMenu;

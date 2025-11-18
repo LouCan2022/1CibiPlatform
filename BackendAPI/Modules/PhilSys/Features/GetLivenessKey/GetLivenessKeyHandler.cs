@@ -1,5 +1,4 @@
-﻿
-namespace PhilSys.Features.GetLivenessKey;
+﻿namespace PhilSys.Features.GetLivenessKey;
 
 public record GetLivenessKeyQueryRequest() : IRequest<GetLivenessKeyResult>;
 
@@ -14,7 +13,6 @@ public class GetLivenessKeyHandler : IRequestHandler<GetLivenessKeyQueryRequest,
 	}
 	public async Task<GetLivenessKeyResult> Handle(GetLivenessKeyQueryRequest request, CancellationToken cancellationToken)
 	{
-		
 		var livenessKey = await _getLivenessKeyService.GetLivenessKey();
 		return new GetLivenessKeyResult(livenessKey);
 	}
