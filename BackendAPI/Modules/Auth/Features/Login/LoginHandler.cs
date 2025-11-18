@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.Login;
 
-public record LoginCommand(LoginCred LoginCred) : ICommand<LoginResult>;
+public record LoginCommand(string username, string password) : ICommand<LoginResult>;
 
 public record LoginResult(LoginResponseDTO loginResponseDTO);
 
@@ -8,11 +8,11 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
 	public LoginCommandValidator()
 	{
-		RuleFor(x => x.LoginCred.Username)
+		RuleFor(x => x.username)
 			.NotEmpty().WithMessage("Username is required.")
 			.MaximumLength(50).WithMessage("Username must not exceed 50 characters.");
 
-		RuleFor(x => x.LoginCred.Password)
+		RuleFor(x => x.password)
 			.NotEmpty().WithMessage("Password is required.");
 	}
 }
@@ -32,7 +32,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, LoginResult>
 		LoginCommand request,
 		CancellationToken cancellationToken)
 	{
-		var loginResponse = await this._loginService.LoginAsync(request.LoginCred);
+		var loginResponse = await this._loginService.LoginAsync(request.username, request.password);
 		return new LoginResult(loginResponse);
 	}
 
