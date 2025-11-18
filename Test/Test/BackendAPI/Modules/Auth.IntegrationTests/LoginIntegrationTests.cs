@@ -21,7 +21,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		// Arrange
 		await SeedUserData();
 
-		var command = new LoginCommand(new LoginCred("john@example.com", "p@ssw0rd!"));
+		var command = new LoginCommand("john@example.com", "p@ssw0rd!");
 
 		// Act
 		var result = await _sender.Send(command);
@@ -38,7 +38,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		// Arrange
 		await SeedUserData();
 
-		var command = new LoginCommand(new LoginCred("john@example.com", "wrongpassword"));
+		var command = new LoginCommand("john@example.com", "wrongpassword");
 
 		// Act
 		Func<Task> act = async () => { await _sender.Send(command); };

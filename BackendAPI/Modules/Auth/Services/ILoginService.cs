@@ -2,7 +2,7 @@
 
 public interface ILoginService
 {
-	Task<LoginResponseDTO> LoginAsync(LoginCred cred);
+	Task<LoginResponseDTO> LoginAsync(string username, string password);
 
 	Task<LoginResponseWebDTO> LoginWebAsync(LoginWebCred cred);
 
