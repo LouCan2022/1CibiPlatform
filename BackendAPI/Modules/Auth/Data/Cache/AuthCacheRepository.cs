@@ -9,12 +9,13 @@ public class AuthCacheRepository : IAuthRepository
 		IAuthRepository authRepository,
 		HybridCache hybridCache)
 	{
-		this._authRepository = authRepository;
-		this._hybridCache = hybridCache;
+		_authRepository = authRepository;
+		_hybridCache = hybridCache;
 	}
 
 	private const string SubMenusTag = "submenus";
 	private const string ApplicationsTag = "applications";
+	private const string AppSubRoleTag = "appsubroles";
 
 	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
 		PaginationRequest paginationRequest,
@@ -253,5 +254,57 @@ public class AuthCacheRepository : IAuthRepository
 	public async Task<AuthSubMenu> GetSubMenuAsync(int applicationId)
 	{
 		return await _authRepository.GetSubMenuAsync(applicationId);
+	}
+
+	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"authsubrole_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<AppSubRolesDTO>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.GetAppSubRolesAsync(req, token),
+			tags: [AppSubRoleTag],
+			cancellationToken: cancellationToken);
+	}
+
+	public Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId)
+	{
+		return await _authRepository.GetAppSubRoleAsync(appSubRoleId);
+	}
+
+	public async Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO appSubRole)
+	{
+		var result = await _authRepository.AddAppSubRoleAsync(appSubRole);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(AppSubRoleTag);
+
+		return result;
+	}
+
+	public async Task<bool> DeleteAppSubRoleAsync(AuthUserAppRole appSubRole)
+	{
+		var result = await _authRepository.DeleteAppSubRoleAsync(appSubRole);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(AppSubRoleTag);
+
+		return result;
+	}
+
+	public async Task<AuthUserAppRole> EditAppSubRoleAsync(AuthUserAppRole appSubRole)
+	{
+		var updated = await _authRepository.EditAppSubRoleAsync(appSubRole);
+
+		if (updated != null)
+			await _hybridCache.RemoveByTagAsync(AppSubRoleTag);
+
+		return updated!;
 	}
 }
