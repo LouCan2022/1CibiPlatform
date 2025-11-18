@@ -41,11 +41,11 @@ public class LoginService : ILoginService
 	}
 
 
-	public async Task<LoginResponseDTO> LoginAsync(LoginCred cred)
+	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
 	{
-		_logger.LogInformation("Login attempt for user: {Username}", cred.Username);
+		_logger.LogInformation("Login attempt for user: {Username}", username);
 
-		var loginCred = new LoginWebCred(cred.Username, cred.Password, false);
+		var loginCred = new LoginWebCred(username, password, false);
 
 		// fetching user data from database
 		LoginDTO userData = await this._authRepository.GetUserDataAsync(loginCred);
@@ -53,16 +53,16 @@ public class LoginService : ILoginService
 		// checking if client credentials are valid
 		if (userData == null)
 		{
-			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
+			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", username);
 			throw new NotFoundException("Invalid username or password.");
 		}
 
 		// verifying password
-		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, cred.Password);
+		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, password);
 
 		if (!isPasswordValid)
 		{
-			_logger.LogWarning("Login failed: Invalid password for user: {Username}", cred.Username);
+			_logger.LogWarning("Login failed: Invalid password for user: {Username}", username);
 			throw new NotFoundException("Invalid username or password.");
 		}
 
@@ -80,7 +80,7 @@ public class LoginService : ILoginService
 
 		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, jwtToken, cookieOptions);
 
-		_logger.LogInformation("Login successful for user: {Username}", cred.Username);
+		_logger.LogInformation("Login successful for user: {Username}", username);
 
 		var response = new LoginResponseDTO(
 			userData.Id.ToString()!,

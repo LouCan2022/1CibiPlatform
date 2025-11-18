@@ -21,10 +21,6 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 				.NotEmpty().WithMessage("First Name is required for 'name_dob' inquiry.")
 				.MaximumLength(50).WithMessage("First Name must not exceed 50 characters.");
 
-			RuleFor(x => x.identity_data.MiddleName)
-				.NotEmpty().WithMessage("Middle Name is required for 'name_dob' inquiry.")
-				.MaximumLength(50).WithMessage("Middle Name must not exceed 50 characters.");
-
 			RuleFor(x => x.identity_data.LastName)
 				.NotEmpty().WithMessage("Last Name is required for 'name_dob' inquiry.")
 				.MaximumLength(50).WithMessage("Last Name must not exceed 50 characters.");
