@@ -29,7 +29,7 @@ public class ApplicationService : IApplicationService
 		if (application == null)
 		{
 			_logger.LogError("Application with ID {AppId} was not found during delete operation.", AppId);
-			throw new InternalServerException($"Application with ID {AppId} was not found.");
+			throw new NotFoundException($"Application with ID {AppId} was not found.");
 		}
 		var isDeleted = await _authRepository.DeleteApplicationAsync(application); 
 		return isDeleted;
@@ -47,9 +47,14 @@ public class ApplicationService : IApplicationService
 		if (existingApplication == null)
 		{
 			_logger.LogError("Application with ID {AppId} was not found during update operation.", applicationDTO.AppId);
-			throw new InternalServerException($"Application with ID {applicationDTO.AppId} was not found.");
+			throw new NotFoundException($"Application with ID {applicationDTO.AppId} was not found.");
 		}
-		var application = await _authRepository.EditApplicationAsync(applicationDTO);
+
+		existingApplication.AppName = applicationDTO.AppName!;
+		existingApplication.Description = applicationDTO.Description;
+		existingApplication.IsActive = applicationDTO.IsActive;
+
+		var application = await _authRepository.EditApplicationAsync(existingApplication);
 		return application.Adapt<ApplicationDTO>();
 	}
 }

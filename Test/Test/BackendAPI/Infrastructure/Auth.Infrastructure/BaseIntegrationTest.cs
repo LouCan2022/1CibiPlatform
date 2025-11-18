@@ -42,6 +42,20 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 					_dbContext.AuthUsers.RemoveRange(users);
 					await _dbContext.SaveChangesAsync();
 				}
+
+				var applications = _dbContext.AuthApplications.ToList();
+				if (applications.Any())
+				{
+					_dbContext.AuthApplications.RemoveRange(applications);
+					await _dbContext.SaveChangesAsync();
+				}
+
+				var subMenus = _dbContext.AuthSubmenu.ToList();
+				if (subMenus.Any())
+				{
+					_dbContext.AuthSubmenu.RemoveRange(subMenus);
+					await _dbContext.SaveChangesAsync();
+				}
 			}
 		}
 		catch (Exception ex)
