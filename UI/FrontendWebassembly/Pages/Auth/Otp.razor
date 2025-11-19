@@ -250,6 +250,7 @@ else
 
             // Show success message and start countdown
             isLoading = false;
+            isResendLoading = false;
             showSuccessMessage = true;
             await LocalStorageService.RemoveItemAsync("tempUserId");
             await LocalStorageService.RemoveItemAsync("tempUserEmail");
@@ -279,6 +280,7 @@ else
         {
             Console.WriteLine($"OTP Verification Exception: {ex.Message}");
             isLoading = false;
+            isResendLoading = false;
             isOtpValid = false;
             errorMessage = "An unexpected error occurred. Please try again.";
             StateHasChanged();

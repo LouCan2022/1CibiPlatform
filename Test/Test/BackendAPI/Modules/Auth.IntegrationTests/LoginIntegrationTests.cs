@@ -28,7 +28,12 @@ public class LoginIntegrationTests : BaseIntegrationTest
 
 		// Assert
 		result.Should().NotBeNull();
-		result.loginResponseDTO.UserName.Should().Be("john@example.com");
+		result.loginResponseDTO.email.Should().Be("john@example.com");
+		result.loginResponseDTO.userId.Should().NotBeEmpty();
+		result.loginResponseDTO.name.Should().Be("Admin Admin Admin");
+		result.loginResponseDTO.access_token.Should().NotBeNullOrEmpty();
+		result.loginResponseDTO.token_type.Should().Be("bearer");
+
 	}
 
 
@@ -93,7 +98,8 @@ public class LoginIntegrationTests : BaseIntegrationTest
 			Email = "john@example.com",
 			PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 			FirstName = "Admin",
-			LastName = ""
+			MiddleName = "Admin",
+			LastName = "Admin"
 		};
 		_dbContext.AuthUsers.Add(user);
 		await _dbContext.SaveChangesAsync();
