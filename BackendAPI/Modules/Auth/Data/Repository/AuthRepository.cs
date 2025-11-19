@@ -525,9 +525,35 @@ public class AuthRepository : IAuthRepository
 			);
 	}
 
-	public Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	public async Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		var appSubRolesQuery = _dbcontext.AuthUserAppRoles
+				.Where(asr => 
+					(EF.Functions.ILike(asr.RoleId.ToString(), $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(asr.Submenu.ToString()!, $"%{paginationRequest.SearchTerm}%") ||
+					  EF.Functions.ILike(asr.AppId.ToString()!, $"%{paginationRequest.SearchTerm}%")));
+
+		var totalRecords = await appSubRolesQuery.CountAsync(cancellationToken);
+
+		var appSubRoles = await appSubRolesQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asr => new AppSubRolesDTO(
+					asr.AppRoleId,
+					asr.UserId,
+					asr.AppId,
+					asr.Submenu,
+					asr.RoleId))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AppSubRolesDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  appSubRoles
+			);
 	}
 
 	public async Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId)

@@ -8,12 +8,12 @@ public class DeleteAppSubRoleEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("deleteapplication", async (DeleteApplicationCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("deleteappsubrole", async (DeleteAppSubRoleCommand request, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new DeleteApplicationCommand(
-				request.AppId
+			var command = new DeleteAppSubRoleCommand(
+				request.AppSubRoleId
 				);
-			DeleteApplicationResult result = await sender.Send(command, cancellationToken);
+			DeleteAppSubRoleResult result = await sender.Send(command, cancellationToken);
 			var response = new DeleteApplicationResponse(result.IsDeleted);
 			return Results.Ok(response.IsDeleted);
 		})
