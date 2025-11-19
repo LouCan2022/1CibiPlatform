@@ -8,7 +8,7 @@ public class EditAppSubRoleEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("editappsubrole", async (EditSubMenuCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPatch("auth/editappsubrole", async (EditSubMenuCommand request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new EditSubMenuCommand(request.editSubMenu);
 			EditSubMenuResult result = await sender.Send(command, cancellationToken);

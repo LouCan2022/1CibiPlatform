@@ -9,7 +9,7 @@ public class EditApplicationEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("editapplication", async (EditApplicationCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPatch("auth/editapplication", async (EditApplicationCommand request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new EditApplicationCommand(request.editApplication);
 			EditApplicationResult result = await sender.Send(command, cancellationToken);
