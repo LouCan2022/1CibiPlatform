@@ -3,10 +3,10 @@
 public class AppSubRoleService : IAppSubRoleService
 {
 	private readonly IAuthRepository _authRepository;
-	private readonly ILogger<ApplicationService> _logger;
+	private readonly ILogger<AppSubRoleService> _logger;
 
 	public AppSubRoleService(IAuthRepository authRepository,
-					   ILogger<ApplicationService> logger)
+					   ILogger<AppSubRoleService> logger)
 	{
 		_authRepository = authRepository;
 		_logger = logger;
