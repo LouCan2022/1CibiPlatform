@@ -82,11 +82,17 @@ public class LoginService : ILoginService
 
 		_logger.LogInformation("Login successful for user: {Username}", username);
 
+
+		var name = !string.IsNullOrEmpty(userData.MiddleName) ?
+			$"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
+			$"{userData.FirstName} {userData.LastName}";
+
 		var response = new LoginResponseDTO(
 			userData.Id.ToString()!,
 			jwtToken,
 			"bearer",
 			ExpireInMinutes(),
+			name,
 			userData.Email,
 			DateTime.Now.ToString(),
 			DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
@@ -133,6 +139,12 @@ public class LoginService : ILoginService
 		var appId = userData.AppId;
 		var subMenuId = userData.SubMenuId;
 
+
+		var name = !string.IsNullOrEmpty(userData.MiddleName) ?
+			$"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
+			$"{userData.FirstName} {userData.LastName}";
+
+
 		if (refreshTokenExist != null)
 		{
 			_logger.LogInformation("Reusing existing refresh token for user: {Username}", cred.Username);
@@ -141,6 +153,7 @@ public class LoginService : ILoginService
 				userData.Id.ToString()!,
 				jwtToken,
 				refreshTokenExist,
+				name,
 				"bearer",
 				ExpireInMinutes(),
 				appId,
@@ -167,6 +180,7 @@ public class LoginService : ILoginService
 			userData.Id.ToString()!,
 			jwtToken,
 			refreshToken,
+			name,
 			"bearer",
 			ExpireInMinutes(),
 			appId,
