@@ -17,6 +17,7 @@
                 <MudAppBar Style="@GetAppBarStyle()" Class="mb-8 mt-0">
                     <MudIconButton Icon="@Icons.Material.Filled.Menu" Style="@GetMenuIconStyle()" Edge="Edge.Start" OnClick="@DrawerToggle" />
                     <MudSpacer />
+                    <MudText Typo="Typo.subtitle1" Class="mr-2">Hi @name</MudText>
                     <MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                                    Style="Color.Inherit;"
                                    OnClick="@ToggleDarkMode" />
@@ -119,10 +120,12 @@ else
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
     private bool _isLoading = true;
+    private string name = "";
 
     private const string _appIdKey = "AppId";
     private const string _subMenuKey = "SubMenuId";
     private const string _roleIdKey = "RoleId";
+    private const string _userNameKey = "Name";
 
     private List<int> Apps = new List<int>();
     private List<List<int>> SubMenus = new List<List<int>>();
@@ -227,6 +230,9 @@ else
 
             Roles = JsonSerializer.Deserialize<List<int>>(await LocalStorageService.GetItemAsync<string>(_roleIdKey));
             Console.WriteLine($"Roles: {string.Join(", ", Roles)}");
+
+            name = await LocalStorageService.GetItemAsync<string>(_userNameKey) ?? string.Empty;
+
 
             var stored = await LocalStorageService.GetItemAsync<bool?>("isDarkMode");
             

@@ -299,6 +299,7 @@ public class AuthRepository : IAuthRepository
 	{
 		return await
 			_dbcontext.AuthRefreshToken
+			.OrderByDescending(rt => rt.CreatedAt)
 			.FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive);
 	}
 
@@ -441,7 +442,7 @@ public class AuthRepository : IAuthRepository
 
 	public async Task<bool> DeleteApplicationAsync(AuthApplication application)
 	{
-		
+
 		var isDeleted = _dbcontext.AuthApplications.Remove(application);
 		await _dbcontext.SaveChangesAsync();
 		return true;
