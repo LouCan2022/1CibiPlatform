@@ -5,7 +5,7 @@ public class UpdateFaceLivenessSessionEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("updatefacelivenesssession", async (UpdateFaceLivenessSessionRequest request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPatch("updatefacelivenesssession", async (UpdateFaceLivenessSessionRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new UpdateFaceLivenessSessionCommand(
 				request.HashToken,

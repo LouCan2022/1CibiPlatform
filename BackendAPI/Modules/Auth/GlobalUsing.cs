@@ -19,6 +19,8 @@ global using FluentValidation;
 global using System.IdentityModel.Tokens.Jwt;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Caching.Hybrid;
+global using Microsoft.AspNetCore.Mvc;
+ 
 
 // path
 global using Auth.Data.Entities;
