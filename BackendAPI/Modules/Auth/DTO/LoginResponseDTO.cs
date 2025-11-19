@@ -1,9 +1,10 @@
 ﻿namespace Auth.DTO;
 public record LoginResponseDTO
 	(string userId,
-	 string Access_token,
-	 string Token_type = "bearer",
+	 string access_token,
+	 string token_type = "bearer",
 	 int expires_in = 0,
-	 string UserName = default!,
-	 string Issued = default!,
-	 string Expires = default!);
+	 string name = default!,
+	 string email = default!,
+	 string issued = default!,
+	 string expires = default!);

@@ -85,6 +85,7 @@
 
 			var userData = await _authRepository.GetNewUserDataAsync(userId);
 
+
 			// checking if client credentials are valid
 			if (userData == null)
 			{
@@ -114,12 +115,18 @@
 			var (newRefreshToken, newRefreshTokenHash) = this.GenerateRefreshToken();
 			SetRefreshTokenCookie(newRefreshToken, false);
 
+			var name = !string.IsNullOrEmpty(userData.MiddleName) ?
+				  $"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
+				  $"{userData.FirstName} {userData.LastName}";
+
+
 			_logger.LogInformation("Creating new refresh token for user: {Email}", userData.Email);
 			// reuse existing refresh token if not expired
 			return new LoginResponseWebDTO(
 				userData.Id.ToString()!,
 				jwtToken,
 				newRefreshToken!,
+				name,
 				"bearer",
 				ExpireInMinutes(),
 				appId,

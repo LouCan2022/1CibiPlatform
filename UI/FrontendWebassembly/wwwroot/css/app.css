@@ -134,6 +134,7 @@ code {
     background: linear-gradient(90deg, #102247 0%, #2a77ae 50%) !important;
     color: white !important;
     border-radius: 8px;
+    margin : 0px 10px 0px 10px
 }
 
 .nav-active-light .mud-icon-root,
