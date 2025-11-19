@@ -51,7 +51,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 	{
 		// Arrange
 		var service = _fixture.LoginService;
-		var loginDto = new LoginDTO(Guid.NewGuid(), "hash", "email@example.com", "F", "L", null, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
+		var loginDto = new LoginDTO(Guid.NewGuid(), "hash", "email@example.com", "John", "Doe", null, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
 		_fixture.MockAuthRepository.Setup(x => x.GetUserDataAsync(It.IsAny<LoginWebCred>())).ReturnsAsync(loginDto);
 		_fixture.MockPasswordHasherService.Setup(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
 		_fixture.MockJwtService.Setup(x => x.GetAccessToken(It.IsAny<LoginDTO>())).Returns("token");
@@ -61,6 +61,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 
 		// Assert
 		resp.Should().NotBeNull();
-		resp.Access_token.Should().Be("token");
+		resp.userId.Should().NotBeNull();
+		resp.name.Should().Be("John Doe");
 	}
 }

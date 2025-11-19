@@ -4,6 +4,7 @@ public record LoginResponseWebDTO
 	(string userId,
 	 string Access_token,
 	 string refresh_token,
+	 string Name,
 	 string Token_type = "bearer",
 	 int expires_in = 0,
 	 List<int> Appid = default!,

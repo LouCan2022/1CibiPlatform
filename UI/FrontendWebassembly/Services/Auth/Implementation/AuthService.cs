@@ -23,7 +23,7 @@ public class AuthService : IAuthService
 
 
 		_httpRefreshTokenCookieOnly = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
-		this._userNameKey = "Username";
+		this._userNameKey = "Name";
 		this._userIdKey = "UserId";
 		this._appIdKey = "AppId";
 		this._subMenuKey = "SubMenuId";
@@ -75,7 +75,7 @@ public class AuthService : IAuthService
 	{
 		// Store UserId and Username in local storage
 		await this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
-		await this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.UserName);
+		await this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.name);
 		await this._localStorageService.SetItemAsync(_appIdKey, JsonSerializer.Serialize(credResponseDTO.Appid));
 		await this._localStorageService.SetItemAsync(_subMenuKey, JsonSerializer.Serialize(credResponseDTO.SubMenuid));
 		await this._localStorageService.SetItemAsync(_roleIdKey, JsonSerializer.Serialize(credResponseDTO.RoleId));
