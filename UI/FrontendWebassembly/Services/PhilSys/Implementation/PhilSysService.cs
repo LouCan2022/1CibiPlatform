@@ -17,7 +17,7 @@ public class PhilSysService : IPhilSysService
 			FaceLivenessSessionId = FaceLivenessSession
 		};
 
-		var response = await _httpClient.PostAsJsonAsync("philsys/idv/updatefacelivenesssession", payload);
+		var response = await _httpClient.PatchAsJsonAsync("philsys/idv/updatefacelivenesssession", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
@@ -84,8 +84,7 @@ public class PhilSysService : IPhilSysService
 
 	public async Task<bool> DeleteTransactionAsync(string HashToken)
 	{
-		var request = new { HashToken };
-		var response = await _httpClient.PostAsJsonAsync("/philsys/deletetransaction", request);
+		var response = await _httpClient.DeleteAsync($"philsys/deletetransaction/{HashToken}");
 		if (!response.IsSuccessStatusCode)
 		{
 			Console.WriteLine("❌ Did not Delete Successfully");

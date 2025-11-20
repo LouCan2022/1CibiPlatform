@@ -6,6 +6,7 @@ public interface IAuthRepository
 
 	Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
 
 	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
@@ -17,9 +18,8 @@ public interface IAuthRepository
 	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	
 	Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
-
 	Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
-
+	Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<bool> SaveUserAsync(Authusers user);
 
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
@@ -51,6 +51,7 @@ public interface IAuthRepository
 	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);
 
 	Task<AuthApplication> GetApplicationAsync(int applicationId);
+	Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId);
 
 	Task<bool> DeleteApplicationAsync(AuthApplication application);
 	Task<bool> AddApplicationAsync(AddApplicationDTO application);
@@ -59,4 +60,8 @@ public interface IAuthRepository
 	Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu);
 	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
 	Task<AuthSubMenu> EditSubMenuAsync(AuthSubMenu subMenu);
+
+	Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO appSubRole);
+	Task<bool> DeleteAppSubRoleAsync(AuthUserAppRole appSubRole);
+	Task<AuthUserAppRole> EditAppSubRoleAsync(AuthUserAppRole appSubRole);
 }

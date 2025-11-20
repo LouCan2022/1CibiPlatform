@@ -37,7 +37,7 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		{
 			if (_dbContext is not null)
 			{
-				// Use TRUNCATE with RESTART IDENTITY and CASCADE to reliably clear tables and reset sequences.
+
 				var sql = @"TRUNCATE TABLE ""AuthUserAppRoles"", ""AuthRefreshToken"", ""PasswordResetToken"", ""OtpVerification"", ""AuthSubmenu"", ""AuthRoles"", ""AuthUsers"", ""AuthApplications"" RESTART IDENTITY CASCADE;";
 				await _dbContext.Database.ExecuteSqlRawAsync(sql);
 			}

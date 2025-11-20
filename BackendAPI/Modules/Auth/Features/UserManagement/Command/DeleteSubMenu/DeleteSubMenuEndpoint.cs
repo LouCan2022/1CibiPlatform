@@ -6,11 +6,10 @@ public class DeleteSubMenuEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("deletesubmenu", async (DeleteSubMenuCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapDelete("auth/deletesubmenu/{SubMenuId}", async (int SubMenuId, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new DeleteSubMenuCommand(
-				request.SubMenuId
-				);
+			var request = new DeleteSubMenuRequest(SubMenuId);
+			var command = new DeleteSubMenuCommand(request.SubMenuId);
 			DeleteSubMenuResult result = await sender.Send(command, cancellationToken);
 			var response = new DeleteSubMenuResponse(result.IsDeleted);
 			return Results.Ok(response.IsDeleted);

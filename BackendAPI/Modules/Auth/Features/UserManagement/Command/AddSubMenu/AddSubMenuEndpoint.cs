@@ -6,7 +6,7 @@ public class AddSubMenuEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("addsubmenu", async (AddSubMenuCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("auth/addsubmenu", async (AddSubMenuCommand request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new AddSubMenuCommand(
 				request.subMenu
