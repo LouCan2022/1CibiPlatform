@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
@@ -36,26 +37,9 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		{
 			if (_dbContext is not null)
 			{
-				var users = _dbContext.AuthUsers.ToList();
-				if (users.Any())
-				{
-					_dbContext.AuthUsers.RemoveRange(users);
-					await _dbContext.SaveChangesAsync();
-				}
-
-				var applications = _dbContext.AuthApplications.ToList();
-				if (applications.Any())
-				{
-					_dbContext.AuthApplications.RemoveRange(applications);
-					await _dbContext.SaveChangesAsync();
-				}
-
-				var subMenus = _dbContext.AuthSubmenu.ToList();
-				if (subMenus.Any())
-				{
-					_dbContext.AuthSubmenu.RemoveRange(subMenus);
-					await _dbContext.SaveChangesAsync();
-				}
+				// Use TRUNCATE with RESTART IDENTITY and CASCADE to reliably clear tables and reset sequences.
+				var sql = @"TRUNCATE TABLE ""AuthUserAppRoles"", ""AuthRefreshToken"", ""PasswordResetToken"", ""OtpVerification"", ""AuthSubmenu"", ""AuthRoles"", ""AuthUsers"", ""AuthApplications"" RESTART IDENTITY CASCADE;";
+				await _dbContext.Database.ExecuteSqlRawAsync(sql);
 			}
 		}
 		catch (Exception ex)
