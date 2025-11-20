@@ -21,10 +21,7 @@ public class PhilSysRepository : IPhilSysRepository
 		transaction.IsTransacted = true;
 		transaction.TransactedAt = DateTime.UtcNow;
 
-		var entry = _dbcontext.Attach(transaction);
-
-		entry.Property(t => t.IsTransacted).IsModified = true;
-		entry.Property(t => t.TransactedAt).IsModified = true;
+		_dbcontext.PhilSysTransactions.Update(transaction);
 
 		await _dbcontext.SaveChangesAsync();
 

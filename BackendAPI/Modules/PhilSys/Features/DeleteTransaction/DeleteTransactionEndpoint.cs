@@ -5,11 +5,10 @@ public class DeleteTransactionEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("deletetransaction", async (DeleteTransactionCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapDelete("deletetransaction/{HashToken}", async (string HashToken, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new DeleteTransactionCommand(
-				request.HashToken
-				);
+			var request = new DeleteTransactionRequest(HashToken);
+			var command = new DeleteTransactionCommand(request.HashToken);
 			DeleteTransactionResult result = await sender.Send(command, cancellationToken);
 			var response = new DeleteTransactionResponse(result.IsDeleted);
 			return Results.Ok(response.IsDeleted);

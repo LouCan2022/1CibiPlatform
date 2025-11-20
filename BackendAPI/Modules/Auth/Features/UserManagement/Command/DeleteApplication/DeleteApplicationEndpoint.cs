@@ -6,11 +6,10 @@ public class DeleteApplicationEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("deleteapplication", async (DeleteApplicationCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapDelete("auth/deleteapplication/{AppId}", async (int AppId, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new DeleteApplicationCommand(
-				request.AppId
-				);
+			var request = new DeleteApplicationRequest(AppId);
+			var command = new DeleteApplicationCommand(request.AppId);
 			DeleteApplicationResult result = await sender.Send(command, cancellationToken);
 			var response = new DeleteApplicationResponse(result.IsDeleted);
 			return Results.Ok(response.IsDeleted);

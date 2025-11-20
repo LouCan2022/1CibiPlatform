@@ -2,6 +2,7 @@
 using BuildingBlocks.SharedServices.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PhilSys.Data.Context;
@@ -36,12 +37,8 @@ namespace Test.BackendAPI.Infrastructure.PhilSys.Infrastracture
 			{
 				if (_dbContext is not null)
 				{
-					var transactions = _dbContext.PhilSysTransactions.ToList();
-					if (transactions.Any())
-					{
-						_dbContext.PhilSysTransactions.RemoveRange(transactions);
-						await _dbContext.SaveChangesAsync();
-					}
+					var sql = @"TRUNCATE TABLE ""PhilSysTransactions"" RESTART IDENTITY CASCADE;";
+					await _dbContext.Database.ExecuteSqlRawAsync(sql);
 				}
 			}
 			catch (Exception ex)
