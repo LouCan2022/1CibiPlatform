@@ -30,7 +30,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public Mock<ILogger<UserManagementService>> MockUserManagementLogger { get; private set; }
 		public Mock<ILogger<ApplicationService>> MockApplicationLogger { get; private set; }
 		public Mock<ILogger<SubMenuService>> MockSubMenuLogger { get; private set; }
-
+		public Mock<ILogger<AppSubRoleService>> MockAppSubRoleLogger {  get; private set; }
 		// Configuration
 		public IConfiguration Configuration { get; private set; }
 
@@ -43,7 +43,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public UserManagementService UserManagementService { get; private set; }
 		public ApplicationService ApplicationService { get; private set; }
 		public SubMenuService SubMenuService { get; private set; }
-
+		public AppSubRoleService AppSubRoleService { get; private set; }
 		public AuthServiceFixture()
 		{
 			// init mocks
@@ -64,6 +64,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 			MockUserManagementLogger = new Mock<ILogger<UserManagementService>>();
 			MockApplicationLogger = new Mock<ILogger<ApplicationService>>();
 			MockSubMenuLogger = new Mock<ILogger<SubMenuService>>();
+			MockAppSubRoleLogger = new Mock<ILogger<AppSubRoleService>>();
 
 			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
@@ -130,6 +131,11 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 			SubMenuService = new SubMenuService(
 				MockAuthRepository.Object,
 				MockSubMenuLogger.Object
+				);
+
+			AppSubRoleService = new AppSubRoleService(
+				MockAuthRepository.Object,
+				MockAppSubRoleLogger.Object
 				);
 
 			JwtService = new JWTService(Configuration);

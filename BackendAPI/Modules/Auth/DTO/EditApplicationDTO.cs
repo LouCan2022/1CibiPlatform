@@ -1,6 +1,6 @@
 ﻿namespace Auth.DTO;
 
-public class EditApplicationDTO
+public record EditApplicationDTO
 {
 	public int AppId { get; set; }
 	public string? AppName { get; set; }

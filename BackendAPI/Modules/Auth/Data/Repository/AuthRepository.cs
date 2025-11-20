@@ -498,4 +498,100 @@ public class AuthRepository : IAuthRepository
 
 		return subMenu;
 	}
+
+	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext
+			.AuthUserAppRoles
+			.LongCountAsync(cancellationToken);
+
+		var applications = await _dbcontext.AuthUserAppRoles
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asr => new AppSubRolesDTO(
+					asr.AppId,
+					asr.UserId,
+					asr.AppId,
+					asr.Submenu,
+					asr.RoleId))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AppSubRolesDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  applications
+			);
+	}
+
+	public async Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var appSubRolesQuery = _dbcontext.AuthUserAppRoles
+				.Where(asr => 
+					(EF.Functions.ILike(asr.RoleId.ToString(), $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(asr.Submenu.ToString()!, $"%{paginationRequest.SearchTerm}%") ||
+					  EF.Functions.ILike(asr.AppId.ToString()!, $"%{paginationRequest.SearchTerm}%")));
+
+		var totalRecords = await appSubRolesQuery.CountAsync(cancellationToken);
+
+		var appSubRoles = await appSubRolesQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.AsNoTracking()
+			.Select(asr => new AppSubRolesDTO(
+					asr.AppRoleId,
+					asr.UserId,
+					asr.AppId,
+					asr.Submenu,
+					asr.RoleId))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AppSubRolesDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  appSubRoles
+			);
+	}
+
+	public async Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId)
+	{
+		var appSubRole = await _dbcontext.AuthUserAppRoles
+		.FirstOrDefaultAsync(x => x.AppRoleId == appSubRoleId);
+
+		return appSubRole!;
+	}
+
+	public async Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO appSubRole)
+	{
+		var authUserAppRole = new AuthUserAppRole
+		{
+			UserId = appSubRole.UserId!,
+			AppId = appSubRole.AppId,
+			Submenu = appSubRole.SubMenuId,
+			RoleId = appSubRole.RoleId,
+			AssignedBy = appSubRole.AssignedBy,
+			AssignedAt = DateTime.UtcNow,
+		};
+		var isAdded = await _dbcontext.AuthUserAppRoles.AddAsync(authUserAppRole);
+		await _dbcontext.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<bool> DeleteAppSubRoleAsync(AuthUserAppRole appSubRole)
+	{
+		var isDeleted = _dbcontext.AuthUserAppRoles.Remove(appSubRole);
+		await _dbcontext.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<AuthUserAppRole> EditAppSubRoleAsync(AuthUserAppRole appSubRole)
+	{
+		_dbcontext.AuthUserAppRoles.Update(appSubRole);
+		await _dbcontext.SaveChangesAsync();
+		return appSubRole;
+	}
 }
