@@ -1,7 +1,7 @@
 ﻿namespace Auth.Features.UserManagement.Command.DeleteRole;
 public record DeleteRoleCommand(int RoleId) : ICommand<DeleteRoleResult>;
 public record DeleteRoleResult(bool IsDeleted);
-public class DeleteRoleHandler
+public class DeleteRoleHandler : ICommandHandler<DeleteRoleCommand, DeleteRoleResult>
 {
     private readonly IRoleService _roleService;
 
