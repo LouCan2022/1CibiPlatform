@@ -7,6 +7,7 @@ public interface IAuthRepository
 	Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<RolesDTO>> GetRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
 
 	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
@@ -20,6 +21,7 @@ public interface IAuthRepository
 	Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<RolesDTO>> SearchRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<bool> SaveUserAsync(Authusers user);
 
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
@@ -64,4 +66,8 @@ public interface IAuthRepository
 	Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO appSubRole);
 	Task<bool> DeleteAppSubRoleAsync(AuthUserAppRole appSubRole);
 	Task<AuthUserAppRole> EditAppSubRoleAsync(AuthUserAppRole appSubRole);
+	Task<bool> AddRoleAsync(AddRoleDTO role);
+	Task<bool> DeleteRoleAsync(AuthRole role);
+	Task<AuthRole> GetRoleAsync(int roleId);
+	Task<AuthRole> EditRoleAsync(AuthRole role);
 }
