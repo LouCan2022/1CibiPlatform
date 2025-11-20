@@ -126,10 +126,6 @@ public class LoginService : ILoginService
 			throw new NotFoundException("Invalid username or password.");
 		}
 
-		// produce access token
-		_logger.LogInformation("Generating JWT token for user: {Username}", cred.Username);
-		string jwtToken = this._jWTService.GetAccessToken(userData);
-		SetAccessTokenCookie(jwtToken);
 
 
 		// produce refresh token
@@ -140,9 +136,23 @@ public class LoginService : ILoginService
 		var subMenuId = userData.SubMenuId;
 
 
+		if (!appId.Any() ||
+			!subMenuId.Any() ||
+			!roleId.Any())
+		{
+			_logger.LogInformation("User application and role data retrieved for user: {Username}", cred.Username);
+			throw new UnauthorizedAccessException("Your account has no assigned application. Please contact an administrator for assistance.");
+		}
+
+		// produce access token
+		_logger.LogInformation("Generating JWT token for user: {Username}", cred.Username);
+		string jwtToken = this._jWTService.GetAccessToken(userData);
+		SetAccessTokenCookie(jwtToken);
+
+
 		var name = !string.IsNullOrEmpty(userData.MiddleName) ?
-			$"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
-			$"{userData.FirstName} {userData.LastName}";
+		$"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
+		$"{userData.FirstName} {userData.LastName}";
 
 
 		if (refreshTokenExist != null)
@@ -164,6 +174,7 @@ public class LoginService : ILoginService
 			);
 		}
 
+		// generate new refresh token
 		_logger.LogInformation("Generating refresh token for user: {Username}", cred.Username);
 		(string refreshToken, string hashRefreshToken) = this._refreshTokenService.GenerateRefreshToken();
 		SetRefreshTokenCookie(refreshToken, cred.IsRememberMe);
