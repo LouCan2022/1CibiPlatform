@@ -8,10 +8,10 @@ using Test.BackendAPI.Modules.Auth.UnitTests.Fixture;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests;
 
-public class UserAppRoleServiceTests : IClassFixture<AuthServiceFixture>
+public class AppSubRoleServiceTests : IClassFixture<AuthServiceFixture>
 {
 	private readonly AuthServiceFixture _fixture;
-	public UserAppRoleServiceTests(AuthServiceFixture fixture)
+	public AppSubRoleServiceTests(AuthServiceFixture fixture)
 	{
 		_fixture = fixture;
 	}

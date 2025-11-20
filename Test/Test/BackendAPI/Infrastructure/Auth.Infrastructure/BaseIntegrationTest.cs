@@ -36,6 +36,14 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		{
 			if (_dbContext is not null)
 			{
+
+				var appSubRoles = _dbContext.AuthUserAppRoles.ToList();
+				if (appSubRoles.Any())
+				{
+					_dbContext.AuthUserAppRoles.RemoveRange(appSubRoles);
+					await _dbContext.SaveChangesAsync();
+				}
+
 				var users = _dbContext.AuthUsers.ToList();
 				if (users.Any())
 				{
@@ -54,6 +62,13 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 				if (subMenus.Any())
 				{
 					_dbContext.AuthSubmenu.RemoveRange(subMenus);
+					await _dbContext.SaveChangesAsync();
+				}
+
+				var roles = _dbContext.AuthRoles.ToList();
+				if (roles.Any())
+				{
+					_dbContext.AuthRoles.RemoveRange(roles);
 					await _dbContext.SaveChangesAsync();
 				}
 			}
