@@ -227,8 +227,6 @@ public class AppSubRoleIntegrationTests : BaseIntegrationTest
 			FirstName = "Admin"
 		};
 
-		var Id = "8a12dac9-813d-4c53-be26-e28e222d4721";
-
 		var user1 = new Authusers { Id = Guid.NewGuid(), Email = "u1@test.com" };
 		var user2 = new Authusers { Id = Guid.NewGuid(), Email = "u2@test.com" };
 		var user3 = new Authusers { Id = Guid.NewGuid(), Email = "u3@test.com" };
