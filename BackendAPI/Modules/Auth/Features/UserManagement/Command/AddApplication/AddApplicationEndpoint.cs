@@ -6,7 +6,7 @@ public class AddApplicationEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("auth/addapplication", async (AddApplicationCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("auth/addapplication", async (AddApplicationRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new AddApplicationCommand(
 				request.application

@@ -1,6 +1,4 @@
-﻿using Auth.Features.UserManagement.Command.EditSubMenu;
-
-namespace Auth.Features.UserManagement.Command.EditAppSubRole;
+﻿namespace Auth.Features.UserManagement.Command.EditAppSubRole;
 public record EditAppSubRoleRequest(EditAppSubRoleDTO editAppSubRole);
 
 public record EditAppSubRoleResponse(AppSubRoleDTO appSubRole);
@@ -8,12 +6,12 @@ public class EditAppSubRoleEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPatch("auth/editappsubrole", async (EditSubMenuCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPatch("auth/editappsubrole", async (EditAppSubRoleRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new EditSubMenuCommand(request.editSubMenu);
-			EditSubMenuResult result = await sender.Send(command, cancellationToken);
-			var response = new EditSubMenuResponse(result.subMenu);
-			return Results.Ok(response.subMenu);
+			var command = new EditAppSubRoleCommand(request.editAppSubRole);
+			EditAppSubRoleResult result = await sender.Send(command, cancellationToken);
+			var response = new EditAppSubRoleResponse(result.appSubRole);
+			return Results.Ok(response.appSubRole);
 		})
 		.WithName("EditAppSubRole")
 		.WithTags("User Management")

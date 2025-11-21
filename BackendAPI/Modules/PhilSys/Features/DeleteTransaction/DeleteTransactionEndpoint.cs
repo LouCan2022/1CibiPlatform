@@ -7,8 +7,7 @@ public class DeleteTransactionEndpoint : ICarterModule
 	{
 		app.MapDelete("deletetransaction/{HashToken}", async (string HashToken, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var request = new DeleteTransactionRequest(HashToken);
-			var command = new DeleteTransactionCommand(request.HashToken);
+			var command = new DeleteTransactionCommand(HashToken);
 			DeleteTransactionResult result = await sender.Send(command, cancellationToken);
 			var response = new DeleteTransactionResponse(result.IsDeleted);
 			return Results.Ok(response.IsDeleted);

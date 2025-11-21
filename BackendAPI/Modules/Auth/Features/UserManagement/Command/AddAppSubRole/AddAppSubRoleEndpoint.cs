@@ -5,7 +5,7 @@ public class AddAppSubRoleEndpoint : ICarterModule
 {
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
-		app.MapPost("auth/addappsubrole", async (AddAppSubRoleCommand request, ISender sender, CancellationToken cancellationToken) =>
+		app.MapPost("auth/addappsubrole", async (AddAppSubRoleRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
 			var command = new AddAppSubRoleCommand(
 				request.appSubRole

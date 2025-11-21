@@ -21,7 +21,6 @@ public class ApplicationServiceTests : IClassFixture<AuthServiceFixture>
 	public async Task GetApplicationsAsync_ShouldReturnPaginatedResult()
 	{
 		// Arrange
-		var service = _fixture.UserManagementService;
 		var paginationRequest = new PaginationRequest
 		{
 			PageIndex = 1,
