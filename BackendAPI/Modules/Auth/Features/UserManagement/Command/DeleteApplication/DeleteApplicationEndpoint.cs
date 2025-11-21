@@ -8,8 +8,7 @@ public class DeleteApplicationEndpoint : ICarterModule
 	{
 		app.MapDelete("auth/deleteapplication/{AppId}", async (int AppId, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var request = new DeleteApplicationRequest(AppId);
-			var command = new DeleteApplicationCommand(request.AppId);
+			var command = new DeleteApplicationCommand(AppId);
 			DeleteApplicationResult result = await sender.Send(command, cancellationToken);
 			var response = new DeleteApplicationResponse(result.IsDeleted);
 			return Results.Ok(response.IsDeleted);

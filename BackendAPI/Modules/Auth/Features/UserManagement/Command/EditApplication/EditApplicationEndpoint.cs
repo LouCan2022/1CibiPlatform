@@ -1,6 +1,4 @@
-﻿using Auth.Features.UserManagement.Command.DeleteApplication;
-
-namespace Auth.Features.UserManagement.Command.EditApplication;
+﻿namespace Auth.Features.UserManagement.Command.EditApplication;
 
 public record EditApplicationRequest(EditApplicationDTO editApplication);
 
@@ -18,7 +16,7 @@ public class EditApplicationEndpoint : ICarterModule
 		})
 		.WithName("EditApplication")
 		.WithTags("User Management")
-		.Produces<DeleteApplicationResponse>()
+		.Produces<EditApplicationResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Edit Application")
 		.WithDescription("Edits an existing application in OnePlatform.");
