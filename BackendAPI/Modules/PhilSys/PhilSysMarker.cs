@@ -1,5 +1,3 @@
-﻿namespace PhilSys;
+﻿namespace BackendAPI.Modules.PhilSys;
 
-public class PhilSysMarker
-{
-}
+public static class PhilSysMarker { }
