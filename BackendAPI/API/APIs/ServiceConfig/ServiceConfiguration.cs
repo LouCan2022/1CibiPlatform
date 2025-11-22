@@ -58,30 +58,30 @@ public static class ServiceConfiguration
 		services.AddCors(options =>
 		{
 			options.AddPolicy("CorsPolicy",
-							 policy =>
-							 {
-								 policy.WithOrigins(
-									 "http://192.168.34.20:4200",
-									 "http://localhost:5055")
-									   .AllowAnyHeader()
-									   .AllowAnyMethod()
-									   .AllowCredentials();
-							 });
+					 policy =>
+					 {
+						 policy.WithOrigins(
+							 "http://192.168.34.20:4200",
+							 "http://localhost:5055")
+							 .AllowAnyHeader()
+							 .AllowAnyMethod()
+							 .AllowCredentials();
+					 });
 		});
 
 	public static void ConfigureCorsDev(this IServiceCollection services) =>
 		services.AddCors(options =>
 		{
 			options.AddPolicy("CorsPolicy",
-							 policy =>
-							 {
-								 policy.WithOrigins(
-									 "http://localhost:5123",
-									 "http://localhost:5134")
-									   .AllowAnyHeader()
-									   .AllowAnyMethod()
-									   .AllowCredentials();
-							 });
+					 policy =>
+					 {
+						 policy.WithOrigins(
+							 "http://localhost:5123",
+							 "http://localhost:5134")
+							 .AllowAnyHeader()
+							 .AllowAnyMethod()
+							 .AllowCredentials();
+					 });
 		});
 	#endregion
 
