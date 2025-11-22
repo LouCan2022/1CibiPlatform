@@ -19,8 +19,7 @@ global using FluentValidation;
 global using System.IdentityModel.Tokens.Jwt;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Caching.Hybrid;
-global using Microsoft.AspNetCore.Mvc;
- 
+
 
 // path
 global using Auth.Data.Entities;
@@ -36,3 +35,6 @@ global using BuildingBlocks.Exceptions.Handler;
 global using Auth.Data.DataSeed;
 global using BuildingBlocks.SharedServices.Interfaces;
 global using BuildingBlocks.Pagination;
+global using BuildingBlocks.SharedInterfaces;
+global using BuildingBlocks.SharedDTO;
+global using BuildingBlocks.SharedConstants;
