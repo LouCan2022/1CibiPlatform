@@ -510,7 +510,7 @@ public class AuthRepository : IAuthRepository
 			.Take(paginationRequest.PageSize)
 			.AsNoTracking()
 			.Select(asr => new AppSubRolesDTO(
-					asr.AppId,
+					asr.AppRoleId,
 					asr.UserId,
 					asr.AppId,
 					asr.Submenu,

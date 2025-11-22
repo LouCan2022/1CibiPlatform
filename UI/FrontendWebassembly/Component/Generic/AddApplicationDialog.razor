@@ -1,0 +1,47 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-2">Add Application</MudText>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="Application.AppName"
+                          Label="Application Name"
+                          Required="true"
+                          Class="mb-3" />
+
+            <MudTextField @bind-Value="Application.Description"
+                          Label="Description"
+                          Class="mb-3" />
+
+            <MudCheckBox T="bool"
+                         @bind-Checked="Application.IsActive"
+                         Label="Is Active"
+                         Class="mb-3" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="@(!form.IsValid)">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public AddApplicationDTO Application { get; set; } = new AddApplicationDTO();
+
+    [Parameter] public EventCallback<AddApplicationDTO> OnValidSubmit { get; set; }
+
+    private MudForm form;
+
+    void Cancel() => MudDialog.Cancel();
+
+    async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            await OnValidSubmit.InvokeAsync(Application);
+            MudDialog.Close(DialogResult.Ok(Application));
+        }
+    }
+}
