@@ -1,5 +1,3 @@
-﻿namespace SSO;
+﻿namespace BackendAPI.Modules.SSO;
 
-public class SSOMarker
-{
-}
+public static class SSOMarker { }

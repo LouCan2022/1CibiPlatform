@@ -1,5 +1,3 @@
-﻿namespace CNX;
+﻿namespace BackendAPI.Modules.CNX;
 
-public class CNXMarker
-{
-}
+public static class CNXMarker { }

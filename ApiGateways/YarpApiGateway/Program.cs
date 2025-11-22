@@ -1,20 +1,13 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using ApiGateways.YarpApiGateway.Extensions;
+using ApiGateways.YarpApiGateway.Services;
+using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-	options.AddPolicy("DevCors", policy =>
-	{
-		policy.WithOrigins(
-			 "http://localhost:5134")
-			  .AllowCredentials()
-			  .AllowAnyMethod()
-			  .AllowAnyHeader();
-	});
-});
+// central registration for gateway concerns
+builder.AddGatewayServices();
 
-
+// Kestrel configuration: keep production PFX loading for certificates
 builder.WebHost.ConfigureKestrel(kestrel =>
 {
 	if (builder.Environment.IsDevelopment())
@@ -37,10 +30,10 @@ builder.WebHost.ConfigureKestrel(kestrel =>
 			var cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword);
 			var daysUntilExpiry = (cert.NotAfter - DateTime.UtcNow).TotalDays;
 
-			if (daysUntilExpiry < 30)
+			if (daysUntilExpiry <30)
 			{
 				Console.ForegroundColor = ConsoleColor.Yellow;
-				Console.WriteLine($"⚠️  WARNING: Certificate expires in {daysUntilExpiry:F0} days!");
+				Console.WriteLine($"⚠️ WARNING: Certificate expires in {daysUntilExpiry:F0} days!");
 				Console.ResetColor();
 			}
 
@@ -50,15 +43,17 @@ builder.WebHost.ConfigureKestrel(kestrel =>
 	}
 });
 
-
-builder.Services.AddReverseProxy()
-	.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
-
 var app = builder.Build();
 
-app.UseWebSockets();
+app.UseRouting();
 
+// enable middleware
+app.UseRateLimiter();
+app.UseWebSockets();
 app.UseCors("DevCors");
+
+// diagnostic endpoint to inspect discovered routes/clusters
+app.MapGet("/__routes", (RouteCatalog catalog) => Results.Ok(new { routes = catalog.Routes, clusters = catalog.Clusters }));
 
 app.MapReverseProxy();
 
