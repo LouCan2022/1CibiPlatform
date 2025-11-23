@@ -14,4 +14,7 @@ public interface IUserManagementService
 	Task<bool> DeleteUserAppSbRoleAsync(int AppSubRoleId);
 
 	Task<bool> AddApplicationAsync(AddApplicationDTO addApplicationDTO);
+	Task<bool> AddSubMenuAsync(AddSubMenuDTO addSubMenuDTO);
+	Task<bool> AddRoleAsync(AddRoleDTO addRoleDTO);
+	Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO addAppSubRoleDTO);
 }

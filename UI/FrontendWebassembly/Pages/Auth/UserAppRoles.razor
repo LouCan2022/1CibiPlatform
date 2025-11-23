@@ -20,7 +20,7 @@
 
 @if (_activeIndex == 0)
 {
-    <MudTable Items="@Users" Filter="FilterFunc1">
+    <MudTable T="UsersDTO" @ref="usersTable" ServerData="LoadUsersServerData" Filter="FilterFunc1">
         <ToolBarContent>
             <MudText Typo="Typo.h6">User Management</MudText>
             <MudSpacer />
@@ -49,36 +49,33 @@
 }
 else if (_activeIndex == 1)
 {
-    <MudTable Items="@Applications" Filter="FilterFunc2">
+    <MudTable T="ApplicationsDTO" @ref="applicationsTable" ServerData="LoadApplicationsServerData" Filter="FilterFunc2">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Application Management</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             <MudSpacer />
-            <MudButton Variant="Variant.Filled"
-                       Class="theme-button theme-button-active"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddDialog">
+            <MudButton Variant="Variant.Filled" 
+                       Class="theme-button theme-button-active" 
+                       StartIcon="@Icons.Material.Filled.Add" 
+                       OnClick="OpenAddApplicationDialog">
                 Add
             </MudButton>
         </ToolBarContent>
-
         <HeaderContent>
             <MudTh>Id</MudTh>
             <MudTh>Application</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
-
         <RowTemplate>
             <MudTd DataLabel="Id">@context.applicationId</MudTd>
             <MudTd DataLabel="Application">@context.applicationName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
-                               OnClick="@(() => EditApplication(context))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium"
-                               OnClick="@(() => ConfirmDelete(context.applicationId, "application"))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => EditApplication(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium" OnClick="@(() => ConfirmDelete(context.applicationId, "application"))" />
             </MudTd>
         </RowTemplate>
         <PagerContent>
@@ -89,7 +86,7 @@ else if (_activeIndex == 1)
 
 else if (_activeIndex == 2)
 {
-    <MudTable Items="@SubMenus" Filter="FilterFunc3">
+    <MudTable T="SubMenusDTO" @ref="subMenusTable" ServerData="LoadSubMenusServerData" Filter="FilterFunc3">
         <ToolBarContent>
             <MudText Typo="Typo.h6">SubMenu Management</MudText>
             <MudSpacer />
@@ -98,7 +95,7 @@ else if (_activeIndex == 2)
             <MudButton Variant="Variant.Filled"
                        Class="theme-button theme-button-active"
                        StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddDialog">
+                       OnClick="OpenAddSubMenuDialog">
                 Add
             </MudButton>
         </ToolBarContent>
@@ -129,7 +126,7 @@ else if (_activeIndex == 2)
 
 else if (_activeIndex == 3)
 {
-    <MudTable Items="@Roles" Filter="FilterFunc4">
+    <MudTable T="RolesDTO" @ref="rolesTable" ServerData="LoadRolesServerData" Filter="FilterFunc4">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Role Management</MudText>
             <MudSpacer />
@@ -138,7 +135,7 @@ else if (_activeIndex == 3)
             <MudButton Variant="Variant.Filled"
                        Class="theme-button theme-button-active"
                        StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddDialog">
+                       OnClick="OpenAddRoleDialog">
                 Add
             </MudButton>
         </ToolBarContent>
@@ -169,7 +166,7 @@ else if (_activeIndex == 3)
 
 else if (_activeIndex == 4)
 {
-    <MudTable Items="@AppSubRoles" Filter="FilterFunc5">
+    <MudTable T="AppSubRolesDTO" @ref="appSubRolesTable" ServerData="LoadUserAppSubRolesServerData" Filter="FilterFunc5">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Users' App SubMenu Role Management</MudText>
             <MudSpacer />
@@ -178,7 +175,7 @@ else if (_activeIndex == 4)
             <MudButton Variant="Variant.Filled"
                        Class="theme-button theme-button-active"
                        StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddDialog">
+                       OnClick="OpenAddAppSubRoleDialog">
                 Add
             </MudButton>
         </ToolBarContent>
@@ -214,44 +211,157 @@ else if (_activeIndex == 4)
 @code {
     private int _activeIndex = 0;
     private string searchString = "";
-    private IEnumerable<UsersDTO> Users = new List<UsersDTO>();
-    private IEnumerable<ApplicationsDTO> Applications = new List<ApplicationsDTO>();
-    private IEnumerable<SubMenusDTO> SubMenus = new List<SubMenusDTO>();
-    private IEnumerable<RolesDTO> Roles = new List<RolesDTO>();
-    private IEnumerable<AppSubRolesDTO> AppSubRoles = new List<AppSubRolesDTO>();
+    private AddApplicationDTO addApplication = new AddApplicationDTO();
+    private MudTable<UsersDTO> usersTable;
+    private MudTable<ApplicationsDTO> applicationsTable;
+    private MudTable<SubMenusDTO> subMenusTable;
+    private MudTable<RolesDTO> rolesTable;
+    private MudTable<AppSubRolesDTO> appSubRolesTable;
 
-    protected override async Task OnInitializedAsync()
+    private async Task<TableData<UsersDTO>> LoadUsersServerData(TableState state, CancellationToken cancellationToken)
     {
-        // Call GetUsersAsync and populate the table
-        var users = await UserManagementService.GetUsersAsync();
-        Users = users.Data;
-
-        var applications = await UserManagementService.GetApplicationsAsync();
-        Applications = applications.Data;
-
-        var submenus = await UserManagementService.GetSubMenusAsync();
-        SubMenus = submenus.Data;
-
-        var roles = await UserManagementService.GetRolesAsync();
-        Roles = roles.Data;
-
-        var appsubroles = await UserManagementService.GetAppSubRolesAsync();
-        AppSubRoles = appsubroles.Data;
+        var result = await UserManagementService.GetUsersAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchString
+        );
+        return new TableData<UsersDTO>
+        {
+            TotalItems = result.PageSize,
+            Items = result.Data
+        };
     }
 
-    private async Task LoadApplications()
+    private async Task<TableData<ApplicationsDTO>> LoadApplicationsServerData(TableState state, CancellationToken cancellationToken)
     {
-        var applications = await UserManagementService.GetApplicationsAsync();
-        Applications = applications.Data;
+        var result = await UserManagementService.GetApplicationsAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchString
+        );
+        return new TableData<ApplicationsDTO>
+        {
+            TotalItems = result.PageSize,
+            Items = result.Data
+        };
+    }
 
-        var submenus = await UserManagementService.GetSubMenusAsync();
-        SubMenus = submenus.Data;
+    private async Task<TableData<SubMenusDTO>> LoadSubMenusServerData(TableState state, CancellationToken cancellationToken)
+    {
+        var result = await UserManagementService.GetSubMenusAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchString
+        );
+        return new TableData<SubMenusDTO>
+        {
+            TotalItems = result.PageSize,
+            Items = result.Data
+        };
+    }
 
-        var roles = await UserManagementService.GetRolesAsync();
-        Roles = roles.Data;
+    private async Task<TableData<RolesDTO>> LoadRolesServerData(TableState state, CancellationToken cancellationToken)
+    {
+        var result = await UserManagementService.GetRolesAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchString
+        );
+        return new TableData<RolesDTO>
+        {
+            TotalItems = result.PageSize,
+            Items = result.Data
+        };
+    }
 
-        var appsubroles = await UserManagementService.GetAppSubRolesAsync();
-        AppSubRoles = appsubroles.Data;
+    private async Task<TableData<AppSubRolesDTO>> LoadUserAppSubRolesServerData(TableState state, CancellationToken cancellationToken)
+    {
+        var result = await UserManagementService.GetAppSubRolesAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchString
+        );
+        return new TableData<AppSubRolesDTO>
+        {
+            TotalItems = result.PageSize,
+            Items = result.Data
+        };
+    }
+
+    private async Task OpenAddApplicationDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<AddApplicationComponent>("Add Application", options);
+
+        var result = await dialog.Result;
+
+        if  (result!.Data is AddApplicationDTO addedApplication)
+        {
+            await AddApplication(addedApplication);
+        }
+    }
+
+    private async Task OpenAddSubMenuDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<AddSubMenuComponent>("Add SubMenu", options);
+
+        var result = await dialog.Result;
+
+        if (result!.Data is AddSubMenuDTO addedSubMenu)
+        {
+            await AddSubMenu(addedSubMenu);
+        }
+    }
+
+    private async Task OpenAddRoleDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<AddRoleComponent>("Add Role", options);
+
+        var result = await dialog.Result;
+
+        if (result!.Data is AddRoleDTO addedRole)
+        {
+            await AddRole(addedRole);
+        }
+    }
+
+    private async Task OpenAddAppSubRoleDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<AddAppSubRoleComponent>("Add User's AppSubRole", options);
+
+        var result = await dialog.Result;
+
+        if (result!.Data is AddAppSubRoleDTO addedAppSubRole)
+        {
+            await AddAppSubRole(addedAppSubRole);
+        }
     }
 
     private bool FilterFunc1(UsersDTO user)
@@ -283,26 +393,6 @@ else if (_activeIndex == 4)
 
         return false;
     }
-
-    private async Task OpenAddApplicationDialog()
-    {
-        var application = new AddApplicationDTO();
-
-        var parameters = new DialogParameters
-    {
-        { "Application", application },
-        { "OnValidSubmit", EventCallback.Factory.Create<AddApplicationDTO>(this, async (app) =>
-            {
-                await UserManagementService.AddApplicationAsync(app);
-                await LoadApplications();
-            })
-        }
-    };
-
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
-        await DialogService.ShowAsync<AddApplicationDialog>("Add Application", parameters, options);
-    }
-
 
     private bool FilterFunc3(SubMenusDTO submenu)
     {
@@ -356,7 +446,7 @@ else if (_activeIndex == 4)
             { "Color", Color.Error }
         };
 
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
         var dialog = await DialogService.ShowAsync<DialogConfirmation>("Confirm Delete", parameters, options)!;
         var result = await dialog.Result;
@@ -386,16 +476,14 @@ else if (_activeIndex == 4)
     private async Task DeleteApplication(int AppId)
     {
         await UserManagementService.DeleteApplicationAsync(AppId);
-        await LoadApplications();
-        StateHasChanged();
+        await applicationsTable.ReloadServerData();
         return;
     }
 
     private async Task DeleteSubMenu(int SubMenuId)
     {
         await UserManagementService.DeleteSubMenuAsync(SubMenuId);
-        await LoadApplications();
-        StateHasChanged();
+        await subMenusTable.ReloadServerData();
         return;
     }
 
@@ -403,16 +491,14 @@ else if (_activeIndex == 4)
     private async Task DeleteRole(int RoleId)
     {
         await UserManagementService.DeleteRoleAsync(RoleId);
-        await LoadApplications();
-        StateHasChanged();
+        await rolesTable.ReloadServerData();
         return;
     }
 
     private async Task DeleteAppSubRole(int AppSubRoleId)
     {
         await UserManagementService.DeleteUserAppSbRoleAsync(AppSubRoleId);
-        await LoadApplications();
-        StateHasChanged();
+        await appSubRolesTable.ReloadServerData();
         return;
     }
 
@@ -420,21 +506,34 @@ else if (_activeIndex == 4)
     private async Task AddApplication(AddApplicationDTO addApplicationDTO)
     {
         await UserManagementService.AddApplicationAsync(addApplicationDTO);
-        await LoadApplications();
-        StateHasChanged();
+        await applicationsTable.ReloadServerData();
+        return;
+    }
+
+    private async Task AddSubMenu(AddSubMenuDTO addSubMenuDTO)
+    {
+        await UserManagementService.AddSubMenuAsync(addSubMenuDTO);
+        await subMenusTable.ReloadServerData();
+        return;
+    }
+
+    private async Task AddRole(AddRoleDTO addRoleDTO)
+    {
+        await UserManagementService.AddRoleAsync(addRoleDTO);
+        await rolesTable.ReloadServerData();
+        return;
+    }
+
+    private async Task AddAppSubRole(AddAppSubRoleDTO addAppSubRoleDTO)
+    {
+        await UserManagementService.AddAppSubRoleAsync(addAppSubRoleDTO);
+        await appSubRolesTable.ReloadServerData();
         return;
     }
 
     private void EditApplication(ApplicationsDTO application)
     {
-        // Your delete logic here
         Console.WriteLine($"Delete {application.applicationName} {application.Description}");
-    }
-
-    private void DeleteSubMenu(SubMenusDTO submenus)
-    {
-        // Your edit logic here
-        Console.WriteLine($"Edit {submenus.subMenuName} {submenus.Description}");
     }
 
     private void EditSubMenu(SubMenusDTO submenus)
@@ -443,22 +542,11 @@ else if (_activeIndex == 4)
         Console.WriteLine($"Delete {submenus.subMenuName} {submenus.Description}");
     }
 
-    private void DeleteRole(RolesDTO roles)
-    {
-        // Your edit logic here
-        Console.WriteLine($"Edit {roles.roleName} {roles.Description}");
-    }
 
     private void EditRole(RolesDTO roles)
     {
         // Your delete logic here
         Console.WriteLine($"Delete {roles.roleName} {roles.Description}");
-    }
-
-    private void DeleteAppSubRole(AppSubRolesDTO appsubroles)
-    {
-        // Your edit logic here
-        Console.WriteLine($"Edit {appsubroles.UserSubRoleId}");
     }
 
     private void EditAppSubRole(AppSubRolesDTO appsubroles)
@@ -470,11 +558,6 @@ else if (_activeIndex == 4)
     private void OnTabChanged(int index)
     {
         _activeIndex = index;
-    }
-
-    private async Task OpenAddDialog()
-    {
-        await OpenAddApplicationDialog();
     }
 
     private string GetTabClass(int index)
