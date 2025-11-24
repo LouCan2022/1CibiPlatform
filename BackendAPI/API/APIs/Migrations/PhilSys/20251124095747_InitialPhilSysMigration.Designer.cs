@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251103095639_InitialPhilSysMigration")]
+    [Migration("20251124095747_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
@@ -78,8 +78,8 @@ namespace APIs.Migrations.PhilSys
                         .HasColumnType("character varying(16)");
 
                     b.Property<string>("Suffix")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("TransactedAt")
                         .HasColumnType("timestamp with time zone");

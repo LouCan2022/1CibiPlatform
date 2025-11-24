@@ -21,7 +21,7 @@ namespace APIs.Migrations.PhilSys
                     FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     MiddleName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    Suffix = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    Suffix = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     BirthDate = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
                     PCN = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: true),
                     FaceLivenessSessionId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
