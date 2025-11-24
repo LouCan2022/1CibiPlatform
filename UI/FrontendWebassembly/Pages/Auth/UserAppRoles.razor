@@ -25,7 +25,8 @@
             <MudText Typo="Typo.h6">User Management</MudText>
             <MudSpacer />
             <MudTextField T="string"
-                          ValueChanged="OnSearchUser"
+                          @bind-Value="searchStringUser"
+                          Immediate="true"
                           Placeholder="Search"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -60,7 +61,8 @@ else if (_activeIndex == 1)
             <MudText Typo="Typo.h6">Application Management</MudText>
             <MudSpacer />
             <MudTextField T="string"
-                          ValueChanged="OnSearchApplication"
+                          @bind-Value="searchStringApp"
+                          Immediate="true"
                           Placeholder="Search"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -102,7 +104,8 @@ else if (_activeIndex == 2)
             <MudText Typo="Typo.h6">SubMenu Management</MudText>
             <MudSpacer />
             <MudTextField T="string"
-                          ValueChanged="OnSearchSubMenu"
+                          @bind-Value="searchStringSub"
+                          Immediate="true"
                           Placeholder="Search"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -148,7 +151,8 @@ else if (_activeIndex == 3)
             <MudText Typo="Typo.h6">Role Management</MudText>
             <MudSpacer />
             <MudTextField T="string"
-                          ValueChanged="OnSearchRole"
+                          @bind-Value="searchStringRole"
+                          Immediate="true"
                           Placeholder="Search"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -194,7 +198,8 @@ else if (_activeIndex == 4)
             <MudText Typo="Typo.h6">Users' AppSubRole Management</MudText>
             <MudSpacer />
             <MudTextField T="string"
-                          ValueChanged="OnSearchAppSubRole"
+                          @bind-Value="searchStringAppSubRole"
+                          Immediate="true"
                           Placeholder="Search"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -239,11 +244,11 @@ else if (_activeIndex == 4)
 
 @code {
     private int _activeIndex = 0;
-    private string searchStringUser = "";
-    private string searchStringApp = "";
-    private string searchStringSub = "";
-    private string searchStringRole = "";
-    private string searchStringAppSubRole = "";
+    private string _searchStringUser;
+    private string _searchStringApp;
+    private string _searchStringSub;
+    private string _searchStringRole;
+    private string _searchStringAppSubRole;
     private AddApplicationDTO addApplication = new AddApplicationDTO();
     private MudTable<UsersDTO> usersTable;
     private MudTable<ApplicationsDTO> applicationsTable;
@@ -263,34 +268,70 @@ else if (_activeIndex == 4)
             : "philsys-tab-pannel philsys-tab-pannel-inactive";
     }
 
-    private void OnSearchApplication(string text)
+
+    private string searchStringUser
     {
-        searchStringApp = text;
-        applicationsTable.ReloadServerData();
+        get => _searchStringUser;
+        set
+        {
+            if (_searchStringUser != value)
+            {
+                _searchStringUser = value;
+                usersTable?.ReloadServerData();
+            }
+        }
     }
 
-    private void OnSearchUser(string text)
+    private string searchStringApp
     {
-        searchStringUser = text;
-        usersTable.ReloadServerData();
+        get => _searchStringApp;
+        set
+        {
+            if (_searchStringApp != value)
+            {
+                _searchStringApp = value;
+                applicationsTable?.ReloadServerData();
+            }
+        }
     }
 
-    private void OnSearchSubMenu(string text)
+    private string searchStringSub
     {
-        searchStringSub = text;
-        subMenusTable.ReloadServerData();
+        get => _searchStringSub;
+        set
+        {
+            if (_searchStringSub != value)
+            {
+                _searchStringSub = value;
+                subMenusTable?.ReloadServerData();
+            }
+        }
     }
 
-    private void OnSearchRole(string text)
+    private string searchStringRole
     {
-        searchStringRole = text;
-        rolesTable.ReloadServerData();
+        get => _searchStringRole;
+        set
+        {
+            if (_searchStringRole != value)
+            {
+                _searchStringRole = value;
+                rolesTable?.ReloadServerData();
+            }
+        }
     }
 
-    private void OnSearchAppSubRole(string text)
+    private string searchStringAppSubRole
     {
-        searchStringAppSubRole = text;
-        appSubRolesTable.ReloadServerData();
+        get => _searchStringAppSubRole;
+        set
+        {
+            if (_searchStringAppSubRole != value)
+            {
+                _searchStringAppSubRole = value;
+                appSubRolesTable?.ReloadServerData();
+            }
+        }
     }
 
     private async Task<TableData<UsersDTO>> LoadUsersServerData(TableState state, CancellationToken cancellationToken)
@@ -599,8 +640,6 @@ else if (_activeIndex == 4)
                 case "appsubrole":
                     await DeleteAppSubRole(id);
                     break;
-                default:
-                    throw new ArgumentException($"Unknown table type: {table}");
             }
         }
     }
@@ -618,7 +657,6 @@ else if (_activeIndex == 4)
         await subMenusTable.ReloadServerData();
         return;
     }
-
 
     private async Task DeleteRole(int RoleId)
     {
