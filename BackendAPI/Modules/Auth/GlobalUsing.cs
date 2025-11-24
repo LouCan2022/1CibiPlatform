@@ -38,3 +38,5 @@ global using BuildingBlocks.Pagination;
 global using BuildingBlocks.SharedInterfaces;
 global using BuildingBlocks.SharedDTO;
 global using BuildingBlocks.SharedConstants;
+global using Auth.Data.Cache;
+global using BuildingBlocks.SharedServices.Implementations;

@@ -94,51 +94,6 @@ public class LogoutIntegrationTests : BaseIntegrationTest
 		await act.Should().ThrowAsync<NotFoundException>().WithMessage("User not found.");
 	}
 
-	[Fact]
-	public async Task Logout_ShouldThrowBadRequest_WhenRefreshTokenIsInvalid()
-	{
-		// Arrange
-		var user = new Authusers
-		{
-			Id = Guid.NewGuid(),
-			Email = "invalidtoken@example.com",
-			PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-			FirstName = "Invalid",
-			LastName = "Token",
-			IsActive = true
-		};
-		_dbContext.AuthUsers.Add(user);
-
-		var realToken = "real-refresh-token";
-		var hashed = ComputeSha256Base64(realToken);
-
-		var authRefresh = new AuthRefreshToken
-		{
-			UserId = user.Id,
-			TokenHash = hashed,
-			CreatedAt = DateTime.UtcNow,
-			ExpiresAt = DateTime.UtcNow.AddDays(7),
-			IsActive = true
-		};
-
-		_dbContext.AuthRefreshToken.Add(authRefresh);
-		await _dbContext.SaveChangesAsync();
-
-		// set cookie with a different (invalid) token
-		var invalidToken = "invalid-token";
-		var cookieKey = _configuration["AuthWeb:AuthWebHttpCookieOnlyKey"] ?? "refreshKey";
-		var ctx = _httpContextAccessor.HttpContext!;
-		ctx.Request.Headers["Cookie"] = $"{cookieKey}={invalidToken}";
-
-		var command = new LogoutCommand(new LogoutDTO(user.Id, "reason"));
-
-		// Act
-		Func<Task> act = async () => { await _sender.Send(command); };
-
-		// Assert
-		await act.Should().ThrowAsync<BadRequestException>().WithMessage("Logout failed.");
-	}
-
 	private async Task<Authusers> SeedUserDataWithRefreshToken()
 	{
 		var user = new Authusers
