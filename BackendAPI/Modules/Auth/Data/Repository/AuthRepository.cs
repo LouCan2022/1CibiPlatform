@@ -295,12 +295,12 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
-	public async Task<AuthRefreshToken> IsUserExistAsync(Guid userId)
+	public async Task<List<AuthRefreshToken>> IsUserExistAsync(Guid userId)
 	{
 		return await
 			_dbcontext.AuthRefreshToken
-			.OrderByDescending(rt => rt.CreatedAt)
-			.FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive);
+			.Where(art => art.UserId == userId && art.IsActive)
+			.ToListAsync();
 	}
 
 
@@ -529,7 +529,7 @@ public class AuthRepository : IAuthRepository
 	public async Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var appSubRolesQuery = _dbcontext.AuthUserAppRoles
-				.Where(asr => 
+				.Where(asr =>
 					(EF.Functions.ILike(asr.RoleId.ToString(), $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(asr.Submenu.ToString()!, $"%{paginationRequest.SearchTerm}%") ||
 					  EF.Functions.ILike(asr.AppId.ToString()!, $"%{paginationRequest.SearchTerm}%")));
