@@ -20,11 +20,17 @@
 
 @if (_activeIndex == 0)
 {
-    <MudTable T="UsersDTO" @ref="usersTable" ServerData="LoadUsersServerData" Filter="FilterFunc1">
+    <MudTable T="UsersDTO" @ref="usersTable" ServerData="LoadUsersServerData">
         <ToolBarContent>
             <MudText Typo="Typo.h6">User Management</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField T="string"
+                          ValueChanged="OnSearchUser"
+                          Placeholder="Search"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          IconSize="Size.Medium"
+                          Class="mt-0" />
         </ToolBarContent>
 
         <HeaderContent>
@@ -49,12 +55,17 @@
 }
 else if (_activeIndex == 1)
 {
-    <MudTable T="ApplicationsDTO" @ref="applicationsTable" ServerData="LoadApplicationsServerData" Filter="FilterFunc2">
+    <MudTable T="ApplicationsDTO" @ref="applicationsTable" ServerData="LoadApplicationsServerData">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Application Management</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField T="string"
+                          ValueChanged="OnSearchApplication"
+                          Placeholder="Search"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          IconSize="Size.Medium"
+                          Class="mt-0" />
             <MudSpacer />
             <MudButton Variant="Variant.Filled" 
                        Class="theme-button theme-button-active" 
@@ -86,11 +97,17 @@ else if (_activeIndex == 1)
 
 else if (_activeIndex == 2)
 {
-    <MudTable T="SubMenusDTO" @ref="subMenusTable" ServerData="LoadSubMenusServerData" Filter="FilterFunc3">
+    <MudTable T="SubMenusDTO" @ref="subMenusTable" ServerData="LoadSubMenusServerData">
         <ToolBarContent>
             <MudText Typo="Typo.h6">SubMenu Management</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField T="string"
+                          ValueChanged="OnSearchSubMenu"
+                          Placeholder="Search"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          IconSize="Size.Medium"
+                          Class="mt-0" />
             <MudSpacer />
             <MudButton Variant="Variant.Filled"
                        Class="theme-button theme-button-active"
@@ -126,11 +143,17 @@ else if (_activeIndex == 2)
 
 else if (_activeIndex == 3)
 {
-    <MudTable T="RolesDTO" @ref="rolesTable" ServerData="LoadRolesServerData" Filter="FilterFunc4">
+    <MudTable T="RolesDTO" @ref="rolesTable" ServerData="LoadRolesServerData">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Role Management</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField T="string"
+                          ValueChanged="OnSearchRole"
+                          Placeholder="Search"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          IconSize="Size.Medium"
+                          Class="mt-0" />
             <MudSpacer />
             <MudButton Variant="Variant.Filled"
                        Class="theme-button theme-button-active"
@@ -166,11 +189,17 @@ else if (_activeIndex == 3)
 
 else if (_activeIndex == 4)
 {
-    <MudTable T="AppSubRolesDTO" @ref="appSubRolesTable" ServerData="LoadUserAppSubRolesServerData" Filter="FilterFunc5">
+    <MudTable T="AppSubRolesDTO" @ref="appSubRolesTable" ServerData="LoadUserAppSubRolesServerData">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Users' App SubMenu Role Management</MudText>
+            <MudText Typo="Typo.h6">Users' AppSubRole Management</MudText>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField T="string"
+                          ValueChanged="OnSearchAppSubRole"
+                          Placeholder="Search"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          IconSize="Size.Medium"
+                          Class="mt-0" />
             <MudSpacer />
             <MudButton Variant="Variant.Filled"
                        Class="theme-button theme-button-active"
@@ -210,7 +239,11 @@ else if (_activeIndex == 4)
 
 @code {
     private int _activeIndex = 0;
-    private string searchString = "";
+    private string searchStringUser = "";
+    private string searchStringApp = "";
+    private string searchStringSub = "";
+    private string searchStringRole = "";
+    private string searchStringAppSubRole = "";
     private AddApplicationDTO addApplication = new AddApplicationDTO();
     private MudTable<UsersDTO> usersTable;
     private MudTable<ApplicationsDTO> applicationsTable;
@@ -230,12 +263,42 @@ else if (_activeIndex == 4)
             : "philsys-tab-pannel philsys-tab-pannel-inactive";
     }
 
+    private void OnSearchApplication(string text)
+    {
+        searchStringApp = text;
+        applicationsTable.ReloadServerData();
+    }
+
+    private void OnSearchUser(string text)
+    {
+        searchStringUser = text;
+        usersTable.ReloadServerData();
+    }
+
+    private void OnSearchSubMenu(string text)
+    {
+        searchStringSub = text;
+        subMenusTable.ReloadServerData();
+    }
+
+    private void OnSearchRole(string text)
+    {
+        searchStringRole = text;
+        rolesTable.ReloadServerData();
+    }
+
+    private void OnSearchAppSubRole(string text)
+    {
+        searchStringAppSubRole = text;
+        appSubRolesTable.ReloadServerData();
+    }
+
     private async Task<TableData<UsersDTO>> LoadUsersServerData(TableState state, CancellationToken cancellationToken)
     {
         var result = await UserManagementService.GetUsersAsync(
             state.Page + 1,
             state.PageSize,
-            searchString
+            searchStringUser
         );
         return new TableData<UsersDTO>
         {
@@ -252,7 +315,7 @@ else if (_activeIndex == 4)
         var result = await UserManagementService.GetApplicationsAsync(
             state.Page + 1,
             state.PageSize,
-            searchString
+            searchStringApp
         );
 
         return new TableData<ApplicationsDTO>
@@ -267,8 +330,9 @@ else if (_activeIndex == 4)
         var result = await UserManagementService.GetSubMenusAsync(
             state.Page + 1,
             state.PageSize,
-            searchString
+            searchStringSub
         );
+
         return new TableData<SubMenusDTO>
         {
             TotalItems = (int)result.Count,
@@ -281,7 +345,7 @@ else if (_activeIndex == 4)
         var result = await UserManagementService.GetRolesAsync(
             state.Page + 1,
             state.PageSize,
-            searchString
+            searchStringRole
         );
         return new TableData<RolesDTO>
         {
@@ -295,7 +359,7 @@ else if (_activeIndex == 4)
         var result = await UserManagementService.GetAppSubRolesAsync(
             state.Page + 1,
             state.PageSize,
-            searchString
+            searchStringAppSubRole
         );
         return new TableData<AppSubRolesDTO>
         {
@@ -504,79 +568,6 @@ else if (_activeIndex == 4)
             await EditAppSubRole(editedAppSubRole);
         }
     }
-
-    private bool FilterFunc1(UsersDTO user)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-
-        if (!string.IsNullOrEmpty(user.email) && user.email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(user.firstName) && user.firstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(user.middleName) && user.middleName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(user.lastName) && user.lastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    }
-
-    private bool FilterFunc2(ApplicationsDTO application)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-
-        if (!string.IsNullOrEmpty(application.applicationName) && application.applicationName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(application.Description) && application.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    }
-
-    private bool FilterFunc3(SubMenusDTO submenu)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-
-        if (!string.IsNullOrEmpty(submenu.subMenuName) && submenu.subMenuName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(submenu.Description) && submenu.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    }
-
-    private bool FilterFunc4(RolesDTO role)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-
-        if (!string.IsNullOrEmpty(role.roleName) && role.roleName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(role.Description) && role.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    }
-
-
-    private bool FilterFunc5(AppSubRolesDTO appsubroles)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-
-        if (!string.IsNullOrEmpty(appsubroles.RoleId.ToString()) && appsubroles.RoleId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(appsubroles.Submenu.ToString()) && appsubroles.Submenu.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (!string.IsNullOrEmpty(appsubroles.AppId.ToString()) && appsubroles.AppId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    }
-
 
     private async Task ConfirmDelete(int id, string table)
     {
