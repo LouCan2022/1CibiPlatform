@@ -1,56 +1,38 @@
 ﻿<MudDialog Style="padding: 8px;">
     <DialogContent>
         <MudForm @ref="form">
-            <MudTextField @bind-Value="AppSubRole.UserId"
-                          Label="User Id"
-                          Required="true"
-                          RequiredError="User Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
-
-
-            <MudTextField @bind-Value="AppSubRole.AppId"
-                          Label="App Id"
-                          Required="true"
-                          RequiredError="App Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
-
-            <MudTextField @bind-Value="AppSubRole.SubMenuId"
+            <MudTextField @bind-Value="SubMenu.subMenuId"
                           Label="SubMenu Id"
-                          Required="true"
-                          RequiredError="SubMenu Id is required"
+                          ReadOnly
                           Adornment="Adornment.Start"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           MaxLength="100"
                           Class="philsys-rounded-input philsys-uppercase-input" />
 
-            <MudTextField @bind-Value="AppSubRole.RoleId"
-                          Label="Role Id"
+            <MudTextField @bind-Value="SubMenu.subMenuName"
+                          Label="Application Name"
                           Required="true"
-                          RequiredError="Role Id is required"
+                          RequiredError="SubMenu Name is required"
                           Adornment="Adornment.Start"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           MaxLength="100"
                           Class="philsys-rounded-input philsys-uppercase-input" />
 
-            <MudTextField @bind-Value="AppSubRole.AssignedBy"
-                          Label="Assigned By"
+            <MudTextField @bind-Value="SubMenu.Description"
+                          Label="Description"
                           Required="true"
-                          RequiredError="Assigned By is required"
+                          RequiredError="Description is required"
                           Adornment="Adornment.Start"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           MaxLength="100"
                           Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudCheckBox T="bool"
+                         @bind-Value="SubMenu.IsActive"
+                         Label="Is Active" />
         </MudForm>
     </DialogContent>
 
@@ -75,8 +57,7 @@
 
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
 
-    [Parameter]
-    public AddAppSubRoleDTO AppSubRole { get; set; } = new AddAppSubRoleDTO();
+    [Parameter] public SubMenusDTO SubMenu { get; set; } = new SubMenusDTO();
 
     void Cancel() => MudDialog.Cancel();
 
@@ -85,7 +66,7 @@
         await form.Validate();
         if (form.IsValid)
         {
-            MudDialog.Close(DialogResult.Ok(AppSubRole));
+            MudDialog.Close(DialogResult.Ok(SubMenu));
         }
     }
 }

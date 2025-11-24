@@ -19,17 +19,18 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var users = await _dbcontext.AuthUsers
-			.Where(au => au.IsActive)
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(au => new UsersDTO(
-					au.Id,
-					au.Email,
-					au.FirstName,
-					au.MiddleName!,
-					au.LastName))
-			.ToListAsync(cancellationToken);
+					.Where(a => a.IsActive)
+					.OrderBy(a => a.Id)          
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(au => new UsersDTO(
+						au.Id,
+						au.Email,
+						au.FirstName,
+						au.MiddleName ?? "",
+						au.LastName))
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<UsersDTO>
 			(
@@ -47,23 +48,25 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var applications = await _dbcontext.AuthApplications
-			.Where(aa => aa.IsActive)
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(aa => new ApplicationsDTO(
-					aa.AppId,
-					aa.AppName,
-					aa.Description!))
-			.ToListAsync(cancellationToken);
+						.Where(a => a.IsActive)
+						.OrderBy(a => a.AppId)          
+						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+						.Take(paginationRequest.PageSize)
+						.Select(aa => new ApplicationsDTO(
+							aa.AppId,
+							aa.AppName,
+							aa.Description ?? "",
+							aa.IsActive))
+						.AsNoTracking()
+						.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<ApplicationsDTO>
-			(
-			  paginationRequest.PageIndex,
-			  paginationRequest.PageSize,
-			  totalRecords,
-			  applications
-			);
+		(
+			paginationRequest.PageIndex,
+			paginationRequest.PageSize,
+			totalRecords,
+			applications
+		);
 	}
 	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
@@ -73,15 +76,17 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var subMenus = await _dbcontext.AuthSubmenu
-			.Where(asm => asm.IsActive)
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(asm => new SubMenusDTO(
-					asm.SubMenuId,
-					asm.SubMenuName,
-					asm.Description!))
-			.ToListAsync(cancellationToken);
+						.Where(asm => asm.IsActive)
+						.OrderBy(asm => asm.SubMenuId) 
+						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+						.Take(paginationRequest.PageSize)
+						.Select(asm => new SubMenusDTO(
+							asm.SubMenuId,
+							asm.SubMenuName,
+							asm.Description ?? "",
+							asm.IsActive))
+						.AsNoTracking()
+						.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<SubMenusDTO>
 			(
@@ -104,16 +109,17 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);
 
 		var users = await usersQuery
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(au => new UsersDTO(
-					au.Id,
-					au.Email,
-					au.FirstName,
-					au.MiddleName!,
-					au.LastName))
-			.ToListAsync(cancellationToken);
+					.OrderBy(au => au.Id)          
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(au => new UsersDTO(
+						au.Id,
+						au.Email,
+						au.FirstName,
+						au.MiddleName ?? "",   
+						au.LastName))
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<UsersDTO>
 			(
@@ -133,14 +139,16 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await applicationsQuery.CountAsync(cancellationToken);
 
 		var applications = await applicationsQuery
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(asm => new ApplicationsDTO(
-					asm.AppId,
-					asm.AppName,
-					asm.Description!))
-			.ToListAsync(cancellationToken);
+							.OrderBy(asm => asm.AppId)      
+							.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+							.Take(paginationRequest.PageSize)
+							.Select(asm => new ApplicationsDTO(
+								asm.AppId,
+								asm.AppName,
+								asm.Description ?? "",
+								asm.IsActive))
+							.AsNoTracking()
+							.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<ApplicationsDTO>
 			(
@@ -160,14 +168,16 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await subMenusQuery.CountAsync(cancellationToken);
 
 		var subMenus = await subMenusQuery
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(asm => new SubMenusDTO(
-					asm.SubMenuId,
-					asm.SubMenuName,
-					asm.Description!))
-			.ToListAsync(cancellationToken);
+						.OrderBy(asm => asm.SubMenuId)   
+						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+						.Take(paginationRequest.PageSize)
+						.Select(asm => new SubMenusDTO(
+							asm.SubMenuId,
+							asm.SubMenuName,
+							asm.Description ?? "",
+							asm.IsActive))
+						.AsNoTracking()
+						.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<SubMenusDTO>
 			(
@@ -210,7 +220,6 @@ public class AuthRepository : IAuthRepository
 
 		return userData!;
 	}
-
 
 	public async Task<UserDataDTO> GetNewUserDataAsync(Guid userId)
 	{
@@ -506,16 +515,17 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var applications = await _dbcontext.AuthUserAppRoles
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(asr => new AppSubRolesDTO(
-					asr.AppRoleId,
-					asr.UserId,
-					asr.AppId,
-					asr.Submenu,
-					asr.RoleId))
-			.ToListAsync(cancellationToken);
+							.AsNoTracking() 
+							.OrderBy(asr => asr.AppRoleId)  
+							.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+							.Take(paginationRequest.PageSize)
+							.Select(asr => new AppSubRolesDTO(
+								asr.AppRoleId,
+								asr.UserId,
+								asr.AppId,
+								asr.Submenu,
+								asr.RoleId))
+							.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<AppSubRolesDTO>
 			(
@@ -537,16 +547,17 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await appSubRolesQuery.CountAsync(cancellationToken);
 
 		var appSubRoles = await appSubRolesQuery
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(asr => new AppSubRolesDTO(
-					asr.AppRoleId,
-					asr.UserId,
-					asr.AppId,
-					asr.Submenu,
-					asr.RoleId))
-			.ToListAsync(cancellationToken);
+							.AsNoTracking()  
+							.OrderBy(asr => asr.AppRoleId)   
+							.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+							.Take(paginationRequest.PageSize)
+							.Select(asr => new AppSubRolesDTO(
+								asr.AppRoleId,
+								asr.UserId,
+								asr.AppId,
+								asr.Submenu,
+								asr.RoleId))
+							.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<AppSubRolesDTO>
 			(
@@ -602,14 +613,15 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var roles = await _dbcontext.AuthRoles
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(asr => new RolesDTO(
-					asr.RoleId,
-					asr.RoleName,
-					asr.Description!))
-			.ToListAsync(cancellationToken);
+					.OrderBy(asr => asr.RoleId)  
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(asr => new RolesDTO(
+						asr.RoleId,
+						asr.RoleName,
+						asr.Description ?? ""))
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<RolesDTO>
 			(
@@ -631,14 +643,15 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await rolesQuery.CountAsync(cancellationToken);
 
 		var roles = await rolesQuery
-			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-			.Take(paginationRequest.PageSize)
-			.AsNoTracking()
-			.Select(ar => new RolesDTO(
-					ar.RoleId,
-					ar.RoleName,
-					ar.Description!))
-			.ToListAsync(cancellationToken);
+					.OrderBy(ar => ar.RoleId)     
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(ar => new RolesDTO(
+						ar.RoleId,
+						ar.RoleName,
+						ar.Description ?? ""))
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
 
 		return new PaginatedResult<RolesDTO>
 			(

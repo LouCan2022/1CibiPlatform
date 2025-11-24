@@ -251,4 +251,123 @@ public class UserManagementService : IUserManagementService
 		Console.WriteLine("✅ Added the User's AppSubRole Successfully");
 		return successContent;
 	}
+
+	public async Task<EditApplicationDTO> EditApplicationAsync(ApplicationsDTO editApplicationDTO)
+	{
+		var editApplication = new EditApplicationDTO
+		{
+			AppId = editApplicationDTO.applicationId,
+			AppName = editApplicationDTO.applicationName,
+			Description = editApplicationDTO.Description,
+			IsActive = editApplicationDTO.IsActive
+		};
+
+		var payload = new
+		{
+			editApplication
+		};
+
+		var response = await _httpClient.PatchAsJsonAsync($"auth/editapplication", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Edit the Application Successfully");
+			return null!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<EditApplicationDTO>();
+		Console.WriteLine("✅ Added the Application Successfully");
+		if (successContent != null)
+		{
+			return successContent;
+		}
+		return null!;
+	}
+
+	public async Task<EditSubMenuDTO> EditSubMenuAsync(SubMenusDTO editSubMenuDTO)
+	{
+		var editSubMenu = new EditSubMenuDTO
+		{
+			SubMenuId = editSubMenuDTO.subMenuId,
+			SubMenuName = editSubMenuDTO.subMenuName,
+			Description = editSubMenuDTO.Description,
+			IsActive = editSubMenuDTO.IsActive
+		};
+
+		var payload = new
+		{
+			editSubMenu
+		};
+
+		var response = await _httpClient.PatchAsJsonAsync($"auth/editsubmenu", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Edit the SubMenu Successfully");
+			return null!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<EditSubMenuDTO>();
+		Console.WriteLine("✅ Added the SubMenu Successfully");
+		if (successContent != null)
+		{
+			return successContent;
+		}
+		return null!;
+	}
+
+	public async Task<EditRoleDTO> EditRoleAsync(RolesDTO editRoleDTO)
+	{
+		var editRole = new EditRoleDTO
+		{
+			RoleId = editRoleDTO.roleId,
+			RoleName = editRoleDTO.roleName,
+			Description = editRoleDTO.Description
+		};
+
+		var payload = new
+		{
+			editRole
+		};
+
+		var response = await _httpClient.PatchAsJsonAsync($"auth/editrole", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Edit the Role Successfully");
+			return null!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<EditRoleDTO>();
+		Console.WriteLine("✅ Added the Role Successfully");
+		if (successContent != null)
+		{
+			return successContent;
+		}
+		return null!;
+	}
+    public async Task<EditAppSubRoleDTO> EditAppSubRoleAsync(AppSubRolesDTO editAppSubRoleDTO)
+    {
+        var editAppSubRole = new EditAppSubRoleDTO
+        {
+            AppSubRoleId = editAppSubRoleDTO.UserSubRoleId,
+            UserId = editAppSubRoleDTO.UserId,
+            AppId = editAppSubRoleDTO.AppId,
+            SubMenuId = editAppSubRoleDTO.Submenu,
+            RoleId = editAppSubRoleDTO.RoleId,
+        };
+
+        var payload = new
+        {
+            editAppSubRole
+        };
+
+        var response = await _httpClient.PatchAsJsonAsync($"auth/editappsubrole", payload);
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("❌ Did not Edit the UserAppSubRole Successfully");
+            return null!;
+        }
+        var successContent = await response.Content.ReadFromJsonAsync<EditAppSubRoleDTO>();
+        Console.WriteLine("✅ Added the UserAppSubRole Successfully");
+        if (successContent != null)
+        {
+            return successContent;
+        }
+        return null!;
+    }
 }
