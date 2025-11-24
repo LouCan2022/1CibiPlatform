@@ -1,7 +1,4 @@
-﻿using Auth.Data.Cache;
-using BuildingBlocks.SharedServices.Implementations;
-
-namespace Auth.ServiceConfig
+﻿namespace Auth.ServiceConfig
 {
 	public static class AuthServiceConfiguration
 	{

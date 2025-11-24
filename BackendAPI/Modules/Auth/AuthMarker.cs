@@ -1,5 +1,3 @@
-﻿namespace Auth;
+﻿namespace BackendAPI.Modules.Auth;
 
-public class AuthMarker
-{
-}
+public static class AuthMarker { }
