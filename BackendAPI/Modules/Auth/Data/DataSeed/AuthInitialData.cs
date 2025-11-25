@@ -45,6 +45,14 @@ public class AuthInitialData
 					Submenu= 2,
 					RoleId = 2,
 					AssignedBy = this._Id
+				},
+				new AuthUserAppRole
+				{
+					UserId = this._Id,
+					AppId = 3,
+					Submenu= 4,
+					RoleId = 3,
+					AssignedBy = this._Id
 				}
 			};
 	}
@@ -62,6 +70,11 @@ public class AuthInitialData
 				{
 					AppName = "Philsys",
 					Description = "IDV"
+				},
+				new AuthApplication
+				{
+					AppName = "Settings",
+					Description = "OnePlatform Settings"
 				}
 			};
 	}
@@ -103,6 +116,11 @@ public class AuthInitialData
 				{
 					SubMenuName = "IDV",
 					Description = "Philsys IDV"
+				},
+				new AuthSubMenu
+				{
+					SubMenuName = "User Management",
+					Description = "Assigning of Application, SubMenus, and Roles"
 				}
 			};
 	}

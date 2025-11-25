@@ -28,7 +28,7 @@ public class PhilSysTransactionConfiguration : IEntityTypeConfiguration<PhilSysT
 			   .HasMaxLength(100);
 
 		builder.Property(pt => pt.Suffix)
-			   .HasMaxLength(10);
+			   .HasMaxLength(20);
 
 		builder.Property(pt => pt.BirthDate)
 			   .HasMaxLength(10);

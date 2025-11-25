@@ -153,7 +153,7 @@ public class UpdateFaceLivenessSessionService
 			{
 				digital_id = BasicInformationOrPCNResponseDTO.code,
 				national_id_number = BasicInformationOrPCNResponseDTO.reference,
-				face_image_url = BasicInformationOrPCNResponseDTO.face_url,
+				face_url = BasicInformationOrPCNResponseDTO.face_url,
 				full_name = BasicInformationOrPCNResponseDTO.full_name,
 				first_name = BasicInformationOrPCNResponseDTO.first_name,
 				middle_name = BasicInformationOrPCNResponseDTO.middle_name,
@@ -161,22 +161,32 @@ public class UpdateFaceLivenessSessionService
 				suffix = BasicInformationOrPCNResponseDTO.suffix,
 				gender = BasicInformationOrPCNResponseDTO.gender,
 				marital_status = BasicInformationOrPCNResponseDTO.marital_status,
-				birth_date = BasicInformationOrPCNResponseDTO.birth_date,
+				blood_type = BasicInformationOrPCNResponseDTO.blood_type,
 				email = BasicInformationOrPCNResponseDTO.email,
 				mobile_number = BasicInformationOrPCNResponseDTO.mobile_number,
-				blood_type = BasicInformationOrPCNResponseDTO.blood_type,
-				address = new Address
-				{
-					permanent = BasicInformationOrPCNResponseDTO.full_address,
-					present = BasicInformationOrPCNResponseDTO.present_full_address
-				},
-				place_of_birth = new PlaceOfBirth
-				{
-					full = BasicInformationOrPCNResponseDTO.place_of_birth,
-					municipality = BasicInformationOrPCNResponseDTO.pob_municipality,
-					province = BasicInformationOrPCNResponseDTO.pob_province,
-					country = BasicInformationOrPCNResponseDTO.pob_country
-				}
+				birth_date = BasicInformationOrPCNResponseDTO.birth_date,
+				full_address = BasicInformationOrPCNResponseDTO.full_address,
+				address_line_1 = BasicInformationOrPCNResponseDTO.address_line_1,
+				address_line_2 = BasicInformationOrPCNResponseDTO.address_line_2,
+				barangay = BasicInformationOrPCNResponseDTO.barangay,
+				municipality = BasicInformationOrPCNResponseDTO.municipality,
+				province = BasicInformationOrPCNResponseDTO.province,
+				country = BasicInformationOrPCNResponseDTO.country,
+				postal_code = BasicInformationOrPCNResponseDTO.postal_code,	
+				present_full_address = BasicInformationOrPCNResponseDTO.present_full_address,
+				present_address_line_1 = BasicInformationOrPCNResponseDTO.present_address_line_1,
+				present_address_line_2 = BasicInformationOrPCNResponseDTO.present_address_line_2,
+				present_barangay = BasicInformationOrPCNResponseDTO.present_barangay,
+				present_municipality = BasicInformationOrPCNResponseDTO.present_municipality,
+				present_province = BasicInformationOrPCNResponseDTO.present_province,
+				present_country = BasicInformationOrPCNResponseDTO.present_country,
+				present_postal_code = BasicInformationOrPCNResponseDTO.present_postal_code,
+				residency_status = BasicInformationOrPCNResponseDTO.residency_status,
+				place_of_birth = BasicInformationOrPCNResponseDTO.place_of_birth,
+				pob_municipality = BasicInformationOrPCNResponseDTO.pob_municipality,
+				pob_province = BasicInformationOrPCNResponseDTO.pob_province,
+				pob_country = BasicInformationOrPCNResponseDTO.country
+
 			}
 		};
 	}
