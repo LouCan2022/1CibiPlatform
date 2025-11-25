@@ -17,7 +17,7 @@ public interface IAuthRepository
 	Task<PasswordResetToken> GetUserTokenAsync(string token);
 
 	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
-	
+
 	Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
@@ -32,7 +32,7 @@ public interface IAuthRepository
 
 	Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken);
 
-	Task<AuthRefreshToken> IsUserExistAsync(Guid userId);
+	Task<List<AuthRefreshToken>> IsUserExistAsync(Guid userId);
 
 	Task<bool> InsertOtpVerification(OtpVerification otpVerification);
 
