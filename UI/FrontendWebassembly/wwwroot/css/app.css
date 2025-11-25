@@ -169,6 +169,12 @@ code {
     text-transform: none !important;
     font-size: 16px !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.theme-button:hover {
+    transform: scale(1.06); 
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important; 
 }
 
 .theme-button-inactive {
@@ -356,4 +362,13 @@ code {
 .mud-table td {
     align-items: center;
     text-align: center;
+}
+
+.mud-table-container {
+    overflow: hidden; 
+}
+
+table {
+    table-layout: fixed !important; 
+    width: 100% !important;
 }
