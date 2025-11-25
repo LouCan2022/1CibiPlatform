@@ -135,11 +135,6 @@
         }
 
         showLoader = false;
-        if (webHookUrl != "/")
-        {
-            await JS.InvokeVoidAsync("philsysCloseTab");
-            return;
-        }
 
         Console.WriteLine($"Successully Updated the session ID.");
         StateHasChanged();
