@@ -25,3 +25,6 @@ global using PhilSys.Features.UpdateFaceLivenessSession;
 global using BuildingBlocks.SharedServices.Interfaces;
 global using Mapster;
 global using BuildingBlocks.Exceptions;
+global using BuildingBlocks.SharedConstants;
+global using BuildingBlocks.SharedDTO;
+global using BuildingBlocks.SharedInterfaces;

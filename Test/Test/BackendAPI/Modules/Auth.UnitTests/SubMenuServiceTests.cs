@@ -30,8 +30,8 @@ public class SubMenuServiceTests : IClassFixture<AuthServiceFixture>
 
 		var data = new List<SubMenusDTO>
 		{
-			new SubMenusDTO ( 1, "Dashboard", "CNX Dashboard" ),
-			new SubMenusDTO ( 2, "IDV", "PhilSys IDV" )
+			new SubMenusDTO ( 1, "Dashboard", "CNX Dashboard", true),
+			new SubMenusDTO ( 2, "IDV", "PhilSys IDV", true)
 		};
 
 		var expectedResult = new PaginatedResult<SubMenusDTO>(1, 1, 10, data);
@@ -64,8 +64,8 @@ public class SubMenuServiceTests : IClassFixture<AuthServiceFixture>
 
 		var data = new List<SubMenusDTO>
 		{
-			new SubMenusDTO ( 1, "Dashboard", "CNX Dashboard" ),
-			new SubMenusDTO ( 2, "IDV", "PhilSys IDV" )
+			new SubMenusDTO ( 1, "Dashboard", "CNX Dashboard" , true),
+			new SubMenusDTO ( 2, "IDV", "PhilSys IDV", true)
 		};
 
 		var expectedResult = new PaginatedResult<SubMenusDTO>(1, 1, 10, data);

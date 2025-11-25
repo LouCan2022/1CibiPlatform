@@ -1,0 +1,68 @@
+﻿<MudDialog Style="padding: 8px;">
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="Role.roleId"
+                          Label="Role Id"
+                          ReadOnly
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudTextField @bind-Value="Role.roleName"
+                          Label="Role Name"
+                          Required="true"
+                          RequiredError="SubMenu Name is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudTextField @bind-Value="Role.Description"
+                          Label="Description"
+                          Required="true"
+                          RequiredError="Description is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default"
+                   OnClick="Cancel"
+                   Class="theme-button theme-button-inactive"
+                   Style="border-radius: 4px;">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="Submit"
+                   Class="theme-button theme-button-active"
+                   Style="border-radius: 4px;">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form;
+
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public RolesDTO Role { get; set; } = new RolesDTO();
+
+    void Cancel() => MudDialog.Cancel();
+
+    async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(Role));
+        }
+    }
+}

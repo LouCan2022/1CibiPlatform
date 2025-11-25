@@ -1,0 +1,72 @@
+﻿<MudDialog Style="padding: 8px;">
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="Application.applicationId"
+                          Label="Application Id"
+                          ReadOnly
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudTextField @bind-Value="Application.applicationName"
+                          Label="Application Name"
+                          Required="true"
+                          RequiredError="Application Name is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudTextField @bind-Value="Application.Description"
+                          Label="Description"
+                          Required="true"
+                          RequiredError="Description is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudCheckBox T="bool"
+                         @bind-Value="Application.IsActive"
+                         Label="Is Active" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default"
+                   OnClick="Cancel"
+                   Class="theme-button theme-button-inactive"
+                   Style="border-radius: 4px;">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="Submit"
+                   Class="theme-button theme-button-active"
+                   Style="border-radius: 4px;">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form;
+
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public ApplicationsDTO Application { get; set; } = new ApplicationsDTO();
+
+    void Cancel() => MudDialog.Cancel();
+
+    async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(Application));
+        }
+    }
+}

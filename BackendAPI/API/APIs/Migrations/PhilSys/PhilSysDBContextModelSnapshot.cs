@@ -75,8 +75,8 @@ namespace APIs.Migrations.PhilSys
                         .HasColumnType("character varying(16)");
 
                     b.Property<string>("Suffix")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("TransactedAt")
                         .HasColumnType("timestamp with time zone");
@@ -123,15 +123,27 @@ namespace APIs.Migrations.PhilSys
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("PhilSys.DTO.DataSubject", "data_subject", b1 =>
+                    b.OwnsOne("PhilSys.Data.Entities.DataSubjectEntity", "data_subject", b1 =>
                         {
                             b1.Property<int>("PhilSysTransactionResultTrid")
                                 .HasColumnType("integer");
+
+                            b1.Property<string>("address_line_1")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("address_line_2")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("barangay")
+                                .HasColumnType("text");
 
                             b1.Property<string>("birth_date")
                                 .HasColumnType("text");
 
                             b1.Property<string>("blood_type")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("country")
                                 .HasColumnType("text");
 
                             b1.Property<string>("digital_id")
@@ -140,10 +152,13 @@ namespace APIs.Migrations.PhilSys
                             b1.Property<string>("email")
                                 .HasColumnType("text");
 
-                            b1.Property<string>("face_image_url")
+                            b1.Property<string>("face_url")
                                 .HasColumnType("text");
 
                             b1.Property<string>("first_name")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("full_address")
                                 .HasColumnType("text");
 
                             b1.Property<string>("full_name")
@@ -164,7 +179,55 @@ namespace APIs.Migrations.PhilSys
                             b1.Property<string>("mobile_number")
                                 .HasColumnType("text");
 
+                            b1.Property<string>("municipality")
+                                .HasColumnType("text");
+
                             b1.Property<string>("national_id_number")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("place_of_birth")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("pob_country")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("pob_municipality")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("pob_province")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("postal_code")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_address_line_1")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_address_line_2")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_barangay")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_country")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_full_address")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_municipality")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_postal_code")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("present_province")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("province")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("residency_status")
                                 .HasColumnType("text");
 
                             b1.Property<string>("suffix")
@@ -176,54 +239,6 @@ namespace APIs.Migrations.PhilSys
 
                             b1.WithOwner()
                                 .HasForeignKey("PhilSysTransactionResultTrid");
-
-                            b1.OwnsOne("PhilSys.DTO.Address", "address", b2 =>
-                                {
-                                    b2.Property<int>("DataSubjectPhilSysTransactionResultTrid")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<string>("permanent")
-                                        .HasColumnType("text");
-
-                                    b2.Property<string>("present")
-                                        .HasColumnType("text");
-
-                                    b2.HasKey("DataSubjectPhilSysTransactionResultTrid");
-
-                                    b2.ToTable("PhilSysTransactionResults");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("DataSubjectPhilSysTransactionResultTrid");
-                                });
-
-                            b1.OwnsOne("PhilSys.DTO.PlaceOfBirth", "place_of_birth", b2 =>
-                                {
-                                    b2.Property<int>("DataSubjectPhilSysTransactionResultTrid")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<string>("country")
-                                        .HasColumnType("text");
-
-                                    b2.Property<string>("full")
-                                        .HasColumnType("text");
-
-                                    b2.Property<string>("municipality")
-                                        .HasColumnType("text");
-
-                                    b2.Property<string>("province")
-                                        .HasColumnType("text");
-
-                                    b2.HasKey("DataSubjectPhilSysTransactionResultTrid");
-
-                                    b2.ToTable("PhilSysTransactionResults");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("DataSubjectPhilSysTransactionResultTrid");
-                                });
-
-                            b1.Navigation("address");
-
-                            b1.Navigation("place_of_birth");
                         });
 
                     b.Navigation("data_subject")

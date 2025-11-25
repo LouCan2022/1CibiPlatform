@@ -1,0 +1,79 @@
+﻿<MudDialog Style="padding: 8px;">
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="AppSubRole.UserId"
+                          Label="UserAppSubRole Id"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+
+            <MudTextField @bind-Value="AppSubRole.AppId"
+                          Label="App Id"
+                          Required="true"
+                          RequiredError="App Id is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudTextField @bind-Value="AppSubRole.Submenu"
+                          Label="SubMenu Id"
+                          Required="true"
+                          RequiredError="SubMenu Id is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+
+            <MudTextField @bind-Value="AppSubRole.RoleId"
+                          Label="Role Id"
+                          Required="true"
+                          RequiredError="Role Id is required"
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default"
+                   OnClick="Cancel"
+                   Class="theme-button theme-button-inactive"
+                   Style="border-radius: 4px;">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="Submit"
+                   Class="theme-button theme-button-active"
+                   Style="border-radius: 4px;">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form;
+
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public AppSubRolesDTO AppSubRole { get; set; } = new AppSubRolesDTO();
+
+    void Cancel() => MudDialog.Cancel();
+
+    async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(AppSubRole));
+        }
+    }
+}

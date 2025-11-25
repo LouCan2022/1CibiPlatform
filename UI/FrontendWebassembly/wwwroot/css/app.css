@@ -347,3 +347,13 @@ code {
 .philsys-uppercase-input input.mud-input-slot {
     text-transform: capitalize;
 }
+
+.mud-table th {
+    font-weight: 700 !important;
+    text-align: center;
+}
+
+.mud-table td {
+    align-items: center;
+    text-align: center;
+}
