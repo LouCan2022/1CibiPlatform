@@ -22,7 +22,6 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public Mock<IJWTService> MockJwtService { get; private set; }
 		public Mock<IRefreshTokenService> MockRefreshTokenService { get; private set; }
 		public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; private set; }
-		public Mock<HybridCache> MockHybridCache { get; private set; }
 
 		// Loggers
 		public Mock<ILogger<RegisterService>> MockRegisterLogger { get; private set; }
@@ -70,7 +69,6 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 			MockSubMenuLogger = new Mock<ILogger<SubMenuService>>();
 			MockAppSubRoleLogger = new Mock<ILogger<AppSubRoleService>>();
 			MockRoleLogger = new Mock<ILogger<RoleService>>();
-			MockHybridCache = new Mock<HybridCache>();
 
 			// configuration values required by several services
 			Configuration = new ConfigurationBuilder()
@@ -107,8 +105,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 				MockJwtService.Object,
 				MockRefreshTokenService.Object,
 				MockHttpContextAccessor.Object,
-				MockLoginLogger.Object,
-				MockHybridCache.Object);
+				MockLoginLogger.Object);
 
 			RefreshTokenService = new RefreshTokenService(
 				MockAuthRepository.Object,
