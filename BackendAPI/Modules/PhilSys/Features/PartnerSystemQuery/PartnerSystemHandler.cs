@@ -7,7 +7,12 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 	{
 		// Always required fields
 		RuleFor(x => x.callback_url)
-			.NotEmpty().WithMessage("callback_url is required.");
+			.NotEmpty().WithMessage("callback_url is required.")
+			.Must(url =>
+				url == "/" ||
+				Uri.IsWellFormedUriString(url, UriKind.Absolute)
+			)
+			.WithMessage("callback_url must be a valid URL.");
 
 		RuleFor(x => x.inquiry_type)
 			.NotEmpty().WithMessage("inquiry_type is required.")
@@ -19,11 +24,17 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 		{
 			RuleFor(x => x.identity_data.FirstName)
 				.NotEmpty().WithMessage("First Name is required for 'name_dob' inquiry.")
-				.MaximumLength(50).WithMessage("First Name must not exceed 50 characters.");
+				.MaximumLength(100).WithMessage("First Name must not exceed 50 characters.");
+
+			RuleFor(x => x.identity_data.MiddleName)
+				.MaximumLength(100).WithMessage("Middle Name must not exceed 100 characters.");
 
 			RuleFor(x => x.identity_data.LastName)
 				.NotEmpty().WithMessage("Last Name is required for 'name_dob' inquiry.")
-				.MaximumLength(50).WithMessage("Last Name must not exceed 50 characters.");
+				.MaximumLength(100).WithMessage("Last Name must not exceed 50 characters.");
+
+			RuleFor(x => x.identity_data.Suffix)
+				.MaximumLength(20).WithMessage("Suffix must not exceed 20 characters.");
 
 			RuleFor(x => x.identity_data.BirthDate)
 				.NotEmpty().WithMessage("Birth Date is required for 'name_dob' inquiry.")

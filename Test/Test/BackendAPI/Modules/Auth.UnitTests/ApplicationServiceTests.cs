@@ -30,8 +30,8 @@ public class ApplicationServiceTests : IClassFixture<AuthServiceFixture>
 
 		var applicationData = new List<ApplicationsDTO>
 		{
-			new ApplicationsDTO(1, "PhilSys", "PhilSys IDV"),
-			new ApplicationsDTO(2, "CNX", "CNX Dashboard")
+			new ApplicationsDTO(1, "PhilSys", "PhilSys IDV", true),
+			new ApplicationsDTO(2, "CNX", "CNX Dashboard", true)
 		};
 
 		var expectedResult = new PaginatedResult<ApplicationsDTO>(1, 2, 10, applicationData);
@@ -66,7 +66,7 @@ public class ApplicationServiceTests : IClassFixture<AuthServiceFixture>
 
 		var applicationData = new List<ApplicationsDTO>
 		{
-			new ApplicationsDTO(1, "PhilSys", "PhilSys IDV"),
+			new ApplicationsDTO(1, "PhilSys", "PhilSys IDV", true),
 		};
 
 		var expectedResult = new PaginatedResult<ApplicationsDTO>(1, 2, 10, applicationData);
