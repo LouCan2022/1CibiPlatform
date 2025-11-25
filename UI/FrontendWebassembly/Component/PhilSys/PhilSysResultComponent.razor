@@ -78,9 +78,8 @@
             <!-- SEARCH AGAIN BUTTON -->
             <MudItem xs="12" md="8" Class="d-flex justify-end align-center">
                 <ButtonComponent StartIcon="@Icons.Material.Filled.Search"
-                                 Class="@(WebHookUrl == "/" ? "theme-button theme-button-active" : "theme-button theme-button-inactive")"
+                                 Class="theme-button theme-button-active"
                                  Style="width: 200px;"
-                                 Disabled="@(WebHookUrl == "/" ? false : true)"
                                  Onclick="SearchAgain">
                     Search Again
                 </ButtonComponent>
