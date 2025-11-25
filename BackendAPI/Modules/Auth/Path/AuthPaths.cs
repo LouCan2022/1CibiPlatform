@@ -472,6 +472,12 @@ public class AuthPaths : IReverseProxyModule
 				{
 					{ "PathSet", "Saml2/Acs" }
 				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "FrontEndEntryPoint",
+				MatchPath: "/{**catchall}",
+				ClusterId: GatewayConstants.OnePlatformUI
 			)
 		};
 	}
@@ -487,6 +493,16 @@ public class AuthPaths : IReverseProxyModule
 					new DestinationDefinitionDTO(
 						Id: "d1",
 						Address: "http://apis:8080"
+					)
+				}
+			),
+			new ClusterDefinitionDTO(
+				ClusterId: GatewayConstants.OnePlatformUI,
+				Destinations: new []
+				{
+					new DestinationDefinitionDTO(
+						Id: "d1",
+						Address: "http://frontendwebassembly:8080"
 					)
 				}
 			)
