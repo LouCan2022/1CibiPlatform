@@ -1,4 +1,6 @@
-﻿<MudDialog Style="padding: 8px;">
+﻿@inject LocalStorageService LocalStorageService
+
+<MudDialog Style="padding: 8px;">
     <DialogContent>
         <MudForm @ref="form">
             <MudTextField @bind-Value="AppSubRole.UserId"
@@ -41,16 +43,6 @@
                           Margin="Margin.Dense"
                           MaxLength="100"
                           Class="philsys-rounded-input philsys-uppercase-input" />
-
-            <MudTextField @bind-Value="AppSubRole.AssignedBy"
-                          Label="Assigned By"
-                          Required="true"
-                          RequiredError="Assigned By is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
         </MudForm>
     </DialogContent>
 
@@ -79,6 +71,12 @@
     public AddAppSubRoleDTO AppSubRole { get; set; } = new AddAppSubRoleDTO();
 
     void Cancel() => MudDialog.Cancel();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        AppSubRole.AssignedBy = await LocalStorageService.GetItemAsync<Guid>("UserId");
+    }
 
     async Task Submit()
     {
