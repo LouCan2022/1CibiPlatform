@@ -18,7 +18,8 @@ public class EditAppSubRoleEndpoint : ICarterModule
 		.Produces<EditAppSubRoleResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Edit AppSubRole")
-		.WithDescription("Edits an application, submenu, and a role of a user in OnePlatform");
+		.WithDescription("Edits an application, submenu, and a role of a user in OnePlatform")
+		.RequireAuthorization();
 	}
 }
 

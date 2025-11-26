@@ -76,11 +76,13 @@ else if (_activeIndex == 1)
             </MudButton>
         </ToolBarContent>
         <HeaderContent>
+            <MudTh>Id</MudTh>
             <MudTh>Application</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
         <RowTemplate>
+            <MudTd DataLabel="Id">@context.applicationId</MudTd>
             <MudTd DataLabel="Application">@context.applicationName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">
@@ -119,12 +121,14 @@ else if (_activeIndex == 2)
         </ToolBarContent>
 
         <HeaderContent>
+            <MudTh>Id</MudTh>
             <MudTh>SubMenu</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
 
         <RowTemplate>
+            <MudTd DataLabel="Id">@context.subMenuId</MudTd>
             <MudTd DataLabel="Application">@context.subMenuName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">
@@ -165,12 +169,14 @@ else if (_activeIndex == 3)
         </ToolBarContent>
 
         <HeaderContent>
+            <MudTh>Id</MudTh>
             <MudTh>Role</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
 
         <RowTemplate>
+            <MudTd DataLabel="Id">@context.roleId</MudTd>
             <MudTd DataLabel="Application">@context.roleName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">

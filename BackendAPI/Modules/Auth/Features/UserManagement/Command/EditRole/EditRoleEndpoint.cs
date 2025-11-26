@@ -19,7 +19,8 @@ public class EditRoleEndpoint : ICarterModule
 		.Produces<EditRoleResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Edit Role")
-		.WithDescription("Edits an existing role in OnePlatform.");
+		.WithDescription("Edits an existing role in OnePlatform.")
+		.RequireAuthorization();
 	}
 }
 

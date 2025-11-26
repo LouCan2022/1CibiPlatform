@@ -7,47 +7,59 @@
 
             <MudSelect T="Guid" @bind-Value="AppSubRole.UserId"
                        Label="Email"
-                       Required="true"
-                       Placeholder="Select a user...">
+                       For="@(() => AppSubRole.UserId)">
                 <MudSelectItem Value="Guid.Empty" Disabled="true">Select a User</MudSelectItem>
-                @foreach (var user in Users)
+                @foreach (var user in Users!)
                 {
                     <MudSelectItem Value="@user.userId">@user.email</MudSelectItem>
                 }
             </MudSelect>
+            @if (showUserError)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">User is required</MudText>
+            }
 
             <MudSelect T="int" @bind-Value="AppSubRole.AppId"
                        Label="Application"
-                       Required="true"
-                       Placeholder="Select an application...">
+                       For="@(() => AppSubRole.AppId)">
                 <MudSelectItem Value="0" Disabled="true">Select an Application</MudSelectItem>
-                @foreach (var app in Apps)
+                @foreach (var app in Apps!)
                 {
                     <MudSelectItem Value="@app.applicationId">@app.applicationName</MudSelectItem>
                 }
             </MudSelect>
+            @if (showAppError)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">Application is required</MudText>
+            }
 
             <MudSelect T="int" @bind-Value="AppSubRole.SubMenuId"
                        Label="Submenu"
-                       Required="true"
-                       Placeholder="Select a submenu...">
+                       For="@(() => AppSubRole.SubMenuId)">
                 <MudSelectItem Value="0" Disabled="true">Select a SubMenu</MudSelectItem>
-                @foreach (var sm in SubMenus)
+                @foreach (var sm in SubMenus!)
                 {
                     <MudSelectItem Value="@sm.subMenuId">@sm.subMenuName</MudSelectItem>
                 }
             </MudSelect>
+            @if (showSubMenuError)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">SubMenu is required</MudText>
+            }
 
             <MudSelect T="int" @bind-Value="AppSubRole.RoleId"
                        Label="Role"
-                       Required="true"
-                       Placeholder="Select a role...">
+                       For="@(() => AppSubRole.RoleId)">
                 <MudSelectItem Value="0" Disabled="true">Select a Role</MudSelectItem>
-                @foreach (var role in Roles)
+                @foreach (var role in Roles!)
                 {
                     <MudSelectItem Value="@role.roleId">@role.roleName</MudSelectItem>
                 }
             </MudSelect>
+            @if (showRoleError)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">Role is required</MudText>
+            }
 
         </MudForm>
     </DialogContent>
@@ -63,9 +75,14 @@
 </MudDialog>
 
 @code {
-    private MudForm form;
+    private MudForm? form;
 
-    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    private bool showUserError;
+    private bool showAppError;
+    private bool showSubMenuError;
+    private bool showRoleError;
+
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
 
     [Parameter]
     public AddAppSubRoleDTO AppSubRole { get; set; } = new AddAppSubRoleDTO();
@@ -75,7 +92,7 @@
     private List<SubMenusDTO>? SubMenus = new();
     private List<RolesDTO>? Roles = new();
 
-    void Cancel() => MudDialog.Cancel();
+    void Cancel() => MudDialog!.Cancel();
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,10 +106,17 @@
 
     async Task Submit()
     {
-        await form.Validate();
-        if (form.IsValid)
-        {
-            MudDialog.Close(DialogResult.Ok(AppSubRole));
-        }
+        showUserError = AppSubRole.UserId == Guid.Empty;
+        showAppError = AppSubRole.AppId == 0;
+        showSubMenuError = AppSubRole.SubMenuId == 0;
+        showRoleError = AppSubRole.RoleId == 0;
+
+        StateHasChanged();
+
+        if (showUserError || showAppError || showSubMenuError || showRoleError)
+            return;
+
+        await form!.Validate();
+        MudDialog!.Close(DialogResult.Ok(AppSubRole));
     }
 }

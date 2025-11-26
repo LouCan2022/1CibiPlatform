@@ -19,7 +19,8 @@ public class AddAppSubRoleEndpoint : ICarterModule
 		.Produces<AddAppSubRoleResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Add AppSubRole")
-		.WithDescription("Add an application, submenu, and a role for a user in OnePlatform");
+		.WithDescription("Add an application, submenu, and a role for a user in OnePlatform")
+		.RequireAuthorization();
 	}
 }
 
