@@ -35,7 +35,6 @@
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh>Id</MudTh>
             <MudTh>Email</MudTh>
             <MudTh>First Name</MudTh>
             <MudTh>Middle Name</MudTh>
@@ -43,7 +42,6 @@
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.userId</MudTd>
             <MudTd DataLabel="Email">@context.email</MudTd>
             <MudTd DataLabel="First Name">@context.firstName</MudTd>
             <MudTd DataLabel="Middle Name">@context.middleName</MudTd>
@@ -78,13 +76,11 @@ else if (_activeIndex == 1)
             </MudButton>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh>Id</MudTh>
             <MudTh>Application</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.applicationId</MudTd>
             <MudTd DataLabel="Application">@context.applicationName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">
@@ -123,14 +119,12 @@ else if (_activeIndex == 2)
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh>Id</MudTh>
             <MudTh>SubMenu</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.subMenuId</MudTd>
             <MudTd DataLabel="Application">@context.subMenuName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">
@@ -171,14 +165,12 @@ else if (_activeIndex == 3)
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh>Id</MudTh>
             <MudTh>Role</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.roleId</MudTd>
             <MudTd DataLabel="Application">@context.roleName</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="Action">
@@ -219,25 +211,23 @@ else if (_activeIndex == 4)
         </ToolBarContent>
 
         <HeaderContent>
-            <MudTh>UserAppSubRole Id</MudTh>
-            <MudTh>User Id</MudTh>
-            <MudTh>Application Id</MudTh>
-            <MudTh>SubMenu Id</MudTh>
-            <MudTh>Role Id</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Application</MudTh>
+            <MudTh>SubMenu</MudTh>
+            <MudTh>Role</MudTh>
             <MudTh>Action</MudTh>
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.UserSubRoleId</MudTd>
-            <MudTd DataLabel="Id">@context.UserId</MudTd>
-            <MudTd DataLabel="Application Id">@context.AppId</MudTd>
-            <MudTd DataLabel="SubMenu Id">@context.Submenu</MudTd>
-            <MudTd DataLabel="Role Id">@context.RoleId</MudTd>
+            <MudTd DataLabel="Email">@context.UserEmail</MudTd>
+            <MudTd DataLabel="Application">@context.AppName</MudTd>
+            <MudTd DataLabel="SubMenu">@context.SubMenuName</MudTd>
+            <MudTd DataLabel="Role">@context.RoleName</MudTd>
             <MudTd DataLabel="Action">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
                                OnClick="@(() => OpenEditAppSubRoleDialog(context))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium"
-                               OnClick="@(() => ConfirmDelete(context.UserSubRoleId, "appsubrole"))" />
+                               OnClick="@(() => ConfirmDelete(context.AppRoleId, "appsubrole"))" />
             </MudTd>
         </RowTemplate>
         <PagerContent>
@@ -595,11 +585,15 @@ else if (_activeIndex == 4)
         {
             { "AppSubRole", new AppSubRolesDTO
                 {
-                    UserSubRoleId = appsubrole.UserSubRoleId,
+                    AppRoleId = appsubrole.AppRoleId,
                     UserId = appsubrole.UserId,
+                    UserEmail = appsubrole.UserEmail,
                     AppId = appsubrole.AppId,
-                    Submenu = appsubrole.Submenu,
-                    RoleId = appsubrole.RoleId
+                    AppName = appsubrole.AppName,
+                    SubMenuId = appsubrole.SubMenuId,
+                    SubMenuName = appsubrole.SubMenuName,
+                    RoleId = appsubrole.RoleId,
+                    RoleName = appsubrole.RoleName
                 }
             }
         };

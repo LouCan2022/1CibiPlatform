@@ -1,62 +1,62 @@
 ﻿@inject LocalStorageService LocalStorageService
+@inject IUserManagementService UserManagementService
 
 <MudDialog Style="padding: 8px;">
     <DialogContent>
         <MudForm @ref="form">
-            <MudTextField @bind-Value="AppSubRole.UserId"
-                          Label="User Id"
-                          Required="true"
-                          RequiredError="User Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
 
+            <MudSelect T="Guid" @bind-Value="AppSubRole.UserId"
+                       Label="Email"
+                       Required="true"
+                       Placeholder="Select a user...">
+                <MudSelectItem Value="Guid.Empty" Disabled="true">Select a User</MudSelectItem>
+                @foreach (var user in Users)
+                {
+                    <MudSelectItem Value="@user.userId">@user.email</MudSelectItem>
+                }
+            </MudSelect>
 
-            <MudTextField @bind-Value="AppSubRole.AppId"
-                          Label="App Id"
-                          Required="true"
-                          RequiredError="App Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
+            <MudSelect T="int" @bind-Value="AppSubRole.AppId"
+                       Label="Application"
+                       Required="true"
+                       Placeholder="Select an application...">
+                <MudSelectItem Value="0" Disabled="true">Select an Application</MudSelectItem>
+                @foreach (var app in Apps)
+                {
+                    <MudSelectItem Value="@app.applicationId">@app.applicationName</MudSelectItem>
+                }
+            </MudSelect>
 
-            <MudTextField @bind-Value="AppSubRole.SubMenuId"
-                          Label="SubMenu Id"
-                          Required="true"
-                          RequiredError="SubMenu Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
+            <MudSelect T="int" @bind-Value="AppSubRole.SubMenuId"
+                       Label="Submenu"
+                       Required="true"
+                       Placeholder="Select a submenu...">
+                <MudSelectItem Value="0" Disabled="true">Select a SubMenu</MudSelectItem>
+                @foreach (var sm in SubMenus)
+                {
+                    <MudSelectItem Value="@sm.subMenuId">@sm.subMenuName</MudSelectItem>
+                }
+            </MudSelect>
 
-            <MudTextField @bind-Value="AppSubRole.RoleId"
-                          Label="Role Id"
-                          Required="true"
-                          RequiredError="Role Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
+            <MudSelect T="int" @bind-Value="AppSubRole.RoleId"
+                       Label="Role"
+                       Required="true"
+                       Placeholder="Select a role...">
+                <MudSelectItem Value="0" Disabled="true">Select a Role</MudSelectItem>
+                @foreach (var role in Roles)
+                {
+                    <MudSelectItem Value="@role.roleId">@role.roleName</MudSelectItem>
+                }
+            </MudSelect>
+
         </MudForm>
     </DialogContent>
 
     <DialogActions>
-        <MudButton Color="Color.Default"
-                   OnClick="Cancel"
-                   Class="theme-button theme-button-inactive"
-                   Style="border-radius: 4px;">
+        <MudButton Color="Color.Default" OnClick="Cancel" Class="theme-button theme-button-inactive" Style="border-radius: 4px;">
             Cancel
         </MudButton>
-        <MudButton Color="Color.Primary"
-                   OnClick="Submit"
-                   Class="theme-button theme-button-active"
-                   Style="border-radius: 4px;">
+        <MudButton Color="Color.Primary" OnClick="Submit" Class="theme-button theme-button-active" Style="border-radius: 4px;">
             Save
         </MudButton>
     </DialogActions>
@@ -70,12 +70,21 @@
     [Parameter]
     public AddAppSubRoleDTO AppSubRole { get; set; } = new AddAppSubRoleDTO();
 
-    void Cancel() => MudDialog.Cancel();
+    private List<UsersDTO>? Users = new();
+    private List<ApplicationsDTO>? Apps = new();
+    private List<SubMenusDTO>? SubMenus = new();
+    private List<RolesDTO>? Roles = new();
 
+    void Cancel() => MudDialog.Cancel();
 
     protected override async Task OnInitializedAsync()
     {
         AppSubRole.AssignedBy = await LocalStorageService.GetItemAsync<Guid>("UserId");
+
+        Users = (await UserManagementService.GetUsersAsync(1, int.MaxValue)).Data.ToList();
+        Apps = (await UserManagementService.GetApplicationsAsync(1, int.MaxValue)).Data.ToList();
+        SubMenus = (await UserManagementService.GetSubMenusAsync(1, int.MaxValue)).Data.ToList();
+        Roles = (await UserManagementService.GetRolesAsync(1, int.MaxValue)).Data.ToList();
     }
 
     async Task Submit()
