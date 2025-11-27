@@ -1,4 +1,7 @@
-﻿namespace Auth.Services;
+﻿using Auth.Data.Entities;
+using MediatR;
+
+namespace Auth.Services;
 
 public class RegisterService : IRegisterService
 {
@@ -35,36 +38,39 @@ public class RegisterService : IRegisterService
 	public async Task<OtpVerificationResponse> RegisterAsync(RegisterRequestDTO registerRequestDTO)
 	{
 
-		_logger.LogInformation("Starting registration process for email: {Email}", registerRequestDTO.Email);
+		_logger.LogInformation("Starting registration process for email: {Context}", registerRequestDTO.Email);
+
+		var logContext = new
+		{
+			Action = "RegisterUser",
+			Step = "StartRegistration",
+			Email = registerRequestDTO.Email,
+			Timestamp = DateTime.UtcNow
+		};
 
 		var isUserEmailExist = await _authRepository.IsUserEmailExistInOtpVerificationAsync(registerRequestDTO.Email, true);
 
 		if (isUserEmailExist != null)
 		{
-			_logger.LogWarning("Email already in use: {Email}", registerRequestDTO.Email);
+			_logger.LogWarning("Email already in use: {@Context}", logContext);
 			throw new Exception("Email already in use.");
 		}
 
-		_logger.LogInformation("Email is available: {Email}", registerRequestDTO.Email);
-
 		var otp = _otpService.GenerateOtp();
 
-		_logger.LogInformation("Generated OTP for email: {Email}", registerRequestDTO.Email);
 
 		if (otp == null)
 		{
-			_logger.LogError("Failed to generate OTP for email: {Email}", registerRequestDTO.Email);
+			_logger.LogError("Failed to generate OTP for email: {Context}", logContext);
 			throw new Exception("Failed to generate OTP.");
 		}
 
 
 		var HashOTP = _hashService.Hash(otp);
 
-		_logger.LogInformation("Hashed OTP for email: {Email}", registerRequestDTO.Email);
-
 		if (HashOTP == null)
 		{
-			_logger.LogError("Failed to hash OTP for email: {Email}", registerRequestDTO.Email);
+			_logger.LogError("Failed to hash OTP for email: {Context}", logContext);
 			throw new Exception("Failed to hash OTP.");
 		}
 
@@ -80,12 +86,9 @@ public class RegisterService : IRegisterService
 
 		if (!isSent)
 		{
-			_logger.LogError("Failed to send OTP email to: {Email}", registerRequestDTO.Email);
+			_logger.LogError("Failed to send OTP email to: {@Context}", logContext);
 			throw new Exception("Failed to send OTP email.");
 		}
-
-		_logger.LogInformation("Sent OTP email to: {Email}", registerRequestDTO.Email);
-
 
 		var user = new OtpVerification
 		{
@@ -105,8 +108,6 @@ public class RegisterService : IRegisterService
 
 		var otpUser = await _authRepository.InsertOtpVerification(user);
 
-		_logger.LogInformation("Stored OTP verification record for email: {Email}", registerRequestDTO.Email);
-
 		if (!otpUser)
 		{
 			_logger.LogError("Failed to store OTP verification record for email: {Email}", registerRequestDTO.Email);
@@ -114,6 +115,17 @@ public class RegisterService : IRegisterService
 		}
 
 		var userOtpResponse = user.Adapt<OtpVerificationResponse>();
+
+		var successContext = new
+		{
+			Action = "RegisterUser",
+			Step = "Completed",
+			Email = registerRequestDTO.Email,
+			UserId = user.Id,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("User registration completed {@Context}", successContext);
 
 		return userOtpResponse;
 	}
@@ -123,11 +135,19 @@ public class RegisterService : IRegisterService
 	{
 		_logger.LogInformation("Starting OTP verification for email: {Email}", email);
 
+		var logContext = new
+		{
+			Action = "VerifyingOTPToUser",
+			Step = "StartVerification",
+			Email = email,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var existingOtpRecord = await _authRepository.IsUserEmailExistInOtpVerificationAsync(email, false);
 
 		if (existingOtpRecord == null)
 		{
-			_logger.LogWarning("No OTP record found for email: {Email}", email);
+			_logger.LogWarning("No OTP record found for email: {@Context}", logContext);
 			throw new Exception("No OTP record found for this email.");
 		}
 
@@ -137,7 +157,7 @@ public class RegisterService : IRegisterService
 
 		if (!isOtpValid)
 		{
-			_logger.LogWarning("Invalid OTP provided for email: {Email}", email);
+			_logger.LogWarning("Invalid OTP provided for email: {@Context}", logContext);
 			existingOtpRecord.AttemptCount += 1;
 			await _authRepository.UpdateVerificationCodeAsync(existingOtpRecord);
 			throw new Exception("Invalid OTP.");
@@ -145,13 +165,13 @@ public class RegisterService : IRegisterService
 
 		if (existingOtpRecord.IsUsed)
 		{
-			_logger.LogWarning("OTP already used for email: {Email}", email);
+			_logger.LogWarning("OTP already used for email: {@Context}", logContext);
 			throw new Exception("OTP already used.");
 		}
 
 		if (DateTime.UtcNow > existingOtpRecord.ExpiresAt)
 		{
-			_logger.LogWarning("OTP expired for email: {Email}", email);
+			_logger.LogWarning("OTP expired for email: {@Context}", logContext);
 			await this.ResendOtpAsync(existingOtpRecord);
 			throw new InvalidOperationException("Your OTP has expired. A new code has been sent to your email.");
 		}
@@ -183,22 +203,31 @@ public class RegisterService : IRegisterService
 
 		if (!isSuccess)
 		{
-			_logger.LogError("Failed to save user record for email: {Email}", email);
+			_logger.LogError("Failed to save user record for email: {@Context}", logContext);
 			throw new Exception("Failed to save user record.");
 		}
 
-		_logger.LogInformation("Successfully verified OTP for email: {Email}", email);
+		_logger.LogInformation("Successfully verified OTP for email: {@Context}", logContext);
 
 		return true;
 	}
 
 	public async Task<bool> ManualResendOtpCodeAsync(Guid userId, string email)
 	{
+		var logContext = new
+		{
+			Action = "ResendingAutoOTPToUser",
+			Step = "StartResending",
+			Email = email,
+			UserId = userId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var otpVerification = await _authRepository.IsUserEmailExistInOtpVerificationAsync(email, false);
 
 		if (otpVerification == null)
 		{
-			_logger.LogWarning("No OTP record found for email: {Email}", email);
+			_logger.LogWarning("No OTP record found for email: {@Context}", logContext);
 			throw new Exception("No OTP record found for this email.");
 		}
 
@@ -208,7 +237,7 @@ public class RegisterService : IRegisterService
 
 		if (isOtpValid == null)
 		{
-			_logger.LogWarning("No OTP record found for email: {Email}", otpVerification.Email);
+			_logger.LogWarning("No OTP record found for email: {@Context}", logContext);
 			throw new Exception("No OTP record found for this email.");
 		}
 
@@ -216,7 +245,7 @@ public class RegisterService : IRegisterService
 
 		if (userDetail == null)
 		{
-			_logger.LogWarning("No OTP record found for email: {Email}", otpVerification.Email);
+			_logger.LogWarning("No OTP record found for email: {@Context}", logContext);
 			throw new Exception("No OTP record found for this email.");
 		}
 
@@ -224,20 +253,28 @@ public class RegisterService : IRegisterService
 
 		if (!isSent)
 		{
-			_logger.LogError("Failed to resend OTP email to: {Email}", otpVerification.Email);
+			_logger.LogError("Failed to resend OTP email to: {@Context}", logContext);
 			throw new Exception("Failed to resend OTP email.");
 		}
 
-		_logger.LogInformation("Resent OTP email to: {Email}", otpVerification.Email);
+		_logger.LogInformation("Successfully resent OTP email to: {@Context}", logContext);
 
 		return isSent;
 	}
 
 	public async Task<bool> ResendOtpAsync(OtpVerification otpVerification)
 	{
+
+		var logContext = new
+		{
+			Action = "ResendingAutoOTPToUser",
+			Step = "StartResending",
+			Email = otpVerification.Email,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var otp = _otpService.GenerateOtp();
 
-		_logger.LogInformation("Generated OTP for email: {Email}", otpVerification.Email);
 
 		otpVerification.OtpCodeHash = _hashService.Hash(otp);
 
@@ -247,25 +284,25 @@ public class RegisterService : IRegisterService
 
 		if (!isUpdated)
 		{
-			_logger.LogError("Failed to update OTP record for email: {Email}", otpVerification.Email);
+			_logger.LogError("Failed to update OTP record for email: {@Context}", logContext);
 			throw new Exception("Failed to update OTP record.");
 		}
 
 
 		if (otp == null)
 		{
-			_logger.LogError("Failed to generate OTP for email: {Email}", otpVerification.Email);
+			_logger.LogError("Failed to generate OTP for email: {@Context}", logContext);
 			throw new Exception("Failed to generate OTP.");
 		}
 
 
 		var HashOTP = _hashService.Hash(otp);
 
-		_logger.LogInformation("Hashed OTP for email: {Email}", otpVerification.Email);
+		_logger.LogInformation("Hashed OTP for email: {@Context}", logContext);
 
 		if (HashOTP == null)
 		{
-			_logger.LogError("Failed to hash OTP for email: {Email}", otpVerification.Email);
+			_logger.LogError("Failed to hash OTP for email: {@Context}", logContext);
 			throw new Exception("Failed to hash OTP.");
 		}
 
@@ -281,19 +318,28 @@ public class RegisterService : IRegisterService
 
 		if (!isSent)
 		{
-			_logger.LogError("Failed to send OTP email to: {Email}", otpVerification.Email);
+			_logger.LogError("Failed to send OTP email to: {@Context}", logContext);
 			throw new Exception("Failed to send OTP email.");
 		}
 
-		_logger.LogInformation("Sent OTP email to: {Email}", otpVerification.Email);
+		_logger.LogInformation("Successfully sent OTP email to: {@Context}", logContext);
 
 		return true;
 	}
 
 	public async Task<bool> IsOtpSessionValidAsync(Guid userId, string email)
 	{
-		_logger.LogInformation("Checking if OTP is valid for email: {Email}", email);
+		var logContext = new
+		{
+			Action = "VerifyingIfValidUser",
+			Step = "StartVerifying",
+			Email = email,
+			UserId = userId,
+			Timestamp = DateTime.UtcNow
+		};
 
+
+		_logger.LogInformation("Checking if OTP is valid for user: {@Context}", logContext);
 
 		var userDetail = new OtpVerificationRequestDTO(userId, email);
 
@@ -301,18 +347,19 @@ public class RegisterService : IRegisterService
 
 		if (existingOtpRecord == null)
 		{
-			_logger.LogWarning("No OTP record found for email: {Email}", email);
+			_logger.LogWarning("No OTP record found for email: {@Context}", logContext);
 			return false;
 		}
 
 		if (existingOtpRecord.IsUsed)
 		{
-			_logger.LogWarning("OTP already used for email: {Email}", email);
+			_logger.LogWarning("OTP already used for email: {@Context}", logContext);
 			return false;
 		}
 
-		return true;
+		_logger.LogInformation("OTP is valid for user: {@Context}", logContext);
 
+		return true;
 	}
 
 
