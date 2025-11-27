@@ -1,4 +1,6 @@
-﻿namespace APIs.ServiceConfig;
+﻿using Serilog.Events;
+
+namespace APIs.ServiceConfig;
 public static class ServiceConfiguration
 {
 
@@ -15,12 +17,12 @@ public static class ServiceConfiguration
 		IConfiguration configuration)
 	{
 		Log.Logger = new LoggerConfiguration()
-			.MinimumLevel.Debug()
-			.Enrich.FromLogContext()
-			.WriteTo.Console(
-				outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"
-			)
-			.CreateLogger();
+				   .MinimumLevel.Information()
+				   .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+				   .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+				   .Enrich.FromLogContext()
+				   .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter())
+				   .CreateLogger();
 
 		services.AddLogging(builder =>
 		{
