@@ -28,7 +28,8 @@ public class GetApplicationsEndpoint : ICarterModule
 		.Produces<GetApplicationsEndpointResponse>(StatusCodes.Status200OK)
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Get Applications")
-		.WithDescription("Retrieves a list of applications.");
+		.WithDescription("Retrieves a list of applications.")
+	    .RequireAuthorization();
 	}
 }
 

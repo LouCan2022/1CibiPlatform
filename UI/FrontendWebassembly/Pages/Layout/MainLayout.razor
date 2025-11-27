@@ -41,7 +41,7 @@
 
                             var subMenuIds = SubMenus[i];
 
-                            <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
+                            <MudNavGroup Title="@appDescription" Expanded="true" Icon="@appIcon">
                                 @foreach (var subId in subMenuIds)
                                 {
                                     var (subPath, subDescription, subIcon) = SubMenuList.List[subId];
@@ -93,7 +93,7 @@
                     <ButtonComponent OnClick="@(() => Navigation.NavigateTo(Navigation.Uri, true))"
                                      StartIcon="@Icons.Material.Filled.Refresh"
                                      Class="theme-button theme-button-active mt-4"
-                                     Style="width: 140px;">
+                                     Style="width: 140px; border-radius: 4px;">
                         Reload Page
                     </ButtonComponent>
                 </MudPaper>
