@@ -3,14 +3,13 @@
 <MudTable T="TItem"
           @ref="TableRef"
           ServerData="LoadServerData"
+          Class="responsive-title"
           Style="width:100%; border-radius: 4px; border: 1px solid gray; padding: 10px;">
-    
-
 
         <ToolBarContent>
             @if (!string.IsNullOrWhiteSpace(Title))
             {
-                <MudText Typo="Typo.h6">@Title</MudText>
+            <MudText Typo="Typo.h6" Class="responsive-title">@Title</MudText>
             }
 
             <MudSpacer />
@@ -26,15 +25,15 @@
                               IconSize="Size.Medium"
                               Class="mt-0"
                               ValueChanged="SearchChanged" />
-
             }
+
             @if (AddButtonText != null)
             {
                 <MudSpacer />
                 <MudButton Variant="Variant.Filled"
                            Class="theme-button theme-button-active"
                            StartIcon="@Icons.Material.Filled.Add"
-                           Style="border-radius: 4px;"
+                           Style="border-radius: 4px; margin-left:20px;"
                            OnClick="@OnAddClicked">
                     @AddButtonText
                 </MudButton>
@@ -65,7 +64,7 @@
     [Parameter] public RenderFragment HeaderTemplate { get; set; }
     [Parameter] public RenderFragment<TItem> RowTemplate { get; set; }
 
-    public MudTable<TItem> TableRef { get; private set; }
+   public MudTable<TItem> TableRef { get; private set; }
 
     [Parameter]
     public string SearchString { get; set; }
@@ -78,7 +77,7 @@
         SearchString = value;
         if (SearchStringChanged.HasDelegate)
             await SearchStringChanged.InvokeAsync(value);
-        await TableRef?.ReloadServerData();
+        await TableRef!.ReloadServerData();
     }
 
 }

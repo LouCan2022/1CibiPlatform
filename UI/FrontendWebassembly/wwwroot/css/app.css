@@ -357,11 +357,14 @@ code {
 .mud-table th {
     font-weight: 700 !important;
     text-align: center;
+    font-size: 18px;
 }
+
 
 .mud-table td {
     align-items: center;
     text-align: center;
+    font-size: 16px;
 }
 
 .mud-table-container {
@@ -371,4 +374,16 @@ code {
 table {
     table-layout: fixed !important; 
     width: 100% !important;
+}
+
+.responsive-title {
+    font-size: 20px !important; 
+}
+
+@media (max-width: 600px) {
+    .responsive-title {
+        font-size: 13px !important;
+        white-space: normal;
+        margin-right: 16px !important;
+    }
 }
