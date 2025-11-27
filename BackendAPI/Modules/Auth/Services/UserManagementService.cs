@@ -16,7 +16,15 @@ public class UserManagementService : IUserService
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Fetching users with pagination: {@PaginationRequest}", paginationRequest);
+		var logContext = new
+		{
+			Action = "GetUsers",
+			Step = "StartFetching",
+			PaginationRequest = paginationRequest,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Fetching users with pagination: {@Context}", logContext);
 
 		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
 			_authRepository.GetUserAsync(paginationRequest, cancellationToken) :
