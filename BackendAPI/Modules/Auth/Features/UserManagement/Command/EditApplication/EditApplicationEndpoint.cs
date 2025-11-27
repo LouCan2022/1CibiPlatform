@@ -19,6 +19,7 @@ public class EditApplicationEndpoint : ICarterModule
 		.Produces<EditApplicationResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Edit Application")
-		.WithDescription("Edits an existing application in OnePlatform.");
+		.WithDescription("Edits an existing application in OnePlatform.")
+		.RequireAuthorization();
 	}
 }

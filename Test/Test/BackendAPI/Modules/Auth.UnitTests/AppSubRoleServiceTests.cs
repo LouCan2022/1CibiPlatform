@@ -29,8 +29,8 @@ public class AppSubRoleServiceTests : IClassFixture<AuthServiceFixture>
 
 		var data = new List<AppSubRolesDTO>
 			{
-				new AppSubRolesDTO ( 1, Guid.NewGuid(), 1, 1, 1 ),
-				new AppSubRolesDTO ( 2, Guid.NewGuid(), 2, 2, 2)
+				new AppSubRolesDTO ( 1, Guid.NewGuid(), "john@example.com", 1, "PhilSys", 1, "IDV", 1, "SuperAdmin" ),
+				new AppSubRolesDTO ( 2, Guid.NewGuid(), "doe@example.com", 2, "CNX", 2, "DashBoard", 2, "Admin" )
 			};
 
 		var expectedResult = new PaginatedResult<AppSubRolesDTO>(1, 1, 10, data);
@@ -63,8 +63,8 @@ public class AppSubRoleServiceTests : IClassFixture<AuthServiceFixture>
 
 		var data = new List<AppSubRolesDTO>
 			{
-				new AppSubRolesDTO ( 1, Guid.NewGuid(), 1, 1, 1 ),
-				new AppSubRolesDTO ( 2, Guid.NewGuid(), 2, 2, 2)
+				new AppSubRolesDTO ( 1, Guid.NewGuid(), "john@example.com", 1, "PhilSys", 1, "IDV", 1, "SuperAdmin" ),
+				new AppSubRolesDTO ( 2, Guid.NewGuid(), "doe@example.com", 2, "CNX", 2, "DashBoard", 2, "Admin" )
 			};
 
 		var expectedResult = new PaginatedResult<AppSubRolesDTO>(1, 1, 10, data);

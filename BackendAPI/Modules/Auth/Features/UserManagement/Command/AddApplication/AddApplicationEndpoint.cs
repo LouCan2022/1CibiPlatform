@@ -20,6 +20,7 @@ public class AddApplicationEndpoint : ICarterModule
 		.Produces<AddApplicationResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Add Application")
-		.WithDescription("Add an application in OnePlatform.");
+		.WithDescription("Add an application in OnePlatform.")
+		.RequireAuthorization();
 	}
 }

@@ -20,10 +20,6 @@ public class AuthPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "/login" }
-				},
-				Metadata: new Dictionary<string,string>
-				{
-					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.LoginPolicy }
 				}
 			),
 

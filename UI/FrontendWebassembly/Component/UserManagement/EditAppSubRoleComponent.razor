@@ -1,47 +1,63 @@
-﻿<MudDialog Style="padding: 8px;">
+﻿@inject LocalStorageService LocalStorageService
+@inject IUserManagementService UserManagementService
+
+<MudDialog Style="padding: 8px;">
     <DialogContent>
-        <MudForm @ref="form">
-            <MudTextField @bind-Value="AppSubRole.UserId"
-                          Label="UserAppSubRole Id"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
 
+        @if (!IsLoaded)
+        {
+            <div style="display: flex; justify-content: center; align-items: center; height: 200px;">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            </div>
+        }
+        else
+        {
+            <MudForm @ref="form">
 
-            <MudTextField @bind-Value="AppSubRole.AppId"
-                          Label="App Id"
-                          Required="true"
-                          RequiredError="App Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
+                <MudSelect @bind-Value="AppSubRole.UserId"
+                           Label="Email"
+                           Required="true"
+                           Placeholder="Select a user...">
+                    @foreach (var user in Users!)
+                    {
+                        <MudSelectItem Value="@user.userId">@user.email</MudSelectItem>
+                    }
+                </MudSelect>
 
-            <MudTextField @bind-Value="AppSubRole.Submenu"
-                          Label="SubMenu Id"
-                          Required="true"
-                          RequiredError="SubMenu Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
+                <MudSelect @bind-Value="AppSubRole.AppId"
+                           Label="Application"
+                           Required="true"
+                           Placeholder="Select an application...">
+                    @foreach (var app in Apps!)
+                    {
+                        <MudSelectItem Value="@app.applicationId">@app.applicationName</MudSelectItem>
+                    }
+                </MudSelect>
 
-            <MudTextField @bind-Value="AppSubRole.RoleId"
-                          Label="Role Id"
-                          Required="true"
-                          RequiredError="Role Id is required"
-                          Adornment="Adornment.Start"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          MaxLength="100"
-                          Class="philsys-rounded-input philsys-uppercase-input" />
-        </MudForm>
+                <MudSelect @bind-Value="AppSubRole.SubMenuId"
+                           Label="Submenu"
+                           Required="true"
+                           Placeholder="Select a submenu...">
+                    @foreach (var sm in SubMenus!)
+                    {
+                        <MudSelectItem Value="@sm.subMenuId">@sm.subMenuName</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect @bind-Value="AppSubRole.RoleId"
+                           Label="Role"
+                           Required="true"
+                           Placeholder="Select a role...">
+                    @foreach (var role in Roles!)
+                    {
+                        <MudSelectItem Value="@role.roleId">@role.roleName</MudSelectItem>
+                    }
+                </MudSelect>
+
+            </MudForm>
+        }
+
     </DialogContent>
-
     <DialogActions>
         <MudButton Color="Color.Default"
                    OnClick="Cancel"
@@ -59,21 +75,36 @@
 </MudDialog>
 
 @code {
-    private MudForm form;
-
-    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    private MudForm? form;
+    private bool IsLoaded = false;
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
 
     [Parameter]
     public AppSubRolesDTO AppSubRole { get; set; } = new AppSubRolesDTO();
 
-    void Cancel() => MudDialog.Cancel();
+    private List<UsersDTO>? Users = new();
+    private List<ApplicationsDTO>? Apps = new();
+    private List<SubMenusDTO>? SubMenus = new();
+    private List<RolesDTO>? Roles = new();
+
+    void Cancel() => MudDialog!.Cancel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = (await UserManagementService.GetUsersAsync(1, int.MaxValue)).Data.ToList();
+        Apps = (await UserManagementService.GetApplicationsAsync(1, int.MaxValue)).Data.ToList();
+        SubMenus = (await UserManagementService.GetSubMenusAsync(1, int.MaxValue)).Data.ToList();
+        Roles = (await UserManagementService.GetRolesAsync(1, int.MaxValue)).Data.ToList();
+
+        IsLoaded = true;
+    }
 
     async Task Submit()
     {
-        await form.Validate();
+        await form!.Validate();
         if (form.IsValid)
         {
-            MudDialog.Close(DialogResult.Ok(AppSubRole));
+            MudDialog!.Close(DialogResult.Ok(AppSubRole));
         }
     }
 }

@@ -18,6 +18,7 @@ public class DeleteApplicationEndpoint : ICarterModule
 		.Produces<DeleteApplicationResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Delete Application")
-		.WithDescription("Deletes an existing application in OnePlatform.");
+		.WithDescription("Deletes an existing application in OnePlatform.")
+		.RequireAuthorization();
 	}
 }

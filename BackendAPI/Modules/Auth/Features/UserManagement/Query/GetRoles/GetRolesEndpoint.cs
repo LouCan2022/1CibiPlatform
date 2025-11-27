@@ -28,7 +28,8 @@ public class GetRolesEndpoint : ICarterModule
 		.Produces<GetRolesEndpointResponse>(StatusCodes.Status200OK)
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Get Roles")
-		.WithDescription("Retrieves a list of roles.");
+		.WithDescription("Retrieves a list of roles.")
+		.RequireAuthorization();
 	}
 }
 

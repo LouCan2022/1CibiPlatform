@@ -344,10 +344,10 @@ public class UserManagementService : IUserManagementService
     {
         var editAppSubRole = new EditAppSubRoleDTO
         {
-            AppSubRoleId = editAppSubRoleDTO.UserSubRoleId,
+            AppSubRoleId = editAppSubRoleDTO.AppRoleId,
             UserId = editAppSubRoleDTO.UserId,
             AppId = editAppSubRoleDTO.AppId,
-            SubMenuId = editAppSubRoleDTO.Submenu,
+            SubMenuId = editAppSubRoleDTO.SubMenuId,
             RoleId = editAppSubRoleDTO.RoleId,
         };
 

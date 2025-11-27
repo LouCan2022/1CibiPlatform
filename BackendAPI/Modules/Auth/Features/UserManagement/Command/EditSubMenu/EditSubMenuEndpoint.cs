@@ -19,6 +19,7 @@ public class EditSubMenuEndpoint : ICarterModule
 		.Produces<EditSubMenuResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Edit SubMenu")
-		.WithDescription("Edits an existing submnu in OnePlatform.");
+		.WithDescription("Edits an existing submnu in OnePlatform.")
+		.RequireAuthorization();
 	}
 }

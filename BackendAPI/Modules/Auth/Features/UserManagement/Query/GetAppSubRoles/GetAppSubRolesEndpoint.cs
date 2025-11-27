@@ -28,7 +28,8 @@ public class GetAppSubRolesEndpoint : ICarterModule
 		.Produces<GetAppSubRolesEndpointResponse>(StatusCodes.Status200OK)
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Get AppSubRoles")
-		.WithDescription("Retrieves a list of users with an application, role, and submenu");
+		.WithDescription("Retrieves a list of users with an application, role, and submenu")
+		.RequireAuthorization();
 	}
 }
 

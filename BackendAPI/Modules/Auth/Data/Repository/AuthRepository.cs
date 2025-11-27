@@ -102,6 +102,7 @@ public class AuthRepository : IAuthRepository
 		var usersQuery = _dbcontext.AuthUsers
 				.Where(au => au.IsActive &&
 					(EF.Functions.ILike(au.FirstName, $"%{paginationRequest.SearchTerm}%") ||
+					 EF.Functions.ILike(au.MiddleName!, $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(au.LastName, $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(au.Email, $"%{paginationRequest.SearchTerm}%")));
 
@@ -508,65 +509,127 @@ public class AuthRepository : IAuthRepository
 		return subMenu;
 	}
 
-	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(
+	PaginationRequest paginationRequest,
+	CancellationToken cancellationToken)
 	{
-		var totalRecords = await _dbcontext
-			.AuthUserAppRoles
-			.LongCountAsync(cancellationToken);
+		var baseQuery =
+			from asr in _dbcontext.AuthUserAppRoles.AsNoTracking()
+			join u in _dbcontext.AuthUsers.AsNoTracking()
+				on asr.UserId equals u.Id into uGroup
+			from user in uGroup.DefaultIfEmpty()   
 
-		var applications = await _dbcontext.AuthUserAppRoles
-							.AsNoTracking() 
-							.OrderBy(asr => asr.AppRoleId)  
-							.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-							.Take(paginationRequest.PageSize)
-							.Select(asr => new AppSubRolesDTO(
-								asr.AppRoleId,
-								asr.UserId,
-								asr.AppId,
-								asr.Submenu,
-								asr.RoleId))
-							.ToListAsync(cancellationToken);
+			join r in _dbcontext.AuthRoles.AsNoTracking()
+				on asr.RoleId equals r.RoleId into rGroup
+			from role in rGroup.DefaultIfEmpty()
 
-		return new PaginatedResult<AppSubRolesDTO>
-			(
-			  paginationRequest.PageIndex,
-			  paginationRequest.PageSize,
-			  totalRecords,
-			  applications
+			join a in _dbcontext.AuthApplications.AsNoTracking()
+				on asr.AppId equals a.AppId into aGroup
+			from app in aGroup.DefaultIfEmpty()
+
+			join s in _dbcontext.AuthSubmenu.AsNoTracking()
+				on asr.Submenu equals s.SubMenuId into sGroup
+			from sub in sGroup.DefaultIfEmpty()   
+
+			orderby asr.AppRoleId
+			select new AppSubRolesDTO(
+				asr.AppRoleId,
+				asr.UserId,
+				user.Email,       
+				asr.AppId,
+				app.AppName,       
+				asr.Submenu,
+				sub.SubMenuName,
+				asr.RoleId,
+				role.RoleName      
 			);
+
+		var totalRecords = await baseQuery.LongCountAsync(cancellationToken);
+
+		var applications = await baseQuery
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AppSubRolesDTO>(
+			paginationRequest.PageIndex,
+			paginationRequest.PageSize,
+			totalRecords,
+			applications
+		);
 	}
 
-	public async Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+
+	public async Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(
+	PaginationRequest paginationRequest,
+	CancellationToken cancellationToken)
 	{
-		var appSubRolesQuery = _dbcontext.AuthUserAppRoles
-				.Where(asr =>
-					(EF.Functions.ILike(asr.RoleId.ToString(), $"%{paginationRequest.SearchTerm}%") ||
-					 EF.Functions.ILike(asr.Submenu.ToString()!, $"%{paginationRequest.SearchTerm}%") ||
-					  EF.Functions.ILike(asr.AppId.ToString()!, $"%{paginationRequest.SearchTerm}%")));
+		var search = paginationRequest.SearchTerm?.Trim().ToLower() ?? "";
 
-		var totalRecords = await appSubRolesQuery.CountAsync(cancellationToken);
+		var baseQuery =
+			from asr in _dbcontext.AuthUserAppRoles.AsNoTracking()
+			join u in _dbcontext.AuthUsers.AsNoTracking()
+				on asr.UserId equals u.Id into uGroup
+			from user in uGroup.DefaultIfEmpty()   
 
-		var appSubRoles = await appSubRolesQuery
-							.AsNoTracking()  
-							.OrderBy(asr => asr.AppRoleId)   
-							.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
-							.Take(paginationRequest.PageSize)
-							.Select(asr => new AppSubRolesDTO(
-								asr.AppRoleId,
-								asr.UserId,
-								asr.AppId,
-								asr.Submenu,
-								asr.RoleId))
-							.ToListAsync(cancellationToken);
+			join r in _dbcontext.AuthRoles.AsNoTracking()
+				on asr.RoleId equals r.RoleId into rGroup
+			from role in rGroup.DefaultIfEmpty()
 
-		return new PaginatedResult<AppSubRolesDTO>
-			(
-			  paginationRequest.PageIndex,
-			  paginationRequest.PageSize,
-			  totalRecords,
-			  appSubRoles
+			join a in _dbcontext.AuthApplications.AsNoTracking()
+				on asr.AppId equals a.AppId into aGroup
+			from app in aGroup.DefaultIfEmpty()
+
+			join s in _dbcontext.AuthSubmenu.AsNoTracking()
+				on asr.Submenu equals s.SubMenuId into sGroup
+			from sub in sGroup.DefaultIfEmpty()
+
+			select new
+			{
+				asr,
+				user,
+				role,
+				app,
+				sub
+			};
+
+		if (!string.IsNullOrWhiteSpace(search))
+		{
+			baseQuery = baseQuery.Where(x =>
+				EF.Functions.ILike(x.sub.SubMenuName, $"%{search}%") ||
+				EF.Functions.ILike(x.role.RoleName!, $"%{search}%") ||
+				EF.Functions.ILike(x.user.Email!, $"%{search}%") ||
+				EF.Functions.ILike(x.app.AppName!, $"%{search}%")
 			);
+		}
+
+		var totalRecords = await baseQuery.CountAsync(cancellationToken);
+
+		var results = await baseQuery
+			.OrderBy(x => x.asr.AppRoleId)
+			.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+			.Take(paginationRequest.PageSize)
+			.Select(x => new AppSubRolesDTO(
+				x.asr.AppRoleId,
+				x.asr.UserId,
+				x.user.Email,
+				x.asr.AppId,
+				x.app.AppName,
+				x.asr.Submenu,
+				x.sub.SubMenuName,
+				x.asr.RoleId,
+				x.role.RoleName
+			))
+			.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AppSubRolesDTO>(
+			paginationRequest.PageIndex,
+			paginationRequest.PageSize,
+			totalRecords,
+			results
+		);
 	}
+
 
 	public async Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId)
 	{

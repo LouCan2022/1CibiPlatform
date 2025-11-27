@@ -19,7 +19,8 @@ public class AddRoleEndpoint : ICarterModule
 		.Produces<AddRoleResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Add Role")
-		.WithDescription("Add a role in OnePlatform.");
+		.WithDescription("Add a role in OnePlatform.")
+		.RequireAuthorization();
 	}
 }
 
