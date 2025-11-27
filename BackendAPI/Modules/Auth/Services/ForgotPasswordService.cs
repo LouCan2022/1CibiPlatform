@@ -1,4 +1,6 @@
-﻿namespace Auth.Services;
+﻿using MediatR;
+
+namespace Auth.Services;
 
 public class ForgotPasswordService : IForgotPasswordService
 {
@@ -34,13 +36,23 @@ public class ForgotPasswordService : IForgotPasswordService
 
 	public async Task<Guid> ForgotPasswordAsync(string email)
 	{
-		_logger.LogInformation("ForgotPassword called with email: {Email}", email);
+
+		var logContext = new
+		{
+			Action = "LoggingOutUser",
+			Step = "StartLoggingOut",
+			Email = email,
+			Timestamp = DateTime.UtcNow
+		};
+
+
+		_logger.LogInformation("ForgotPassword called with email: {@Context}", logContext);
 
 		var user = await _authRepository.IsUserEmailExistAsync(email);
 
 		if (user == null)
 		{
-			_logger.LogWarning("No user found with email: {Email}", email);
+			_logger.LogWarning("No user found with email: {@Context}", logContext);
 			throw new NotFoundException("Email not found.");
 		}
 
@@ -48,7 +60,7 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		if (secureToken == null)
 		{
-			_logger.LogError("Failed to generate secure token for email: {Email}", email);
+			_logger.LogError("Failed to generate secure token for email: {@Context}", logContext);
 			throw new Exception("Failed to generate secure token.");
 		}
 
@@ -68,11 +80,9 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		if (!isSent)
 		{
-			_logger.LogError("Failed to send password reset email to: {Email}", email);
+			_logger.LogError("Failed to send password reset email to: {@Context}", logContext);
 			throw new Exception("Failed to send password reset email.");
 		}
-
-		_logger.LogInformation("Sent password reset email to: {Email}", email);
 
 		var userDetailsPasswordToken = new PasswordResetToken
 		{
@@ -87,22 +97,34 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		if (!saveTokenResult)
 		{
-			_logger.LogError("Failed to save password reset token for email: {Email}", email);
+			_logger.LogError("Failed to save password reset token for email: {@Context}", logContext);
 			throw new Exception("Failed to save password reset token.");
 		}
+
+		_logger.LogInformation("Password reset token generated and email sent for user: {@Context}", logContext);
 
 		return user.Id;
 	}
 
 	public async Task<bool> IsTokenValid(string tokeHash)
 	{
+		var logContext = new
+		{
+			Action = "CheckingTokenIfValid",
+			Step = "StartChecking",
+			TokenContext = tokeHash,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var token = await _authRepository.GetUserTokenAsync(tokeHash);
 
 		if (token == null || token.IsUsed || token.ExpiresAt < DateTime.UtcNow)
 		{
-			_logger.LogWarning("Invalid or expired token: {TokenHash}", tokeHash);
+			_logger.LogWarning("Invalid or expired token: {@Context}", logContext);
 			return false;
 		}
+
+		_logger.LogInformation("Token is valid: {@Context}", logContext);
 
 		return true;
 	}
@@ -114,23 +136,30 @@ public class ForgotPasswordService : IForgotPasswordService
 	{
 		var isTokenValid = this.IsTokenValid(tokenHash);
 
+		var logContext = new
+		{
+			Action = "ResetPassword",
+			Step = "StartResetting",
+			UserId = id,
+			TokenContext = tokenHash,
+			Timestamp = DateTime.UtcNow
+		};
+
 		if (!isTokenValid.Result)
 		{
-			_logger.LogWarning("Invalid or expired token for user ID: {UserId}", id);
+			_logger.LogWarning("Invalid or expired token for user: {@Context}", logContext);
 			throw new UnauthorizedAccessException("Invalid or expired token.");
 		}
 
-		_logger.LogInformation("ResetPasswordAsync called for user ID: {UserId}", id);
+		_logger.LogInformation("ResetPasswordAsync called for user: {@Context}", logContext);
 
 		var userNewPassword = await _authRepository.GetRawUserAsync(id);
 
 		if (userNewPassword == null)
 		{
-			_logger.LogWarning("No user found with ID: {UserId}", id);
+			_logger.LogWarning("No user found with ID: {@Context}", logContext);
 			throw new NotFoundException("User not found.");
 		}
-
-		_logger.LogInformation("User found with ID: {UserId}", id);
 
 		var newHashedPassword = _passwordHasherService.HashPassword(newPassword);
 
@@ -140,11 +169,10 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		if (!isUpdated)
 		{
-			_logger.LogError("Failed to update password for user ID: {UserId}", id);
+			_logger.LogError("Failed to update password for user ID: {@Context}", logContext);
 			throw new Exception("Failed to update password.");
 		}
 
-		_logger.LogInformation("Password updated for user ID: {UserId}", id);
 
 		var token = await _authRepository.GetUserTokenAsync(tokenHash);
 
@@ -153,15 +181,14 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		var isTokenUpdated = await _authRepository.UpdatePasswordResetTokenAsUsedAsync(token);
 
-		_logger.LogInformation("Marking token as used for user ID: {UserId}", id);
 
 		if (!isTokenUpdated)
 		{
-			_logger.LogError("Failed to update password reset token for user ID: {UserId}", id);
+			_logger.LogError("Failed to update password reset token for user ID: {@Context}", logContext);
 			throw new Exception("Failed to update password reset token.");
 		}
 
-		_logger.LogInformation("Password updated successfully for user ID: {UserId}", id);
+		_logger.LogInformation("Password updated successfully for user ID: {@Context}", logContext);
 
 		return true;
 	}

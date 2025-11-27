@@ -30,7 +30,7 @@ builder.WebHost.ConfigureKestrel(kestrel =>
 			var cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword);
 			var daysUntilExpiry = (cert.NotAfter - DateTime.UtcNow).TotalDays;
 
-			if (daysUntilExpiry <30)
+			if (daysUntilExpiry < 30)
 			{
 				Console.ForegroundColor = ConsoleColor.Yellow;
 				Console.WriteLine($"⚠️ WARNING: Certificate expires in {daysUntilExpiry:F0} days!");

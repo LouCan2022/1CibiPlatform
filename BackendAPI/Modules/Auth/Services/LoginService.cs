@@ -9,7 +9,6 @@ public class LoginService : ILoginService
 	private readonly IRefreshTokenService _refreshTokenService;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly ILogger<LoginService> _logger;
-	private readonly HybridCache _hybridCache;
 	private readonly string _httpCookieOnlyKey;
 	private readonly double _expiryinMinutesKey;
 	private readonly string _httpCookieOnlyRefreshTokenKey;
@@ -24,8 +23,7 @@ public class LoginService : ILoginService
 	IJWTService jWTService,
 	IRefreshTokenService refreshTokenService,
 	IHttpContextAccessor httpContextAccessor,
-	ILogger<LoginService> logger,
-	HybridCache hybridCache)
+	ILogger<LoginService> logger)
 	{
 		this._authRepository = authRepository;
 		this._passwordHasherService = passwordHasherService;
@@ -34,7 +32,6 @@ public class LoginService : ILoginService
 		this._refreshTokenService = refreshTokenService;
 		this._httpContextAccessor = httpContextAccessor;
 		this._logger = logger;
-		this._hybridCache = hybridCache;
 
 		_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
 		_expiryinMinutesKey = _configuration.GetValue<double>("Jwt:ExpiryInMinutes");
@@ -46,7 +43,16 @@ public class LoginService : ILoginService
 
 	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
 	{
-		_logger.LogInformation("Login attempt for user: {Username}", username);
+
+		var logContext = new
+		{
+			Action = "LoggingToApi",
+			Step = "StartLogin",
+			Email = username,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Login attempt for user: {@Context}", logContext);
 
 		var loginCred = new LoginWebCred(username, password, false);
 
@@ -56,7 +62,7 @@ public class LoginService : ILoginService
 		// checking if client credentials are valid
 		if (userData == null)
 		{
-			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", username);
+			_logger.LogWarning("Login failed: Invalid username or password for user: {@Context}", logContext);
 			throw new NotFoundException("Invalid username or password.");
 		}
 
@@ -65,7 +71,7 @@ public class LoginService : ILoginService
 
 		if (!isPasswordValid)
 		{
-			_logger.LogWarning("Login failed: Invalid password for user: {Username}", username);
+			_logger.LogWarning("Login failed: Invalid password for user: {@Context}", logContext);
 			throw new NotFoundException("Invalid username or password.");
 		}
 
@@ -83,8 +89,7 @@ public class LoginService : ILoginService
 
 		_httpContextAccessor.HttpContext!.Response.Cookies.Append(_httpCookieOnlyKey!, jwtToken, cookieOptions);
 
-		_logger.LogInformation("Login successful for user: {Username}", username);
-
+		_logger.LogInformation("Login successful for user: {@Context}", logContext);
 
 		var name = !string.IsNullOrEmpty(userData.MiddleName) ?
 			$"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
@@ -106,9 +111,17 @@ public class LoginService : ILoginService
 
 	public async Task<LoginResponseWebDTO> LoginWebAsync(LoginWebCred cred)
 	{
-		_logger.LogInformation("Login attempt for user: {Username}", cred.Username);
 
-		bool isLogoutInCache = await IsCreateLogoutInCacheAsync(true);
+		var logContext = new
+		{
+			Action = "LoggingToWeb",
+			Step = "StartLogin",
+			Email = cred.Username,
+			IsRememberMe = cred.IsRememberMe,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Login attempt for user: {@Context}", logContext);
 
 		// fetching user data from database
 		LoginDTO userData = await this._authRepository.GetUserDataAsync(cred);
@@ -117,7 +130,7 @@ public class LoginService : ILoginService
 		if (userData == null)
 		{
 			// invalid Refresh TOKEN
-			_logger.LogWarning("Login failed: Invalid username or password for user: {Username}", cred.Username);
+			_logger.LogWarning("Login failed: Invalid username or password for user: {@Context}", logContext);
 			throw new NotFoundException("Invalid username or password");
 		}
 
@@ -127,30 +140,25 @@ public class LoginService : ILoginService
 
 		if (!isPasswordValid)
 		{
-			_logger.LogWarning("Login failed: Invalid password for user: {Username}", cred.Username);
+			_logger.LogWarning("Login failed: Invalid password for user: {@Context}", logContext);
 			throw new NotFoundException("Invalid username or password.");
 		}
 
-
-
 		// produce refresh token
 		var refreshTokenExist = this.GetRefreshTokenFromCookie();
-
 		var roleId = userData.roleId;
 		var appId = userData.AppId;
 		var subMenuId = userData.SubMenuId;
-
 
 		if (!appId.Any() ||
 			!subMenuId.Any() ||
 			!roleId.Any())
 		{
-			_logger.LogInformation("User application and role data retrieved for user: {Username}", cred.Username);
+			_logger.LogInformation("User application and role data retrieved for user: {@Context}", logContext);
 			throw new UnauthorizedAccessException("Your account has no assigned application. Please contact an administrator for assistance.");
 		}
 
 		// produce access token
-		_logger.LogInformation("Generating JWT token for user: {Username}", cred.Username);
 		string jwtToken = this._jWTService.GetAccessToken(userData);
 		SetAccessTokenCookie(jwtToken);
 
@@ -160,11 +168,21 @@ public class LoginService : ILoginService
 		$"{userData.FirstName} {userData.LastName}";
 
 
+
+		var successContext = new
+		{
+			Action = "LoggingToWeb",
+			Step = "StartLogin",
+			Email = cred.Username,
+			Userid = userData.Id,
+			IsRememberMe = cred.IsRememberMe,
+			Timestamp = DateTime.UtcNow
+		};
+
+
 		if (refreshTokenExist != null)
 		{
-			_logger.LogInformation("Reusing existing refresh token for user: {Username}", cred.Username);
-
-			isLogoutInCache = await IsCreateLogoutInCacheAsync(true);
+			_logger.LogInformation("Login successful for user: {@Context}", successContext);
 
 			// reuse existing refresh token if not expired
 			return new LoginResponseWebDTO(
@@ -183,20 +201,14 @@ public class LoginService : ILoginService
 		}
 
 		// generate new refresh token
-		_logger.LogInformation("Generating refresh token for user: {Username}", cred.Username);
 		(string refreshToken, string hashRefreshToken) = this._refreshTokenService.GenerateRefreshToken();
 		SetRefreshTokenCookie(refreshToken, cred.IsRememberMe);
 
 		// save refresh token to database
 		// save if http cookie only for refresh token is already expired
-		_logger.LogInformation("Saving refresh token for user: {UserId}", userData.Id);
 		await this._authRepository.SaveRefreshTokenAsync(userData.Id, hashRefreshToken, DateTime.UtcNow.AddMinutes(_expiryinMinutesKey));
 
-
-		_logger.LogInformation("Login successful for user: {Username}", cred.Username);
-
-		_logger.LogInformation("Creating login cache for user: {Username}", cred.Username);
-		isLogoutInCache = await IsCreateLogoutInCacheAsync(true);
+		_logger.LogInformation("Login successful for user: {@Context}", successContext);
 
 		return new LoginResponseWebDTO(
 			userData.Id.ToString()!,
@@ -279,13 +291,22 @@ public class LoginService : ILoginService
 		Guid userId,
 		string revokeReason)
 	{
-		_logger.LogInformation("Logout attempt for user: {UserId}", userId);
+		var logContext = new
+		{
+			Action = "LogoutUser",
+			Step = "StartLogout",
+			UserId = userId,
+			RevokeReason = revokeReason,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Logout attempt for user: {@Context}", logContext);
 
 		var logoutCachekey = $"{_isUserLoginTag}_{GetRefreshTokenFromCookie()}";
 
 		if (string.IsNullOrEmpty(GetRefreshTokenFromCookie()))
 		{
-			_logger.LogWarning("Logout failed: No refresh token found in cookies for user: {UserId}", userId);
+			_logger.LogWarning("Logout failed: No refresh token found in cookies for user: {@Context}", logContext);
 			throw new BadRequestException("Logout failed.");
 		}
 
@@ -295,7 +316,7 @@ public class LoginService : ILoginService
 
 		if (userData == null)
 		{
-			_logger.LogWarning("Logout failed: User not found for user: {UserId}", userId);
+			_logger.LogWarning("Logout failed: User not found for user: {@Context}", logContext);
 			throw new NotFoundException("User not found.");
 		}
 
@@ -307,21 +328,19 @@ public class LoginService : ILoginService
 
 				if (result == false)
 				{
-					_logger.LogInformation("Logout failed for user: {UserId}", userId);
+					_logger.LogInformation("Logout failed for user: {@Context}", logContext);
 					throw new BadRequestException("Logout failed.");
 				}
 
 				this.RemoveAccessAndRefreshTokenCookie();
 
-				_logger.LogInformation("Logout successful for user: {UserId}", userId);
-
-				await _hybridCache.RemoveAsync($"{logoutCachekey}");
+				_logger.LogInformation("Logout successful for user: {@Context}", logContext);
 
 				return result;
 			}
 		}
 
-		_logger.LogWarning("Logout failed: Refresh token not found for user: {UserId}", userId);
+		_logger.LogWarning("Logout failed: Refresh token not found for user: {@Context}", logContext);
 		throw new NotFoundException("User not found.");
 	}
 
@@ -329,17 +348,16 @@ public class LoginService : ILoginService
 	{
 		var cachekey = $"{_isUserLoginTag}_{GetRefreshTokenFromCookie()}";
 
-		_logger.LogInformation("Checking authentication status...");
-
-
-		var isLogoutInCache = await IsCreateLogoutInCacheAsync(false);
-
-		if (!isLogoutInCache)
+		var logContext = new
 		{
-			_logger.LogWarning("Authentication check failed: User has logged out.");
-			await _hybridCache.RemoveAsync(cachekey);
-			return false;
-		}
+			Action = "AuthenticateUser",
+			Step = "StartAuthentication",
+			RefreshToken = GetRefreshTokenFromCookie(),
+			RequestId = Guid.NewGuid(),
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Checking authentication status... {@Context}", logContext);
 
 		if (string.IsNullOrEmpty(GetRefreshTokenFromCookie()))
 		{
@@ -347,21 +365,9 @@ public class LoginService : ILoginService
 			return false;
 		}
 
-		_logger.LogInformation("User is authenticated.");
+		_logger.LogInformation("User is authenticated for {@Context}", logContext);
 
 		return true;
-	}
-
-	private async Task<bool> IsCreateLogoutInCacheAsync(bool isLogin)
-	{
-		var cachekey = $"{_isUserLoginTag}_{GetRefreshTokenFromCookie()}";
-
-		return await _hybridCache.GetOrCreateAsync<bool>(
-			cachekey,
-			ct => ValueTask.FromResult(isLogin),
-			options: null,
-			cancellationToken: default
-		);
 	}
 }
 
