@@ -29,6 +29,7 @@ public class GetUsersEndpoint : ICarterModule
 		.Produces<GetUsersEndpointResponse>(StatusCodes.Status200OK)
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Get Users")
-		.WithDescription("Retrieves a list of users.");
+		.WithDescription("Retrieves a list of users.")
+		.RequireAuthorization();
 	}
 }

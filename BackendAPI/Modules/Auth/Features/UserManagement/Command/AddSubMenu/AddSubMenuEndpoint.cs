@@ -20,6 +20,7 @@ public class AddSubMenuEndpoint : ICarterModule
 		.Produces<AddSubMenuResponse>()
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Add SubMenu")
-		.WithDescription("Add an submenu in OnePlatform.");
+		.WithDescription("Add an submenu in OnePlatform.")
+		.RequireAuthorization();
 	}
 }

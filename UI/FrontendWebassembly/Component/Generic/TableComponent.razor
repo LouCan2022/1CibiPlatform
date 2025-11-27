@@ -1,0 +1,83 @@
+﻿@typeparam TItem
+
+<MudTable T="TItem"
+          @ref="TableRef"
+          ServerData="LoadServerData"
+          Class="responsive-title"
+          Style="width:100%; border-radius: 4px; border: 1px solid gray; padding: 10px;">
+
+        <ToolBarContent>
+            @if (!string.IsNullOrWhiteSpace(Title))
+            {
+            <MudText Typo="Typo.h6" Class="responsive-title">@Title</MudText>
+            }
+
+            <MudSpacer />
+            @if (EnableSearch)
+            {
+                <MudTextField T="string"
+                              @bind-Value="SearchString"
+                              @bind-Value:event="oninput"
+                              Immediate="true"
+                              Placeholder="Search"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Medium"
+                              Class="mt-0"
+                              ValueChanged="SearchChanged" />
+            }
+
+            @if (AddButtonText != null)
+            {
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled"
+                           Class="theme-button theme-button-active"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Style="border-radius: 4px; margin-left:20px;"
+                           OnClick="@OnAddClicked">
+                    @AddButtonText
+                </MudButton>
+            }
+        </ToolBarContent>
+
+    <HeaderContent>
+        @HeaderTemplate
+    </HeaderContent>
+
+    <RowTemplate Context="item">
+        @RowTemplate(item)
+    </RowTemplate>
+
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public bool EnableSearch { get; set; } = true;
+    [Parameter] public string AddButtonText { get; set; }
+    [Parameter] public EventCallback OnAddClicked { get; set; }
+
+    [Parameter] public Func<TableState, CancellationToken, Task<TableData<TItem>>> LoadServerData { get; set; }
+
+    [Parameter] public RenderFragment HeaderTemplate { get; set; }
+    [Parameter] public RenderFragment<TItem> RowTemplate { get; set; }
+
+   public MudTable<TItem> TableRef { get; private set; }
+
+    [Parameter]
+    public string SearchString { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SearchStringChanged { get; set; }
+
+    private async Task SearchChanged(string value)
+    {
+        SearchString = value;
+        if (SearchStringChanged.HasDelegate)
+            await SearchStringChanged.InvokeAsync(value);
+        await TableRef!.ReloadServerData();
+    }
+
+}

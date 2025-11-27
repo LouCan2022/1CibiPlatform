@@ -2,7 +2,7 @@
 @layout MainLayout
 @inject IUserManagementService UserManagementService
 @inject IDialogService DialogService
-@inject IDialogService DialogService
+
 <MudTabs Rounded="false"
                  Scrollable="true"
                  Centered="true"
@@ -20,226 +20,173 @@
 
 @if (_activeIndex == 0)
 {
-    <MudTable T="UsersDTO" @ref="usersTable" ServerData="LoadUsersServerData">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">User Management</MudText>
-            <MudSpacer />
-            <MudTextField T="string"
-                          @bind-Value="searchStringUser"
-                          Immediate="true"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0" />
-        </ToolBarContent>
+    <TableComponent TItem="UsersDTO"
+                    @ref="usersTable"
+                    Title="User Management"
+                    EnableSearch="true"
+                    LoadServerData="LoadUsersServerData"
+                    SearchString="@searchStringUser"
+                    SearchStringChanged="@((string val) => searchStringUser = val)">
+    <HeaderTemplate>
+        <MudTh>Email</MudTh>
+        <MudTh>First Name</MudTh>
+        <MudTh>Middle Name</MudTh>
+        <MudTh>Last Name</MudTh>
+    </HeaderTemplate>
 
-        <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>Email</MudTh>
-            <MudTh>First Name</MudTh>
-            <MudTh>Middle Name</MudTh>
-            <MudTh>Last Name</MudTh>
-        </HeaderContent>
-
-        <RowTemplate>
-            <MudTd DataLabel="Id">@context.userId</MudTd>
-            <MudTd DataLabel="Email">@context.email</MudTd>
-            <MudTd DataLabel="First Name">@context.firstName</MudTd>
-            <MudTd DataLabel="Middle Name">@context.middleName</MudTd>
-            <MudTd DataLabel="Last Name">@context.lastName</MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+    <RowTemplate Context="user">
+        <MudTd DataLabel="Email">@user.email</MudTd>
+        <MudTd DataLabel="First Name">@user.firstName</MudTd>
+        <MudTd DataLabel="Middle Name">@user.middleName</MudTd>
+        <MudTd DataLabel="Last Name">@user.lastName</MudTd>
+    </RowTemplate>
+</TableComponent>
 }
+
 else if (_activeIndex == 1)
 {
-    <MudTable T="ApplicationsDTO" @ref="applicationsTable" ServerData="LoadApplicationsServerData">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Application Management</MudText>
-            <MudSpacer />
-            <MudTextField T="string"
-                          @bind-Value="searchStringApp"
-                          Immediate="true"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0" />
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled" 
-                       Class="theme-button theme-button-active" 
-                       StartIcon="@Icons.Material.Filled.Add" 
-                       OnClick="OpenAddApplicationDialog">
-                Add
-            </MudButton>
-        </ToolBarContent>
-        <HeaderContent>
+    <TableComponent TItem="ApplicationsDTO"
+                    @ref="applicationsTable"
+                    Title="Application Management"
+                    EnableSearch="true"
+                    AddButtonText="Add"
+                    OnAddClicked="OpenAddApplicationDialog"
+                    LoadServerData="LoadApplicationsServerData"
+                    SearchString="@searchStringApp"
+                    SearchStringChanged="@((string val) => searchStringApp = val)">
+
+        <HeaderTemplate>
             <MudTh>Id</MudTh>
             <MudTh>Application</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Action</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Id">@context.applicationId</MudTd>
-            <MudTd DataLabel="Application">@context.applicationName</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
+        </HeaderTemplate>
+
+        <RowTemplate Context="app">
+            <MudTd DataLabel="Id">@app.applicationId</MudTd>
+            <MudTd DataLabel="Application">@app.applicationName</MudTd>
+            <MudTd DataLabel="Description">@app.Description</MudTd>
             <MudTd DataLabel="Action">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => OpenEditApplicationDialog(context))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium" OnClick="@(() => ConfirmDelete(context.applicationId, "application"))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
+                                   OnClick="@(() => OpenEditApplicationDialog(app))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium"
+                                   OnClick="@(() => ConfirmDelete(app.applicationId, "application"))" />
             </MudTd>
         </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+    </TableComponent>
 }
 
 else if (_activeIndex == 2)
 {
-    <MudTable T="SubMenusDTO" @ref="subMenusTable" ServerData="LoadSubMenusServerData">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">SubMenu Management</MudText>
-            <MudSpacer />
-            <MudTextField T="string"
-                          @bind-Value="searchStringSub"
-                          Immediate="true"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0" />
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled"
-                       Class="theme-button theme-button-active"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddSubMenuDialog">
-                Add
-            </MudButton>
-        </ToolBarContent>
+    <TableComponent TItem="SubMenusDTO"
+                    @ref="subMenusTable"
+                    Title="SubMenu Management"
+                    EnableSearch="true"
+                    AddButtonText="Add"
+                    OnAddClicked="OpenAddSubMenuDialog"
+                    LoadServerData="LoadSubMenusServerData"
+                    SearchString="@searchStringSub"
+                    SearchStringChanged="@((string val) => searchStringSub = val)">
+              
+    <HeaderTemplate>
+        <MudTh>Id</MudTh>
+        <MudTh>SubMenu</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderTemplate>
 
-        <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>SubMenu</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>Action</MudTh>
-        </HeaderContent>
-
-        <RowTemplate>
-            <MudTd DataLabel="Id">@context.subMenuId</MudTd>
-            <MudTd DataLabel="Application">@context.subMenuName</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd DataLabel="Action">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
-                               OnClick="@(() => OpenEditSubMenuDialog(context))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium"
-                               OnClick="@(() => ConfirmDelete(context.subMenuId, "submenu"))" />
-            </MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+    <RowTemplate Context="sub">
+        <MudTd DataLabel="Id">@sub.subMenuId</MudTd>
+        <MudTd DataLabel="SubMenu">@sub.subMenuName</MudTd>
+        <MudTd DataLabel="Description">@sub.Description</MudTd>
+        <MudTd DataLabel="Action">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                           Color="Color.Primary" 
+                           Size="Size.Medium" 
+                           OnClick="@(() => OpenEditSubMenuDialog(sub))" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                           Color="Color.Error" 
+                           Size="Size.Medium" 
+                           OnClick="@(() => ConfirmDelete(sub.subMenuId, "submenu"))" />
+        </MudTd>
+    </RowTemplate>
+</TableComponent>
 }
 
 else if (_activeIndex == 3)
 {
-    <MudTable T="RolesDTO" @ref="rolesTable" ServerData="LoadRolesServerData">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Role Management</MudText>
-            <MudSpacer />
-            <MudTextField T="string"
-                          @bind-Value="searchStringRole"
-                          Immediate="true"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0" />
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled"
-                       Class="theme-button theme-button-active"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddRoleDialog">
-                Add
-            </MudButton>
-        </ToolBarContent>
+    <TableComponent TItem="RolesDTO"
+                    @ref="rolesTable"
+                    Title="Role Management"
+                    EnableSearch="true"
+                    AddButtonText="Add"
+                    OnAddClicked="OpenAddRoleDialog"
+                    LoadServerData="LoadRolesServerData"
+                    SearchString="@searchStringRole"
+                    SearchStringChanged="@((string val) => searchStringRole = val)">
 
-        <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>Role</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>Action</MudTh>
-        </HeaderContent>
+    <HeaderTemplate>
+        <MudTh>Id</MudTh>
+        <MudTh>Role</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderTemplate>
 
-        <RowTemplate>
-            <MudTd DataLabel="Id">@context.roleId</MudTd>
-            <MudTd DataLabel="Application">@context.roleName</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd DataLabel="Action">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
-                               OnClick="@(() => OpenEditRoleDialog(context))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium"
-                               OnClick="@(() => ConfirmDelete(context.roleId, "role"))" />
-            </MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+    <RowTemplate Context="role">
+        <MudTd DataLabel="Id">@role.roleId</MudTd>
+        <MudTd DataLabel="Role">@role.roleName</MudTd>
+        <MudTd DataLabel="Description">@role.Description</MudTd>
+        <MudTd DataLabel="Action">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                           Color="Color.Primary" 
+                           Size="Size.Medium" 
+                           OnClick="@(() => OpenEditRoleDialog(role))" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                           Color="Color.Error" 
+                           Size="Size.Medium" 
+                           OnClick="@(() => ConfirmDelete(role.roleId, "role"))" />
+        </MudTd>
+    </RowTemplate>
+</TableComponent>
 }
 
 else if (_activeIndex == 4)
 {
-    <MudTable T="AppSubRolesDTO" @ref="appSubRolesTable" ServerData="LoadUserAppSubRolesServerData">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Users' AppSubRole Management</MudText>
-            <MudSpacer />
-            <MudTextField T="string"
-                          @bind-Value="searchStringAppSubRole"
-                          Immediate="true"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0" />
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled"
-                       Class="theme-button theme-button-active"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="OpenAddAppSubRoleDialog">
-                Add
-            </MudButton>
-        </ToolBarContent>
+    <TableComponent TItem="AppSubRolesDTO"
+                    @ref="appSubRolesTable"
+                    Title="Users' AppSubRole Management"
+                    EnableSearch="true"
+                    AddButtonText="Add"
+                    OnAddClicked="OpenAddAppSubRoleDialog"
+                    LoadServerData="LoadUserAppSubRolesServerData"
+                    SearchString="@searchStringAppSubRole"
+                    SearchStringChanged="@((string val) => searchStringAppSubRole = val)">
 
-        <HeaderContent>
-            <MudTh>UserAppSubRole Id</MudTh>
-            <MudTh>User Id</MudTh>
-            <MudTh>Application Id</MudTh>
-            <MudTh>SubMenu Id</MudTh>
-            <MudTh>Role Id</MudTh>
-            <MudTh>Action</MudTh>
-        </HeaderContent>
+    <HeaderTemplate>
+        <MudTh>Email</MudTh>
+        <MudTh>Application</MudTh>
+        <MudTh>SubMenu</MudTh>
+        <MudTh>Role</MudTh>
+        <MudTh>Action</MudTh>
+    </HeaderTemplate>
 
-        <RowTemplate>
-            <MudTd DataLabel="Id">@context.UserSubRoleId</MudTd>
-            <MudTd DataLabel="Id">@context.UserId</MudTd>
-            <MudTd DataLabel="Application Id">@context.AppId</MudTd>
-            <MudTd DataLabel="SubMenu Id">@context.Submenu</MudTd>
-            <MudTd DataLabel="Role Id">@context.RoleId</MudTd>
-            <MudTd DataLabel="Action">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
-                               OnClick="@(() => OpenEditAppSubRoleDialog(context))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Medium"
-                               OnClick="@(() => ConfirmDelete(context.UserSubRoleId, "appsubrole"))" />
-            </MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager />
-        </PagerContent>
-    </MudTable>
+    <RowTemplate Context="appSubRole">
+        <MudTd DataLabel="Email">@appSubRole.UserEmail</MudTd>
+        <MudTd DataLabel="Application">@appSubRole.AppName</MudTd>
+        <MudTd DataLabel="SubMenu">@appSubRole.SubMenuName</MudTd>
+        <MudTd DataLabel="Role">@appSubRole.RoleName</MudTd>
+        <MudTd DataLabel="Action">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                           Color="Color.Primary" 
+                           Size="Size.Medium" 
+                           OnClick="@(() => OpenEditAppSubRoleDialog(appSubRole))" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                           Color="Color.Error" 
+                           Size="Size.Medium" 
+                           OnClick="@(() => ConfirmDelete(appSubRole.AppRoleId, "appsubrole"))" />
+        </MudTd>
+    </RowTemplate>
+</TableComponent>
 }
 
 @code {
@@ -250,11 +197,11 @@ else if (_activeIndex == 4)
     private string _searchStringRole;
     private string _searchStringAppSubRole;
     private AddApplicationDTO addApplication = new AddApplicationDTO();
-    private MudTable<UsersDTO> usersTable;
-    private MudTable<ApplicationsDTO> applicationsTable;
-    private MudTable<SubMenusDTO> subMenusTable;
-    private MudTable<RolesDTO> rolesTable;
-    private MudTable<AppSubRolesDTO> appSubRolesTable;
+    private TableComponent<UsersDTO> usersTable;
+    private TableComponent<ApplicationsDTO> applicationsTable;
+    private TableComponent<SubMenusDTO> subMenusTable;
+    private TableComponent<RolesDTO> rolesTable;
+    private TableComponent<AppSubRolesDTO> appSubRolesTable;
 
     private void OnTabChanged(int index)
     {
@@ -268,72 +215,91 @@ else if (_activeIndex == 4)
             : "philsys-tab-pannel philsys-tab-pannel-inactive";
     }
 
+    // Generic Functions
+    private void UpdateSearch<T>(ref string field, string value, TableComponent<T> table) where T : class
+    {
+        if (field != value)
+        {
+            field = value;
+            table?.TableRef.ReloadServerData();
+        }
+    }
 
+    private async Task OpenAddDialog<TComponent, TDto>(string title, Func<TDto, Task> onAdd)
+    where TComponent : ComponentBase
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<TComponent>(title, options);
+        var result = await dialog.Result;
+
+        if (result?.Data is TDto dto)
+        {
+            await onAdd(dto);
+        }
+    }
+
+    private async Task OpenEditDialog<TComponent, TDto>(string title, string paramName, TDto dto, Func<TDto, Task> onEdit)
+    where TComponent : ComponentBase
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = false,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var parameters = new DialogParameters
+        {
+            { paramName, dto }
+        };
+
+        var dialog = await DialogService.ShowAsync<TComponent>(title, parameters, options);
+        var result = await dialog.Result;
+
+        if (result?.Data is TDto editedDto)
+        {
+            await onEdit(editedDto);
+        }
+    }
+
+    // Search 
     private string searchStringUser
     {
         get => _searchStringUser;
-        set
-        {
-            if (_searchStringUser != value)
-            {
-                _searchStringUser = value;
-                usersTable?.ReloadServerData();
-            }
-        }
+        set => UpdateSearch(ref _searchStringUser, value, usersTable);
     }
 
     private string searchStringApp
     {
         get => _searchStringApp;
-        set
-        {
-            if (_searchStringApp != value)
-            {
-                _searchStringApp = value;
-                applicationsTable?.ReloadServerData();
-            }
-        }
+        set => UpdateSearch(ref _searchStringApp, value, applicationsTable);
     }
 
     private string searchStringSub
     {
         get => _searchStringSub;
-        set
-        {
-            if (_searchStringSub != value)
-            {
-                _searchStringSub = value;
-                subMenusTable?.ReloadServerData();
-            }
-        }
+        set => UpdateSearch(ref _searchStringSub, value, subMenusTable);
     }
 
     private string searchStringRole
     {
         get => _searchStringRole;
-        set
-        {
-            if (_searchStringRole != value)
-            {
-                _searchStringRole = value;
-                rolesTable?.ReloadServerData();
-            }
-        }
+        set => UpdateSearch(ref _searchStringRole, value, rolesTable);
     }
 
     private string searchStringAppSubRole
     {
         get => _searchStringAppSubRole;
-        set
-        {
-            if (_searchStringAppSubRole != value)
-            {
-                _searchStringAppSubRole = value;
-                appSubRolesTable?.ReloadServerData();
-            }
-        }
+        set => UpdateSearch(ref _searchStringAppSubRole, value, appSubRolesTable);
     }
 
+    // Load Tables
     private async Task<TableData<UsersDTO>> LoadUsersServerData(TableState state, CancellationToken cancellationToken)
     {
         var result = await UserManagementService.GetUsersAsync(
@@ -350,9 +316,6 @@ else if (_activeIndex == 4)
 
     private async Task<TableData<ApplicationsDTO>> LoadApplicationsServerData(TableState state, CancellationToken cancellationToken)
     {
-        string sortColumn = state.SortLabel; 
-        bool descending = state.SortDirection == SortDirection.Descending;
-
         var result = await UserManagementService.GetApplicationsAsync(
             state.Page + 1,
             state.PageSize,
@@ -409,207 +372,32 @@ else if (_activeIndex == 4)
         };
     }
 
+    // Add and Edit Dialog
     private async Task OpenAddApplicationDialog()
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
-
-        var dialog = await DialogService.ShowAsync<AddApplicationComponent>("Add Application", options);
-
-        var result = await dialog.Result;
-
-        if  (result!.Data is AddApplicationDTO addedApplication)
-        {
-            await AddApplication(addedApplication);
-        }
-    }
+     => await OpenAddDialog<AddApplicationComponent, AddApplicationDTO>("Add Application", AddApplication);
 
     private async Task OpenAddSubMenuDialog()
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
-
-        var dialog = await DialogService.ShowAsync<AddSubMenuComponent>("Add SubMenu", options);
-
-        var result = await dialog.Result;
-
-        if (result!.Data is AddSubMenuDTO addedSubMenu)
-        {
-            await AddSubMenu(addedSubMenu);
-        }
-    }
+     => await OpenAddDialog<AddSubMenuComponent, AddSubMenuDTO>("Add SubMenu", AddSubMenu);
 
     private async Task OpenAddRoleDialog()
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
-
-        var dialog = await DialogService.ShowAsync<AddRoleComponent>("Add Role", options);
-
-        var result = await dialog.Result;
-
-        if (result!.Data is AddRoleDTO addedRole)
-        {
-            await AddRole(addedRole);
-        }
-    }
+        => await OpenAddDialog<AddRoleComponent, AddRoleDTO>("Add Role", AddRole);
 
     private async Task OpenAddAppSubRoleDialog()
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
+        => await OpenAddDialog<AddAppSubRoleComponent, AddAppSubRoleDTO>("Add User's AppSubRole", AddAppSubRole);
 
-        var dialog = await DialogService.ShowAsync<AddAppSubRoleComponent>("Add User's AppSubRole", options);
+    private async Task OpenEditApplicationDialog(ApplicationsDTO app)
+      => await OpenEditDialog<EditApplicationComponent, ApplicationsDTO>("Edit Application", "Application", app, EditApplication);
 
-        var result = await dialog.Result;
-
-        if (result!.Data is AddAppSubRoleDTO addedAppSubRole)
-        {
-            await AddAppSubRole(addedAppSubRole);
-        }
-    }
-
-    private async Task OpenEditApplicationDialog(ApplicationsDTO application)
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
-
-        var parameters = new DialogParameters
-    {
-        { "Application", new ApplicationsDTO
-            {
-                applicationId = application.applicationId,
-                applicationName = application.applicationName,
-                Description = application.Description,
-                IsActive = application.IsActive
-            }
-        }
-    };
-
-        var dialog = await DialogService.ShowAsync<EditApplicationComponent>("Edit Application", parameters, options);
-
-        var result = await dialog.Result;
-
-        if (result!.Data is ApplicationsDTO editedApplication)
-        {
-            await EditApplication(editedApplication);
-        }
-    }
-
-
-    private async Task OpenEditSubMenuDialog(SubMenusDTO submenu)
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
-
-        var parameters = new DialogParameters
-    {
-        { "SubMenu", new SubMenusDTO
-            {
-                subMenuId = submenu.subMenuId,
-                subMenuName = submenu.subMenuName,
-                Description = submenu.Description,
-                IsActive = submenu.IsActive
-            }
-        }
-    };
-
-        var dialog = await DialogService.ShowAsync<EditSubMenuComponent>("Edit SubMenu", parameters, options);
-
-        var result = await dialog.Result;
-
-        if (result!.Data is SubMenusDTO editedSubMenu)
-        {
-            await EditSubMenu(editedSubMenu);
-        }
-    }
+    private async Task OpenEditSubMenuDialog(SubMenusDTO sub)
+        => await OpenEditDialog<EditSubMenuComponent, SubMenusDTO>("Edit SubMenu", "SubMenu", sub, EditSubMenu);
 
     private async Task OpenEditRoleDialog(RolesDTO role)
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
-
-        var parameters = new DialogParameters
-    {
-        { "Role", new RolesDTO
-            {
-                roleId = role.roleId,
-                roleName = role.roleName,
-                Description = role.Description
-            }
-        }
-    };
-
-        var dialog = await DialogService.ShowAsync<EditRoleComponent>("Edit Role", parameters, options);
-
-        var result = await dialog.Result;
-
-        if (result!.Data is RolesDTO editedRole)
-        {
-            await EditRole(editedRole);
-        }
-    }
+        => await OpenEditDialog<EditRoleComponent, RolesDTO>("Edit Role", "Role", role, EditRole);
 
     private async Task OpenEditAppSubRoleDialog(AppSubRolesDTO appsubrole)
-    {
-        var options = new DialogOptions
-        {
-            CloseButton = false,
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true
-        };
+        => await OpenEditDialog<EditAppSubRoleComponent, AppSubRolesDTO>("Edit UserAppSubRole", "AppSubRole", appsubrole, EditAppSubRole);
 
-        var parameters = new DialogParameters
-        {
-            { "AppSubRole", new AppSubRolesDTO
-                {
-                    UserSubRoleId = appsubrole.UserSubRoleId,
-                    UserId = appsubrole.UserId,
-                    AppId = appsubrole.AppId,
-                    Submenu = appsubrole.Submenu,
-                    RoleId = appsubrole.RoleId
-                }
-            }
-        };
-
-        var dialog = await DialogService.ShowAsync<EditAppSubRoleComponent>("Edit UserAppSubRole", parameters, options);
-
-        var result = await dialog.Result;
-
-        if (result!.Data is AppSubRolesDTO editedAppSubRole)
-        {
-            await EditAppSubRole(editedAppSubRole);
-        }
-    }
-
+    // Delete Dialog
     private async Task ConfirmDelete(int id, string table)
     {
         var parameters = new DialogParameters
@@ -644,88 +432,89 @@ else if (_activeIndex == 4)
         }
     }
 
+    // Command Execution 
     private async Task DeleteApplication(int AppId)
     {
         await UserManagementService.DeleteApplicationAsync(AppId);
-        await applicationsTable.ReloadServerData();
+        await applicationsTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task DeleteSubMenu(int SubMenuId)
     {
         await UserManagementService.DeleteSubMenuAsync(SubMenuId);
-        await subMenusTable.ReloadServerData();
+        await subMenusTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task DeleteRole(int RoleId)
     {
         await UserManagementService.DeleteRoleAsync(RoleId);
-        await rolesTable.ReloadServerData();
+        await rolesTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task DeleteAppSubRole(int AppSubRoleId)
     {
         await UserManagementService.DeleteUserAppSbRoleAsync(AppSubRoleId);
-        await appSubRolesTable.ReloadServerData();
+        await appSubRolesTable.TableRef.ReloadServerData();
         return;
     }
-
 
     private async Task AddApplication(AddApplicationDTO addApplicationDTO)
     {
         await UserManagementService.AddApplicationAsync(addApplicationDTO);
-        await applicationsTable.ReloadServerData();
+        await applicationsTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task AddSubMenu(AddSubMenuDTO addSubMenuDTO)
     {
         await UserManagementService.AddSubMenuAsync(addSubMenuDTO);
-        await subMenusTable.ReloadServerData();
+        await subMenusTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task AddRole(AddRoleDTO addRoleDTO)
     {
         await UserManagementService.AddRoleAsync(addRoleDTO);
-        await rolesTable.ReloadServerData();
+        await rolesTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task AddAppSubRole(AddAppSubRoleDTO addAppSubRoleDTO)
     {
         await UserManagementService.AddAppSubRoleAsync(addAppSubRoleDTO);
-        await appSubRolesTable.ReloadServerData();
+        await appSubRolesTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task EditApplication(ApplicationsDTO editApplicationDTO)
     {
         await UserManagementService.EditApplicationAsync(editApplicationDTO);
-        await applicationsTable.ReloadServerData();
+        await applicationsTable.TableRef.ReloadServerData();
+        StateHasChanged();
         return;
     }
 
     private async Task EditSubMenu(SubMenusDTO editSubMenuDTO)
     {
         await UserManagementService.EditSubMenuAsync(editSubMenuDTO);
-        await subMenusTable.ReloadServerData();
+        await subMenusTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task EditRole(RolesDTO editRoleDTO)
     {
         await UserManagementService.EditRoleAsync(editRoleDTO);
-        await rolesTable.ReloadServerData();
+        await rolesTable.TableRef.ReloadServerData();
         return;
     }
 
     private async Task EditAppSubRole(AppSubRolesDTO editAppSubRoleDTO)
     {
         await UserManagementService.EditAppSubRoleAsync(editAppSubRoleDTO);
-        await appSubRolesTable.ReloadServerData();
+        await appSubRolesTable.TableRef.ReloadServerData();
         return;
     }
 }

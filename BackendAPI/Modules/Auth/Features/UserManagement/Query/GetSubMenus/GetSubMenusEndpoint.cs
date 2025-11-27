@@ -27,7 +27,8 @@ public class GetSubMenusEndpoint : ICarterModule
 		.Produces<GetSubMenusEndpointResponse>(StatusCodes.Status200OK)
 		.ProducesProblem(StatusCodes.Status400BadRequest)
 		.WithSummary("Get SubMenus")
-		.WithDescription("Retrieves a list of submenus.");
+		.WithDescription("Retrieves a list of submenus.")
+	    .RequireAuthorization();
 	}
 }
 
