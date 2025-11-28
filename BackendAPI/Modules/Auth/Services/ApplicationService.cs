@@ -16,7 +16,15 @@ public class ApplicationService : IApplicationService
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Fetching application with pagination: {@PaginationRequest}", paginationRequest);
+		var logContext = new
+		{
+			Action = "GetApplications",
+			Step = "FetchingApplications",
+			Pagination = paginationRequest,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Fetching application with pagination: {@Context}", logContext);
 
 		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
 			_authRepository.GetApplicationsAsync(paginationRequest, cancellationToken) :
@@ -25,10 +33,18 @@ public class ApplicationService : IApplicationService
 
 	public async Task<bool> DeleteApplicationAsync(int AppId)
 	{
+		var logContext = new
+		{
+			Action = "DeleteApplication",
+			Step = "FetchForDelete",
+			AppId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var application = await _authRepository.GetApplicationAsync(AppId);
 		if (application == null)
 		{
-			_logger.LogError("Application with ID {AppId} was not found during delete operation.", AppId);
+			_logger.LogError("{AppId} was not found during delete operation: {@Context}", AppId, logContext);
 			throw new NotFoundException($"Application with ID {AppId} was not found.");
 		}
 		var isDeleted = await _authRepository.DeleteApplicationAsync(application); 
@@ -43,10 +59,18 @@ public class ApplicationService : IApplicationService
 
 	public async Task<ApplicationDTO> EditApplicationAsync(EditApplicationDTO applicationDTO)
 	{
+		var logContext = new
+		{
+			Action = "EditApplication",
+			Step = "FetchForUpdate",
+			AppId = applicationDTO.AppId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var existingApplication = await _authRepository.GetApplicationAsync(applicationDTO.AppId);
 		if (existingApplication == null)
 		{
-			_logger.LogError("Application with ID {AppId} was not found during update operation.", applicationDTO.AppId);
+			_logger.LogError("{AppId} was not found during update operation: {@Context}", applicationDTO.AppId, logContext);
 			throw new NotFoundException($"Application with ID {applicationDTO.AppId} was not found.");
 		}
 
