@@ -83,9 +83,9 @@ public class EmailService : IEmailService
                 <html>
                 <head>
                     <style>
-                        body {{ font-family: Arial, sans-serif; }}
-                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                        .header {{ background-color: #007bff; color: white; padding: 20px; text-align: center; }}
+                         body {{ font-family: Arial, sans-serif; border: 1px solid gray; border-radius: 4px; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px;}}
+                        .header {{ background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%); color: white; padding: 20px; text-align: center; border-radius: 4px;}}
                         .content {{ padding: 20px; background-color: #f9f9f9; }}
                         .otp-box {{ 
                             background-color: #fff; 
@@ -95,8 +95,9 @@ public class EmailService : IEmailService
                             font-size: 32px; 
                             font-weight: bold; 
                             letter-spacing: 5px;
-                            margin: 20px 0;
-                        }}
+                            margin: 20px 0;}}
+						p {{
+							  text-align: center; }}
                         .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
                     </style>
                 </head>
@@ -136,19 +137,22 @@ public class EmailService : IEmailService
                 <html>
                 <head>
                     <style>
-                        body {{ font-family: Arial, sans-serif; }}
-                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                        .header {{ background-color: #dc3545; color: white; padding: 20px; text-align: center; }}
+                        body {{ font-family: Arial, sans-serif; border: 1px solid gray; border-radius: 4px; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px;}}
+                        .header {{ background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%); color: white; padding: 20px; text-align: center; border-radius: 4px;}}
                         .content {{ padding: 20px; background-color: #f9f9f9; }}
                         .button {{ 
-                            display: inline-block;
-                            background-color: #dc3545;
-                            color: white;
-                            padding: 12px 30px;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            margin: 20px 0;
-                        }}
+							  display: block;
+							  background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
+							  color: white !important;
+							  padding: 12px 30px;
+							  text-decoration: none;
+							  border-radius: 4px;
+							  margin: 20px auto; 
+							  width: max-content;}}
+						p {{
+							  text-align: center;
+						}}
                         .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
                     </style>
                 </head>
