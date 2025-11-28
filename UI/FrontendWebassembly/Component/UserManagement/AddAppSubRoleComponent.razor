@@ -117,6 +117,15 @@
             return;
 
         await form!.Validate();
-        MudDialog!.Close(DialogResult.Ok(AppSubRole));
+
+        var notification = new AssignmentNotificationDTO
+        {
+            Gmail = Users?.FirstOrDefault(u => u.userId == AppSubRole.UserId)?.email,
+            Application = Apps?.FirstOrDefault(a => a.applicationId == AppSubRole.AppId)?.applicationName,
+            SubMenu = SubMenus?.FirstOrDefault(s => s.subMenuId == AppSubRole.SubMenuId)?.subMenuName,
+            Role = Roles?.FirstOrDefault(r => r.roleId == AppSubRole.RoleId)?.roleName
+        };
+
+        MudDialog!.Close(DialogResult.Ok(new AddAppSubRoleResult(AppSubRole, notification)));
     }
 }

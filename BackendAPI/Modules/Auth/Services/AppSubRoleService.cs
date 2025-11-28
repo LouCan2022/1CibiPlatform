@@ -3,12 +3,15 @@
 public class AppSubRoleService : IAppSubRoleService
 {
 	private readonly IAuthRepository _authRepository;
+	private readonly IEmailService _emailService;
 	private readonly ILogger<AppSubRoleService> _logger;
 
 	public AppSubRoleService(IAuthRepository authRepository,
-					   ILogger<AppSubRoleService> logger)
+						IEmailService emailService,
+					    ILogger<AppSubRoleService> logger)
 	{
 		_authRepository = authRepository;
+		_emailService = emailService;
 		_logger = logger;
 	}
 
@@ -79,5 +82,34 @@ public class AppSubRoleService : IAppSubRoleService
 	{
 		var isAdded = await _authRepository.AddAppSubRoleAsync(appSubRole);
 		return isAdded;
+	}
+
+	public async Task<bool> SendToUserEmailAsync(AccountNotificationDTO accountNotificationDTO)
+	{
+		var logContext = new
+		{
+			Action = "SendEmailNotification",
+			Step = "SendNotification",
+			Email = accountNotificationDTO.Gmail,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Sending notification for email: {@Context}", logContext);
+
+		var otpBody = _emailService.SendNotificationBody(accountNotificationDTO.Gmail!, accountNotificationDTO.Application!, accountNotificationDTO.SubMenu!, accountNotificationDTO.Role!);
+
+		var isSent = await _emailService.SendEmailAsync(
+			toEmail: accountNotificationDTO.Gmail!,
+			subject: "Account Assignment Notification",
+			body: otpBody
+		);
+
+		if (!isSent)
+		{
+			_logger.LogError("Failed to send Notification email to: {@Context}", logContext);
+			throw new InternalServerException("Failed to send Notification email.");
+		}
+
+		return isSent;
 	}
 }

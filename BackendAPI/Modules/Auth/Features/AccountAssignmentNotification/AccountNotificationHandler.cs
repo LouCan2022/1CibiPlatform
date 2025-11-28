@@ -1,0 +1,19 @@
+﻿namespace Auth.Features.AccountAssignmentNotification;
+public record AccountNotificationCommand(AccountNotificationDTO AccountNotificationDTO) : ICommand<AccountNotificationResult>;
+public record AccountNotificationResult(bool IsSent);
+public class AccountNotificationHandler : ICommandHandler<AccountNotificationCommand, AccountNotificationResult>
+{
+	private readonly IAppSubRoleService _appSubRoleService;
+	public AccountNotificationHandler(IAppSubRoleService appSubRoleService)
+	{
+		_appSubRoleService = appSubRoleService;
+	}
+
+	public async Task<AccountNotificationResult> Handle(AccountNotificationCommand request, CancellationToken cancellationToken)
+	{
+
+		var result = await _appSubRoleService.SendToUserEmailAsync(request.AccountNotificationDTO);
+
+		return new AccountNotificationResult(result);
+	}
+}

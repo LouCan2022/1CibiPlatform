@@ -14,6 +14,7 @@ public class EmailService : IEmailService
 	private readonly string _smtpHost;
 	private readonly int _smtpPort;
 	private readonly int _expirationInMinutes;
+	private readonly string _onePlatformLink;
 
 	public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
 	{
@@ -28,6 +29,8 @@ public class EmailService : IEmailService
 		_smtpHost = _configuration["Email:Gmail:SmtpHost"] ?? "smtp.gmail.com";
 		_smtpPort = int.Parse(_configuration["Email:Gmail:SmtpPort"] ?? "587");
 		_expirationInMinutes = int.Parse(_configuration["Email:OtpExpirationInMinutes"] ?? "15");
+		_onePlatformLink = _configuration["Email:OnePlatformLink"]
+			?? throw new InvalidOperationException("Email:OnePlatformLink:OnePlatformLink not configured"); ;
 	}
 
 	public async Task<bool> SendEmailAsync(
@@ -174,6 +177,65 @@ public class EmailService : IEmailService
                     </div>
                 </body>
                 </html>";
+
+		return body;
+	}
+
+	public string SendNotificationBody(
+		string gmail,
+		string application,
+		string submenu,
+		string role
+		)
+	{
+		string subject = "OnePlatform Account Assignment Notification";
+		string body = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; border: 1px solid gray; border-radius: 4px; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px;}}
+                        .header {{ background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%); color: white; padding: 20px; text-align: center; border-radius: 4px;}}
+                        .content {{ padding: 20px; background-color: #f9f9f9; }}
+                        .button {{ 
+							  display: block;
+							  background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
+							  color: white !important;
+							  padding: 12px 30px;
+							  text-decoration: none;
+							  border-radius: 4px;
+							  margin: 20px auto; 
+							  width: max-content;}}
+						p {{
+							  text-align: center;
+						}}
+                        .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <h1>OnePlatform Account Assigned</h1>
+                        </div>
+                        <div class='content'>
+                            <p>Hello {gmail},</p>
+							<p>Your account has been successfully assigned the following in OnePlatform:</p>
+						<ul>
+							<li><strong>Application:</strong> {application}</li>
+							<li><strong>Submenu:</strong> {submenu}</li>
+							<li><strong>Role:</strong> {role}</li>
+						</ul>
+						<p>You can now access the assigned application and perform tasks according to your role.</p>
+						<a href='{_onePlatformLink}' class='button'>Go to OnePlatform</a>
+						<p>If you did not expect this assignment, please contact your administrator immediately.</p>
+					</div>
+					<div class='footer'>
+						<p>&copy; 2025 NoSent. All rights reserved.</p>
+					</div>
+            </div>
+        </body>
+        </html>";
 
 		return body;
 	}
