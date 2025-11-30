@@ -16,7 +16,15 @@ public class RoleService : IRoleService
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Fetching role with pagination: {@PaginationRequest}", paginationRequest);
+		var logContext = new
+		{
+			Action = "GetRoles",
+			Step = "FetchingRoles",
+			Pagination = paginationRequest,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Fetching role with pagination: {@Context}", logContext);
 
 		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
 			_authRepository.GetRolesAsync(paginationRequest, cancellationToken) :
@@ -25,10 +33,18 @@ public class RoleService : IRoleService
 
 	public async Task<bool> DeleteRoleAsync(int RoleId)
 	{
+		var logContext = new
+		{
+			Action = "DeleteRole",
+			Step = "FetchForDelete",
+			RoleId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var role = await _authRepository.GetRoleAsync(RoleId);
 		if (role == null)
 		{
-			_logger.LogError("Role with ID {RoleId} was not found during delete operation.", RoleId);
+			_logger.LogError("{RoleId} was not found during delete operation: {@Context}", RoleId, logContext);
 			throw new NotFoundException($"Role with ID {RoleId} was not found.");
 		}
 		var isDeleted = await _authRepository.DeleteRoleAsync(role);
@@ -43,10 +59,18 @@ public class RoleService : IRoleService
 
 	public async Task<RoleDTO> EditRoleAsync(EditRoleDTO roleDTO)
 	{
+		var logContext = new
+		{
+			Action = "EditRole",
+			Step = "FetchForUpdate",
+			roleDTO.RoleId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var existingRole = await _authRepository.GetRoleAsync(roleDTO.RoleId);
 		if (existingRole == null)
 		{
-			_logger.LogError("Role with ID {RoleId} was not found during update operation.", roleDTO.RoleId);
+			_logger.LogError("{RoleId} was not found during update operation: {@Context}", roleDTO.RoleId, logContext);
 			throw new NotFoundException($"Role with ID {roleDTO.RoleId} was not found.");
 		}
 

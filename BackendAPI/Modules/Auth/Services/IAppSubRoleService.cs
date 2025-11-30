@@ -10,4 +10,6 @@ public interface IAppSubRoleService
 
 	Task<AppSubRoleDTO> EditAppSubRoleAsync(EditAppSubRoleDTO appSubRoleDTO);
 	Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO appSubRole);
+
+	Task<bool> SendToUserEmailAsync(AccountNotificationDTO accountNotificationDTO);
 }

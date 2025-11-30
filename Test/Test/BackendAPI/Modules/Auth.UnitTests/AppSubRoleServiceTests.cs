@@ -185,5 +185,30 @@ public class AppSubRoleServiceTests : IClassFixture<AuthServiceFixture>
 		// Assert
 		result.Should().BeTrue();
 	}
+
+	[Fact]
+	public async Task SendToUserEmailAsync_ShouldReturnNotificationResponse_WhenSuccessful()
+	{
+		// Arrange
+		var request = new AccountNotificationDTO
+		{
+			Gmail = "new@example.com",
+			Application = "PhilSys",
+			SubMenu = "IDV",
+			Role = "SuperAdmin"
+		};
+
+	
+		_fixture.MockEmailService.Setup(x => x.SendNotificationBody(request.Gmail, request.Application, request.SubMenu, request.Role)).Returns("body");
+		_fixture.MockEmailService
+			.Setup(x => x.SendEmailAsync(request.Gmail, "Account Assignment Notification", It.IsAny<string>(), It.IsAny<bool>()))
+			.ReturnsAsync(true);
+
+		// Act
+		var result = await _fixture.AppSubRoleService.SendToUserEmailAsync(request);
+
+		// Assert
+		result.Should().BeTrue();
+	}
 }
 

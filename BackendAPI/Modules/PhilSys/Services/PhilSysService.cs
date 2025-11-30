@@ -24,7 +24,15 @@ public class PhilSysService : IPhilSysService
 			client_secret = clientSecret
 		};
 
-		_logger.LogInformation("Requesting PhilSys token with client_id: {ClientId}", clientId);
+		var logContext = new
+		{
+			Action = "FetchingTokenfromPhilsys",
+			Step = "RequestToken",
+			clientId,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Requesting PhilSys token with {ClientId}: {@Context}", clientId, logContext);
 
 		var response = await SendRequestAsync("auth", body);
 
@@ -32,11 +40,11 @@ public class PhilSysService : IPhilSysService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			_logger.LogError("PhilSys token request failed: {Status} - {Body}", response.StatusCode, responseBody);
+			_logger.LogError("PhilSys token request failed: {@Context}", logContext);
 			throw new InternalServerException("PhilSys token request failed.");
 		}
 
-		_logger.LogInformation("Successful Request for Token.");
+		_logger.LogInformation("Successful Request for Token: {@Context}", logContext);
 
 		var tokenData = responseBody!.data;
 
@@ -65,23 +73,30 @@ public class PhilSysService : IPhilSysService
 			face_liveness_session_id
 		};
 
+		var logContext = new
+		{
+			Action = "PostingBasicInformation",
+			Step = "Post",
+			Name=$"{first_name} {middle_name} {last_name} {suffix}",
+			Timestamp = DateTime.UtcNow
+		};
+
 		_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearer_token);
 
 		var response = await SendRequestAsync("query", body);
 
-		_logger.LogInformation("Sending basic information request for {FirstName} {MiddleName} {LastName} {Suffix}",
-								first_name, middle_name, last_name, suffix);
+		_logger.LogInformation("Sending basic information request for {@Context}", logContext);
 
 		if (!response.IsSuccessStatusCode)
 		{
 			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponseDTO>();
 
-			_logger.LogError("Basic Information request failed: {Status} - {Body}", response.StatusCode, errorResponse);
+			_logger.LogError("Basic Information request failed: {@Context}", logContext);
 
 			throw new InternalServerException("Basic Information request failed. Please contact the administrator.");
 		}
 
-		_logger.LogInformation("Successful Basic Information Request.");
+		_logger.LogInformation("Successful Basic Information Request: {@Context}", logContext);
 
 		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>();
 
@@ -104,22 +119,30 @@ public class PhilSysService : IPhilSysService
 			face_liveness_session_id
 		};
 
+		var logContext = new
+		{
+			Action = "PostingPCN",
+			Step = "Post",
+			PCN = value,
+			Timestamp = DateTime.UtcNow
+		};
+
 		_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearer_token);
 
 		var response = await SendRequestAsync("query/qr", body);
 
-		_logger.LogInformation("Sending PCN request for {PCN}", value);
+		_logger.LogInformation("Sending PCN request for: {@Context}", logContext);
 
 		if (!response.IsSuccessStatusCode)
 		{
 			var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponseDTO>();
 
-			_logger.LogError("PCN request failed: {Status} - {Body}", response.StatusCode, errorResponse);
+			_logger.LogError("PCN request failed: {@Context}", logContext);
 
 			throw new InternalServerException("PCN request failed. Please contact the administrator.");
 		}
 
-		_logger.LogInformation("Successful PCN Request.");
+		_logger.LogInformation("Successful PCN Request: {@Context}", logContext);
 
 		var responseBody = await response.Content.ReadFromJsonAsync<PostBasicInformationOrPCNResponse>();
 

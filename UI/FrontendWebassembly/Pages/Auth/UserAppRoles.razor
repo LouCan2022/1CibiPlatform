@@ -383,7 +383,18 @@ else if (_activeIndex == 4)
         => await OpenAddDialog<AddRoleComponent, AddRoleDTO>("Add Role", AddRole);
 
     private async Task OpenAddAppSubRoleDialog()
-        => await OpenAddDialog<AddAppSubRoleComponent, AddAppSubRoleDTO>("Add User's AppSubRole", AddAppSubRole);
+    {
+        await OpenAddDialog<AddAppSubRoleComponent, AddAppSubRoleResult>(
+            "Add User's AppSubRole",
+            async result =>
+            {
+                var appSubRoleDto = result.AppSubRole;
+                var notificationDto = result.Notification;
+
+                await AddAppSubRole(appSubRoleDto);
+                await UserManagementService.SendNotificationAsync(notificationDto);
+            });
+    }
 
     private async Task OpenEditApplicationDialog(ApplicationsDTO app)
       => await OpenEditDialog<EditApplicationComponent, ApplicationsDTO>("Edit Application", "Application", app, EditApplication);

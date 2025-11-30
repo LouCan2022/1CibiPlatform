@@ -16,11 +16,22 @@ public class LivenessSessionService
 	}
 	public async Task<TransactionStatusResponseDTO> IsLivenessUsedAsync(string HashToken)
 	{
+		var logContext = new
+		{
+			Action = "CheckingPhilSysTransactionStatus",
+			Step = "StartChecking",
+			HashToken,
+			Timestamp = DateTime.UtcNow
+		};
+
+
+		_logger.LogInformation("Checking Transaction Status for HashToken: {@Context}", logContext);
+
 		var status = await _philSysRepository.GetLivenessSessionStatusAsync(HashToken);
 
 		if (status == null)
 		{
-			_logger.LogWarning("There is no transaction for {Token}", HashToken);
+			_logger.LogError("Checking PhilSys Transaction Failed: There is no transaction for HashToken: {@Context}", logContext);
 			throw new InternalServerException($"There is no such transaction created for your liveness check.");
 		}
 
@@ -28,7 +39,7 @@ public class LivenessSessionService
 
 		if (hashTokenChecker == null)
 		{
-			_logger.LogWarning("There is no transaction for {Token}", HashToken);
+			_logger.LogError("Checking PhilSys Transaction Failed: There is no transaction for HashToken: {@Context}", logContext);
 			throw new InternalServerException($"There is no such transaction created for your liveness check.");
 		}
 
@@ -36,11 +47,11 @@ public class LivenessSessionService
 
 		if (!isTokenValid)
 		{
-			_logger.LogWarning("Invalid Token Provided: {Token}", HashToken);
+			_logger.LogError("Checking PhilSys Transaction Failed:  Invalid Token Provided: {@Context}", logContext);
 			throw new InternalServerException("Unable to Proceed. Invalid Token provided.");
 		}
 
-		_logger.LogInformation("Successfully received the transaction record for {Token}.", HashToken);
+		_logger.LogInformation("Successfully received the transaction record for HashToken: {@Context}", logContext);
 
 		return status.Adapt<TransactionStatusResponseDTO>();
 	}

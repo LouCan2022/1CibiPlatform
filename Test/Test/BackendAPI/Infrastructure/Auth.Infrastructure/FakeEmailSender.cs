@@ -12,4 +12,7 @@ public class FakeEmailSender : IEmailService
 
 	public string SendPasswordResetBody(string name, string resetLink, int expireMins)
 		=> $"Hello {name}, to reset your password, please use the following link: {resetLink}. This link will expire in {expireMins} minutes.";
+
+	public string SendNotificationBody(string gmail, string application, string submenu, string role)
+		=> $"Hello {gmail}, you have been granted access to {application} — {submenu} with the role of {role}.";
 }

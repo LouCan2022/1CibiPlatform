@@ -1,7 +1,4 @@
-﻿using Auth.Data.Entities;
-using MediatR;
-
-namespace Auth.Services;
+﻿namespace Auth.Services;
 
 public class RegisterService : IRegisterService
 {

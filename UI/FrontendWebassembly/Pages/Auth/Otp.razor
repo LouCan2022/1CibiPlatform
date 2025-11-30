@@ -4,7 +4,7 @@
 @inject IAuthService IAuthService
 @inject IJSRuntime JSRuntime
 @inject LocalStorageService LocalStorageService
-@implements IDisposable
+@implements IAsyncDisposable
 
 @if (!_isLoading)
 {
@@ -333,10 +333,10 @@ else
         isResendSuccess = false;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         Navigation.LocationChanged -= HandleLocationChanged;
-        RemoveNavigationLock().GetAwaiter().GetResult();
+        await RemoveNavigationLock();
     }
 
 }

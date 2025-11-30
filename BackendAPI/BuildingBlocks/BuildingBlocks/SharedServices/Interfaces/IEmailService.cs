@@ -7,4 +7,6 @@ public interface IEmailService
 	string SendOtpBody(string name, string otpCode);
 
 	string SendPasswordResetBody(string name, string resetLink, int expireMins);
+
+	string SendNotificationBody(string gmail, string application, string submenu, string role);
 }

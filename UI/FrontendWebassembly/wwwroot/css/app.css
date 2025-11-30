@@ -254,9 +254,17 @@ code {
     color: white !important;
 }
 
-.philsys-tab-pannel-inactive {
+.mud-theme-light .philsys-tab-pannel-inactive {
     background-color: var(--mud-palette-surface) !important;
     color: black;
+}
+
+.mud-theme-dark .philsys-tab-pannel-active {
+    color: white !important;
+}
+
+.mud-theme-dark .philsys-tab-pannel-inactive {
+    color: white !important; 
 }
 
 .philsys-custom-tabs .mud-tabs-scroll-button {
