@@ -29,8 +29,8 @@ public class EmailService : IEmailService
 		_smtpHost = _configuration["Email:Gmail:SmtpHost"] ?? "smtp.gmail.com";
 		_smtpPort = int.Parse(_configuration["Email:Gmail:SmtpPort"] ?? "587");
 		_expirationInMinutes = int.Parse(_configuration["Email:OtpExpirationInMinutes"] ?? "15");
-		_onePlatformLink = _configuration["Email:OnePlatformLink"]
-			?? throw new InvalidOperationException("Email:OnePlatformLink:OnePlatformLink not configured"); ;
+		_onePlatformLink = _configuration["PhilSys:LivenessBaseUrl"]
+			?? throw new InvalidOperationException("OnePlatformLink not configured"); ;
 	}
 
 	public async Task<bool> SendEmailAsync(
