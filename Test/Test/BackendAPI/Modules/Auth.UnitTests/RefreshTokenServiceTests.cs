@@ -4,6 +4,7 @@ using Test.BackendAPI.Modules.Auth.UnitTests.Fixture;
 using Moq;
 using Auth.DTO;
 using BuildingBlocks.Exceptions;
+using Auth.Data.Entities;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests;
 
@@ -57,7 +58,7 @@ public class RefreshTokenServiceTests : IClassFixture<AuthServiceFixture>
 		_fixture.MockAuthRepository.Setup(x => x.GetNewUserDataAsync(userId)).ReturnsAsync((UserDataDTO?)null);
 
 		// Act
-		Func<Task> act = async () => await service.GetNewAccessTokenAsync(userId, "anytoken");
+		Func<Task> act = async () => await service.GetNewAccessTokenAsync(userId);
 
 		// Assert
 		await act.Should().ThrowAsync<NotFoundException>().WithMessage("Refresh Token is not found.");
@@ -71,12 +72,18 @@ public class RefreshTokenServiceTests : IClassFixture<AuthServiceFixture>
 		var userId = Guid.NewGuid();
 		// stored hash is for a different token
 		var storedHash = service.HashToken("storedtoken");
-		var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
+		var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, string.Empty, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
 
 		_fixture.MockAuthRepository.Setup(x => x.GetNewUserDataAsync(userId)).ReturnsAsync(userData);
+		_fixture.MockJwtService.Setup(x => x.GetAccessToken(It.IsAny<LoginDTO>())).Returns("token");
+
+		// set cookie present to simulate reuse by adding Cookie header
+		var context = _fixture.MockHttpContextAccessor.Object.HttpContext!;
+		context.Request.Headers["Cookie"] = $"refreshKey=sampletoken";
+
 
 		// Act
-		Func<Task> act = async () => await service.GetNewAccessTokenAsync(userId, "differenttoken");
+		Func<Task> act = async () => await service.GetNewAccessTokenAsync(userId);
 
 		// Assert
 		await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage("Invalid refresh token.");
@@ -91,8 +98,20 @@ public class RefreshTokenServiceTests : IClassFixture<AuthServiceFixture>
 		var refreshToken = "refreshtoken";
 		var storedHash = service.HashToken(refreshToken);
 		var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
+		var authRefreshToken = new AuthRefreshToken
+		{
+			Id = 1,
+			UserId = userId,
+			TokenHash = storedHash,
+			CreatedAt = DateTime.UtcNow,
+			ExpiresAt = DateTime.UtcNow.AddDays(7),
+			IsActive = true
+		};
+
 
 		_fixture.MockAuthRepository.Setup(x => x.GetNewUserDataAsync(userId)).ReturnsAsync(userData);
+		_fixture.MockAuthRepository.Setup(x => x.SearchUserRefreshToken(userId, storedHash)).ReturnsAsync(authRefreshToken);
+		_fixture.MockAuthRepository.Setup(x => x.UpdateRefreshTokenAsync(It.IsAny<AuthRefreshToken>())).ReturnsAsync(true);
 		_fixture.MockJwtService.Setup(x => x.GetAccessToken(It.IsAny<LoginDTO>())).Returns("token");
 
 		// set cookie present to simulate reuse by adding Cookie header
@@ -100,14 +119,53 @@ public class RefreshTokenServiceTests : IClassFixture<AuthServiceFixture>
 		context.Request.Headers["Cookie"] = $"refreshKey={refreshToken}";
 
 		// Act
-		var result = await service.GetNewAccessTokenAsync(userId, refreshToken);
+		var result = await service.GetNewAccessTokenAsync(userId);
 
 		// Assert
 		result.Should().NotBeNull();
-		result.Access_token.Should().Be("token");
-		result.refresh_token.Should().NotBeNullOrEmpty();
-		result.Token_type.Should().Be("bearer");
+		result.AccessToken.Should().Be("token");
+		result.RefreshToken.Should().NotBeNullOrEmpty();
+		result.TokenType.Should().Be("bearer");
 	}
+
+
+
+	[Fact]
+	public async Task GetNewAccessTokenAsync_ShouldThrow_Exception_WhenUpdateFailed()
+	{
+		// Arrange
+		var service = _fixture.RefreshTokenService;
+		var userId = Guid.NewGuid();
+		var refreshToken = "refreshtoken";
+		var storedHash = service.HashToken(refreshToken);
+		var userData = new UserDataDTO(userId, "pw", "email@example.com", "F", "L", null, storedHash, new List<int> { 1 }, new List<List<int>> { new List<int> { 1 } }, new List<int> { 1 });
+		var authRefreshToken = new AuthRefreshToken
+		{
+			Id = 1,
+			UserId = userId,
+			TokenHash = storedHash,
+			CreatedAt = DateTime.UtcNow,
+			ExpiresAt = DateTime.UtcNow.AddDays(7),
+			IsActive = true
+		};
+
+		_fixture.MockAuthRepository.Setup(x => x.GetNewUserDataAsync(userId)).ReturnsAsync(userData);
+		_fixture.MockAuthRepository.Setup(x => x.SearchUserRefreshToken(userId, storedHash)).ReturnsAsync(authRefreshToken);
+		_fixture.MockAuthRepository.Setup(x => x.UpdateRefreshTokenAsync(It.IsAny<AuthRefreshToken>())).ReturnsAsync(false);
+		_fixture.MockJwtService.Setup(x => x.GetAccessToken(It.IsAny<LoginDTO>())).Returns("token");
+
+		// set cookie present to simulate reuse by adding Cookie header
+		var context = _fixture.MockHttpContextAccessor.Object.HttpContext!;
+		context.Request.Headers["Cookie"] = $"refreshKey={refreshToken}";
+
+		// Act
+		Func<Task> act = async () => await service.GetNewAccessTokenAsync(userId);
+
+		// Assert
+		await act.Should().ThrowAsync<Exception>().WithMessage("Failed to update refresh token.");
+	}
+
+
 
 	[Fact]
 	public void ValidateHashToken_ShouldReturnTrue_ForUrlEncodedProvidedToken()

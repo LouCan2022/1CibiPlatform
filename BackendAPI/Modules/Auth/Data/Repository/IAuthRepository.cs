@@ -2,72 +2,73 @@
 
 public interface IAuthRepository
 {
+	// Get methods
 	Task<PaginatedResult<UsersDTO>> GetUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
-
 	Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<RolesDTO>> GetRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
-
 	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
-
 	Task<Authusers> GetRawUserAsync(Guid id);
-
 	Task<PasswordResetToken> GetUserTokenAsync(string token);
+	Task<AuthApplication> GetApplicationAsync(int applicationId);
+	Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId);
+	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
+	Task<AuthRole> GetRoleAsync(int roleId);
 
+	// Search methods
 	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
-
 	Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<RolesDTO>> SearchRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<AuthRefreshToken> SearchUserRefreshToken(Guid userId, string refreshToken);
+
+
+	// Save methods
 	Task<bool> SaveUserAsync(Authusers user);
-
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
-
-	Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason);
-
-	Task<bool> UpdateAuthUserPassword(Authusers authusers);
-
-	Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken);
-
-	Task<List<AuthRefreshToken>> IsUserExistAsync(Guid userId);
-
-	Task<bool> InsertOtpVerification(OtpVerification otpVerification);
-
-	Task<Authusers> IsUserEmailExistAsync(string email);
-
-	Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email, bool isUsed);
-
-	Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto);
-
-	Task<bool> UpdateVerificationCodeAsync(OtpVerification userDto);
-
-	Task<bool> UpdateValidateOtp(OtpVerification otpVerification);
-
-	Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification);
-
-	Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO);
-
 	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);
 
-	Task<AuthApplication> GetApplicationAsync(int applicationId);
-	Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId);
+	// OTP / Verification methods
+	Task<bool> InsertOtpVerification(OtpVerification otpVerification);
+	Task<OtpVerification> IsUserEmailExistInOtpVerificationAsync(string email, bool isUsed);
+	Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerificationRequestDTO);
+	Task<bool> UpdateVerificationCodeAsync(OtpVerification userDto);
+	Task<bool> UpdateValidateOtp(OtpVerification otpVerification);
+	Task<bool> DeleteOtpRecordIfExpired(OtpVerification otpVerification);
 
-	Task<bool> DeleteApplicationAsync(AuthApplication application);
+	// Update methods
+	Task<bool> UpdateRevokeReasonAsync(AuthRefreshToken authRefreshToken, string reason);
+	Task<bool> UpdateAuthUserPassword(Authusers authusers);
+	Task<bool> UpdateRefreshTokenAsync(AuthRefreshToken authRefreshToken);
+	Task<bool> UpdatePasswordResetTokenAsUsedAsync(PasswordResetToken passwordResetToken);
+
+	// Existence / lookup methods
+	Task<List<AuthRefreshToken>> IsUserExistAsync(Guid userId);
+	Task<Authusers> IsUserEmailExistAsync(string email);
+
+	// Registration
+	Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto);
+
+	// Application CRUD
 	Task<bool> AddApplicationAsync(AddApplicationDTO application);
 	Task<AuthApplication> EditApplicationAsync(AuthApplication application);
-	Task<bool> AddSubMenuAsync(AddSubMenuDTO subMenu);
-	Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu);
-	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
-	Task<AuthSubMenu> EditSubMenuAsync(AuthSubMenu subMenu);
+	Task<bool> DeleteApplicationAsync(AuthApplication application);
 
+	// SubMenu CRUD
+	Task<bool> AddSubMenuAsync(AddSubMenuDTO subMenu);
+	Task<AuthSubMenu> EditSubMenuAsync(AuthSubMenu subMenu);
+	Task<bool> DeleteSubMenuAsync(AuthSubMenu subMenu);
+
+	// AppSubRole CRUD
 	Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO appSubRole);
-	Task<bool> DeleteAppSubRoleAsync(AuthUserAppRole appSubRole);
 	Task<AuthUserAppRole> EditAppSubRoleAsync(AuthUserAppRole appSubRole);
+	Task<bool> DeleteAppSubRoleAsync(AuthUserAppRole appSubRole);
+
+	// Role CRUD
 	Task<bool> AddRoleAsync(AddRoleDTO role);
-	Task<bool> DeleteRoleAsync(AuthRole role);
-	Task<AuthRole> GetRoleAsync(int roleId);
 	Task<AuthRole> EditRoleAsync(AuthRole role);
+	Task<bool> DeleteRoleAsync(AuthRole role);
 }

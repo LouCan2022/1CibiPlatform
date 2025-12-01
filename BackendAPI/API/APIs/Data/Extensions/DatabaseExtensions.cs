@@ -1,13 +1,11 @@
-﻿using PhilSys.Data.Extensions;
-
-namespace APIs.Data.Extensions;
+﻿namespace APIs.Data.Extensions;
 
 public static class DatabaseExtensions
 {
-    public static async Task IntializeDatabaseAsync(this WebApplication app)
-    {
-        AuthDatabaseExtensions.AuthIntializeDatabaseAsync(app).GetAwaiter().GetResult();
-        CNXDatabaseExtensions.CNXIntializeDatabaseAsync(app).GetAwaiter().GetResult();
+	public static async Task IntializeDatabaseAsync(this WebApplication app)
+	{
+		AuthDatabaseExtensions.AuthIntializeDatabaseAsync(app).GetAwaiter().GetResult();
+		//CNXDatabaseExtensions.CNXIntializeDatabaseAsync(app).GetAwaiter().GetResult();
 		PhilSysDatabaseExtensions.PhilSysIntializeDatabaseAsync(app).GetAwaiter().GetResult();
-    }
+	}
 }
