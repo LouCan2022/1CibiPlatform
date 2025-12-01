@@ -1,9 +1,11 @@
 ﻿using Auth.Data.Entities;
 using Auth.DTO;
+using Auth.Features.AccountAssignmentNotification;
 using Auth.Features.UserManagement.Command.AddAppSubRole;
 using Auth.Features.UserManagement.Command.DeleteAppSubRole;
 using Auth.Features.UserManagement.Command.EditAppSubRole;
 using Auth.Features.UserManagement.Query.GetAppSubRoles;
+using Auth.Features.VerifyOtp;
 using BuildingBlocks.Exceptions;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -215,6 +217,28 @@ public class AppSubRoleIntegrationTests : BaseIntegrationTest
 
 		// Assert
 		await act.Should().ThrowAsync<NotFoundException>().WithMessage($"AppSubRole with ID 99 was not found."); ;
+	}
+
+	[Fact]
+	public async Task SendToUserEmailAsync_ShouldReturnNotificationResponse_WhenSuccessful()
+	{
+		// Arrange
+		var request = new AccountNotificationDTO
+		{
+			Gmail = "new@example.com",
+			Application = "PhilSys",
+			SubMenu = "IDV",
+			Role = "SuperAdmin"
+		};
+
+		var command = new AccountNotificationCommand(request);
+
+		// Act
+		var result = await _sender.Send(command);
+
+		// Assert
+		result.Should().NotBeNull();
+		result.IsSent.Should().BeTrue();
 	}
 
 	private async Task SeedAppSubRoleData()

@@ -20,10 +20,18 @@ public class SubMenuService : ISubMenuService
 
 	public async Task<bool> DeleteSubMenuAsync(int SubMenuId)
 	{
+		var logContext = new
+		{
+			Action = "DeleteSubMenu",
+			Step = "FetchForDelete",
+			SubMenuId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var subMenu = await _authRepository.GetSubMenuAsync(SubMenuId);
 		if (subMenu == null)
 		{
-			_logger.LogError("SubMenu with ID {SubMenuId} was not found during delete operation.", SubMenuId);
+			_logger.LogError("{SubMenuId} was not found during delete operation: {@Context}", SubMenuId, logContext);
 			throw new NotFoundException($"SubMenu with ID {SubMenuId} was not found.");
 		}
 
@@ -34,10 +42,18 @@ public class SubMenuService : ISubMenuService
 
 	public async Task<SubMenuDTO> EditSubMenuAsync(EditSubMenuDTO subMenuDTO)
 	{
+		var logContext = new
+		{
+			Action = "EditSubMenu",
+			Step = "FetchForUpdate",
+			SubMenuId = subMenuDTO.SubMenuId,
+			Timestamp = DateTime.UtcNow
+		};
+
 		var existingSubMenu = await _authRepository.GetSubMenuAsync(subMenuDTO.SubMenuId);
 		if (existingSubMenu == null)
 		{
-			_logger.LogError("SubMenu with ID {SubMenuId} was not found during update operation.", subMenuDTO!.SubMenuId);
+			_logger.LogError("{SubMenuId} was not found during update operation: {@Context}", subMenuDTO!.SubMenuId, logContext);
 			throw new NotFoundException($"SubMenu with ID {subMenuDTO.SubMenuId} was not found.");
 		}
 		existingSubMenu.SubMenuName = subMenuDTO.SubMenuName!;
@@ -52,7 +68,15 @@ public class SubMenuService : ISubMenuService
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Fetching submenus with pagination: {@PaginationRequest}", paginationRequest);
+		var logContext = new
+		{
+			Action = "GetSubMenus",
+			Step = "FetchingSubMenus",
+			Pagination = paginationRequest,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Fetching submenus with pagination: {@Context}", logContext);
 
 		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
 			_authRepository.GetSubMenusAsync(paginationRequest, cancellationToken) :

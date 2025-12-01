@@ -348,6 +348,17 @@ public class AuthPaths : IReverseProxyModule
 				}
 			),
 
+			new RouteDefinitionDTO(
+				RouteId: "SendNotificationEntryPoint",
+				MatchPath: "account/notification",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "account/notification" }
+				}
+			),
+
 			// SSO routes
 			new RouteDefinitionDTO(
 				RouteId: "SSOLoginEntryPoint",
