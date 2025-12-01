@@ -2,7 +2,7 @@
 
 public static class AppConfiguration
 {
-	#region CORS
+	#region Runtime Configuration
 	public static async Task<WebApplication> UseEnvironmentAsync(this WebApplication app)
 	{
 		app.UseForwardedHeaders();

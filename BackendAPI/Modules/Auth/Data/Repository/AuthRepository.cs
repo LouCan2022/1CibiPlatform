@@ -20,7 +20,7 @@ public class AuthRepository : IAuthRepository
 
 		var users = await _dbcontext.AuthUsers
 					.Where(a => a.IsActive)
-					.OrderBy(a => a.Id)          
+					.OrderBy(a => a.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
 					.Select(au => new UsersDTO(
@@ -49,7 +49,7 @@ public class AuthRepository : IAuthRepository
 
 		var applications = await _dbcontext.AuthApplications
 						.Where(a => a.IsActive)
-						.OrderBy(a => a.AppId)          
+						.OrderBy(a => a.AppId)
 						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 						.Take(paginationRequest.PageSize)
 						.Select(aa => new ApplicationsDTO(
@@ -77,7 +77,7 @@ public class AuthRepository : IAuthRepository
 
 		var subMenus = await _dbcontext.AuthSubmenu
 						.Where(asm => asm.IsActive)
-						.OrderBy(asm => asm.SubMenuId) 
+						.OrderBy(asm => asm.SubMenuId)
 						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 						.Take(paginationRequest.PageSize)
 						.Select(asm => new SubMenusDTO(
@@ -110,14 +110,14 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);
 
 		var users = await usersQuery
-					.OrderBy(au => au.Id)          
+					.OrderBy(au => au.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
 					.Select(au => new UsersDTO(
 						au.Id,
 						au.Email,
 						au.FirstName,
-						au.MiddleName ?? "",   
+						au.MiddleName ?? "",
 						au.LastName))
 					.AsNoTracking()
 					.ToListAsync(cancellationToken);
@@ -140,7 +140,7 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await applicationsQuery.CountAsync(cancellationToken);
 
 		var applications = await applicationsQuery
-							.OrderBy(asm => asm.AppId)      
+							.OrderBy(asm => asm.AppId)
 							.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 							.Take(paginationRequest.PageSize)
 							.Select(asm => new ApplicationsDTO(
@@ -169,7 +169,7 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await subMenusQuery.CountAsync(cancellationToken);
 
 		var subMenus = await subMenusQuery
-						.OrderBy(asm => asm.SubMenuId)   
+						.OrderBy(asm => asm.SubMenuId)
 						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 						.Take(paginationRequest.PageSize)
 						.Select(asm => new SubMenusDTO(
@@ -299,6 +299,15 @@ public class AuthRepository : IAuthRepository
 		authRefresh.RevokedAt = DateTime.UtcNow;
 
 		_dbcontext.AuthRefreshToken.Update(authRefresh);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
+
+	public async Task<bool> UpdateRefreshTokenAsync(AuthRefreshToken authRefreshToken)
+	{
+		_dbcontext.AuthRefreshToken.Update(authRefreshToken);
 
 		await _dbcontext.SaveChangesAsync();
 
@@ -517,7 +526,7 @@ public class AuthRepository : IAuthRepository
 			from asr in _dbcontext.AuthUserAppRoles.AsNoTracking()
 			join u in _dbcontext.AuthUsers.AsNoTracking()
 				on asr.UserId equals u.Id into uGroup
-			from user in uGroup.DefaultIfEmpty()   
+			from user in uGroup.DefaultIfEmpty()
 
 			join r in _dbcontext.AuthRoles.AsNoTracking()
 				on asr.RoleId equals r.RoleId into rGroup
@@ -529,19 +538,19 @@ public class AuthRepository : IAuthRepository
 
 			join s in _dbcontext.AuthSubmenu.AsNoTracking()
 				on asr.Submenu equals s.SubMenuId into sGroup
-			from sub in sGroup.DefaultIfEmpty()   
+			from sub in sGroup.DefaultIfEmpty()
 
 			orderby asr.AppRoleId
 			select new AppSubRolesDTO(
 				asr.AppRoleId,
 				asr.UserId,
-				user.Email,       
+				user.Email,
 				asr.AppId,
-				app.AppName,       
+				app.AppName,
 				asr.Submenu,
 				sub.SubMenuName,
 				asr.RoleId,
-				role.RoleName      
+				role.RoleName
 			);
 
 		var totalRecords = await baseQuery.LongCountAsync(cancellationToken);
@@ -570,7 +579,7 @@ public class AuthRepository : IAuthRepository
 			from asr in _dbcontext.AuthUserAppRoles.AsNoTracking()
 			join u in _dbcontext.AuthUsers.AsNoTracking()
 				on asr.UserId equals u.Id into uGroup
-			from user in uGroup.DefaultIfEmpty()   
+			from user in uGroup.DefaultIfEmpty()
 
 			join r in _dbcontext.AuthRoles.AsNoTracking()
 				on asr.RoleId equals r.RoleId into rGroup
@@ -676,7 +685,7 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var roles = await _dbcontext.AuthRoles
-					.OrderBy(asr => asr.RoleId)  
+					.OrderBy(asr => asr.RoleId)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
 					.Select(asr => new RolesDTO(
@@ -706,7 +715,7 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await rolesQuery.CountAsync(cancellationToken);
 
 		var roles = await rolesQuery
-					.OrderBy(ar => ar.RoleId)     
+					.OrderBy(ar => ar.RoleId)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
 					.Select(ar => new RolesDTO(
@@ -757,5 +766,18 @@ public class AuthRepository : IAuthRepository
 		.FirstOrDefaultAsync(x => x.RoleId == roleId);
 
 		return role!;
+	}
+
+	public Task<AuthRefreshToken> SearchUserRefreshToken(
+		Guid userId,
+		string refreshToken)
+	{
+		var userRefreshTokenData = _dbcontext.AuthRefreshToken
+			.Where(art => art.UserId == userId &&
+						  art.TokenHash == refreshToken &&
+						  art.IsActive == true)
+			.FirstOrDefaultAsync();
+
+		return userRefreshTokenData;
 	}
 }

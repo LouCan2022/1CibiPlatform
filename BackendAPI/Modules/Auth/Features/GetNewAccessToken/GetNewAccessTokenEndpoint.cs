@@ -1,6 +1,6 @@
 ﻿namespace Auth.Features.GetNewAccessToken;
 
-public record GetNewAccessTokenRequest(Guid userId, string RefreshToken);
+public record GetNewAccessTokenRequest(Guid userId);
 
 public record GetNewAccessTokenResponse(LoginResponseWebDTO LoginResponseWebDTO);
 
@@ -11,7 +11,7 @@ public class GetNewAccessTokenEndpoint : ICarterModule
 	{
 		app.MapPost("getnewaccesstoken", async (GetNewAccessTokenRequest request, ISender sender, CancellationToken cancellationToken) =>
 		{
-			var command = new GetNewAccessTokenCommand(request.userId, request.RefreshToken);
+			var command = new GetNewAccessTokenCommand(request.userId);
 
 			GetNewAccessTokenResult result = await sender.Send(command, cancellationToken);
 
