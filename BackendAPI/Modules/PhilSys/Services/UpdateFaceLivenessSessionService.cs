@@ -37,16 +37,25 @@ public class UpdateFaceLivenessSessionService
 		string accessToken = string.Empty;
 		BasicInformationOrPCNResponseDTO responseBody = null!;
 
-		_logger.LogInformation("Updating Face Liveness Session for Token: {HashToken}", HashToken);
+		var logContext = new
+		{
+			Action = "GetVerificationResult",
+			Step = "UpdateFaceLivenessSession",
+			HashToken,
+			FaceLivenessSessionId,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Updating Face Liveness Session for Token: {@Context}", logContext);
 
 		var result = await _philSysRepository.UpdateFaceLivenessSessionAsync(HashToken, FaceLivenessSessionId);
 		if (result == null)
 		{
-			_logger.LogWarning("No transaction found for HashToken: {HashToken}. Unable to update Face Liveness Session.", HashToken);
+			_logger.LogError("No transaction found for {HashToken}: {@Context}", HashToken, logContext);
 			throw new InternalServerException("No transaction record found for your Token. Face Liveness Session update aborted.");
 		}
 
-		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {HashToken}", HashToken);
+		_logger.LogInformation("Successfully updated Face Liveness Session for Token: {@Context}", logContext);
 
 		accessToken = await _philSysService.GetPhilsysTokenAsync(client_id, client_secret);
 	
@@ -86,11 +95,21 @@ public class UpdateFaceLivenessSessionService
 
 	private async Task<bool> UpdateTransactionStatus(string HashToken)
 	{
+		var logContext = new
+		{
+			Action = "UpdateTransactionStatus",
+			Step = "UpdateTransaction",
+			HashToken,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Updating the Transaction Status: {@Context}", logContext);
+
 		var existingTransaction = await _philSysRepository.GetTransactionDataByHashTokenAsync(HashToken);
 
 		if (existingTransaction == null)
 		{
-			_logger.LogWarning("Transaction with HashToken: {HashToken} not found.", HashToken);
+			_logger.LogError("Update Status Failed: Transaction with {HashToken} not found: {@Context}", HashToken, logContext);
 			throw new InternalServerException("No Transaction record found for this transaction. Please contact the administrator.");
 		}
 
@@ -98,40 +117,58 @@ public class UpdateFaceLivenessSessionService
 
 		if (updateStatus == null)
 		{
-			_logger.LogError("Failed to Update the Transaction Status for {HashToken}.", HashToken);
+			_logger.LogError("Update Status Failed: Failed to Update the Transaction Status for {HashToken}: {@Context}", HashToken, logContext);
 			return false;
 		}
 
-		_logger.LogInformation("Successfully Updated the Transaction Status.");
+		_logger.LogInformation("Successfully Updated the Transaction Status: {@Context}", logContext);
 		return true;
 	}
 
 	private async Task SendToClientWebHookAsync (string WebHook, VerificationResponseDTO VerificationResponseDTO)
 	{
+		var logContext = new
+		{
+			Action = "SendToClientWebhook",
+			Step = "SendToWebhook",
+			VerificationResponseDTO.idv_session_id,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Sending the verification response to client webhook: {@Context}", logContext);
+
 		if (WebHook != "/")
 		{
 			var clientResponse = await _httpClient.PostAsJsonAsync(WebHook, VerificationResponseDTO);
 			if (!clientResponse.IsSuccessStatusCode)
 			{
-				_logger.LogError("Failed to send verification response to client webhook: {WebHook}. Status Code: {StatusCode}. Response Body: {ResponseBody}", 
-							      WebHook, clientResponse.StatusCode, clientResponse);
+				_logger.LogError("Failed To Send to Webhook: Failed to send verification response to {WebHook}: {@Context}", WebHook, logContext);
 				throw new InternalServerException("Failed to send verification response to client's webhook. Please contact the administrator.");
 			}
-
-			_logger.LogInformation("Successfully send the verification response to client webhook.");
+			_logger.LogInformation("Successfully send the verification response to client webhook: {@Context}", logContext);
 		}
 	}
 
 	private async Task<bool> AddConvertedResponseToDbAsync(VerificationResponseDTO VerificationResponseDTO)
 	{
+		var logContext = new
+		{
+			Action = "AddingTheVerificationResult",
+			Step = "AddResult",
+			VerificationResponseDTO.idv_session_id,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Adding the Converted Response in PhilSys Transaction Results' Table: {@Context}", logContext);
+
 		var philsysTransactionResult = VerificationResponseDTO.Adapt<PhilSysTransactionResult>();
 		var result = await _philSysResultRepository.AddTransactionResultDataAsync(philsysTransactionResult);
 		if (result == false)
 		{
-			_logger.LogError("Failed to Add the Converted Response in PhilSys Transaction Results' Table.");
+			_logger.LogError("Saved Transaction Failed: Failed to Add the Converted Response in PhilSys Transaction Results' Table: {@Context}", logContext);
 			throw new InternalServerException("Failed to Add the Converted Response in PhilSys Transaction Results.");
 		}
-		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table.");
+		_logger.LogInformation("Successfully Added the Converted Response in PhilSys Transaction Results' Table: {@Context}", logContext);
 		return true;
 	}
 

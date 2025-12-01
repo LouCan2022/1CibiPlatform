@@ -26,18 +26,28 @@ public class PartnerSystemService
 	}
 	public async Task<PartnerSystemResponseDTO> PartnerSystemQueryAsync(string callback_url, string inquiry_type, IdentityData identity_data)
 	{
-		
 		PhilSysTransaction transaction = new PhilSysTransaction { } ;
 
 		var identifier = !string.IsNullOrWhiteSpace(identity_data.PCN)
 							 ? identity_data.PCN
 							 : $"{identity_data.FirstName} {identity_data.LastName}".Trim();
 
+		var logContext = new
+		{
+			Action = "GettingLivenessLink",
+			Step = "StartPostingPcnOrBasicInfo",
+			Identity = identifier,
+			CallbackUrl = callback_url,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Partner system query initiated: {@Context}", logContext); ;
+
 		var token = _securetoken.GenerateSecureToken();
 
 		if (token == null)
 		{
-			_logger.LogError("Failed to generate Token for identity: {Identifier}", identifier);
+			_logger.LogError("Failed Transaction: Failed to generate Token for identity: {@Context}", logContext);
 			throw new Exception("Failed to generate Token.");
 		}
 
@@ -45,7 +55,7 @@ public class PartnerSystemService
 
 		if (HashToken == null)
 		{
-			_logger.LogError("Failed to hash Token for identity: {Identifier}", identifier);
+			_logger.LogError("Failed Transaction: Failed to hash Token for identity: {@Context}", logContext);
 			throw new Exception("Failed to hash Token.");
 		}
 
@@ -91,12 +101,12 @@ public class PartnerSystemService
 		}
 		catch (Exception)
 		{
-			_logger.LogError("Failed to add transaction data record for Tid: {Tid}", transaction.Tid);
+			_logger.LogError("Failed Transaction: Failed to add transaction data record for {Tid}: {@Context}", transaction.Tid, logContext);
 			throw new InternalServerException($"Failed to add transaction.");;
 		}
 
-		_logger.LogInformation("Succcessfully added the transaction data record for {Tid}.", transaction.Tid);
-			
+		_logger.LogInformation("Succcessfully added the transaction data record for {Tid}: {@Context}", transaction.Tid, logContext);
+
 		return new PartnerSystemResponseDTO(
 			idv_session_id: transaction.Tid.ToString(),
 			liveness_link: livenessUrl,

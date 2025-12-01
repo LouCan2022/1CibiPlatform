@@ -252,6 +252,20 @@ public class UserManagementService : IUserManagementService
 		return successContent;
 	}
 
+	public async Task<bool> SendNotificationAsync(AssignmentNotificationDTO accountNotificationDTO)
+	{
+		var payload = new { accountNotificationDTO };
+		var response = await _httpClient.PostAsJsonAsync("account/notification", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not able to send the notification to user's email.");
+			return false!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<bool>();
+		Console.WriteLine("✅ Sent the notification successfully to user's email");
+		return successContent;
+	}
+
 	public async Task<EditApplicationDTO> EditApplicationAsync(ApplicationsDTO editApplicationDTO)
 	{
 		var editApplication = new EditApplicationDTO
