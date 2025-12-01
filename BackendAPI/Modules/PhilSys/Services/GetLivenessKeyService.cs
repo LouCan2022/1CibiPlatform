@@ -13,13 +13,21 @@ public class GetLivenessKeyService
 	}
 	public Task<string> GetLivenessKey()
 	{
-		_logger.LogInformation("Retrieving Liveness Key.");
+
+		var logContext = new
+		{
+			Action = "RetrievingLivenessKey",
+			Step = "StartFetching",
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Retrieving Liveness Key: {@Context}", logContext);
 		if (string.IsNullOrEmpty(_livenessKey))
 		{
-			_logger.LogError("Liveness Key is not configured.");
+			_logger.LogError("Liveness Key is not configured: {@Context}", logContext);
 			return Task.FromResult(string.Empty);
 		}
-		_logger.LogInformation("Liveness Key retrieved successfully.");
+		_logger.LogInformation("Liveness Key retrieved successfully: {@Context}", logContext);
 		return Task.FromResult(_livenessKey);
 	}
 }

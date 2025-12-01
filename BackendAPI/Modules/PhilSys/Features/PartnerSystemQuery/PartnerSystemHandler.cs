@@ -24,14 +24,14 @@ public class PartnerSystemCommandValidator : AbstractValidator<PartnerSystemComm
 		{
 			RuleFor(x => x.identity_data.FirstName)
 				.NotEmpty().WithMessage("First Name is required for 'name_dob' inquiry.")
-				.MaximumLength(100).WithMessage("First Name must not exceed 50 characters.");
+				.MaximumLength(100).WithMessage("First Name must not exceed 100 characters.");
 
 			RuleFor(x => x.identity_data.MiddleName)
 				.MaximumLength(100).WithMessage("Middle Name must not exceed 100 characters.");
 
 			RuleFor(x => x.identity_data.LastName)
 				.NotEmpty().WithMessage("Last Name is required for 'name_dob' inquiry.")
-				.MaximumLength(100).WithMessage("Last Name must not exceed 50 characters.");
+				.MaximumLength(100).WithMessage("Last Name must not exceed 100 characters.");
 
 			RuleFor(x => x.identity_data.Suffix)
 				.MaximumLength(20).WithMessage("Suffix must not exceed 20 characters.");

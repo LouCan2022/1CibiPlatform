@@ -22,4 +22,6 @@ public interface IUserManagementService
 	Task<EditSubMenuDTO> EditSubMenuAsync(SubMenusDTO editSubMenuDTO);
 	Task<EditRoleDTO> EditRoleAsync(RolesDTO editRoleDTO);
 	Task<EditAppSubRoleDTO> EditAppSubRoleAsync(AppSubRolesDTO editAppSubRoleDTO);
+
+	Task<bool> SendNotificationAsync(AssignmentNotificationDTO accountNotificationDTO);
 }

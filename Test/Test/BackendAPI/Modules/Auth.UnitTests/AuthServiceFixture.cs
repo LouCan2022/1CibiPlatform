@@ -139,6 +139,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 
 			AppSubRoleService = new AppSubRoleService(
 				MockAuthRepository.Object,
+				MockEmailService.Object,
 				MockAppSubRoleLogger.Object
 				);
 
