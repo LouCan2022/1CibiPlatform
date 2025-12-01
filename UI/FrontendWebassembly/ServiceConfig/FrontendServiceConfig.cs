@@ -28,12 +28,20 @@ public static class FrontendServiceConfig
 			ssoBaseFromConfig ??= configuration["SsoApiBase"];
 		}
 
-
 		services.AddHttpClient("API", client =>
 		{
 			client.BaseAddress = new Uri(apiBaseFromConfig!);
 		})
-		 .AddHttpMessageHandler<CookieHandler>();
+		 .AddHttpMessageHandler<CookieHandler>()
+		 .AddHttpMessageHandler<InterceptorHandler>();
+
+		// Client used by the interceptor to refresh token does NOT include the interceptor to avoid recursion
+		services.AddHttpClient("RefreshAPI", client =>
+		{
+			client.BaseAddress = new Uri(apiBaseFromConfig!);
+		})
+		.AddHttpMessageHandler<CookieHandler>();
+
 
 		services.AddHttpClient("SSOAPI", client =>
 		{
@@ -41,7 +49,9 @@ public static class FrontendServiceConfig
 		})
 		 .AddHttpMessageHandler<CookieHandler>();
 
-		services.AddScoped<CookieHandler>();
+		services.AddTransient<CookieHandler>();
+		services.AddTransient<InterceptorHandler>();
+		services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<LocalStorageService>();
 		services.AddScoped<IAccessService, AccessService>();

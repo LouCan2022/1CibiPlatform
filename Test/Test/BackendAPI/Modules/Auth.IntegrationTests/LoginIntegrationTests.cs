@@ -68,11 +68,11 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		// Assert
 		result.Should().NotBeNull();
 		result.loginResponseWebDTO.Should().NotBeNull();
-		result.loginResponseWebDTO.Access_token.Should().NotBeNullOrEmpty();
-		result.loginResponseWebDTO.userId.Should().NotBeNullOrEmpty();
-		result.loginResponseWebDTO.refresh_token.Should().NotBeNullOrEmpty();
-		result.loginResponseWebDTO.Token_type.Should().Be("bearer");
-		result.loginResponseWebDTO.expires_in.Should().BeGreaterThan(0);
+		result.loginResponseWebDTO.AccessToken.Should().NotBeNullOrEmpty();
+		result.loginResponseWebDTO.UserId.Should().NotBeNullOrEmpty();
+		result.loginResponseWebDTO.RefreshToken.Should().NotBeNullOrEmpty();
+		result.loginResponseWebDTO.TokenType.Should().Be("bearer");
+		result.loginResponseWebDTO.ExpiresIn.Should().BeGreaterThan(0);
 	}
 
 	[Fact]
