@@ -18,6 +18,7 @@ public class AuthService : IAuthService
 		IConfiguration configuration)
 	{
 		this._httpClient = httpClientFactory.CreateClient("API");
+		//this._httpClient = httpClientFactory.CreateClient("AuthClient");
 		this._localStorageService = localStorageService;
 		this._configuration = configuration;
 
@@ -75,7 +76,7 @@ public class AuthService : IAuthService
 	{
 		// Store UserId and Username in local storage
 		await this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
-		await this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.name);
+		await this._localStorageService.SetItemAsync(_userNameKey, credResponseDTO.Name);
 		await this._localStorageService.SetItemAsync(_appIdKey, JsonSerializer.Serialize(credResponseDTO.Appid));
 		await this._localStorageService.SetItemAsync(_subMenuKey, JsonSerializer.Serialize(credResponseDTO.SubMenuid));
 		await this._localStorageService.SetItemAsync(_roleIdKey, JsonSerializer.Serialize(credResponseDTO.RoleId));

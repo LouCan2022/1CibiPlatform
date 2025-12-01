@@ -1,15 +1,17 @@
 ﻿namespace FrontendWebassembly.DTO.Auth;
 
-public record CredResponseDTO(Guid UserId,
-	string AccessToken,
-	string TokenType,
-	int ExpiresIn,
-	string name,
-	List<int> Appid,
-	List<List<int>> SubMenuid,
-	List<int> RoleId,
-	string Issued,
-	string Expires);
+public record CredResponseDTO(
+	 Guid UserId,
+	 string AccessToken,
+	 string RefreshToken,
+	 string Name,
+	 string TokenType = "bearer",
+	 int ExpiresIn = 0,
+	 List<int> Appid = default!,
+	 List<List<int>> SubMenuid = default!,
+	 List<int> RoleId = default!,
+	 string Issued = default!,
+	 string Expires = default!);
 
 
 public record IsAuthenticatedDTO(bool isAuthenticated);

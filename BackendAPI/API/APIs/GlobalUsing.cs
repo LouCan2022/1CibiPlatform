@@ -25,3 +25,4 @@ global using BackendAPI.Modules.Auth;
 global using BackendAPI.Modules.CNX;
 global using BackendAPI.Modules.PhilSys;
 global using BackendAPI.Modules.SSO;
+global using PhilSys.Data.Extensions;
