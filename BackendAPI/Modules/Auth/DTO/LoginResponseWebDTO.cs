@@ -1,12 +1,12 @@
 ﻿namespace Auth.DTO;
 
 public record LoginResponseWebDTO
-	(string userId,
-	 string Access_token,
-	 string refresh_token,
+	(string UserId,
+	 string AccessToken,
+	 string RefreshToken,
 	 string Name,
-	 string Token_type = "bearer",
-	 int expires_in = 0,
+	 string TokenType = "bearer",
+	 int ExpiresIn = 0,
 	 List<int> Appid = default!,
 	 List<List<int>> SubMenuid = default!,
 	 List<int> RoleId = default!,

@@ -77,27 +77,23 @@
 			throw new NotImplementedException();
 		}
 
-		public virtual async Task<LoginResponseWebDTO> GetNewAccessTokenAsync(Guid userId, string refreshToken)
+		public virtual async Task<LoginResponseWebDTO> GetNewAccessTokenAsync(Guid userId)
 		{
-			_logger.LogInformation("Attempting to get new access token using refresh token.");
 
-			var hashToken = HashToken(refreshToken);
+			var logContext = new
+			{
+				Action = "GettingNewAccessToken",
+				Step = "StartGetting",
+				userId = userId,
+				Timestamp = DateTime.UtcNow
+			};
 
 			var userData = await _authRepository.GetNewUserDataAsync(userId);
 
-
-			// checking if client credentials are valid
 			if (userData == null)
 			{
-				_logger.LogWarning("Refresh Token is not found or invalid.");
+				_logger.LogWarning("Refresh Token is not found or invalid {@Context}", logContext);
 				throw new NotFoundException("Refresh Token is not found.");
-
-			}
-
-			if (!ValidateHashToken(refreshToken, userData.refreshToken))
-			{
-				_logger.LogWarning("Invalid refresh token provided for user ID: {UserId}", userId);
-				throw new UnauthorizedAccessException("Invalid refresh token.");
 			}
 
 			var roleId = userData.roleId;
@@ -107,7 +103,6 @@
 
 			// produce access token
 			var loginDTO = userData.Adapt<LoginDTO>();
-			_logger.LogInformation("Generating JWT token for user: {Email}", userData.Email);
 			string jwtToken = this._jWTService.GetAccessToken(loginDTO);
 			SetAccessTokenCookie(jwtToken);
 
@@ -119,8 +114,38 @@
 				  $"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
 				  $"{userData.FirstName} {userData.LastName}";
 
+			var authRefreshToken = new AuthRefreshToken
+			{
+				UserId = userData.Id,
+				TokenHash = newRefreshTokenHash,
+				CreatedAt = DateTime.UtcNow,
+				ExpiresAt = DateTime.UtcNow.AddDays(7),
+				IsActive = true
+			};
 
-			_logger.LogInformation("Creating new refresh token for user: {Email}", userData.Email);
+			var userDataRefreshToken = await _authRepository.SearchUserRefreshToken(
+				userData.Id,
+				userData.refreshToken);
+
+			if (userDataRefreshToken is null)
+			{
+				_logger.LogWarning("No matching refresh token found for user: {@Context}", logContext);
+				throw new UnauthorizedAccessException("Invalid refresh token.");
+			}
+
+			userDataRefreshToken.TokenHash = newRefreshTokenHash;
+			userDataRefreshToken.CreatedAt = DateTime.UtcNow;
+			userDataRefreshToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
+
+			// add validation
+			var isUpdated = await _authRepository.UpdateRefreshTokenAsync(authRefreshToken);
+
+			if (!isUpdated)
+			{
+				_logger.LogError("Failed to update refresh token for user: {@Context}", logContext);
+				throw new Exception("Failed to update refresh token.");
+			}
+
 			// reuse existing refresh token if not expired
 			return new LoginResponseWebDTO(
 				userData.Id.ToString()!,
@@ -137,6 +162,11 @@
 			);
 		}
 
+		protected virtual string? GetAccessTokenFromCookie()
+		{
+			var accessToken = _httpContextAccessor.HttpContext!.Request.Cookies[_httpCookieOnlyKey!];
+			return accessToken;
+		}
 
 		protected virtual void SetAccessTokenCookie(
 			string accessToken)

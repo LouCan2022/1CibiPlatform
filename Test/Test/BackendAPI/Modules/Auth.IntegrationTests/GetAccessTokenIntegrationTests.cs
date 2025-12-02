@@ -21,7 +21,7 @@ public class GetAccessTokenIntegrationTests : BaseIntegrationTest
 		var nonExistentUserId = Guid.NewGuid();
 		var refreshToken = "some-random-token";
 
-		var command = new GetNewAccessTokenCommand(nonExistentUserId, refreshToken);
+		var command = new GetNewAccessTokenCommand(nonExistentUserId);
 
 		// Act
 		Func<Task> act = async () => { await _sender.Send(command); };
@@ -61,7 +61,7 @@ public class GetAccessTokenIntegrationTests : BaseIntegrationTest
 		await _dbContext.SaveChangesAsync();
 
 
-		var command = new GetNewAccessTokenCommand(user.Id, refreshToken);
+		var command = new GetNewAccessTokenCommand(user.Id);
 
 		// Act
 		var result = await _sender.Send(command);
@@ -69,11 +69,11 @@ public class GetAccessTokenIntegrationTests : BaseIntegrationTest
 		// Assert
 		result.Should().NotBeNull();
 		result.loginResponseWebDTO.Should().NotBeNull();
-		result.loginResponseWebDTO.Access_token.Should().NotBeNullOrEmpty();
-		result.loginResponseWebDTO.refresh_token.Should().NotBeNullOrEmpty();
-		result.loginResponseWebDTO.Token_type.Should().Be("bearer");
-		result.loginResponseWebDTO.userId.Should().Be(user.Id.ToString());
-		result.loginResponseWebDTO.expires_in.Should().BeGreaterThan(0);
+		result.loginResponseWebDTO.AccessToken.Should().NotBeNullOrEmpty();
+		result.loginResponseWebDTO.RefreshToken.Should().NotBeNullOrEmpty();
+		result.loginResponseWebDTO.TokenType.Should().Be("bearer");
+		result.loginResponseWebDTO.UserId.Should().Be(user.Id.ToString());
+		result.loginResponseWebDTO.ExpiresIn.Should().BeGreaterThan(0);
 	}
 
 
@@ -109,7 +109,7 @@ public class GetAccessTokenIntegrationTests : BaseIntegrationTest
 		_dbContext.AuthRefreshToken.Add(authRefresh);
 		await _dbContext.SaveChangesAsync();
 
-		var command = new GetNewAccessTokenCommand(differentUserId, "invalid-token");
+		var command = new GetNewAccessTokenCommand(differentUserId);
 
 		// Act
 		Func<Task> act = async () => { await _sender.Send(command); };
@@ -117,48 +117,6 @@ public class GetAccessTokenIntegrationTests : BaseIntegrationTest
 		// Assert
 		await act.Should().ThrowAsync<NotFoundException>().WithMessage("Refresh Token is not found.");
 	}
-
-
-	[Fact]
-	public async Task GetNewAccessToken_ShouldThrowUnauthorized_WhenRefreshTokenIsInvalid()
-	{
-		// Arrange - seed user with a refresh token, but provide a different token
-		var user = new Authusers
-		{
-			Id = Guid.NewGuid(),
-			Email = "refreshuser2@example.com",
-			PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
-			FirstName = "Refresh",
-			LastName = "User",
-			IsActive = true
-		};
-		_dbContext.AuthUsers.Add(user);
-
-		var realToken = "real-refresh-token";
-		var hashed = ComputeSha256Base64(realToken);
-
-		var authRefresh = new AuthRefreshToken
-		{
-			UserId = user.Id,
-			TokenHash = hashed,
-			CreatedAt = DateTime.UtcNow,
-			ExpiresAt = DateTime.UtcNow.AddDays(7),
-			IsActive = true
-		};
-
-		_dbContext.AuthRefreshToken.Add(authRefresh);
-		await _dbContext.SaveChangesAsync();
-
-		var command = new GetNewAccessTokenCommand(user.Id, "invalid-token");
-
-		// Act
-		Func<Task> act = async () => { await _sender.Send(command); };
-
-		// Assert
-		await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage("Invalid refresh token.");
-	}
-
-
 
 	private static string ComputeSha256Base64(string input)
 	{
