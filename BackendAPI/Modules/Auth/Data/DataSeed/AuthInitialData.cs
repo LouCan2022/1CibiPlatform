@@ -50,7 +50,7 @@ public class AuthInitialData
 				{
 					UserId = this._Id,
 					AppId = 3,
-					Submenu= 4,
+					Submenu= 3,
 					RoleId = 3,
 					AssignedBy = this._Id
 				}
