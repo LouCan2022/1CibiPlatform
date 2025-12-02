@@ -2,6 +2,7 @@
 @layout MainLayout
 @inject IUserManagementService UserManagementService
 @inject IDialogService DialogService
+@attribute [RequirePermission(3, 3)]
 
 <MudTabs Rounded="false"
                  Scrollable="true"
