@@ -4,7 +4,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Default" OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="@Color" OnClick="Submit">@ButtonText</MudButton>
+        <MudButton Class="theme-button-delete"onclick ="Submit">@ButtonText</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -14,7 +14,6 @@
 
     [Parameter] public string ContentText { get; set; }
     [Parameter] public string ButtonText { get; set; }
-    [Parameter] public Color Color { get; set; }
 
     void Cancel() => MudDialog.Cancel();
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
