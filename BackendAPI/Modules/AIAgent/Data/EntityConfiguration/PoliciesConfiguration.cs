@@ -1,8 +1,8 @@
 ﻿namespace AIAgent.Data.EntityConfiguration;
 
-public class PoliciesConfiguration : IEntityTypeConfiguration<Policies>
+public class PoliciesConfiguration : IEntityTypeConfiguration<PolicyEntity>
 {
-	public void Configure(EntityTypeBuilder<Policies> builder)
+	public void Configure(EntityTypeBuilder<PolicyEntity> builder)
 	{
 		builder.HasKey(e => e.Id);
 

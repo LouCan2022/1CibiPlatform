@@ -1,6 +1,6 @@
 ﻿namespace AIAgent.Data.Entities;
 
-public class Policies
+public class PolicyEntity
 {
 	public int Id { get; set; }
 	public string PolicyCode { get; set; }
