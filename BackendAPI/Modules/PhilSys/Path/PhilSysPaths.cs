@@ -1,4 +1,4 @@
-﻿namespace PhilSys.Path;
+﻿namespace BackendAPI.Modules.PhilSys.Path;
 
 // This class provides route and cluster declarations for the Auth module.
 // Comments explain how to use Metadata and Methods:
