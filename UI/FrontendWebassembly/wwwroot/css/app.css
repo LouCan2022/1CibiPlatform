@@ -200,6 +200,11 @@ code {
     border-radius: 4px !important;
 }
 
+.theme-button-delete:hover {
+    transform: scale(1.06);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
 .main-nav-item-custom {
     display: inline-flex !important;
     flex-direction: row !important;
