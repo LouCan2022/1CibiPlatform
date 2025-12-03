@@ -26,3 +26,6 @@ global using BuildingBlocks.Exceptions.Handler;
 global using CNX.DTO;
 global using CNX.Services;
 global using BuildingBlocks.Exceptions;
+global using BuildingBlocks.SharedInterfaces;
+global using BuildingBlocks.SharedDTO;
+global using BuildingBlocks.SharedConstants;
