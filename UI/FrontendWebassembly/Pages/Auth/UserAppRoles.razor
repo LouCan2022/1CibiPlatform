@@ -28,20 +28,20 @@
                     LoadServerData="LoadUsersServerData"
                     SearchString="@searchStringUser"
                     SearchStringChanged="@((string val) => searchStringUser = val)">
-    <HeaderTemplate>
-        <MudTh>Email</MudTh>
-        <MudTh>First Name</MudTh>
-        <MudTh>Middle Name</MudTh>
-        <MudTh>Last Name</MudTh>
-    </HeaderTemplate>
+        <HeaderTemplate>
+            <MudTh>Email</MudTh>
+            <MudTh>First Name</MudTh>
+            <MudTh>Middle Name</MudTh>
+            <MudTh>Last Name</MudTh>
+        </HeaderTemplate>
 
-    <RowTemplate Context="user">
-        <MudTd DataLabel="Email">@user.email</MudTd>
-        <MudTd DataLabel="First Name">@user.firstName</MudTd>
-        <MudTd DataLabel="Middle Name">@user.middleName</MudTd>
-        <MudTd DataLabel="Last Name">@user.lastName</MudTd>
-    </RowTemplate>
-</TableComponent>
+        <RowTemplate Context="user">
+            <MudTd DataLabel="Email">@user.email</MudTd>
+            <MudTd DataLabel="First Name">@user.firstName</MudTd>
+            <MudTd DataLabel="Middle Name">@user.middleName</MudTd>
+            <MudTd DataLabel="Last Name">@user.lastName</MudTd>
+        </RowTemplate>
+    </TableComponent>
 }
 
 else if (_activeIndex == 1)
@@ -89,29 +89,29 @@ else if (_activeIndex == 2)
                     SearchString="@searchStringSub"
                     SearchStringChanged="@((string val) => searchStringSub = val)">
               
-    <HeaderTemplate>
-        <MudTh>Id</MudTh>
-        <MudTh>SubMenu</MudTh>
-        <MudTh>Description</MudTh>
-        <MudTh>Action</MudTh>
-    </HeaderTemplate>
+        <HeaderTemplate>
+            <MudTh>Id</MudTh>
+            <MudTh>SubMenu</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderTemplate>
 
-    <RowTemplate Context="sub">
-        <MudTd DataLabel="Id">@sub.subMenuId</MudTd>
-        <MudTd DataLabel="SubMenu">@sub.subMenuName</MudTd>
-        <MudTd DataLabel="Description">@sub.Description</MudTd>
-        <MudTd DataLabel="Action">
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                           Color="Color.Primary" 
-                           Size="Size.Medium" 
-                           OnClick="@(() => OpenEditSubMenuDialog(sub))" />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                           Color="Color.Error" 
-                           Size="Size.Medium" 
-                           OnClick="@(() => ConfirmDelete(sub.subMenuId, "submenu"))" />
-        </MudTd>
-    </RowTemplate>
-</TableComponent>
+        <RowTemplate Context="sub">
+            <MudTd DataLabel="Id">@sub.subMenuId</MudTd>
+            <MudTd DataLabel="SubMenu">@sub.subMenuName</MudTd>
+            <MudTd DataLabel="Description">@sub.Description</MudTd>
+            <MudTd DataLabel="Action">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                               Color="Color.Primary" 
+                               Size="Size.Medium" 
+                               OnClick="@(() => OpenEditSubMenuDialog(sub))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               Size="Size.Medium" 
+                               OnClick="@(() => ConfirmDelete(sub.subMenuId, "submenu"))" />
+            </MudTd>
+        </RowTemplate>
+    </TableComponent>
 }
 
 else if (_activeIndex == 3)
@@ -126,29 +126,29 @@ else if (_activeIndex == 3)
                     SearchString="@searchStringRole"
                     SearchStringChanged="@((string val) => searchStringRole = val)">
 
-    <HeaderTemplate>
-        <MudTh>Id</MudTh>
-        <MudTh>Role</MudTh>
-        <MudTh>Description</MudTh>
-        <MudTh>Action</MudTh>
-    </HeaderTemplate>
+        <HeaderTemplate>
+            <MudTh>Id</MudTh>
+            <MudTh>Role</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderTemplate>
 
-    <RowTemplate Context="role">
-        <MudTd DataLabel="Id">@role.roleId</MudTd>
-        <MudTd DataLabel="Role">@role.roleName</MudTd>
-        <MudTd DataLabel="Description">@role.Description</MudTd>
-        <MudTd DataLabel="Action">
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                           Color="Color.Primary" 
-                           Size="Size.Medium" 
-                           OnClick="@(() => OpenEditRoleDialog(role))" />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                           Color="Color.Error" 
-                           Size="Size.Medium" 
-                           OnClick="@(() => ConfirmDelete(role.roleId, "role"))" />
-        </MudTd>
-    </RowTemplate>
-</TableComponent>
+        <RowTemplate Context="role">
+            <MudTd DataLabel="Id">@role.roleId</MudTd>
+            <MudTd DataLabel="Role">@role.roleName</MudTd>
+            <MudTd DataLabel="Description">@role.Description</MudTd>
+            <MudTd DataLabel="Action">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                               Color="Color.Primary" 
+                               Size="Size.Medium" 
+                               OnClick="@(() => OpenEditRoleDialog(role))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               Size="Size.Medium" 
+                               OnClick="@(() => ConfirmDelete(role.roleId, "role"))" />
+            </MudTd>
+        </RowTemplate>
+    </TableComponent>
 }
 
 else if (_activeIndex == 4)
@@ -163,31 +163,31 @@ else if (_activeIndex == 4)
                     SearchString="@searchStringAppSubRole"
                     SearchStringChanged="@((string val) => searchStringAppSubRole = val)">
 
-    <HeaderTemplate>
-        <MudTh>Email</MudTh>
-        <MudTh>Application</MudTh>
-        <MudTh>SubMenu</MudTh>
-        <MudTh>Role</MudTh>
-        <MudTh>Action</MudTh>
-    </HeaderTemplate>
+        <HeaderTemplate>
+            <MudTh>Email</MudTh>
+            <MudTh>Application</MudTh>
+            <MudTh>SubMenu</MudTh>
+            <MudTh>Role</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderTemplate>
 
-    <RowTemplate Context="appSubRole">
-        <MudTd DataLabel="Email">@appSubRole.UserEmail</MudTd>
-        <MudTd DataLabel="Application">@appSubRole.AppName</MudTd>
-        <MudTd DataLabel="SubMenu">@appSubRole.SubMenuName</MudTd>
-        <MudTd DataLabel="Role">@appSubRole.RoleName</MudTd>
-        <MudTd DataLabel="Action">
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                           Color="Color.Primary" 
-                           Size="Size.Medium" 
-                           OnClick="@(() => OpenEditAppSubRoleDialog(appSubRole))" />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                           Color="Color.Error" 
-                           Size="Size.Medium" 
-                           OnClick="@(() => ConfirmDelete(appSubRole.AppRoleId, "appsubrole"))" />
-        </MudTd>
-    </RowTemplate>
-</TableComponent>
+        <RowTemplate Context="appSubRole">
+            <MudTd DataLabel="Email">@appSubRole.UserEmail</MudTd>
+            <MudTd DataLabel="Application">@appSubRole.AppName</MudTd>
+            <MudTd DataLabel="SubMenu">@appSubRole.SubMenuName</MudTd>
+            <MudTd DataLabel="Role">@appSubRole.RoleName</MudTd>
+            <MudTd DataLabel="Action">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                               Color="Color.Primary" 
+                               Size="Size.Medium" 
+                               OnClick="@(() => OpenEditAppSubRoleDialog(appSubRole))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               Size="Size.Medium" 
+                               OnClick="@(() => ConfirmDelete(appSubRole.AppRoleId, "appsubrole"))" />
+            </MudTd>
+        </RowTemplate>
+    </TableComponent>
 }
 
 @code {

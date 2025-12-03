@@ -148,7 +148,7 @@ public class AuthPaths : IReverseProxyModule
 				}
 			),
 
-			// CNX / PhilSys / other endpoints routed via onePlatform
+			// CNX / other endpoints routed via onePlatform
 			new RouteDefinitionDTO(
 				RouteId: "SearchCandidateEntryPoint",
 				MatchPath: "cnx/gettalkpushcandidate",

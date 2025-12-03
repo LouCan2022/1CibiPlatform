@@ -1,4 +1,6 @@
-﻿namespace FrontendWebassembly.ServiceConfig;
+﻿using FrontendWebassembly.Services.CNX.Implementation;
+
+namespace FrontendWebassembly.ServiceConfig;
 
 public static class FrontendServiceConfig
 {
@@ -57,6 +59,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<IAccessService, AccessService>();
 		services.AddScoped<IPhilSysService, PhilSysService>();
 		services.AddScoped<IUserManagementService, UserManagementService>();
+		services.AddScoped<ICandidateService, CandidateService>();
 		services.AddScoped<ISSOService, SSOService>();
 		return services;
 	}
