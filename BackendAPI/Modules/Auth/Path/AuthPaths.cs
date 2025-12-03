@@ -148,18 +148,6 @@ public class AuthPaths : IReverseProxyModule
 				}
 			),
 
-			// CNX / other endpoints routed via onePlatform
-			new RouteDefinitionDTO(
-				RouteId: "SearchCandidateEntryPoint",
-				MatchPath: "cnx/gettalkpushcandidate",
-				ClusterId: GatewayConstants.OnePlatformApi,
-				Methods: new [] { GatewayConstants.HttpMethod.Get },
-				Transforms: new Dictionary<string, string>
-				{
-					{ "PathSet", "cnx/gettalkpushcandidate" }
-				}
-			),
-
 			// Auth management endpoints
 			new RouteDefinitionDTO(
 				RouteId: "GetUsersEntryPoint",
