@@ -43,7 +43,7 @@
 
                             var subMenuIds = SubMenus[i];
 
-                            <MudNavGroup Title="@appDescription" Expanded="true" Icon="@appIcon">
+                            <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
                                 @foreach (var subId in subMenuIds)
                                 {
                                     var (subPath, subDescription, subIcon) = SubMenuList.List[subId];

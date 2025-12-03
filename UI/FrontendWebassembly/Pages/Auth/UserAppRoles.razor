@@ -420,13 +420,12 @@ else if (_activeIndex == 4)
         var parameters = new DialogParameters
         {
             { "ContentText", $"Are you sure you want to delete this {table}?" },
-            { "ButtonText", "Delete" },
-            { "Color", Color.Error }
+            { "ButtonText", "Delete" }
         };
 
         var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        var dialog = await DialogService.ShowAsync<DialogConfirmation>("Confirm Delete", parameters, options)!;
+        var dialog = await DialogService.ShowAsync<DeleteDialogConfirmation>("Confirm Delete", parameters, options)!;
         var result = await dialog.Result;
 
         if (!result!.Canceled)

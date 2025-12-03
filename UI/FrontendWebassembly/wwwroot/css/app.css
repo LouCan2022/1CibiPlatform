@@ -190,6 +190,16 @@ code {
     color: white !important;
 }
 
+.theme-button-delete {
+    background: #F44336 !important;
+    text-transform: none !important;
+    font-size: 16px !important;
+    color: white !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border-radius: 4px !important;
+}
+
 .main-nav-item-custom {
     display: inline-flex !important;
     flex-direction: row !important;
