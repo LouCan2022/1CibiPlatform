@@ -372,15 +372,14 @@ code {
     align-items: center;
     text-align: center;
     font-size: 16px;
+    white-space: normal !important;
 }
 
-.mud-table-container {
-    overflow: hidden; 
-}
-
-table {
-    table-layout: fixed !important; 
-    width: 100% !important;
+.mud-table-cell {
+    min-width: 150px !important;
+    white-space: normal;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .responsive-title {
@@ -394,3 +393,10 @@ table {
         margin-right: 16px !important;
     }
 }
+
+.responsive-table-container {
+    overflow-x: auto;
+    width: 100%;
+    height: 100%;
+}
+

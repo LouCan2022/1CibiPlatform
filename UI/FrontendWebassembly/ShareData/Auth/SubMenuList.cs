@@ -10,3 +10,4 @@ public static class SubMenuList
 		{ 3, ("usermanagement", "User Management" , Icons.Material.Filled.ManageAccounts) }
 	  };
 }
+
