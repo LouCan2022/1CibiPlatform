@@ -27,6 +27,7 @@
                     EnableSearch="true"
                     LoadServerData="LoadUsersServerData"
                     SearchString="@searchStringUser"
+                    ColumnCount="4"
                     SearchStringChanged="@((string val) => searchStringUser = val)">
         <HeaderTemplate>
             <MudTh>Email</MudTh>
@@ -54,6 +55,7 @@ else if (_activeIndex == 1)
                     OnAddClicked="OpenAddApplicationDialog"
                     LoadServerData="LoadApplicationsServerData"
                     SearchString="@searchStringApp"
+                    ColumnCount="4"
                     SearchStringChanged="@((string val) => searchStringApp = val)">
 
         <HeaderTemplate>
@@ -87,6 +89,7 @@ else if (_activeIndex == 2)
                     OnAddClicked="OpenAddSubMenuDialog"
                     LoadServerData="LoadSubMenusServerData"
                     SearchString="@searchStringSub"
+                    ColumnCount="4"
                     SearchStringChanged="@((string val) => searchStringSub = val)">
               
         <HeaderTemplate>
@@ -124,6 +127,7 @@ else if (_activeIndex == 3)
                     OnAddClicked="OpenAddRoleDialog"
                     LoadServerData="LoadRolesServerData"
                     SearchString="@searchStringRole"
+                    ColumnCount="4"
                     SearchStringChanged="@((string val) => searchStringRole = val)">
 
         <HeaderTemplate>
@@ -161,6 +165,7 @@ else if (_activeIndex == 4)
                     OnAddClicked="OpenAddAppSubRoleDialog"
                     LoadServerData="LoadUserAppSubRolesServerData"
                     SearchString="@searchStringAppSubRole"
+                    ColumnCount="5"
                     SearchStringChanged="@((string val) => searchStringAppSubRole = val)">
 
         <HeaderTemplate>
