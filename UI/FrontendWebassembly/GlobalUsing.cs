@@ -24,5 +24,6 @@ global using FrontendWebassembly.Services.SSO.Implementations;
 global using System.Text.RegularExpressions;
 global using FrontendWebassembly.Component.Special;
 global using FrontendWebassembly.Services.Auth.Shared;
-
+global using FrontendWebassembly.DTO.CNX;
+global using FrontendWebassembly.Services.CNX.Interface;
 

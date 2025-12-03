@@ -61,7 +61,7 @@ public class GetCandidateService
         string requestUri,
         CancellationToken ct)
     {
-        return await _httpClient.GetAsync(requestUri, ct);
+       return await _httpClient.GetAsync(requestUri, ct);
     }
 
     private string BuildRequestUri(
