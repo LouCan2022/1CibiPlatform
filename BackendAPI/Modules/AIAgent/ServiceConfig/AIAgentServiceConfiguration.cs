@@ -24,6 +24,7 @@ public static class AIAgentServiceConfiguration
 	#region Services
 	public static IServiceCollection AddAIAgentServices(this IServiceCollection services)
 	{
+		services.AddSingleton<IAIAgentService, AIAgentService>();
 
 		return services;
 	}
@@ -32,7 +33,7 @@ public static class AIAgentServiceConfiguration
 
 	#region Db Config
 
-	public static IServiceCollection AddAuthInfrastructure(
+	public static IServiceCollection AddAIAgentInfrastructure(
 	this IServiceCollection services,
 	IConfiguration configuration)
 	{
@@ -46,5 +47,23 @@ public static class AIAgentServiceConfiguration
 		return services;
 	}
 
+	#endregion
+
+	#region OpenAI Config
+	public static IServiceCollection AddAIAgentConfiguration(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		services.AddOpenAIChatClient
+			(
+			  modelId: configuration.GetValue<string>("OpenAI:Model")!,
+			  apiKey: configuration.GetValue<string>("OpenAI:ApiKey")!,
+			  endpoint: configuration.GetValue<Uri>("OpenAI:Endpoint")!
+			);
+
+		services.AddKernel();
+
+		return services;
+	}
 	#endregion
 }

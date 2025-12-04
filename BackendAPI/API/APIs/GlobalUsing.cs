@@ -1,5 +1,4 @@
-﻿//path
-global using Auth.ServiceConfig;
+﻿global using Auth.ServiceConfig;
 global using APIs.ServiceConfig;
 global using Auth.Data.Context;
 global using Microsoft.EntityFrameworkCore;
@@ -12,7 +11,6 @@ global using CNX.ServiceConfig;
 global using Carter;
 global using System.Reflection;
 global using Auth.Data.Extensions;
-global using CNX.Data.Extensions;
 global using PhilSys.ServiceConfig;
 global using SSO.ServiceConfig;
 global using Sustainsys.Saml2;
@@ -26,3 +24,7 @@ global using BackendAPI.Modules.CNX;
 global using BackendAPI.Modules.PhilSys;
 global using BackendAPI.Modules.SSO;
 global using PhilSys.Data.Extensions;
+global using AIAgent;
+global using Serilog.Events;
+global using AIAgent.ServiceConfig;
+

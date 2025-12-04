@@ -16,6 +16,8 @@ builder.Services
 	.AddEndpointsApiExplorer()
 	.AddSwaggerGen();
 
+builder.Services.AddAIAgentConfiguration(builder.Configuration);
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
 	options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
