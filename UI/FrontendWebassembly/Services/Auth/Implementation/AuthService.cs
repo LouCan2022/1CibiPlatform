@@ -4,10 +4,8 @@ public class AuthService : IAuthService
 {
 	private HttpClient _httpClient;
 	private readonly LocalStorageService _localStorageService;
-	private readonly IConfiguration _configuration;
 	private readonly ILogger<AuthService> _logger;
 
-	private readonly string _httpRefreshTokenCookieOnly;
 	private readonly string _userNameKey;
 	private readonly string _userIdKey;
 	private readonly string _appIdKey;
@@ -16,16 +14,13 @@ public class AuthService : IAuthService
 
 	public AuthService(IHttpClientFactory httpClientFactory,
 		LocalStorageService localStorageService,
-		IConfiguration configuration,
 		ILogger<AuthService> logger)
 	{
 		this._httpClient = httpClientFactory.CreateClient("API");
 		this._localStorageService = localStorageService;
-		this._configuration = configuration;
 		this._logger = logger;
 
 
-		_httpRefreshTokenCookieOnly = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 		this._userNameKey = "Name";
 		this._userIdKey = "UserId";
 		this._appIdKey = "AppId";

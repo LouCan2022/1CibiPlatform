@@ -17,6 +17,13 @@ public class AIAgentPath : IReverseProxyModule
 					{ "PathSet", "aiagent/askai" }
 				}
 			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetAIAgentResponseEntryPoint",
+				MatchPath: "hubs/aiagent/{**catch-all}",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post , GatewayConstants.HttpMethod.Get }
+			)
 		};
 	}
 

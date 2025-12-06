@@ -23,3 +23,7 @@ global using BuildingBlocks.SharedInterfaces;
 global using BuildingBlocks.SharedConstants;
 global using Microsoft.Extensions.Logging;
 global using System.Collections.Concurrent;
+global using Microsoft.AspNetCore.SignalR;
+global using AIAgent.Hubs;
+
+

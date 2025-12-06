@@ -25,7 +25,7 @@ public static class AIAgentServiceConfiguration
 	public static IServiceCollection AddAIAgentServices(this IServiceCollection services)
 	{
 		services.AddSingleton<IAIAgentService, AIAgentService>();
-
+		services.AddSignalR();
 		return services;
 	}
 
@@ -66,4 +66,5 @@ public static class AIAgentServiceConfiguration
 		return services;
 	}
 	#endregion
+
 }

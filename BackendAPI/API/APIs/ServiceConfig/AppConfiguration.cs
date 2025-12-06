@@ -54,4 +54,15 @@ public static class AppConfiguration
 	}
 	#endregion
 
+	#region SignalR Configuration	
+	public static WebApplication UseSignalRConfiguration(
+		this WebApplication app,
+		IConfiguration configuration)
+	{
+		app.MapHub<AIAgent.Hubs.AIAgentHub>(configuration["SignalRHub:Endpoint"]!);
+		app.UseWebSockets();
+		return app;
+	}
+	#endregion
+
 }

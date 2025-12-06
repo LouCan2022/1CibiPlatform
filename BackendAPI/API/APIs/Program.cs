@@ -29,8 +29,8 @@ var app = builder.Build();
 
 await app.UseEnvironmentAsync();
 
+app.UseSignalRConfiguration(builder.Configuration);
 app.UseCustomMiddlewares();
-
 app.Run();
 
 public partial class Program { }

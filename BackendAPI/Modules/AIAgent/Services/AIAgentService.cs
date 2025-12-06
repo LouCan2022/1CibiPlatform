@@ -4,6 +4,7 @@ public class AIAgentService : IAIAgentService
 {
 	private readonly Kernel _kernel;
 	private readonly ILogger<AIAgentService> _logger;
+	private readonly IHubContext<AIAgentHub, IAIClient> _hubContext;
 	private readonly ConcurrentDictionary<string, List<(string Role, string Content)>> _conversations = new();
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _userLocks = new();
 
@@ -12,11 +13,13 @@ public class AIAgentService : IAIAgentService
 
 	public AIAgentService(
 		Kernel kernel,
-		ILogger<AIAgentService> logger
+		ILogger<AIAgentService> logger,
+		IHubContext<AIAgentHub, IAIClient> hubContext
 		)
 	{
 		this._kernel = kernel;
 		this._logger = logger;
+		this._hubContext = hubContext;
 	}
 
 	public async Task<AIAnswerDTO> GetAIAnswerAsync(
@@ -33,28 +36,38 @@ public class AIAgentService : IAIAgentService
 			// Retrieve or initialize conversation history
 			var history = _conversations.GetOrAdd(userId, _ => new List<(string, string)>());
 
-			// Build conversation context (no lock needed because semaphore serializes access)
+			// Build conversation context
 			string historyText = string.Join("\n", history.Select(h => $"{h.Role}: {h.Content}"));
 
 			string template = """
-                  You are a helpful, honest, and concise assistant.
-                  Use the conversation history below to provide context-aware answers.
-                  If you don't know, say "I don't know."
-                  Conversation history:
-                  {{$historyText}}
-                  User: {{$input}}
-                  Assistant:
-                  """;
+                              You are a helpful, honest, and concise assistant.
+                              Use the conversation history below to provide context-aware answers.
+                              Add some format with your answers to make it more readable.
+                              If you don't know, say "I don't know."
+                              Conversation history:
+                              {{$historyText}}
+                              User: {{$input}}
+                              Assistant:
+                            """;
 
 			var args = new KernelArguments { ["input"] = question };
 			args["historyText"] = historyText;
 
 			_logger.LogDebug("Invoking kernel for user {UserId} with history length {HistoryCount}", userId, history.Count);
 
+			// Notify clients that the assistant is "typing"
+			_ = _hubContext.Clients.Group(userId).ReceiveTyping(true);
+
 			var raw = await _kernel.InvokePromptAsync(template, args);
 			var answer = raw?.ToString()?.Trim() ?? string.Empty;
 
-			// Append new exchange to history (no lock needed because semaphore serializes access)
+			// Send full answer to connected clients
+			await _hubContext.Clients.Group(userId).ReceiveAiResponse(answer);
+
+
+			_ = _hubContext.Clients.Group(userId).ReceiveTyping(false);
+
+			// Append new exchange to history 
 			history.Add(("User", question));
 			history.Add(("Assistant", answer));
 
@@ -83,6 +96,8 @@ public class AIAgentService : IAIAgentService
 		{
 			sem.Dispose();
 		}
-	}
 
+		// Notify connected clients the session was cleared
+		_ = _hubContext.Clients.Group(userId).SessionCleared();
+	}
 }

@@ -26,4 +26,8 @@ global using FrontendWebassembly.Component.Special;
 global using FrontendWebassembly.Services.Auth.Shared;
 global using FrontendWebassembly.DTO.CNX;
 global using FrontendWebassembly.Services.CNX.Interface;
-
+global using FrontendWebassembly.DTO.AIAgentChat;
+global using FrontendWebassembly.Services.AIAgentChat.Interface;
+global using Microsoft.AspNetCore.SignalR.Client;
+global using FrontendWebassembly.Services.AIAgentChat.Implementation;
+global using FrontendWebassembly.Services.CNX.Implementation;
