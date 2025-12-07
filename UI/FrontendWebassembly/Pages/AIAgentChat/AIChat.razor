@@ -1,4 +1,4 @@
-﻿@page "/aichat/chat"
+﻿@page "/ai/chat"
 @using MudBlazor
 @using FrontendWebassembly.Services.AIAgentChat
 @using Markdig
@@ -27,21 +27,32 @@
                     @foreach (var msg in Messages)
                     {
                         var isUser = msg.Sender == "User";
-                       if(isUser == false)
-                       {
-                         <MudChat ChatPosition="ChatBubblePosition.Start">
-                              <MudChatBubble>
-                                    <div class="message-html">@((MarkupString)msg.Html)</div>
-                             </MudChatBubble>
-                         </MudChat>
-                       }
-                       else{
-                         <MudChat ChatPosition="ChatBubblePosition.End">
-                             <MudChatBubble>
-                                    @msg.Text
-                             </MudChatBubble>
-                         </MudChat>
-                         }
+                        if (!isUser)
+                        {
+                            <MudChat ChatPosition="ChatBubblePosition.Start">
+                                <MudAvatar Size="Size.Medium" Class="ml-2" Color="Color.Primary" Variant="Variant.Filled" >
+                                       <MudIcon Icon="@Icons.Material.Filled.Android" />
+                                </MudAvatar>
+                                <MudChatBubble>
+                                    <div class="d-flex align-items-start">
+                                        <div class="message-html">@((MarkupString)msg.Html)</div>
+                                    </div>
+                                </MudChatBubble>
+                            </MudChat>
+                        }
+                        else
+                        {
+                            <MudChat ChatPosition="ChatBubblePosition.End">
+                                <MudAvatar Size="Size.Medium" Class="mr-2" Color="Color.Primary" Variant="Variant.Filled">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person" />
+                                </MudAvatar>
+                                <MudChatBubble>
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <div class="mr-2">@msg.Text</div>
+                                    </div>
+                                </MudChatBubble>
+                            </MudChat>
+                        }
                     }
 
                     @if (IsTyping)
