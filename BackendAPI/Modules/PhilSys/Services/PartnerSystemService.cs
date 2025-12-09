@@ -109,8 +109,7 @@ public class PartnerSystemService
 
 		return new PartnerSystemResponseDTO(
 			idv_session_id: transaction.Tid.ToString(),
-			liveness_link: livenessUrl,
-			isTransacted: false
+			liveness_link: livenessUrl
 		);
 	}
 }
