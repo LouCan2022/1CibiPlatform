@@ -2,6 +2,5 @@
 
 public record PartnerSystemResponseDTO(
 	string? idv_session_id,
-	string? liveness_link,
-	bool? isTransacted
+	string? liveness_link
 );
