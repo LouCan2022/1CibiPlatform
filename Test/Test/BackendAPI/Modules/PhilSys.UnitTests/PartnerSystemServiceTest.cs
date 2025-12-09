@@ -63,7 +63,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests
 				CreatedAt = DateTime.UtcNow,
 				ExpiresAt = DateTime.UtcNow.AddMinutes(5)
 			};
-			var partnerSystemResponse = new PartnerSystemResponseDTO(idv_session_id: Tid, liveness_link: $"http://localhost:5134/philsys/idv/liveness/{philsysTransaction.HashToken}", isTransacted: false);
+			var partnerSystemResponse = new PartnerSystemResponseDTO(idv_session_id: Tid, liveness_link: $"http://localhost:5134/philsys/idv/liveness/{philsysTransaction.HashToken}");
 			_fixture.MockSecureToken.Setup(x => x.GenerateSecureToken()).Returns("token");
 			_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>())).Returns("hash-token");
 			_fixture.MockPhilSysRepository.Setup(x => x.AddTransactionDataAsync(philsysTransaction)).ReturnsAsync(true);
