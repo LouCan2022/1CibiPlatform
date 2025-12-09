@@ -65,4 +65,11 @@ public static class AppConfiguration
 	}
 	#endregion
 
+	#region AI agent app skills configuration
+	public static WebApplication UseAIAgentSkillsConfiguration(this WebApplication app)
+	{
+		app.UseAIAgentSkills();
+		return app;
+	}
+	#endregion
 }

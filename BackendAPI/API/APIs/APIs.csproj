@@ -48,5 +48,11 @@
 		<Folder Include="Migrations\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- Copy all skill manifests under BackendAPI/Modules/AIAgent/Skills into the build/publish output -->
+		<None Include="..\..\Modules\AIAgent\Skills\**\*.skill.yaml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

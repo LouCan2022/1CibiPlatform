@@ -25,5 +25,12 @@ global using Microsoft.Extensions.Logging;
 global using System.Collections.Concurrent;
 global using Microsoft.AspNetCore.SignalR;
 global using AIAgent.Hubs;
+global using System.Text;
+global using System.Text.Json;
+global using System.ComponentModel.DataAnnotations;
+global using ClosedXML.Excel;
+global using AIAgent.Skills;
+global using Microsoft.Extensions.Logging.Abstractions;
+global using AIAgent.Skills.ReadExcel;
 
 

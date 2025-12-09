@@ -1,5 +1,6 @@
 ﻿namespace AIAgent.ServiceConfig;
 
+
 public static class AIAgentServiceConfiguration
 {
 	private const string assemblyName = "APIs";
@@ -62,6 +63,16 @@ public static class AIAgentServiceConfiguration
 			);
 
 		services.AddKernel();
+
+		return services;
+	}
+	#endregion
+
+	#region AI Agent Skills Config
+	public static IServiceCollection AddAIAgentSkills(this IServiceCollection services, IConfiguration configuration)
+	{
+		// Register the registry; the startup filter will scan and import into kernel if available
+		services.AddSingleton<SkillRegistry>();
 
 		return services;
 	}

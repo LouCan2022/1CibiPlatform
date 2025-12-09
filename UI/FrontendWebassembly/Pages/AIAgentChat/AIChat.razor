@@ -135,7 +135,12 @@
 
         // convert markdown to html for assistant message using pipeline (supports emoji, tables, code fences, etc.)
         var html = Markdown.ToHtml(message ?? string.Empty, _mdPipeline);
-        Messages.Add(new ChatMessage { Sender = "Assistant", Text = message ?? string.Empty, Html = html, Time = DateTime.Now });
+        Messages.Add(
+            new ChatMessage { 
+                Sender = "Assistant", 
+                Text = message ?? string.Empty, 
+                Html = html, 
+                Time = DateTime.Now });
         // mark request completed so stray later hub messages are ignored
         _currentRequestActive = false;
         IsTyping = false;

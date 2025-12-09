@@ -260,4 +260,14 @@ public static class ServiceConfiguration
 	}
 
 	#endregion
+
+	#region AI Agent Config
+	public static IServiceCollection AddAIAgentConfigurationSkills(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		services.AddAIAgentSkills(configuration);
+		return services;
+	}
+	#endregion
 }
