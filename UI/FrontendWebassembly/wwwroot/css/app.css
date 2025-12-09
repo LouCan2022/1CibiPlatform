@@ -164,7 +164,7 @@ code {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
-.theme-button {
+.theme-button, .theme-button-delete {
     background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
     text-transform: none !important;
     font-size: 16px !important;
@@ -172,9 +172,9 @@ code {
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.theme-button:hover {
-    transform: scale(1.06); 
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important; 
+.theme-button:hover, .theme-button-delete:hover {
+    transform: scale(1.06);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
 }
 
 .theme-button-inactive {
@@ -192,17 +192,8 @@ code {
 
 .theme-button-delete {
     background: #F44336 !important;
-    text-transform: none !important;
-    font-size: 16px !important;
     color: white !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
     border-radius: 4px !important;
-}
-
-.theme-button-delete:hover {
-    transform: scale(1.06);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
 }
 
 .main-nav-item-custom {
