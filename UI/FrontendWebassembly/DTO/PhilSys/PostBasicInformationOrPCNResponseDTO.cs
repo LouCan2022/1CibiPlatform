@@ -1,3 +1,4 @@
 ﻿namespace FrontendWebassembly.DTO.PhilSys;
 public record PostBasicInformationOrPCNResponseDTO(
-	string? liveness_link);
+		string? idv_session_id,
+		string? liveness_link);
