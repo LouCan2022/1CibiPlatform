@@ -114,6 +114,4 @@ public class GetCandidateService
             c.Others?.PagIbigNumber,
             c.Others?.ExtractedPagIbigNumber)).ToList();
     }
-
-
 }

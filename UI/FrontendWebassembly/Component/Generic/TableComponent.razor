@@ -7,6 +7,7 @@
           Class="responsive-title"
           HorizontalScrollbar="true"
           Hover="true"
+          RowsPerPage="@(RowsPerPage ?? 10)"
           LoadingContent="@(UseLoadingContentBody ? null : LoadingContent)"
           LoadingContentBody="@(UseLoadingContentBody ? LoadingContentBody : null)"
           Style="border-radius: 4px; border: 1px solid gray; padding: 10px;">
@@ -71,6 +72,7 @@
     private bool UseLoadingContentBody { get; set; } = true;
 
     private readonly RenderFragment LoadingContent = @<MudSkeleton />;
+    [Parameter] public int? RowsPerPage { get; set; }
     [Parameter] public Func<TableState, CancellationToken, Task<TableData<TItem>>> LoadServerData { get; set; }
 
     [Parameter] public RenderFragment HeaderTemplate { get; set; }
