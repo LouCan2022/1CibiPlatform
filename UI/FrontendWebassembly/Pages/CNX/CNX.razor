@@ -13,10 +13,9 @@
                Class="theme-button theme-button-active mb-4"
                Style="border-radius: 4px;"
                OnClick="DownloadCandidateData">
-        Download Candidates
+        Export
     </MudButton>
 </div>
-
 
 <TableComponent TItem="CandidateResponseDTO"
                 @ref="candidatesTable"
@@ -25,7 +24,7 @@
                 LoadServerData="LoadCandidatesData"
                 SearchString="@searchStringCandidate"
                 ColumnCount="28"
-                RowsPerPage="25"
+                RowsPerPage="50"
                 SearchStringChanged="@((string val) => searchStringCandidate = val)">
     <HeaderTemplate>
         <MudTh>Candidate ID</MudTh>
@@ -94,6 +93,7 @@
     private TableComponent<CandidateResponseDTO>? candidatesTable;
     private List<CandidateResponseDTO> currentPageData = new();
     private string? _searchStringCandidate;
+    private string? page;
 
     private void UpdateSearch<T>(ref string field, string value, TableComponent<T> table) where T : class
     {
@@ -112,19 +112,19 @@
 
     private async Task<TableData<CandidateResponseDTO>> LoadCandidatesData(TableState state, CancellationToken cancellationToken)
     {
-        var allItems = await CandidateService.GetCandidates(searchStringCandidate, cancellationToken);
+        var pageNumber = (state.Page + 1).ToString();
 
-        currentPageData = allItems;
+        var result = await CandidateService.GetCandidates(
+            searchStringCandidate,
+            pageNumber,
+            cancellationToken);
 
-        var items = allItems
-            .Skip(state.Page * state.PageSize)
-            .Take(state.PageSize)
-            .ToList();
+        currentPageData = result.Candidate ?? new List<CandidateResponseDTO>();
 
         return new TableData<CandidateResponseDTO>
         {
-            TotalItems = allItems.Count,
-            Items = items
+            TotalItems = result.Total,
+            Items = currentPageData
         };
     }
 

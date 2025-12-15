@@ -17,10 +17,12 @@ public class GetCandidateService
     }
 
 
-    public async Task<List<CandidateResponseDto>?> GetCampaignInvitationsAsync(
+    public async Task<PaginatedCNX> GetCampaignInvitationsAsync(
         string searchData,
+		string page,
         CancellationToken ct = default)
     {
+		PaginatedCNX candidatesDTO = new();
         var apiKey = _configuration.GetValue<string>("CNXTalkpushsKey:Key");
         var filterCheck = _configuration.GetValue<string>("CNXTalkpushsKey:FilterCheck");
 
@@ -29,7 +31,7 @@ public class GetCandidateService
             throw new InvalidOperationException("API key is not configured.");
         }
 
-        var requestURI = BuildRequestUri(searchData, apiKey, filterCheck);
+        var requestURI = BuildRequestUri(searchData, apiKey, filterCheck, page);
 
         _logger.LogInformation("=== REQUEST ===");
 
@@ -52,9 +54,14 @@ public class GetCandidateService
         var result = await response.Content.ReadFromJsonAsync<CampaignInvitationResponseDTO>(
             cancellationToken: ct);
 
-        var mapDTO = MapToDtos(result!.Candidates);
+        var mapDTO = MapToDtos(result);
 
-        return mapDTO;
+		candidatesDTO.Total = result.Total;
+		candidatesDTO.Current_Page = result.Pages;
+		candidatesDTO.Total = result.Total;
+		candidatesDTO.Candidate = mapDTO;
+
+        return candidatesDTO!;
     }
 
     protected virtual async Task<HttpResponseMessage> SendRequestAsync(
@@ -67,7 +74,8 @@ public class GetCandidateService
     private string BuildRequestUri(
         string searchData,
         string apiKey,
-        string filterCheck
+        string filterCheck,
+		string page
         )
     {
         var queryParams = new Dictionary<string, string>
@@ -75,16 +83,15 @@ public class GetCandidateService
             ["api_key"] = apiKey,
             ["filter[query]"] = searchData,
             ["filter[others][bi_check]"] = filterCheck,
-            ["page"] = "1"
-        };
+            ["page"] = page
+		};
 
         return QueryHelpers.AddQueryString("campaign_invitations", queryParams!);
     }
 
-
-    private static List<CandidateResponseDto> MapToDtos(List<Candidate> candidates)
+    private static List<CandidateResponseDto> MapToDtos(CampaignInvitationResponseDTO candidates)
     {
-        return candidates.Select(c => new CandidateResponseDto(
+        return candidates.Candidates.Select(c => new CandidateResponseDto(
             c.CandidateId,
             c.Others?.JobRequisitionId,
             c.FirstName,
