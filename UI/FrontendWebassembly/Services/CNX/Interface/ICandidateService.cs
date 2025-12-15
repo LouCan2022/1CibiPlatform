@@ -2,5 +2,5 @@
 
 public interface ICandidateService
 {
-	Task<List<CandidateResponseDTO>> GetCandidates(string gmail, CancellationToken cancellationToken = default);
+	Task<PaginatedCNX> GetCandidates(string gmail, string page, CancellationToken cancellationToken = default);
 }
