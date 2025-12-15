@@ -1,8 +1,8 @@
 ﻿namespace CNX.Features.GetTalkpushCandidate;
 
-public record GetTalkpushCandidateCommmand(string request) : ICommand<GetTalkpushCandidateResult>;
+public record GetTalkpushCandidateCommmand(string request, string page) : ICommand<GetTalkpushCandidateResult>;
 
-public record GetTalkpushCandidateResult(List<CandidateResponseDto> CandidateResponseDto);
+public record GetTalkpushCandidateResult(PaginatedCNX CandidateResponseDto);
 
 public class GetTalkpushCandidateHandler : ICommandHandler<GetTalkpushCandidateCommmand, GetTalkpushCandidateResult>
 {
@@ -20,10 +20,11 @@ public class GetTalkpushCandidateHandler : ICommandHandler<GetTalkpushCandidateC
         CancellationToken cancellationToken)
     {
         var searchData = request.request;
+		var page = request.page;
 
         _logger.LogInformation("Handling GetTalkpushCandidateRequest - Search Data: {searchData}", searchData);
 
-        var candidate = await _getCandidateService.GetCampaignInvitationsAsync(searchData, cancellationToken);
+        var candidate = await _getCandidateService.GetCampaignInvitationsAsync(searchData, page, cancellationToken);
 
         if (candidate == null)
         {
