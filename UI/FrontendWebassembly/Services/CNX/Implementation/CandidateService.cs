@@ -8,10 +8,10 @@ public class CandidateService : ICandidateService
 	{
 		_httpClient = httpClientFactory.CreateClient("API");
 	}
-	public async Task<List<CandidateResponseDTO>> GetCandidates(string gmail, CancellationToken ct = default)
+	public async Task<PaginatedCNX> GetCandidates(string gmail, string page, CancellationToken ct = default)
 	{
-		var query = $"cnx/gettalkpushcandidate?request={gmail}";
-		var response = await _httpClient.GetFromJsonAsync<List<CandidateResponseDTO>>(query, ct);
+		var query = $"cnx/gettalkpushcandidate?request={gmail}&page={page}";
+		var response = await _httpClient.GetFromJsonAsync<PaginatedCNX>(query, ct);
 
 		return response!;
 	}

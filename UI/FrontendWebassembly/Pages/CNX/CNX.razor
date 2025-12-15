@@ -1,10 +1,21 @@
 ﻿@page "/cnx/cnxdashboard"
 @inherits SecurePageBase
 @inject ICandidateService CandidateService
+@inject IJSRuntime JS
 @* cnx/usersearch *@
 @attribute [RequirePermission(1, 1)]  
 
 <PageTitle>Concentrix</PageTitle>
+
+<div style="display:flex; justify-content:flex-end; gap:1rem;">
+    <MudButton Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Download"
+               Class="theme-button theme-button-active mb-4"
+               Style="border-radius: 4px;"
+               OnClick="DownloadCandidateData">
+        Export
+    </MudButton>
+</div>
 
 <TableComponent TItem="CandidateResponseDTO"
                 @ref="candidatesTable"
@@ -13,6 +24,7 @@
                 LoadServerData="LoadCandidatesData"
                 SearchString="@searchStringCandidate"
                 ColumnCount="28"
+                RowsPerPage="50"
                 SearchStringChanged="@((string val) => searchStringCandidate = val)">
     <HeaderTemplate>
         <MudTh>Candidate ID</MudTh>
@@ -78,8 +90,9 @@
 </TableComponent>
 
 @code {
-    private TableComponent<CandidateResponseDTO> candidatesTable;
-    private string _searchStringCandidate;
+    private TableComponent<CandidateResponseDTO>? candidatesTable;
+    private List<CandidateResponseDTO> currentPageData = new();
+    private string? _searchStringCandidate;
 
     private void UpdateSearch<T>(ref string field, string value, TableComponent<T> table) where T : class
     {
@@ -92,29 +105,68 @@
 
     private string searchStringCandidate
     {
-        get => _searchStringCandidate;
-        set => UpdateSearch(ref _searchStringCandidate, value, candidatesTable);
+        get => _searchStringCandidate!;
+        set => UpdateSearch(ref _searchStringCandidate!, value, candidatesTable!);
     }
 
     private async Task<TableData<CandidateResponseDTO>> LoadCandidatesData(TableState state, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(searchStringCandidate))
-        {
-            return new TableData<CandidateResponseDTO>
-            {
-                TotalItems = 0,
-                Items = Array.Empty<CandidateResponseDTO>()
-            };
-        }
+        var pageNumber = (state.Page + 1).ToString();
 
-        var result = await CandidateService.GetCandidates(searchStringCandidate, cancellationToken);
+        var result = await CandidateService.GetCandidates(
+            searchStringCandidate,
+            pageNumber,
+            cancellationToken);
+
+        currentPageData = result.Candidate ?? new List<CandidateResponseDTO>();
 
         return new TableData<CandidateResponseDTO>
         {
-            TotalItems = result.Count,
-            Items = result
+            TotalItems = result.Total,
+            Items = currentPageData
         };
     }
 
+    private async Task DownloadCandidateData()
+    {
+        if (currentPageData == null || !currentPageData.Any())
+            return;
+
+        var fileName = $"Candidates_Page_{DateTime.Now:MM-dd-yyyy(HH-mm-ss)}.xlsx";
+
+        var dataForExcel = currentPageData.Select(c => new Dictionary<string, object>
+        {
+            ["Candidate ID"] = c.CandidateId.ToString(),
+            ["Job Requisition ID"] = c.JobRequisitionId!,
+            ["First Name"] = c.FirstName!,
+            ["Middle Name"] = c.MiddleName!,
+            ["Last Name"] = c.LastName!,
+            ["Date Of Birth"] = c.DateOfBirth!,
+            ["Email"] = c.Email!,
+            ["User Phone Number"] = c.UserPhoneNumber!,
+            ["Marital Status"] = c.MaritalStatus!,
+            ["Package Account Name"] = c.PackageAccountName!,
+            ["CampaignTitle"] = c.CampaignTitle!,
+            ["Msa"] = c.Msa!,
+            ["Job Requisition Primary Location"] = c.JobRequisitionPrimaryLocation!,
+            ["Gender"] = c.Gender!,
+            ["Hire Date"] = c.HireDate!,
+            ["School Name"] = c.SchoolName!,
+            ["Education"] = c.Education!,
+            ["City"] = c.City!,
+            ["Postal Code"] = c.PostalCode!,
+            ["Address Line1"] = c.AddressLine1!,
+            ["SSS Number"] = c.SssNumber!,
+            ["Extracted SSS Number"] = c.ExtractedSssNumber!,
+            ["TIN Number"] = c.TinNumber!,
+            ["Extracted TIN Number"] = c.ExtractedTinNumber!,
+            ["PhilHealth Number"] = c.PhilhealthNumber!,
+            ["Extracted PhilHealth Number"] = c.ExtractedPhilhealthNumber!,
+            ["Pag-IBIG Number"] = c.PagIbigNumber!,
+            ["Extracted Pag-IBIG Number"] = c.ExtractedPagIbigNumber!
+        }).ToList();
+
+        await JS.InvokeVoidAsync("downloadExcel", fileName, dataForExcel);
+    }
 
 }
