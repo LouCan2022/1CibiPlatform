@@ -73,39 +73,36 @@ a,
     content: "An error has occurred.";
 }
 
-.loading-progress {
-    position: relative;
+.loader-container {
+    height: 100vh;
     display: flex;
+    align-items: center;
     justify-content: center;
-    align-content: center;
-    width: 8rem;
-    height: 8rem;
-    margin: 20vh auto 1rem auto;
 }
 
-.loading-progress circle {
-    fill: none;
-    stroke: #e0e0e0;
-    stroke-width: 0.6rem;
-    transform-origin: 50% 50%;
-    transform: rotate(-90deg);
+.loader {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+    position: relative !important;
+    border: 6px solid transparent !important; 
+    border-top-color: #102247 !important; 
+    border-right-color: #2a77ae !important; 
+    border-bottom-color: #68c0d6 !important; 
+    border-left-color: transparent !important; 
+    animation: rotation 1s linear infinite !important;
+    box-sizing: border-box !important;
 }
 
-.loading-progress circle:last-child {
-    stroke: #1b6ec2;
-    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-    transition: stroke-dasharray 0.05s ease-in-out;
-}
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg) !important;
+    }
 
-.loading-progress-text {
-    position: absolute;
-    text-align: center;
-    font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
-}
-
-.loading-progress-text:after {
-    content: var(--blazor-load-percentage-text, "Loading");
+    100% {
+        transform: rotate(360deg) !important;
+    }
 }
 
 code {

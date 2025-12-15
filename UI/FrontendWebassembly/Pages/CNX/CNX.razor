@@ -93,7 +93,6 @@
     private TableComponent<CandidateResponseDTO>? candidatesTable;
     private List<CandidateResponseDTO> currentPageData = new();
     private string? _searchStringCandidate;
-    private string? page;
 
     private void UpdateSearch<T>(ref string field, string value, TableComponent<T> table) where T : class
     {
@@ -133,7 +132,7 @@
         if (currentPageData == null || !currentPageData.Any())
             return;
 
-        var fileName = $"Candidates_Page_{DateTime.Now:MM-dd-yyyy-HH-mm-ss}.xlsx";
+        var fileName = $"Candidates_Page_{DateTime.Now:MM-dd-yyyy(HH-mm-ss)}.xlsx";
 
         var dataForExcel = currentPageData.Select(c => new Dictionary<string, object>
         {
