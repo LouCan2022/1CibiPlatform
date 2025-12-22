@@ -28,3 +28,4 @@ global using BuildingBlocks.Exceptions;
 global using BuildingBlocks.SharedConstants;
 global using BuildingBlocks.SharedDTO;
 global using BuildingBlocks.SharedInterfaces;
+global using Microsoft.Extensions.Caching.Hybrid;
