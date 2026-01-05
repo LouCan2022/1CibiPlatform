@@ -18,3 +18,6 @@ global using SSO.DTO;
 global using Microsoft.Extensions.Logging;
 global using System.Collections.ObjectModel;
 global using System.Security.Claims;
+global using BuildingBlocks.SharedInterfaces;
+global using BuildingBlocks.SharedConstants;
+global using BuildingBlocks.SharedDTO;

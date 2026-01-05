@@ -162,12 +162,9 @@ public class LoginService : ILoginService
 		string jwtToken = this._jWTService.GetAccessToken(userData);
 		SetAccessTokenCookie(jwtToken);
 
-
 		var name = !string.IsNullOrEmpty(userData.MiddleName) ?
 		$"{userData.FirstName} {userData.MiddleName} {userData.LastName}" :
 		$"{userData.FirstName} {userData.LastName}";
-
-
 
 		var successContext = new
 		{

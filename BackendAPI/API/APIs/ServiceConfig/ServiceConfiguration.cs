@@ -1,6 +1,7 @@
 ﻿using Serilog.Events;
 
 namespace APIs.ServiceConfig;
+
 public static class ServiceConfiguration
 {
 
@@ -79,7 +80,8 @@ public static class ServiceConfiguration
 					 {
 						 policy.WithOrigins(
 							 "http://localhost:5123",
-							 "http://localhost:5134")
+							 "http://localhost:5134",
+							 "https://aurelio-baronetical-micki.ngrok-free.dev")
 							 .AllowAnyHeader()
 							 .AllowAnyMethod()
 							 .AllowCredentials();

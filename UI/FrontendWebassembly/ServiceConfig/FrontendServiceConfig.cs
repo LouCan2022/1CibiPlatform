@@ -1,4 +1,5 @@
 ﻿using FrontendWebassembly.Services.CNX.Implementation;
+using System.Runtime.Intrinsics.Arm;
 
 namespace FrontendWebassembly.ServiceConfig;
 

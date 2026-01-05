@@ -7,6 +7,17 @@ public record SSOLoginCallbackResponse(SSOLoginResponseDTO Result);
 
 public class SSOLoginCallbackEndpoint : ICarterModule
 {
+
+	private readonly string _blazorAppUrl;
+	private readonly IConfiguration _configuration;
+
+	public SSOLoginCallbackEndpoint(IConfiguration configuration)
+	{
+
+		this._configuration = configuration;
+		_blazorAppUrl = _configuration!.GetValue<string>("SSOMetadata:BlazorAppUrl")!;
+	}
+
 	public void AddRoutes(IEndpointRouteBuilder app)
 	{
 		app.MapGet("sso/login/callback", async (string? returnUrl, ISender sender, HttpContext httpContext, CancellationToken cancellationToken) =>
@@ -18,9 +29,7 @@ public class SSOLoginCallbackEndpoint : ICarterModule
 
 			SSOLoginCallbackResult result = await sender.Send(command, cancellationToken);
 
-			var blazorAppUrl = $"http://localhost:5134/sso/frontpage";
-
-			return Results.Redirect(blazorAppUrl);
+			return Results.Redirect(_blazorAppUrl);
 
 		}).WithTags("SSO")
 		  .WithName("SSOLoginCallback")
