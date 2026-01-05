@@ -1,6 +1,10 @@
 ﻿using Auth.Data.Entities;
+using Auth.Features.UserManagement.Command.EditUser;
 using Auth.Features.UserManagement.Query.GetUsers;
+using BuildingBlocks.Exceptions;
 using FluentAssertions;
+using Auth.DTO;
+using Microsoft.EntityFrameworkCore;
 using Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 namespace Test.BackendAPI.Modules.Auth.IntegrationTests;
@@ -88,7 +92,49 @@ public class UserManagementIntegrationTests : BaseIntegrationTest
 		result.Users.Data.Count().Should().Be(0);
 	}
 
+	[Fact]
+	public async Task EditUser_ShouldUpdateExistingUserSuccessfully()
+	{
+		// Arrange
+		await SeedUserData();
 
+		var existingUser = await _dbContext.AuthUsers
+			.AsNoTracking()
+			.FirstOrDefaultAsync(x => x.Email == "john@example1.com");
+
+		var user = new EditUserDTO
+		{
+			Email = existingUser!.Email,
+			IsApproved = true
+		};
+
+		var command = new EditUserCommand(user);
+
+		// Act
+		var result = await _sender.Send(command);
+
+		// Assert
+		result.Should().NotBeNull();
+		result!.user.IsApproved.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task EditUser_ShouldThrow_WhenUserDoesNotExist()
+	{
+		// Arrange
+		var user = new EditUserDTO
+		{
+			Email = "john@example0.com",
+			IsApproved = true
+		};
+		var command = new EditUserCommand(user);
+
+		// Act
+		Func<Task> act = async () => await _sender.Send(command);
+
+		// Assert
+		await act.Should().ThrowAsync<NotFoundException>().WithMessage($"{user.Email} was not found."); ;
+	}
 
 	private async Task SeedUserData()
 	{
@@ -100,7 +146,8 @@ public class UserManagementIntegrationTests : BaseIntegrationTest
 				Email = "john@example1.com",
 				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 				FirstName = "Admin1",
-				LastName = ""
+				LastName = "",
+				IsApproved = false
 			},
 			new Authusers
 			{
@@ -108,7 +155,8 @@ public class UserManagementIntegrationTests : BaseIntegrationTest
 				Email = "john@example2.com",
 				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 				FirstName = "Admin2",
-				LastName = ""
+				LastName = "",
+				IsApproved = false
 			},
 			new Authusers
 			{
@@ -116,7 +164,8 @@ public class UserManagementIntegrationTests : BaseIntegrationTest
 				Email = "john@example3.com",
 				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 				FirstName = "Admin3",
-				LastName = ""
+				LastName = "",
+				IsApproved = false
 			},
 			new Authusers
 			{
@@ -124,7 +173,8 @@ public class UserManagementIntegrationTests : BaseIntegrationTest
 				Email = "john@example4.com",
 				PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 				FirstName = "Admin4",
-				LastName = ""
+				LastName = "",
+				IsApproved = false
 			},
 
 		};

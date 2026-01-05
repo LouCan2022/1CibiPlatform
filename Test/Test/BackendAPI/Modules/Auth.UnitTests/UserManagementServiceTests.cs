@@ -1,4 +1,6 @@
-﻿using Auth.DTO;
+﻿using Auth.Data.Entities;
+using Auth.DTO;
+using BuildingBlocks.Exceptions;
 using BuildingBlocks.Pagination;
 using FluentAssertions;
 using Moq;
@@ -84,5 +86,47 @@ public class UserManagementServiceTests : IClassFixture<AuthServiceFixture>
 		result.PageSize.Should().Be(expectedResult.PageSize);
 		result.Count.Should().Be(expectedResult.Count);
 		result.Data.Should().BeEquivalentTo(expectedResult.Data);
+	}
+
+	[Fact]
+	public async Task EditUserAsync_ShouldThrow_WhenUserNotFound()
+	{
+		// Arrange
+		var editDto = new EditUserDTO { Email = "john@example.com", IsApproved = true};
+
+		_fixture.MockAuthRepository
+			.Setup(x => x.GetUserAsync(editDto.Email))
+			.ReturnsAsync((Authusers)null);
+
+		// Act
+		Func<Task> act = async () => await _fixture.UserManagementService.EditUserAsync(editDto);
+
+		// Assert
+		await act.Should().ThrowAsync<NotFoundException>()
+			.WithMessage($"{editDto.Email} was not found.");
+	}
+
+	[Fact]
+	public async Task EditUserAsync_ShouldReturnUpdatedDto_WhenSuccessful()
+	{
+		// Arrange
+		var editDto = new EditUserDTO { Email = "johndoe@example.com", IsApproved = true };
+		var existingUser = new Authusers { Email = "johndoe@example.com", IsApproved = false };
+		var updatedUser = new Authusers { Email = "johndoe@example.com", IsApproved = true };
+
+		_fixture.MockAuthRepository
+			.Setup(x => x.GetUserAsync(editDto.Email))
+			.ReturnsAsync(existingUser);
+
+		_fixture.MockAuthRepository
+			.Setup(x => x.EditUserAsync(existingUser))
+			.ReturnsAsync(updatedUser);
+
+		// Act
+		var result = await _fixture.UserManagementService.EditUserAsync(editDto);
+
+		// Assert
+		result.Should().NotBeNull();
+		result.IsApproved.Should().BeTrue();
 	}
 }
