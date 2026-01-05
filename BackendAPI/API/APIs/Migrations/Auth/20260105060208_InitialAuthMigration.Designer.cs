@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     [DbContext(typeof(AuthApplicationDbContext))]
-    [Migration("20251114073444_InitialAuthMigration")]
+    [Migration("20260105060208_InitialAuthMigration")]
     partial class InitialAuthMigration
     {
         /// <inheritdoc />
@@ -221,6 +221,11 @@ namespace APIs.Migrations.Auth
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsApproved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("LastName")
                         .IsRequired()

@@ -384,4 +384,32 @@ public class UserManagementService : IUserManagementService
         }
         return null!;
     }
+
+	public async Task<EditUserDTO> EditUserAsync(UsersDTO editUserDTO)
+	{
+		var editUser = new EditUserDTO
+		{
+			Email = editUserDTO.email,
+			IsApproved = editUserDTO.isApproved
+		};
+
+		var payload = new
+		{
+			editUser
+		};
+
+		var response = await _httpClient.PatchAsJsonAsync($"auth/edituser", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not Edit the User Successfully");
+			return null!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<EditUserDTO>();
+		Console.WriteLine("✅ Added the User Successfully");
+		if (successContent != null)
+		{
+			return successContent;
+		}
+		return null!;
+	}
 }

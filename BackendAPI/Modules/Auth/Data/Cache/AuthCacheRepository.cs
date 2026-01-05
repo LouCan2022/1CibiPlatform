@@ -380,6 +380,16 @@ public class AuthCacheRepository : IAuthRepository
 		return updated!;
 	}
 
+	public async Task<Authusers> EditUserAsync(Authusers user)
+	{
+		var updated = await _authRepository.EditUserAsync(user);
+
+		if (updated != null)
+			await _hybridCache.RemoveByTagAsync(UsersTag);
+
+		return updated!;
+	}
+
 	public Task<bool> UpdateRefreshTokenAsync(AuthRefreshToken authRefreshToken)
 	{
 		return _authRepository.UpdateRefreshTokenAsync(authRefreshToken);
@@ -388,5 +398,10 @@ public class AuthCacheRepository : IAuthRepository
 	public Task<AuthRefreshToken> SearchUserRefreshToken(Guid userId, string refreshToken)
 	{
 		return _authRepository.SearchUserRefreshToken(userId, refreshToken);
+	}
+
+	public async Task<Authusers> GetUserAsync(string email)
+	{
+		return await _authRepository.GetUserAsync(email);
 	}
 }

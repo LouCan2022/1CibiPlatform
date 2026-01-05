@@ -28,7 +28,8 @@ public class AuthRepository : IAuthRepository
 						au.Email,
 						au.FirstName,
 						au.MiddleName ?? "",
-						au.LastName))
+						au.LastName,
+						au.IsApproved))
 					.AsNoTracking()
 					.ToListAsync(cancellationToken);
 
@@ -67,6 +68,13 @@ public class AuthRepository : IAuthRepository
 			totalRecords,
 			applications
 		);
+	}
+
+	public async Task<Authusers> GetUserAsync(string email)
+	{
+		var user = await _dbcontext.AuthUsers.FirstOrDefaultAsync(u => u.Email == email);
+
+		return user!;
 	}
 	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
@@ -118,7 +126,8 @@ public class AuthRepository : IAuthRepository
 						au.Email,
 						au.FirstName,
 						au.MiddleName ?? "",
-						au.LastName))
+						au.LastName,
+						au.IsApproved))
 					.AsNoTracking()
 					.ToListAsync(cancellationToken);
 
@@ -209,6 +218,7 @@ public class AuthRepository : IAuthRepository
 							   user.FirstName!,
 							   user.LastName!,
 							   user.MiddleName,
+							   user.IsApproved,
 							   userRolesGroup.Select(r => r.AppId).Distinct().ToList(),
 							   userRolesGroup.GroupBy(r => r.AppId)
 											 .Select(g => g.Select(r => r.Submenu).ToList())
@@ -443,7 +453,6 @@ public class AuthRepository : IAuthRepository
 
 		return true;
 	}
-
 	public async Task<AuthApplication> GetApplicationAsync(int applicationId)
 	{
 		var application = await _dbcontext.AuthApplications
@@ -516,6 +525,14 @@ public class AuthRepository : IAuthRepository
 		await _dbcontext.SaveChangesAsync();
 
 		return subMenu;
+	}
+
+	public async Task<Authusers> EditUserAsync(Authusers user)
+	{
+		_dbcontext.AuthUsers.Update(user);
+		await _dbcontext.SaveChangesAsync();
+
+		return user;
 	}
 
 	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(

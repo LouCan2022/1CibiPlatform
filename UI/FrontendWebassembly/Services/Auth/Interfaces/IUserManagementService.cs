@@ -18,6 +18,8 @@ public interface IUserManagementService
 	Task<bool> AddRoleAsync(AddRoleDTO addRoleDTO);
 	Task<bool> AddAppSubRoleAsync(AddAppSubRoleDTO addAppSubRoleDTO);
 
+	Task<EditUserDTO> EditUserAsync(UsersDTO editUserDTO);
+
 	Task<EditApplicationDTO> EditApplicationAsync(ApplicationsDTO editApplicationDTO);
 	Task<EditSubMenuDTO> EditSubMenuAsync(SubMenusDTO editSubMenuDTO);
 	Task<EditRoleDTO> EditRoleAsync(RolesDTO editRoleDTO);

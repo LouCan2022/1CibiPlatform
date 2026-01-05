@@ -34,6 +34,8 @@
             <MudTh>First Name</MudTh>
             <MudTh>Middle Name</MudTh>
             <MudTh>Last Name</MudTh>
+            <MudTh>Approved</MudTh>
+            <MudTh>Action</MudTh>
         </HeaderTemplate>
 
         <RowTemplate Context="user">
@@ -41,6 +43,26 @@
             <MudTd DataLabel="First Name">@user.firstName</MudTd>
             <MudTd DataLabel="Middle Name">@user.middleName</MudTd>
             <MudTd DataLabel="Last Name">@user.lastName</MudTd>
+            <MudTd DataLabel="Approved">
+                 <div style="grid-column: 1; grid-row: 2; align-content: center; margin-bottom: 12px;">
+                @if (user.isApproved == true)
+                {
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 16px; margin-top: 10px; height: 40px;">
+                         Approved
+                    </div>
+                }
+                @if (user.isApproved == false)
+                {
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; background-color: #fdecea; color: #c62828; border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 16px; margin-top: 10px; height: 40px;">
+                        Unapproved
+                    </div>
+                }
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Action">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
+                               OnClick="@(() => OpenEditUserDialog(user))" />
+            </MudTd>
         </RowTemplate>
     </TableComponent>
 }
@@ -402,6 +424,9 @@ else if (_activeIndex == 4)
             });
     }
 
+    private async Task OpenEditUserDialog(UsersDTO user)
+      => await OpenEditDialog<EditUserComponent, UsersDTO>("Edit User", "User", user, EditUser);
+
     private async Task OpenEditApplicationDialog(ApplicationsDTO app)
       => await OpenEditDialog<EditApplicationComponent, ApplicationsDTO>("Edit Application", "Application", app, EditApplication);
 
@@ -502,6 +527,14 @@ else if (_activeIndex == 4)
     {
         await UserManagementService.AddAppSubRoleAsync(addAppSubRoleDTO);
         await appSubRolesTable.TableRef.ReloadServerData();
+        return;
+    }
+
+    private async Task EditUser(UsersDTO editUserDTO)
+    {
+        await UserManagementService.EditUserAsync(editUserDTO);
+        await usersTable.TableRef.ReloadServerData();
+        StateHasChanged();
         return;
     }
 

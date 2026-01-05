@@ -161,6 +161,17 @@ public class AuthPaths : IReverseProxyModule
 			),
 
 			new RouteDefinitionDTO(
+				RouteId: "EditUserEntryPoint",
+				MatchPath: "auth/edituser",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "auth/edituser" }
+				}
+			),
+
+			new RouteDefinitionDTO(
 				RouteId: "GetApplicationsEntryPoint",
 				MatchPath: "auth/getapplications",
 				ClusterId: GatewayConstants.OnePlatformApi,

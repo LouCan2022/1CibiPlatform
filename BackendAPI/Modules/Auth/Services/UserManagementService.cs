@@ -12,6 +12,29 @@ public class UserManagementService : IUserService
 		this._logger = logger;
 	}
 
+	public async Task<UserDTO> EditUserAsync(EditUserDTO userDTO)
+	{
+		var logContext = new
+		{
+			Action = "EditUser",
+			Step = "FetchForUpdate",
+			userDTO.Email,
+			Timestamp = DateTime.UtcNow
+		};
+
+		var existingUser = await _authRepository.GetUserAsync(userDTO.Email!);
+		if (existingUser == null)
+		{
+			_logger.LogError("{Email} was not found during update operation: {@Context}", userDTO.Email, logContext);
+			throw new NotFoundException($"{userDTO.Email} was not found.");
+		}
+
+		existingUser.IsApproved = userDTO.IsApproved;
+
+		var user = await _authRepository.EditUserAsync(existingUser);
+		return user.Adapt<UserDTO>();
+	}
+
 	public Task<PaginatedResult<UsersDTO>> GetUsersAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)

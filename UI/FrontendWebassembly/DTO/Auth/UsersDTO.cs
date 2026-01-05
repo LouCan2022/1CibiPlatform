@@ -5,6 +5,7 @@ public record UsersDTO {
 	public string? firstName { get; set; }
 	public string? middleName { get; set; }
 	public string? lastName { get; set; }
+	public bool isApproved { get; set; }
 }
 
 public record UsersResponseDTO

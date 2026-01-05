@@ -16,6 +16,7 @@ public interface IAuthRepository
 	Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId);
 	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
 	Task<AuthRole> GetRoleAsync(int roleId);
+	Task<Authusers> GetUserAsync(string email);
 
 	// Search methods
 	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
@@ -51,6 +52,9 @@ public interface IAuthRepository
 
 	// Registration
 	Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto);
+
+	//User Edit
+	Task<Authusers> EditUserAsync(Authusers user);
 
 	// Application CRUD
 	Task<bool> AddApplicationAsync(AddApplicationDTO application);
