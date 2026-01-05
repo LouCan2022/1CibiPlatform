@@ -1,14 +1,22 @@
 ﻿namespace FrontendWebassembly.Services.Auth.Implementation;
 
+using System.Text.Json;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+
 public class AccessService : IAccessService
 {
 	private readonly LocalStorageService _localStorage;
+	private readonly ILogger<AccessService> _logger;
 	private const string _appIdKey = "AppId";
 	private const string _subMenuKey = "SubMenuId";
 
-	public AccessService(LocalStorageService localStorage)
+	public AccessService(LocalStorageService localStorage, ILogger<AccessService> logger)
 	{
 		_localStorage = localStorage;
+		_logger = logger;
 	}
 
 
@@ -17,8 +25,8 @@ public class AccessService : IAccessService
 		var apps = JsonSerializer.Deserialize<List<int>>(await _localStorage.GetItemAsync<string>(_appIdKey));
 		var subMenus = JsonSerializer.Deserialize<List<List<int>>>(await _localStorage.GetItemAsync<string>(_subMenuKey));
 
-		Console.WriteLine($"Apps: {string.Join(", ", apps ?? new List<int>())}");
-		Console.WriteLine($"SubMenus: {string.Join(", ", subMenus?.SelectMany(sm => sm) ?? new List<int>())}");
+		_logger.LogDebug("Apps: {Apps}", string.Join(", ", apps ?? new List<int>()));
+		_logger.LogDebug("SubMenus: {SubMenus}", string.Join(", ", subMenus?.SelectMany(sm => sm) ?? new List<int>()));
 
 		if (apps is null && subMenus is null)
 		{
@@ -27,16 +35,16 @@ public class AccessService : IAccessService
 
 		if (!apps.Contains(appId))
 		{
-			Console.WriteLine($"AppId {appId} not found in user's apps.");
+			_logger.LogWarning("AppId {AppId} not found in user's apps.", appId);
 			return false;
 		}
 
 		var index = apps.IndexOf(appId);
-		Console.WriteLine($"Index of AppId {appId}: {index}");
+		_logger.LogDebug("Index of AppId {AppId}: {Index}", appId, index);
 
 		if (!subMenus[index].Contains(subMenuId))
 		{
-			Console.WriteLine($"SubMenuId {subMenuId} not found for AppId {appId}.");
+			_logger.LogWarning("SubMenuId {SubMenuId} not found for AppId {AppId}.", subMenuId, appId);
 			return false;
 		}
 

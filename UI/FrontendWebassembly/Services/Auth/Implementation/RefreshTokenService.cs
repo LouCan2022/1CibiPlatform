@@ -5,6 +5,7 @@ public class RefreshTokenService : IRefreshTokenService
 	private HttpClient _httpClient;
 	private readonly LocalStorageService _localStorageService;
 	private readonly IConfiguration _configuration;
+	private readonly ILogger<RefreshTokenService> _logger;
 
 	private readonly string _userNameKey;
 	private readonly string _userIdKey;
@@ -15,11 +16,13 @@ public class RefreshTokenService : IRefreshTokenService
 
 	public RefreshTokenService(IHttpClientFactory httpClientFactory,
 		LocalStorageService localStorageService,
-		IConfiguration configuration)
+		IConfiguration configuration,
+		ILogger<RefreshTokenService> logger)
 	{
 		_httpClient = httpClientFactory.CreateClient("RefreshAPI");
 		this._localStorageService = localStorageService;
 		this._configuration = configuration;
+		this._logger = logger;
 
 		this._userNameKey = "Name";
 		this._userIdKey = "UserId";
@@ -31,7 +34,7 @@ public class RefreshTokenService : IRefreshTokenService
 
 	public async Task<AuthResponseDTO> GetNewAccessAndRefreshToken(Guid userId)
 	{
-		Console.WriteLine("🔹 Starting Getting New Token request...");
+		_logger.LogDebug("Starting Getting New Token request for UserId: {UserId}...", userId);
 
 		var payload = new
 		{
@@ -40,30 +43,30 @@ public class RefreshTokenService : IRefreshTokenService
 
 		var response = await _httpClient.PostAsJsonAsync("/token/web/getnewaccesstoken", payload);
 
-		Console.WriteLine($"⬅️ Received response: {(int)response.StatusCode} {response.ReasonPhrase}");
+		_logger.LogDebug("Received response: {Status} {Reason}", (int)response.StatusCode, response.ReasonPhrase);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Login failed. Reading error content...");
+			_logger.LogWarning("Getting new token failed for UserId {UserId}. Reading error content...", userId);
 
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
-			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {errorContent!.Detail}");
+			_logger.LogError("Could not parse JSON error. Detail: {Detail}", errorContent!.Detail);
 			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Error");
 		}
 
-		Console.WriteLine("✅ Login successful. Reading success content...");
+		_logger.LogInformation("Getting new token successful for UserId {UserId}. Reading success content...", userId);
 
 		var successContent = await response.Content.ReadFromJsonAsync<CredResponseDTO>();
 
-		Console.WriteLine("💾 Storing user info in local storage...");
-		this.SetLocalstorage(successContent!);
+		_logger.LogDebug("Storing user info in local storage for UserId: {UserId}", successContent?.UserId);
+		await this.SetLocalstorage(successContent!);
 
 
 		return new AuthResponseDTO(successContent!.UserId, successContent.AccessToken, string.Empty, string.Empty);
 	}
 
-	protected virtual async void SetLocalstorage(CredResponseDTO credResponseDTO)
+	protected virtual async Task SetLocalstorage(CredResponseDTO credResponseDTO)
 	{
 		// Store UserId and Username in local storage
 		await this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
@@ -75,13 +78,13 @@ public class RefreshTokenService : IRefreshTokenService
 
 	public async Task<bool> Logout()
 	{
-		Console.WriteLine("🔹 Starting logout request...");
+		_logger.LogDebug("Starting logout request...");
 
 		var userId = await _localStorageService.GetItemAsync<Guid>(_userIdKey);
 
 		if (userId == Guid.Empty)
 		{
-			Console.WriteLine("UserId not found in local storage. Cannot proceed with logout.");
+			_logger.LogWarning("UserId not found in local storage. Cannot proceed with logout.");
 			return false;
 		}
 
@@ -98,7 +101,7 @@ public class RefreshTokenService : IRefreshTokenService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("Something went wrong call the IT Team for further support {response}", JsonSerializer.Serialize(response));
+			_logger.LogError("Something went wrong call the IT Team for further support {Response}", JsonSerializer.Serialize(response));
 			return false;
 		}
 
@@ -106,14 +109,14 @@ public class RefreshTokenService : IRefreshTokenService
 
 		if (successContent!.isLoggedOut == false)
 		{
-			Console.WriteLine("User is not logged out");
+			_logger.LogWarning("User is not logged out");
 			return false;
 		}
 
 
 		await this._localStorageService.ClearAsync();
 
-		Console.WriteLine("✅ Logout successful.");
+		_logger.LogInformation("Logout successful.");
 
 		return true;
 	}
