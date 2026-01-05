@@ -7,7 +7,8 @@ public static class SubMenuList
 	  {
 		{ 1, ("cnxdashboard", "List of Subjects" , Icons.Material.Filled.Dashboard) },
 		{ 2, ("idv", "IDV" , Icons.Material.Filled.Person) },
-		{ 3, ("usermanagement", "User Management" , Icons.Material.Filled.ManageAccounts) }
+		{ 3, ("usermanagement", "User Management" , Icons.Material.Filled.ManageAccounts) },
+	  	{ 4, ("chat", "Chat", Icons.Material.Filled.Chat) }
 	  };
 }
 

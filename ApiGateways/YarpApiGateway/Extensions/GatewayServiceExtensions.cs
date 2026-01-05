@@ -8,18 +8,23 @@ using System.Reflection;
 using System.Threading.RateLimiting;
 using Yarp.ReverseProxy.Configuration;
 using BuildingBlocks.SharedConstants;
+using AIAgent;
 
 namespace ApiGateways.YarpApiGateway.Extensions;
 
 public static class GatewayServiceExtensions
 {
 	// Registers CORS, Rate Limiting, module discovery, and YARP reverse proxy from modules
+	#region Gateway Services
 	public static void AddGatewayServices(this WebApplicationBuilder builder)
 	{
 		AddCors(builder.Services);
 		AddRateLimiting(builder.Services);
 		AddModuleDiscoveryAndReverseProxy(builder);
 	}
+	#endregion
+
+	#region Private Methods
 
 	private static void AddCors(IServiceCollection services)
 	{
@@ -34,6 +39,9 @@ public static class GatewayServiceExtensions
 			});
 		});
 	}
+	#endregion
+
+	#region Rate Limiting
 
 	private static void AddRateLimiting(IServiceCollection services)
 	{
@@ -83,6 +91,9 @@ public static class GatewayServiceExtensions
 			options.RejectionStatusCode = 429;
 		});
 	}
+	#endregion
+
+	#region Module Discovery
 
 	private static void AddModuleDiscoveryAndReverseProxy(WebApplicationBuilder builder)
 	{
@@ -93,7 +104,8 @@ public static class GatewayServiceExtensions
 			typeof(AuthMarker).Assembly,
 			typeof(CNXMarker).Assembly,
 			typeof(PhilSysMarker).Assembly,
-			typeof(SSOMarker).Assembly
+			typeof(SSOMarker).Assembly,
+			typeof(AIAgentMarker).Assembly
 		};
 
 		builder.Services.Scan(scan =>
@@ -164,4 +176,5 @@ public static class GatewayServiceExtensions
 		builder.Services.AddReverseProxy()
 		.LoadFromMemory(yarpRoutes, yarpClusters);
 	}
+	#endregion
 }
