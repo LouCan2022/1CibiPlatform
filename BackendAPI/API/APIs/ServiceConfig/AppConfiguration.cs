@@ -59,6 +59,11 @@ public static class AppConfiguration
 		this WebApplication app,
 		IConfiguration configuration)
 	{
+		if (app.Environment.IsEnvironment("Testing"))
+		{
+			return app;
+		}
+
 		app.MapHub<AIAgent.Hubs.AIAgentHub>(configuration["SignalRHub:Endpoint"]!);
 		app.UseWebSockets();
 		return app;

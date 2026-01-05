@@ -25,4 +25,9 @@
     <ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Path\" />
+  </ItemGroup>
+
 </Project>
