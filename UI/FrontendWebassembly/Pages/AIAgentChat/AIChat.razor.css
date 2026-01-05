@@ -1,0 +1,31 @@
+.chat-window { max-height: 60vh; overflow:auto; padding: 12px; border-radius:8px; background: var(--mud-palette-surface); }
+.messages { display:flex; flex-direction:column; gap:12px; }
+.message-row { display:flex; align-items:flex-start; }
+.message-row.user { justify-content:flex-end; }
+.message-row.user .message-bubble { background: var(--mud-palette-primary); color: white; margin-left: 12px; }
+.message-row.assistant .message-bubble { background: var(--mud-palette-surface); color: var(--mud-palette-text-primary); margin-right: 12px; }
+.message-bubble { padding:10px 12px; border-radius:10px; max-width:70%; }
+.message-text { white-space:pre-wrap; }
+.message-time { font-size:0.7rem; opacity:0.7; margin-top:6px; text-align:right; }
+.empty-state { text-align:center; padding:20px; color:var(--mud-palette-text-secondary); }
+.chat-input { display:flex; align-items:center; margin-top:12px; }
+.typing-dots { display:inline-flex; gap:6px; align-items:center; }
+.typing-dots span { width:8px; height:8px; background:var(--mud-palette-text-primary); border-radius:50%; display:inline-block; animation: blink 1s infinite; opacity:0.85; }
+.typing-dots span:nth-child(2) { animation-delay: .2s }
+.typing-dots span:nth-child(3) { animation-delay: .4s }
+@keyframes blink { 0% { transform: translateY(0); opacity: 0.4 } 50% { transform: translateY(-4px); opacity: 1 } 100% { transform: translateY(0); opacity:0.4 } }
+/* formatted HTML inside assistant bubble */
+.message-html p { margin: 0 0 8px 0; }
+.message-html pre { background: var(--mud-palette-background); padding:12px; border-radius:6px; overflow:auto; }
+.message-html code { background: rgba(0,0,0,0.04); padding:2px 6px; border-radius:4px; font-family: monospace; }
+.message-html table { border-collapse:collapse; width:100%; }
+.message-html table td, .message-html table th { border:1px solid rgba(0,0,0,0.08); padding:6px 8px; }
+.message-html ul, .message-html ol { padding-left:18px; margin:0 0 8px 0; }
+/* custom bullet emoji for unordered lists */
+.message-html ul li { list-style:none; position:relative; padding-left:20px; }
+.message-html ul li:before { content: "\1F538"; /* small diamond emoji as bullet */ position:absolute; left:0; top:0; }
+/* task list checkboxes */
+.message-html input[type="checkbox"] { transform: scale(1.1); margin-right:8px; }
+/* code block language label (if GenericAttributes used to add language attribute) */
+.message-html pre[data-language] { position:relative; }
+.message-html pre[data-language]::before { content: attr(data-language); position:absolute; top:-18px; right:8px; font-size:0.75rem; color:rgba(0,0,0,0.6); }

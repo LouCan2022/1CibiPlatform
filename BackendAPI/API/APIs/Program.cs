@@ -13,6 +13,8 @@ builder.Services
 	.AddModuleServices()
 	.AddJwtAuthentication(builder.Configuration, builder.Environment)
 	.AddModuleInfrastructure(builder.Configuration)
+	.AddAIAgentConfiguration(builder.Configuration)
+	.AddAIAgentSkills(builder.Configuration)
 	.AddEndpointsApiExplorer()
 	.AddSwaggerGen();
 
@@ -26,9 +28,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var app = builder.Build();
 
 await app.UseEnvironmentAsync();
-
+app.UseAIAgentSkills();
+app.UseSignalRConfiguration(builder.Configuration);
 app.UseCustomMiddlewares();
-
 app.Run();
 
 public partial class Program { }

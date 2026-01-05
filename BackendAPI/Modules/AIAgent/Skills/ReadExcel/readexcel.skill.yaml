@@ -1,0 +1,51 @@
+name: ReadExcel
+version: 1.0.1
+description: "Parses an uploaded spreadsheet (CSV, XLSX) and returns tabular rows. This manifest describes the Kernel-friendly skill signature that accepts Base64-encoded files. The runtime implementation uses ClosedXML for .xlsx parsing."
+functions:
+  - name: ProcessExcel.RunAsync
+    title: "Process Excel / CSV"
+    description: |
+      Validates and parses a spreadsheet provided as a Base64-encoded payload. Use this signature when invoking the skill directly from the Semantic Kernel or an agent.
+    input_schema:
+      type: object
+      required:
+        - FileName
+        - Base64File
+      properties:
+        FileName:
+          type: string
+          minLength: 3
+          description: "The uploaded file name, used to infer format (e.g., customers.csv, sheet.xlsx)."
+        Base64File:
+          type: string
+          description: "Base64-encoded file content. Must be a valid Base64 string representing the binary file."
+        HeaderRow:
+          type: integer
+          minimum: 1
+          default: 1
+          description: "1-based index of the header row. Defaults to 1."
+      description: "Provide file as Base64 along with FileName so the skill can infer format and parse accordingly."
+    examples:
+      - input:
+          FileName: "customers.csv"
+          Base64File: "VGhpcyxpcyxhLGJhc2U2NCxFbGFt..." # truncated
+          HeaderRow: 1
+        output:
+          Success: true
+          Message: "Parsed 42 rows from CSV."
+    usage: |
+      The Kernel can call this function by passing a JSON object matching the input_schema. Example payload:
+
+      {"FileName":"data.xlsx","Base64File":"<base64...>","HeaderRow":1}
+
+      Note: For large files consider uploading via an authenticated HTTP endpoint and calling the runtime API instead of inlining large Base64 payloads in prompts.
+    dependencies:
+      - ClosedXML: "Required at runtime for .xlsx parsing. Add the ClosedXML NuGet package to the AIAgent project."
+    security:
+      - type: bearer
+        description: "Protect endpoints that wrap this skill; require authentication/authorization."
+notes: |
+  - This manifest is intended for direct Kernel/agent invocation using Base64 payloads. If you prefer multipart uploads, keep the runtime IFormFile API and use an HTTP bridge.  
+  - Install ClosedXML in the AIAgent project:  
+    dotnet add BackendAPI/Modules/AIAgent/AIAgent.csproj package ClosedXML
+  - For very large files prefer streaming upload endpoints instead of embedding large Base64 strings in Kernel calls.

@@ -3,10 +3,12 @@
 public class UserManagementService : IUserManagementService
 {
 	private readonly HttpClient _httpClient;
+	private readonly ILogger<UserManagementService> _logger;
 
-	public UserManagementService(IHttpClientFactory httpClientFactory)
+	public UserManagementService(IHttpClientFactory httpClientFactory, ILogger<UserManagementService> logger)
 	{
 		_httpClient = httpClientFactory.CreateClient("API");
+		_logger = logger;
 	}
 
 	public async Task<PaginatedResult<UsersDTO>> GetUsersAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default)
@@ -19,7 +21,7 @@ public class UserManagementService : IUserManagementService
 
 		if (response == null)
 		{
-			Console.WriteLine("❌ Did not Get the Users Successfully");
+			_logger.LogWarning("Did not get the users successfully");
 
 			return new PaginatedResult<UsersDTO>(
 				pageIndex: PageNumber ?? 1,
@@ -32,7 +34,12 @@ public class UserManagementService : IUserManagementService
 		return response.users!;
 	}
 
-	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(int? PageNumber = 1, int? PageSize = int.MaxValue, string? SearchTerm = null, CancellationToken ct = default)
+	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(
+		int? PageNumber = 1,
+		int? PageSize =
+		int.MaxValue, string?
+		SearchTerm = null,
+		CancellationToken ct = default)
 	{
 		var query = $"auth/getapplications?pageNumber={PageNumber}&pageSize={PageSize}";
 		if (!string.IsNullOrEmpty(SearchTerm))
@@ -42,7 +49,7 @@ public class UserManagementService : IUserManagementService
 
 		if (response == null)
 		{
-			Console.WriteLine("❌ Did not Get the applications Successfully");
+			_logger.LogWarning("Did not get the applications successfully");
 
 			return new PaginatedResult<ApplicationsDTO>(
 				pageIndex: PageNumber ?? 1,
@@ -55,7 +62,12 @@ public class UserManagementService : IUserManagementService
 		return response.applications!;
 	}
 
-	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default)
+	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(
+		int? PageNumber = 1,
+		int? PageSize = 10,
+		string?
+		SearchTerm = null,
+		CancellationToken ct = default)
 	{
 		var query = $"auth/getsubmenus?pageNumber={PageNumber}&pageSize={PageSize}";
 		if (!string.IsNullOrEmpty(SearchTerm))
@@ -65,7 +77,7 @@ public class UserManagementService : IUserManagementService
 
 		if (response == null)
 		{
-			Console.WriteLine("❌ Did not Get the submenus Successfully");
+			_logger.LogWarning("Did not get the submenus successfully");
 
 			return new PaginatedResult<SubMenusDTO>(
 				pageIndex: PageNumber ?? 1,
@@ -78,7 +90,11 @@ public class UserManagementService : IUserManagementService
 		return response.submenus!;
 	}
 
-	public async Task<PaginatedResult<RolesDTO>> GetRolesAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default)
+	public async Task<PaginatedResult<RolesDTO>> GetRolesAsync(
+		int? PageNumber = 1,
+		int? PageSize = 10,
+		string? SearchTerm = null,
+		CancellationToken ct = default)
 	{
 		var query = $"auth/getroles?pageNumber={PageNumber}&pageSize={PageSize}";
 		if (!string.IsNullOrEmpty(SearchTerm))
@@ -88,7 +104,7 @@ public class UserManagementService : IUserManagementService
 
 		if (response == null)
 		{
-			Console.WriteLine("❌ Did not Get the roles Successfully");
+			_logger.LogWarning("Did not get the roles successfully");
 
 			return new PaginatedResult<RolesDTO>(
 				pageIndex: PageNumber ?? 1,
@@ -101,7 +117,11 @@ public class UserManagementService : IUserManagementService
 		return response.roles!;
 	}
 
-	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default)
+	public async Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(
+		int? PageNumber = 1,
+		int? PageSize = 10,
+		string? SearchTerm = null,
+		CancellationToken ct = default)
 	{
 		var query = $"auth/getappsubroles?pageNumber={PageNumber}&pageSize={PageSize}";
 		if (!string.IsNullOrEmpty(SearchTerm))
@@ -111,7 +131,7 @@ public class UserManagementService : IUserManagementService
 
 		if (response == null)
 		{
-			Console.WriteLine("❌ Did not Get the appsubroles Successfully");
+			_logger.LogWarning("Did not get the appsubroles successfully");
 
 			return new PaginatedResult<AppSubRolesDTO>(
 				pageIndex: PageNumber ?? 1,
@@ -129,12 +149,12 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.DeleteAsync($"auth/deleteapplication/{AppId}");
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Delete the Application Successfully");
-			return false!;
+			_logger.LogWarning("Did not delete the application successfully (AppId: {AppId})", AppId);
+			return false;
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Deleted the Application Successfully");
+		_logger.LogInformation("Deleted the application successfully (AppId: {AppId})", AppId);
 		return successContent!;
 	}
 
@@ -143,12 +163,12 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.DeleteAsync($"auth/deletesubmenu/{SubMenuId}");
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Delete the SubMenu Successfully");
-			return false!;
+			_logger.LogWarning("Did not delete the submenu successfully (SubMenuId: {SubMenuId})", SubMenuId);
+			return false;
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Deleted the SubMenu Successfully");
+		_logger.LogInformation("Deleted the submenu successfully (SubMenuId: {SubMenuId})", SubMenuId);
 		return successContent!;
 	}
 
@@ -157,12 +177,12 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.DeleteAsync($"auth/deleterole/{RoleId}");
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Delete the Role Successfully");
-			return false!;
+			_logger.LogWarning("Did not delete the role successfully (RoleId: {RoleId})", RoleId);
+			return false;
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Deleted the Role Successfully");
+		_logger.LogInformation("Deleted the role successfully (RoleId: {RoleId})", RoleId);
 		return successContent!;
 	}
 
@@ -171,12 +191,12 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.DeleteAsync($"auth/deleteappsubrole/{AppSubRoleId}");
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Delete the AppSubRole Successfully");
-			return false!;
+			_logger.LogWarning("Did not delete the AppSubRole successfully (AppSubRoleId: {AppSubRoleId})", AppSubRoleId);
+			return false;
 		}
 
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Deleted the AppSubRole Successfully");
+		_logger.LogInformation("Deleted the AppSubRole successfully (AppSubRoleId: {AppSubRoleId})", AppSubRoleId);
 		return successContent!;
 	}
 
@@ -190,11 +210,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PostAsJsonAsync($"auth/addapplication", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Add the Application Successfully");
-			return false!;
+			_logger.LogWarning("Did not add the application successfully");
+			return false;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Added the Application Successfully");
+		_logger.LogInformation("Added the application successfully");
 		return successContent;
 	}
 
@@ -208,11 +228,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PostAsJsonAsync($"auth/addsubmenu", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Add the SubMenu Successfully");
-			return false!;
+			_logger.LogWarning("Did not add the submenu successfully");
+			return false;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Added the SubMenu Successfully");
+		_logger.LogInformation("Added the submenu successfully");
 		return successContent;
 	}
 
@@ -226,11 +246,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PostAsJsonAsync($"auth/addrole", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Add the Role Successfully");
-			return false!;
+			_logger.LogWarning("Did not add the role successfully");
+			return false;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Added the Role Successfully");
+		_logger.LogInformation("Added the role successfully");
 		return successContent;
 	}
 
@@ -244,11 +264,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PostAsJsonAsync($"auth/addappsubrole", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Add the User's AppSubRole Successfully");
-			return false!;
+			_logger.LogWarning("Did not add the user's appsubrole successfully");
+			return false;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Added the User's AppSubRole Successfully");
+		_logger.LogInformation("Added the user's appsubrole successfully");
 		return successContent;
 	}
 
@@ -258,11 +278,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PostAsJsonAsync("account/notification", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not able to send the notification to user's email.");
-			return false!;
+			_logger.LogWarning("Did not able to send the notification to user's email.");
+			return false;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
-		Console.WriteLine("✅ Sent the notification successfully to user's email");
+		_logger.LogInformation("Sent the notification successfully to user's email");
 		return successContent;
 	}
 
@@ -284,11 +304,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PatchAsJsonAsync($"auth/editapplication", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Edit the Application Successfully");
+			_logger.LogWarning("Did not edit the application successfully");
 			return null!;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<EditApplicationDTO>();
-		Console.WriteLine("✅ Added the Application Successfully");
+		_logger.LogInformation("Edited the application successfully");
 		if (successContent != null)
 		{
 			return successContent;
@@ -314,11 +334,11 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PatchAsJsonAsync($"auth/editsubmenu", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Edit the SubMenu Successfully");
+			_logger.LogWarning("Did not edit the submenu successfully");
 			return null!;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<EditSubMenuDTO>();
-		Console.WriteLine("✅ Added the SubMenu Successfully");
+		_logger.LogInformation("Edited the submenu successfully");
 		if (successContent != null)
 		{
 			return successContent;
@@ -343,45 +363,46 @@ public class UserManagementService : IUserManagementService
 		var response = await _httpClient.PatchAsJsonAsync($"auth/editrole", payload);
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Did not Edit the Role Successfully");
+			_logger.LogWarning("Did not edit the role successfully");
 			return null!;
 		}
 		var successContent = await response.Content.ReadFromJsonAsync<EditRoleDTO>();
-		Console.WriteLine("✅ Added the Role Successfully");
+		_logger.LogInformation("Edited the role successfully");
 		if (successContent != null)
 		{
 			return successContent;
 		}
 		return null!;
 	}
-    public async Task<EditAppSubRoleDTO> EditAppSubRoleAsync(AppSubRolesDTO editAppSubRoleDTO)
-    {
-        var editAppSubRole = new EditAppSubRoleDTO
-        {
-            AppSubRoleId = editAppSubRoleDTO.AppRoleId,
-            UserId = editAppSubRoleDTO.UserId,
-            AppId = editAppSubRoleDTO.AppId,
-            SubMenuId = editAppSubRoleDTO.SubMenuId,
-            RoleId = editAppSubRoleDTO.RoleId,
-        };
 
-        var payload = new
-        {
-            editAppSubRole
-        };
+	public async Task<EditAppSubRoleDTO> EditAppSubRoleAsync(AppSubRolesDTO editAppSubRoleDTO)
+	{
+		var editAppSubRole = new EditAppSubRoleDTO
+		{
+			AppSubRoleId = editAppSubRoleDTO.AppRoleId,
+			UserId = editAppSubRoleDTO.UserId,
+			AppId = editAppSubRoleDTO.AppId,
+			SubMenuId = editAppSubRoleDTO.SubMenuId,
+			RoleId = editAppSubRoleDTO.RoleId,
+		};
 
-        var response = await _httpClient.PatchAsJsonAsync($"auth/editappsubrole", payload);
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine("❌ Did not Edit the UserAppSubRole Successfully");
-            return null!;
-        }
-        var successContent = await response.Content.ReadFromJsonAsync<EditAppSubRoleDTO>();
-        Console.WriteLine("✅ Added the UserAppSubRole Successfully");
-        if (successContent != null)
-        {
-            return successContent;
-        }
-        return null!;
-    }
+		var payload = new
+		{
+			editAppSubRole
+		};
+
+		var response = await _httpClient.PatchAsJsonAsync($"auth/editappsubrole", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			_logger.LogWarning("Did not edit the UserAppSubRole successfully");
+			return null!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<EditAppSubRoleDTO>();
+		_logger.LogInformation("Edited the UserAppSubRole successfully");
+		if (successContent != null)
+		{
+			return successContent;
+		}
+		return null!;
+	}
 }
