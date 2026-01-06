@@ -4,6 +4,7 @@ public static class GatewayConstants
 {
 	// Cluster IDs
 	public const string OnePlatformApi = "onePlatformApi";
+	public const string PITool = "PITool";
 	public const string OnePlatformUI = "BlazorUI";
 
 	// Rate limit policy names

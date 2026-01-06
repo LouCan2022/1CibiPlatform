@@ -80,8 +80,7 @@ public static class ServiceConfiguration
 					 {
 						 policy.WithOrigins(
 							 "http://localhost:5123",
-							 "http://localhost:5134",
-							 "https://aurelio-baronetical-micki.ngrok-free.dev")
+							 "http://localhost:5134")
 							 .AllowAnyHeader()
 							 .AllowAnyMethod()
 							 .AllowCredentials();
@@ -89,7 +88,7 @@ public static class ServiceConfiguration
 		});
 	#endregion
 
-	#region JWT Config
+	#region JWT Config and SSO Config
 	public static IServiceCollection AddJwtAuthentication(
 		this IServiceCollection services,
 		IConfiguration configuration,

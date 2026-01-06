@@ -22,7 +22,7 @@ public class SSOLoginCallbackHandler : ICommandHandler<SSOLoginCallbackCommand, 
 	{
 		_httpContextAccessor = httpContextAccessor;
 		_logger = logger;
-		this._configuration = configuration;
+		_configuration = configuration;
 		_signinScheme = _configuration!.GetValue<string>("SSOMetadata:SigninScheme")!;
 		_isHttps = _configuration!.GetValue<bool>("AuthWeb:IsHttps");
 		_cookieExpiryinDaysKey = _configuration!.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");

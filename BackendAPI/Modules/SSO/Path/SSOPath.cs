@@ -77,12 +77,36 @@ public class SSOPath : IReverseProxyModule
 				{
 					{ "PathSet", "Saml2/Acs" }
 				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "SSOOMS",
+				MatchPath: "PI",
+				ClusterId: GatewayConstants.PITool,
+				Methods: new[] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+			   {
+				   { "PathRemovePrefix", "/PI" },
+				   { "PathPrefix", "/uat" }
+			   }
 			)
 		};
 	}
 
 	public IEnumerable<ClusterDefinitionDTO> GetClusters()
 	{
-		return Enumerable.Empty<ClusterDefinitionDTO>();
+		return new[]
+		{
+			new ClusterDefinitionDTO(
+				ClusterId: GatewayConstants.PITool,
+				Destinations: new []
+				{
+					new DestinationDefinitionDTO(
+						Id: "d1",
+						Address: "https://pitool.cibi.com.ph"
+					)
+				}
+			),
+		};
 	}
 }
