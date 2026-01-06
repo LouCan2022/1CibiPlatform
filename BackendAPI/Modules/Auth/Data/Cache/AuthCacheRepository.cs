@@ -191,7 +191,12 @@ public class AuthCacheRepository : IAuthRepository
 
 	public async Task<bool> SaveUserAsync(Authusers user)
 	{
-		return await _authRepository.SaveUserAsync(user);
+		var result = await _authRepository.SaveUserAsync(user);
+
+		if (result != false)
+			await _hybridCache.RemoveByTagAsync(UnApprovedUsersTag);
+
+		return result!;
 	}
 
 	public async Task<bool> UpdateAuthUserPassword(Authusers authusers)

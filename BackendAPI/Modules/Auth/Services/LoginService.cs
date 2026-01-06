@@ -157,13 +157,17 @@ public class LoginService : ILoginService
 		var subMenuId = userData.SubMenuId;
 		var IsApprove = userData.IsApproved;
 
+		if (IsApprove == false)
+		{
+			_logger.LogInformation("User approval status retrieved for user: {@Context}", logContext);
+			throw new UnauthorizedAccessException("Your account has not been approved yet. Please contact an administrator for assistance.");
+		}
 		if (!appId.Any() ||
 			!subMenuId.Any() ||
-			!roleId.Any() ||
-			IsApprove == false)
+			!roleId.Any())
 		{
 			_logger.LogInformation("User application and role data retrieved for user: {@Context}", logContext);
-			throw new UnauthorizedAccessException("Your account has no assigned application and is not approved. Please contact an administrator for assistance.");
+			throw new UnauthorizedAccessException("Your account has no assigned application. Please contact an administrator for assistance.");
 		}
 
 		// produce access token

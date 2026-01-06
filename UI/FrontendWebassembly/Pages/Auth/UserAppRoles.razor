@@ -38,7 +38,7 @@
             <MudTd DataLabel="Email">@unapproveduser.email</MudTd>
             <MudTd DataLabel="Action">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
-                               OnClick="@(() => OpenEditUserDialog(unapproveduser))" />
+                               OnClick="@(() => OpenEditUserApprovalDialog(unapproveduser))" />
             </MudTd>
         </RowTemplate>
     </TableComponent>
@@ -447,9 +447,14 @@ else if (_activeIndex == 5)
             });
     }
 
-    private async Task OpenEditUserDialog(UnApprovedUsersDTO unapproveduser)
-      => await OpenEditDialog<EditUserComponent, UnApprovedUsersDTO>("Edit User", "User", unapproveduser, EditUser);
-
+    private async Task OpenEditUserApprovalDialog(UnApprovedUsersDTO unapproveduser)
+    {
+        await OpenEditDialog<EditUserApprovalComponent, UnApprovedUsersDTO>("User Approval", "User", unapproveduser, async result =>
+        {
+            await EditUser(unapproveduser);
+            await UserManagementService.SendApprovalNotificationAsync(unapproveduser.email!);
+        });
+    }
     private async Task OpenEditApplicationDialog(ApplicationsDTO app)
       => await OpenEditDialog<EditApplicationComponent, ApplicationsDTO>("Edit Application", "Application", app, EditApplication);
 
@@ -556,7 +561,6 @@ else if (_activeIndex == 5)
     private async Task EditUser(UnApprovedUsersDTO editUserDTO)
     {
         await UserManagementService.EditUserAsync(editUserDTO);
-        await usersTable.TableRef.ReloadServerData();
         await unapprovedUsersTable.TableRef.ReloadServerData();
         StateHasChanged();
         return;
