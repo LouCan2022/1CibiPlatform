@@ -117,7 +117,7 @@ public class EmailService : IEmailService
                             <p>If you did not create this account, please ignore this email.</p>
                         </div>
                         <div class='footer'>
-                            <p>&copy; 2025 NoSent. All rights reserved.</p>
+                            <p>&copy; 2026 NoSent. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -172,7 +172,7 @@ public class EmailService : IEmailService
                             <p>If you did not request this, please ignore this email.</p>
                         </div>
                         <div class='footer'>
-                            <p>&copy; 2025 NoSent. All rights reserved.</p>
+                            <p>&copy; 2026 NoSent. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -231,7 +231,55 @@ public class EmailService : IEmailService
 						<p>If you did not expect this assignment, please contact your administrator immediately.</p>
 					</div>
 					<div class='footer'>
-						<p>&copy; 2025 NoSent. All rights reserved.</p>
+						<p>&copy; 2026 NoSent. All rights reserved.</p>
+					</div>
+            </div>
+        </body>
+        </html>";
+
+		return body;
+	}
+
+	public string SendApprovalNotificationBody(string gmail)
+	{
+		string subject = "OnePlatform Account Approval Notification";
+		string body = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; border: 1px solid gray; border-radius: 4px; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px;}}
+                        .header {{ background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%); color: white; padding: 20px; text-align: center; border-radius: 4px;}}
+                        .content {{ padding: 20px; background-color: #f9f9f9; }}
+                        .button {{ 
+							  display: block;
+							  background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
+							  color: white !important;
+							  padding: 12px 30px;
+							  text-decoration: none;
+							  border-radius: 4px;
+							  margin: 20px auto; 
+							  width: max-content;}}
+						p {{
+							  text-align: center;
+						}}
+                        .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <h1>OnePlatform Account Assigned</h1>
+                        </div>
+                        <div class='content'>
+                            <p>Hello {gmail},</p>
+							<p>Your account has been successfully approved.</p>
+						<p>You can now access the approved account.</p>
+						<a href='{_onePlatformLink}' class='button'>Go to OnePlatform</a>
+					</div>
+					<div class='footer'>
+						<p>&copy; 2026 NoSent. All rights reserved.</p>
 					</div>
             </div>
         </body>

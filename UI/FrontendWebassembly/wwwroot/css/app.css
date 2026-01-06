@@ -361,10 +361,6 @@ code {
     font-size: clamp(0.9rem, 2.5vw, 1.3rem) !important;
 }
 
-.philsys-uppercase-input input.mud-input-slot {
-    text-transform: capitalize;
-}
-
 .mud-table th {
     font-weight: 700 !important;
     text-align: center;

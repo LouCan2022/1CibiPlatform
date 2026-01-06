@@ -19,7 +19,7 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var users = await _dbcontext.AuthUsers
-					.Where(a => a.IsActive)
+					.Where(a => a.IsApproved)
 					.OrderBy(a => a.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
@@ -41,6 +41,40 @@ public class AuthRepository : IAuthRepository
 			  users
 			);
 	}
+
+	public async Task<PaginatedResult<UsersDTO>> GetUnapprovedUserAsync(
+		PaginationRequest paginationRequest,
+		CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext
+			.AuthUsers
+			.Where(a => !a.IsApproved)
+			.LongCountAsync(cancellationToken);
+
+		var users = await _dbcontext.AuthUsers
+					.Where(a => !a.IsApproved)
+					.OrderBy(a => a.Id)
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(au => new UsersDTO(
+						au.Id,
+						au.Email,
+						au.FirstName,
+						au.MiddleName ?? "",
+						au.LastName,
+						au.IsApproved))
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<UsersDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  users
+			);
+	}
+
 	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var totalRecords = await _dbcontext
@@ -118,6 +152,39 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);
 
 		var users = await usersQuery
+					.OrderBy(au => au.Id)
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(au => new UsersDTO(
+						au.Id,
+						au.Email,
+						au.FirstName,
+						au.MiddleName ?? "",
+						au.LastName,
+						au.IsApproved))
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<UsersDTO>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  users
+			);
+	}
+
+	public async Task<PaginatedResult<UsersDTO>> SearchUnApprovedUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+
+		var usersQuery = _dbcontext.AuthUsers
+				.Where(au => !au.IsApproved &&
+					(EF.Functions.ILike(au.Email, $"%{paginationRequest.SearchTerm}%")));
+
+		var totalRecords = await usersQuery.CountAsync(cancellationToken);
+
+		var users = await usersQuery
+					.Where(a => !a.IsApproved)
 					.OrderBy(au => au.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)

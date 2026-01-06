@@ -3,13 +3,16 @@
 public class UserManagementService : IUserService
 {
 	private readonly IAuthRepository _authRepository;
+	private readonly IEmailService _emailService;
 	private readonly ILogger<UserManagementService> _logger;
 
 	public UserManagementService(IAuthRepository authRepository,
+					   IEmailService emailService,
 					   ILogger<UserManagementService> logger)
 	{
-		this._authRepository = authRepository;
-		this._logger = logger;
+		_authRepository = authRepository;
+		_emailService = emailService;
+		_logger = logger;
 	}
 
 	public async Task<UserDTO> EditUserAsync(EditUserDTO userDTO)
@@ -52,5 +55,53 @@ public class UserManagementService : IUserService
 		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
 			_authRepository.GetUserAsync(paginationRequest, cancellationToken) :
 			_authRepository.SearchUserAsync(paginationRequest, cancellationToken);
+	}
+
+	public Task<PaginatedResult<UsersDTO>> GetUnApprovedUsersAsync(
+		PaginationRequest paginationRequest,
+		CancellationToken cancellationToken)
+	{
+		var logContext = new
+		{
+			Action = "GetUnApprovedUser",
+			Step = "StartFetching",
+			PaginationRequest = paginationRequest,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Fetching unapproved users with pagination: {@Context}", logContext);
+
+		return string.IsNullOrEmpty(paginationRequest.SearchTerm) ?
+			_authRepository.GetUnapprovedUserAsync(paginationRequest, cancellationToken) :
+			_authRepository.SearchUnApprovedUserAsync(paginationRequest, cancellationToken);
+	}
+
+	public async Task<bool> SendApprovalToUserEmailAsync(string Gmail)
+	{
+		var logContext = new
+		{
+			Action = "SendEmailNotification",
+			Step = "SendNotification",
+			Email = Gmail,
+			Timestamp = DateTime.UtcNow
+		};
+
+		_logger.LogInformation("Sending notification for email: {@Context}", logContext);
+
+		var otpBody = _emailService.SendApprovalNotificationBody(Gmail!);
+
+		var isSent = await _emailService.SendEmailAsync(
+			toEmail: Gmail!,
+			subject: "Account Assignment Notification",
+			body: otpBody
+		);
+
+		if (!isSent)
+		{
+			_logger.LogError("Failed to send Notification email to: {@Context}", logContext);
+			throw new InternalServerException("Failed to send Notification email.");
+		}
+
+		return isSent;
 	}
 }

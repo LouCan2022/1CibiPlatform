@@ -32,6 +32,29 @@ public class UserManagementService : IUserManagementService
 		return response.users!;
 	}
 
+	public async Task<PaginatedResult<UnApprovedUsersDTO>> GetUnApprovedUsersAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default)
+	{
+		var query = $"auth/getunapprovedusers?pageNumber={PageNumber}&pageSize={PageSize}";
+		if (!string.IsNullOrEmpty(SearchTerm))
+			query += $"&SearchTerm={Uri.EscapeDataString(SearchTerm)}";
+
+		var response = await _httpClient.GetFromJsonAsync<UnApprovedUsersResponseDTO>(query, ct);
+
+		if (response == null)
+		{
+			Console.WriteLine("❌ Did not Get the UnApproved Users Successfully");
+
+			return new PaginatedResult<UnApprovedUsersDTO>(
+				pageIndex: PageNumber ?? 1,
+				pageSize: PageSize ?? 10,
+				count: 0,
+				data: Enumerable.Empty<UnApprovedUsersDTO>()
+			);
+		}
+
+		return response.users!;
+	}
+
 	public async Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(int? PageNumber = 1, int? PageSize = int.MaxValue, string? SearchTerm = null, CancellationToken ct = default)
 	{
 		var query = $"auth/getapplications?pageNumber={PageNumber}&pageSize={PageSize}";
@@ -266,6 +289,20 @@ public class UserManagementService : IUserManagementService
 		return successContent;
 	}
 
+	public async Task<bool> SendApprovalNotificationAsync(string Gmail)
+	{
+		var payload = new { Gmail };
+		var response = await _httpClient.PostAsJsonAsync("account/approvalnotification", payload);
+		if (!response.IsSuccessStatusCode)
+		{
+			Console.WriteLine("❌ Did not able to send the approval notification to user's email.");
+			return false!;
+		}
+		var successContent = await response.Content.ReadFromJsonAsync<bool>();
+		Console.WriteLine("✅ Sent the approval notification successfully to user's email");
+		return successContent;
+	}
+
 	public async Task<EditApplicationDTO> EditApplicationAsync(ApplicationsDTO editApplicationDTO)
 	{
 		var editApplication = new EditApplicationDTO
@@ -385,7 +422,7 @@ public class UserManagementService : IUserManagementService
         return null!;
     }
 
-	public async Task<EditUserDTO> EditUserAsync(UsersDTO editUserDTO)
+	public async Task<EditUserDTO> EditUserAsync(UnApprovedUsersDTO editUserDTO)
 	{
 		var editUser = new EditUserDTO
 		{

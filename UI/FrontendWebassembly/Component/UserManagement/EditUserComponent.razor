@@ -36,7 +36,7 @@
 
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
 
-    [Parameter] public UsersDTO User { get; set; } = new UsersDTO();
+    [Parameter] public UnApprovedUsersDTO User { get; set; } = new UnApprovedUsersDTO();
 
     void Cancel() => MudDialog.Cancel();
 
