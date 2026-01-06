@@ -15,11 +15,11 @@ public class AuthRepository : IAuthRepository
 	{
 		var totalRecords = await _dbcontext
 			.AuthUsers
-			.Where(au => au.IsActive)
+			.Where(au => au.IsApproved == true && au.IsActive)
 			.LongCountAsync(cancellationToken);
 
 		var users = await _dbcontext.AuthUsers
-					.Where(a => !a.IsApproved)
+					.Where(a => a.IsApproved == true & a.IsActive)
 					.OrderBy(a => a.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
@@ -48,11 +48,11 @@ public class AuthRepository : IAuthRepository
 	{
 		var totalRecords = await _dbcontext
 			.AuthUsers
-			.Where(a => a.IsApproved)
+			.Where(a => a.IsApproved == false && a.IsActive)
 			.LongCountAsync(cancellationToken);
 
 		var users = await _dbcontext.AuthUsers
-					.Where(a => a.IsApproved)
+					.Where(a => a.IsApproved == false && a.IsActive)
 					.OrderBy(a => a.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
@@ -142,7 +142,7 @@ public class AuthRepository : IAuthRepository
 	{
 
 		var usersQuery = _dbcontext.AuthUsers
-				.Where(au => !au.IsApproved &&
+				.Where(au => au.IsApproved == true && au.IsActive &&
 					(EF.Functions.ILike(au.FirstName, $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(au.MiddleName!, $"%{paginationRequest.SearchTerm}%") ||
 					 EF.Functions.ILike(au.LastName, $"%{paginationRequest.SearchTerm}%") ||
@@ -152,6 +152,7 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);
 
 		var users = await usersQuery
+					.Where(au => au.IsApproved == true && au.IsActive)
 					.OrderBy(au => au.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
@@ -178,13 +179,13 @@ public class AuthRepository : IAuthRepository
 	{
 
 		var usersQuery = _dbcontext.AuthUsers
-				.Where(au => !au.IsApproved &&
+				.Where(au => au.IsApproved == false && au.IsActive &&
 					(EF.Functions.ILike(au.Email, $"%{paginationRequest.SearchTerm}%")));
 
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);
 
 		var users = await usersQuery
-					.Where(a => a.IsApproved)
+					.Where(a => a.IsApproved == false && a.IsActive)
 					.OrderBy(au => au.Id)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)

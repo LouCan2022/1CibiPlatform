@@ -38,7 +38,7 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQueryRequest, GetUsers
 			request.PageSize ?? 10,
 			request.SearchTerm);
 
-		var userData = await this._userService.GetUsersAsync(
+		var userData = await _userService.GetUsersAsync(
 			paginationRequest,
 			cancellationToken);
 

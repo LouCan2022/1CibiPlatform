@@ -81,7 +81,7 @@ public class AuthCacheRepository : IAuthRepository
 		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<UsersDTO>>(
 			cacheKey,
 			paginationRequest,
-			async (req, token) => await _authRepository.GetUserAsync(req, token),
+			async (req, token) => await _authRepository.GetUnapprovedUserAsync(req, token),
 			null,
 			tags: [UnApprovedUsersTag],
 			cancellationToken);
@@ -94,7 +94,7 @@ public class AuthCacheRepository : IAuthRepository
 		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<UsersDTO>>(
 			cacheKey,
 			paginationRequest,
-			async (req, token) => await _authRepository.SearchUserAsync(req, token),
+			async (req, token) => await _authRepository.SearchUnApprovedUserAsync(req, token),
 			null,
 			null,
 			cancellationToken);
