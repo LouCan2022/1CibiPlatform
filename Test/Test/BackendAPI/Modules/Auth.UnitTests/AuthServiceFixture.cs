@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 {
@@ -125,6 +124,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 
 			UserManagementService = new UserManagementService(
 				MockAuthRepository.Object,
+				MockEmailService.Object,
 				MockUserManagementLogger.Object);
 
 			ApplicationService = new ApplicationService(
