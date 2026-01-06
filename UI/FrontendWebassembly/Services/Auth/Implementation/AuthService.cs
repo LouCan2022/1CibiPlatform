@@ -4,9 +4,8 @@ public class AuthService : IAuthService
 {
 	private HttpClient _httpClient;
 	private readonly LocalStorageService _localStorageService;
-	private readonly IConfiguration _configuration;
+	private readonly ILogger<AuthService> _logger;
 
-	private readonly string _httpRefreshTokenCookieOnly;
 	private readonly string _userNameKey;
 	private readonly string _userIdKey;
 	private readonly string _appIdKey;
@@ -15,15 +14,13 @@ public class AuthService : IAuthService
 
 	public AuthService(IHttpClientFactory httpClientFactory,
 		LocalStorageService localStorageService,
-		IConfiguration configuration)
+		ILogger<AuthService> logger)
 	{
 		this._httpClient = httpClientFactory.CreateClient("API");
-		//this._httpClient = httpClientFactory.CreateClient("AuthClient");
 		this._localStorageService = localStorageService;
-		this._configuration = configuration;
+		this._logger = logger;
 
 
-		_httpRefreshTokenCookieOnly = _configuration.GetSection("AuthWeb:AuthWebHttpCookieOnlyKey").Value! ?? "";
 		this._userNameKey = "Name";
 		this._userIdKey = "UserId";
 		this._appIdKey = "AppId";
@@ -33,7 +30,7 @@ public class AuthService : IAuthService
 
 	public async Task<AuthResponseDTO> Login(LoginCred cred)
 	{
-		Console.WriteLine("🔹 Starting login request...");
+		_logger.LogDebug("Starting login request for {Email}", cred.Email);
 
 		var payload = new
 		{
@@ -45,34 +42,34 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /token/generatetoken for user: {cred.Email}");
+		_logger.LogDebug("Sending POST to /token/web/generatetoken for user: {Email}", cred.Email);
 
 		var response = await _httpClient.PostAsJsonAsync("/token/web/generatetoken", payload);
-		Console.WriteLine($"⬅️ Received response: {(int)response.StatusCode} {response.ReasonPhrase}");
+		_logger.LogDebug("Received response: {Status} {Reason}", (int)response.StatusCode, response.ReasonPhrase);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Login failed. Reading error content...");
+			_logger.LogWarning("Login failed for {Email}. Reading error content...", cred.Email);
 
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
-			Console.WriteLine($"⚠️ Could not parse JSON error. Raw content: {errorContent!.Detail}");
-			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent.Detail, "Error");
+			_logger.LogError("Login error detail: {Detail}", errorContent?.Detail);
+			return new AuthResponseDTO(Guid.Empty, string.Empty, errorContent?.Detail ?? "", "Error");
 		}
 
-		Console.WriteLine("✅ Login successful. Reading success content...");
+		_logger.LogInformation("Login successful for {Email}. Reading success content...", cred.Email);
 
 		var successContent = await response.Content.ReadFromJsonAsync<CredResponseDTO>();
 
-		Console.WriteLine("💾 Storing user info in local storage...");
-		this.SetLocalstorage(successContent!);
+		_logger.LogDebug("Storing user info in local storage for UserId: {UserId}", successContent?.UserId);
+		await this.SetLocalstorage(successContent!);
 
-		Console.WriteLine($"🎉 User {cred.Email} logged in successfully with UserId: {successContent!.UserId}");
+		_logger.LogInformation("User {Email} logged in successfully with UserId: {UserId}", cred.Email, successContent!.UserId);
 
 		return new AuthResponseDTO(successContent.UserId, successContent.AccessToken, string.Empty, string.Empty);
 	}
 
-	protected virtual async void SetLocalstorage(CredResponseDTO credResponseDTO)
+	protected virtual async Task SetLocalstorage(CredResponseDTO credResponseDTO)
 	{
 		// Store UserId and Username in local storage
 		await this._localStorageService.SetItemAsync(_userIdKey, credResponseDTO.UserId.ToString());
@@ -88,7 +85,7 @@ public class AuthService : IAuthService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("Something went wrong call the IT Team for further support {response}", response);
+			_logger.LogError("Something went wrong contact IT Team. Response: {Response}", response);
 			return false;
 		}
 
@@ -96,7 +93,7 @@ public class AuthService : IAuthService
 
 		if (successContent!.isAuthenticated == false)
 		{
-			Console.WriteLine("User is not authenticated");
+			_logger.LogInformation("User is not authenticated");
 			return false;
 
 		}
@@ -106,13 +103,13 @@ public class AuthService : IAuthService
 
 	public async Task<bool> Logout()
 	{
-		Console.WriteLine("🔹 Starting logout request...");
+		_logger.LogDebug("Starting logout request...");
 
 		var userId = await _localStorageService.GetItemAsync<Guid>(_userIdKey);
 
 		if (userId == Guid.Empty)
 		{
-			Console.WriteLine("UserId not found in local storage. Cannot proceed with logout.");
+			_logger.LogWarning("UserId not found in local storage. Cannot proceed with logout.");
 			return false;
 		}
 
@@ -129,7 +126,7 @@ public class AuthService : IAuthService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("Something went wrong call the IT Team for further support {response}", JsonSerializer.Serialize(response));
+			_logger.LogError("Logout failed. Response: {Response}", JsonSerializer.Serialize(response));
 			return false;
 		}
 
@@ -137,21 +134,21 @@ public class AuthService : IAuthService
 
 		if (successContent!.isLoggedOut == false)
 		{
-			Console.WriteLine("User is not logged out");
+			_logger.LogWarning("User is not logged out");
 			return false;
 		}
 
 
 		await this._localStorageService.ClearAsync();
 
-		Console.WriteLine("✅ Logout successful.");
+		_logger.LogInformation("Logout successful.");
 
 		return true;
 	}
 
 	public async Task<RegisterResponseDTO> Register(RegisterRequestDTO registerRequestDTO)
 	{
-		Console.WriteLine("🔹 Starting registration request...");
+		_logger.LogDebug("Starting registration request for {Email}...", registerRequestDTO.Email);
 
 		var payload = new
 		{
@@ -165,20 +162,20 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /auth/register for email: {registerRequestDTO.Email}");
+		_logger.LogDebug("Sending POST to /auth/register for email: {Email}", registerRequestDTO.Email);
 
 		var response = await _httpClient.PostAsJsonAsync("/auth/register", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Registration failed. Reading error content...");
+			_logger.LogWarning("Registration failed for {Email}. Reading error content...", registerRequestDTO.Email);
 
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
 			return new RegisterResponseDTO(Guid.Empty, string.Empty, errorContent!.Detail);
 		}
 
-		Console.WriteLine("✅ Registration successful. Reading success content...");
+		_logger.LogInformation("Registration successful for {Email}. Reading success content...", registerRequestDTO.Email);
 
 		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationResponseDTO>();
 
@@ -188,7 +185,7 @@ public class AuthService : IAuthService
 	public async Task<OtpSessionResponseDTO> IsOtpSessionValid(OtpSessionRequestDTO otpRequestDTO)
 	{
 
-		Console.WriteLine("🔹 Starting OTP validation request...");
+		_logger.LogDebug("Starting OTP validation request for UserId: {UserId}, Email: {Email}", otpRequestDTO.userId, otpRequestDTO.email);
 
 		var payload = new
 		{
@@ -199,20 +196,18 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /auth/validate/otp for UserId: {otpRequestDTO.userId}, Email: {otpRequestDTO.email}");
-
 		var response = await _httpClient.PostAsJsonAsync("/auth/validate/otp", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ OTP validation failed. Reading error content...");
+			_logger.LogWarning("OTP validation failed for {Email}. Reading error content...", otpRequestDTO.email);
 
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 
 			return new OtpSessionResponseDTO(false, errorContent!.Detail);
 		}
 
-		Console.WriteLine("✅ OTP validation successful. Reading success content...");
+		_logger.LogInformation("OTP validation successful for {Email}. Reading success content...", otpRequestDTO.email);
 
 		var successContent = await response.Content.ReadFromJsonAsync<OtpVerificationSessionResponseDTO>();
 
@@ -221,7 +216,7 @@ public class AuthService : IAuthService
 
 	public async Task<OtpSessionResponseDTO> OtpVerification(OtpVerificationRequestDTO otpVerificationRequestDTO)
 	{
-		Console.WriteLine("🔹 Starting OTP verification request...");
+		_logger.LogDebug("Starting OTP verification request for Email: {Email}", otpVerificationRequestDTO.Email);
 
 		var payload = new
 		{
@@ -232,25 +227,25 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /auth/verify/otp for Email: {otpVerificationRequestDTO.Email}");
+		_logger.LogDebug("Sending POST to /auth/verify/otp for Email: {Email}", otpVerificationRequestDTO.Email);
 
 		var response = await _httpClient.PostAsJsonAsync("/auth/verify/otp", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ OTP verification failed. Reading error content...");
+			_logger.LogWarning("OTP verification failed for {Email}. Reading error content...", otpVerificationRequestDTO.Email);
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 			return new OtpSessionResponseDTO(false, errorContent!.Detail);
 		}
 
-		Console.WriteLine("✅ OTP verification successful.");
+		_logger.LogInformation("OTP verification successful for {Email}.");
 
 		return new OtpSessionResponseDTO(true, string.Empty);
 	}
 
 	public async Task<OTPResendResponseDTO> OtpResendAsync(OTPResendRequestDTO otpResendRequestDTO)
 	{
-		Console.WriteLine("🔹 Starting resending email for OTP...");
+		_logger.LogDebug("Starting resending email for OTP for UserId: {UserId}, Email: {Email}", otpResendRequestDTO.userId, otpResendRequestDTO.email);
 
 		var payload = new
 		{
@@ -261,25 +256,25 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /auth/resend/otp for UserId: {otpResendRequestDTO.userId}, Email: {otpResendRequestDTO.email}");
+		_logger.LogDebug("Sending POST to /auth/resend-otp for UserId: {UserId}, Email: {Email}", otpResendRequestDTO.userId, otpResendRequestDTO.email);
 
 		var response = await _httpClient.PostAsJsonAsync("/auth/resend-otp", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Resending OTP failed. Reading error content...");
+			_logger.LogWarning("Resending OTP failed for {Email}. Reading error content...", otpResendRequestDTO.email);
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
 			return new OTPResendResponseDTO(false, errorContent!.Detail);
 		}
 
-		Console.WriteLine("✅ Resending OTP successful.");
+		_logger.LogInformation("Resending OTP successful for {Email}.", otpResendRequestDTO.email);
 
 		return new OTPResendResponseDTO(true, string.Empty);
 	}
 
 	public async Task<GetUserIdForForgotPasswordResponseDTO> ForgotPasswordGetUserId(GetUserIdForForgotPasswordRequestDTO getUserIdForForgotPasswordRequestDTO)
 	{
-		Console.WriteLine("🔹 Starting Forgot Password - Get User ID request...");
+		_logger.LogDebug("Starting Forgot Password - Get User ID request for Email: {Email}...", getUserIdForForgotPasswordRequestDTO.email);
 
 		var payload = new
 		{
@@ -289,20 +284,20 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /forgot-password/get-user-id for Email: {getUserIdForForgotPasswordRequestDTO.email}");
+		_logger.LogDebug("Sending POST to /auth/forgot-password/get-user-id for Email: {Email}", getUserIdForForgotPasswordRequestDTO.email);
 
 		var response = await _httpClient.PostAsJsonAsync("/auth/forgot-password/get-user-id", payload);
 
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Forgot Password - Get User ID failed. Reading error content...");
+			_logger.LogWarning("Forgot Password - Get User ID failed for {Email}. Reading error content...", getUserIdForForgotPasswordRequestDTO.email);
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
-			Console.WriteLine($"Error: {errorContent!.Detail}");
+			_logger.LogError("Error: {Detail}", errorContent!.Detail);
 			return new GetUserIdForForgotPasswordResponseDTO(Guid.Empty, errorContent.Detail);
 		}
 
-		Console.WriteLine("✅ Forgot Password - Get User ID successful. Reading success content...");
+		_logger.LogInformation("Forgot Password - Get User ID successful for {Email}. Reading success content...", getUserIdForForgotPasswordRequestDTO.email);
 
 		var successContent = await response.Content.ReadFromJsonAsync<GetUserIdForForgotPasswordResponseDTO>();
 
@@ -312,7 +307,7 @@ public class AuthService : IAuthService
 
 	public async Task<IsChangePasswordTokenValidResponseDTO> IsForgotPasswordTokenValid(ForgotPasswordTokenRequestDTO forgotPasswordTokenRequestDTO)
 	{
-		Console.WriteLine("🔹 Starting Forgot Password - Validate Token request...");
+		_logger.LogDebug("Starting Forgot Password - Validate Token request for TokenHash: {TokenHash}...", forgotPasswordTokenRequestDTO.tokenHash);
 
 		var payload = new
 		{
@@ -322,19 +317,19 @@ public class AuthService : IAuthService
 			}
 		};
 
-		Console.WriteLine($"➡️ Sending POST to /forgot-password/validate-token for TokenHash: {forgotPasswordTokenRequestDTO.tokenHash}");
+		_logger.LogDebug("Sending POST to /auth/forgot-password/is-change-password-token-valid for TokenHash: {TokenHash}", forgotPasswordTokenRequestDTO.tokenHash);
 
 		var response = await _httpClient.PostAsJsonAsync("/auth/forgot-password/is-change-password-token-valid", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Forgot Password - Validate Token failed. Reading error content...");
+			_logger.LogWarning("Forgot Password - Validate Token failed. Reading error content...");
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
-			Console.WriteLine($"Error: {errorContent!.Detail}");
+			_logger.LogError("Error: {Detail}", errorContent!.Detail);
 			return new IsChangePasswordTokenValidResponseDTO(false, errorContent.Detail);
 		}
 
-		Console.WriteLine("✅ Forgot Password - Validate Token successful. Reading success content...");
+		_logger.LogInformation("Forgot Password - Validate Token successful. Reading success content...");
 
 		var successContent = await response.Content.ReadFromJsonAsync<IsChangePasswordTokenValidResponseDTO>();
 
@@ -344,7 +339,7 @@ public class AuthService : IAuthService
 
 	public async Task<UpdatePasswordResponseDTO> UpdatePassword(UpdatePasswordRequestDTO updatePasswordRequestDTO)
 	{
-		Console.WriteLine("🔹 Starting Update Password request...");
+		_logger.LogDebug("Starting Update Password request for UserId: {UserId}...", updatePasswordRequestDTO.userId);
 
 		var payload = new
 		{
@@ -355,18 +350,18 @@ public class AuthService : IAuthService
 				newPassword = updatePasswordRequestDTO.newPassword
 			}
 		};
-		Console.WriteLine($"➡️ Sending POST to /auth/forgot-password/change-password for UserId: {updatePasswordRequestDTO.userId}");
+		_logger.LogDebug("Sending POST to /auth/forgot-password/change-password for UserId: {UserId}", updatePasswordRequestDTO.userId);
 
 		var response = await _httpClient.PostAsJsonAsync("/auth/forgot-password/change-password", payload);
 
 		if (!response.IsSuccessStatusCode)
 		{
-			Console.WriteLine("❌ Update Password failed. Reading error content...");
+			_logger.LogWarning("Update Password failed for UserId: {UserId}. Reading error content...", updatePasswordRequestDTO.userId);
 			var errorContent = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
-			Console.WriteLine($"Error: {errorContent!.Detail}");
+			_logger.LogError("Error: {Detail}", errorContent!.Detail);
 			return new UpdatePasswordResponseDTO(false, errorContent.Detail);
 		}
-		Console.WriteLine("✅ Update Password successful. Reading success content...");
+		_logger.LogInformation("Update Password successful. Reading success content...");
 
 		var successContent = await response.Content.ReadFromJsonAsync<UpdatePasswordResponseDTO>();
 

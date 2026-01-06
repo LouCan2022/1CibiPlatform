@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11222.15 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -41,6 +41,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{402D4AE2-B94C-4BFE-9FF6-F4DF84962576}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test\Test.csproj", "{959FA9F7-17DC-4C8D-8EFC-C167B8DCA0EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIAgent", "BackendAPI\Modules\AIAgent\AIAgent.csproj", "{6D8B4542-AF60-4B9A-AD16-334AC776CC5D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +90,10 @@ Global
 		{959FA9F7-17DC-4C8D-8EFC-C167B8DCA0EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{959FA9F7-17DC-4C8D-8EFC-C167B8DCA0EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{959FA9F7-17DC-4C8D-8EFC-C167B8DCA0EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D8B4542-AF60-4B9A-AD16-334AC776CC5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D8B4542-AF60-4B9A-AD16-334AC776CC5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D8B4542-AF60-4B9A-AD16-334AC776CC5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D8B4542-AF60-4B9A-AD16-334AC776CC5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{A40D649A-C631-45BB-9A70-7FEBB4C414EA} = {0BFEBC6C-E742-43DC-AAAB-65310DD2A4C7}
 		{BDAF523F-CDA9-4DC7-82E2-A9F0BBAF6E30} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{959FA9F7-17DC-4C8D-8EFC-C167B8DCA0EA} = {402D4AE2-B94C-4BFE-9FF6-F4DF84962576}
+		{6D8B4542-AF60-4B9A-AD16-334AC776CC5D} = {0BFEBC6C-E742-43DC-AAAB-65310DD2A4C7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46B8F5AC-4BB4-4C3A-84F6-2A39D72DC64B}

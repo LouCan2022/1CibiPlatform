@@ -1,5 +1,4 @@
-﻿
-namespace Auth.Data.EntityConfiguration;
+﻿namespace Auth.Data.EntityConfiguration;
 
 public class ApplicationConfiguration : IEntityTypeConfiguration<AuthApplication>
 {

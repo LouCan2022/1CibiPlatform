@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ApiGateways\YarpApiGateway\YarpApiGateway.csproj" />
     <ProjectReference Include="..\..\BackendAPI\API\APIs\APIs.csproj" />
     <ProjectReference Include="..\..\BackendAPI\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\BackendAPI\Modules\Auth\Auth.csproj" />
