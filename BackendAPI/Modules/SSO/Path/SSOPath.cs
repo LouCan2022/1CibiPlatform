@@ -80,16 +80,15 @@ public class SSOPath : IReverseProxyModule
 			),
 
 			new RouteDefinitionDTO(
-				RouteId: "SSOOMS",
+				RouteId: "SSOPI",
 				MatchPath: "PI",
 				ClusterId: GatewayConstants.PITool,
 				Methods: new[] { GatewayConstants.HttpMethod.Get },
 				Transforms: new Dictionary<string, string>
 			   {
-				   { "PathRemovePrefix", "/PI" },
-				   { "PathPrefix", "/uat" }
-			   }
-			)
+					{ "PathSet", "/uat" }
+				}
+			),
 		};
 	}
 
@@ -103,6 +102,7 @@ public class SSOPath : IReverseProxyModule
 				{
 					new DestinationDefinitionDTO(
 						Id: "d1",
+						//Address: "http://host.docker.internal:55622"
 						Address: "https://pitool.cibi.com.ph"
 					)
 				}
