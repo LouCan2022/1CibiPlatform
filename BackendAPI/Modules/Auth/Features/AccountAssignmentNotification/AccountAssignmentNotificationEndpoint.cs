@@ -25,7 +25,7 @@ public class AccountAssignmentNotificationEndpoint : ICarterModule
 		  .WithTags("User Management")
 		  .Produces<AccountNotificationResponse>()
 		  .ProducesProblem(StatusCodes.Status400BadRequest)
-		  .WithSummary("accountnotitification")
-		  .WithDescription("accountnotitification");
+		  .WithSummary("accountnotification")
+		  .WithDescription("accountnotification");
 	}
 }

@@ -12,14 +12,38 @@
                  @bind-ActivePanelIndex="_activeIndex"
                  OnActivePanelIndexChanged="OnTabChanged"
                  Class="philsys-custom-tabs mb-5">
-                <MudTabPanel Text="User" Class="@GetTabClass(0)" Style="text-transform:none; min-width:120px;" />
-                <MudTabPanel Text="Appplication" Class="@GetTabClass(1)"  Style="text-transform:none; min-width: 120px;" />
-                <MudTabPanel Text="SubMenu" Class="@GetTabClass(2)" Style="text-transform:none; min-width: 120px;" />
-                <MudTabPanel Text="Role" Class="@GetTabClass(3)" Style="text-transform:none; min-width: 120px;" />
-                <MudTabPanel Text="User's AppSubRole" Class="@GetTabClass(4)" Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="Approval" Class="@GetTabClass(0)" Style="text-transform:none; min-width:120px;" />
+                <MudTabPanel Text="User" Class="@GetTabClass(1)" Style="text-transform:none; min-width:120px;" />
+                <MudTabPanel Text="Appplication" Class="@GetTabClass(2)"  Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="SubMenu" Class="@GetTabClass(3)" Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="Role" Class="@GetTabClass(4)" Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="User's AppSubRole" Class="@GetTabClass(5)" Style="text-transform:none; min-width: 120px;" />
 </MudTabs>
-
 @if (_activeIndex == 0)
+{
+    <TableComponent TItem="UnApprovedUsersDTO"
+                    @ref="unapprovedUsersTable"
+                    Title="User Approval"
+                    EnableSearch="true"
+                    LoadServerData="LoadUnApprovedUsersServerData"
+                    SearchString="@searchStringUnApprovedUser"
+                    ColumnCount="4"
+                    SearchStringChanged="@((string val) => searchStringUnApprovedUser = val)">
+        <HeaderTemplate>
+            <MudTh>Email</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderTemplate>
+
+        <RowTemplate Context="unapproveduser">
+            <MudTd DataLabel="Email">@unapproveduser.email</MudTd>
+            <MudTd DataLabel="Action">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Medium"
+                               OnClick="@(() => OpenEditUserApprovalDialog(unapproveduser))" />
+            </MudTd>
+        </RowTemplate>
+    </TableComponent>
+}
+else if (_activeIndex == 1)
 {
     <TableComponent TItem="UsersDTO"
                     @ref="usersTable"
@@ -45,7 +69,7 @@
     </TableComponent>
 }
 
-else if (_activeIndex == 1)
+else if (_activeIndex == 2)
 {
     <TableComponent TItem="ApplicationsDTO"
                     @ref="applicationsTable"
@@ -79,7 +103,7 @@ else if (_activeIndex == 1)
     </TableComponent>
 }
 
-else if (_activeIndex == 2)
+else if (_activeIndex == 3)
 {
     <TableComponent TItem="SubMenusDTO"
                     @ref="subMenusTable"
@@ -117,7 +141,7 @@ else if (_activeIndex == 2)
     </TableComponent>
 }
 
-else if (_activeIndex == 3)
+else if (_activeIndex == 4)
 {
     <TableComponent TItem="RolesDTO"
                     @ref="rolesTable"
@@ -155,7 +179,7 @@ else if (_activeIndex == 3)
     </TableComponent>
 }
 
-else if (_activeIndex == 4)
+else if (_activeIndex == 5)
 {
     <TableComponent TItem="AppSubRolesDTO"
                     @ref="appSubRolesTable"
@@ -197,12 +221,13 @@ else if (_activeIndex == 4)
 
 @code {
     private int _activeIndex = 0;
+    private string _searchStringUnApprovedUser;
     private string _searchStringUser;
     private string _searchStringApp;
     private string _searchStringSub;
     private string _searchStringRole;
     private string _searchStringAppSubRole;
-    private AddApplicationDTO addApplication = new AddApplicationDTO();
+    private TableComponent<UnApprovedUsersDTO> unapprovedUsersTable;
     private TableComponent<UsersDTO> usersTable;
     private TableComponent<ApplicationsDTO> applicationsTable;
     private TableComponent<SubMenusDTO> subMenusTable;
@@ -275,6 +300,12 @@ else if (_activeIndex == 4)
     }
 
     // Search 
+    private string searchStringUnApprovedUser
+    {
+        get => _searchStringUnApprovedUser;
+        set => UpdateSearch(ref _searchStringUnApprovedUser, value, unapprovedUsersTable);
+    }
+
     private string searchStringUser
     {
         get => _searchStringUser;
@@ -314,6 +345,20 @@ else if (_activeIndex == 4)
             searchStringUser
         );
         return new TableData<UsersDTO>
+        {
+            TotalItems = (int)result.Count,
+            Items = result.Data
+        };
+    }
+
+    private async Task<TableData<UnApprovedUsersDTO>> LoadUnApprovedUsersServerData(TableState state, CancellationToken cancellationToken)
+    {
+        var result = await UserManagementService.GetUnApprovedUsersAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchStringUnApprovedUser
+        );
+        return new TableData<UnApprovedUsersDTO>
         {
             TotalItems = (int)result.Count,
             Items = result.Data
@@ -402,6 +447,14 @@ else if (_activeIndex == 4)
             });
     }
 
+    private async Task OpenEditUserApprovalDialog(UnApprovedUsersDTO unapproveduser)
+    {
+        await OpenEditDialog<EditUserApprovalComponent, UnApprovedUsersDTO>("User Approval", "User", unapproveduser, async result =>
+        {
+            await EditUser(unapproveduser);
+            await UserManagementService.SendApprovalNotificationAsync(unapproveduser.email!);
+        });
+    }
     private async Task OpenEditApplicationDialog(ApplicationsDTO app)
       => await OpenEditDialog<EditApplicationComponent, ApplicationsDTO>("Edit Application", "Application", app, EditApplication);
 
@@ -502,6 +555,14 @@ else if (_activeIndex == 4)
     {
         await UserManagementService.AddAppSubRoleAsync(addAppSubRoleDTO);
         await appSubRolesTable.TableRef.ReloadServerData();
+        return;
+    }
+
+    private async Task EditUser(UnApprovedUsersDTO editUserDTO)
+    {
+        await UserManagementService.EditUserAsync(editUserDTO);
+        await unapprovedUsersTable.TableRef.ReloadServerData();
+        StateHasChanged();
         return;
     }
 

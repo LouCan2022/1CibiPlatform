@@ -1,3 +1,3 @@
 ﻿namespace Auth.DTO;
 
-public record UsersDTO(Guid userId, string email, string firstName, string? middleName, string lastName);
+public record UsersDTO(Guid userId, string email, string firstName, string? middleName, string lastName, bool isApproved);
