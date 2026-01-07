@@ -44,18 +44,18 @@ services:
       - postgres
 
   # FOR PROD
-  frontendwebassembly:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "8080"
-    volumes:
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-    networks:
-      - backend
-    depends_on:
-      - apis
+  # frontendwebassembly:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #   ports:
+  #     - "8080"
+  #   volumes:
+  #     - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  #     - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - apis
 
 networks:
   backend:
