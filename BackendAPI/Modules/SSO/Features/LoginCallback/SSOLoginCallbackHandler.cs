@@ -73,6 +73,8 @@ public class SSOLoginCallbackHandler : ICommandHandler<SSOLoginCallbackCommand, 
 			HttpOnly = true,
 			Secure = _isHttps,
 			SameSite = SameSiteMode.Lax,
+			Domain = "cibi.com.ph", // for refactoring later use from config
+			Path = "/", // for refactoring later use from config
 			Expires = DateTimeOffset.UtcNow.AddDays(_cookieExpiryinDaysKey)
 		};
 
