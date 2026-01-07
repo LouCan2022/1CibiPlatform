@@ -7,6 +7,7 @@ public record LoginDTO(
 	string FirstName,
 	string LastName,
 	string? MiddleName,
+	bool IsApproved,
 	List<int> AppId,
 	List<List<int>> SubMenuId,
 	List<int> roleId

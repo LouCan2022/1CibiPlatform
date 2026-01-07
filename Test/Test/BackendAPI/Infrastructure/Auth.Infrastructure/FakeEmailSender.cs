@@ -1,5 +1,4 @@
 ﻿using BuildingBlocks.SharedServices.Interfaces;
-
 namespace Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
 public class FakeEmailSender : IEmailService
@@ -15,4 +14,7 @@ public class FakeEmailSender : IEmailService
 
 	public string SendNotificationBody(string gmail, string application, string submenu, string role)
 		=> $"Hello {gmail}, you have been granted access to {application} — {submenu} with the role of {role}.";
+
+	public string SendApprovalNotificationBody(string gmail)
+		=> $"Hello {gmail}, your account has been approved.";
 }
