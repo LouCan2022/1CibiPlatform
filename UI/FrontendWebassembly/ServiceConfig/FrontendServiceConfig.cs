@@ -1,4 +1,8 @@
-﻿namespace FrontendWebassembly.ServiceConfig;
+using FrontendWebassembly.Services.CNX.Implementation;
+using System.Runtime.Intrinsics.Arm;
+
+namespace FrontendWebassembly.ServiceConfig;
+
 
 public static class FrontendServiceConfig
 {
