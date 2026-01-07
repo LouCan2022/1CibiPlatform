@@ -28,10 +28,10 @@ public class SSOLogoutHandler : ICommandHandler<SSOLogoutCommand>
 
 		_logger.LogInformation("User logging out");
 
-		await httpContext!.SignOutAsync(_signinScheme);
-
 		// remove http cookie only
 		_httpContextAccessor.HttpContext!.Response.Cookies.Delete(_userEmailCookieName);
+
+		await httpContext!.SignOutAsync(_signinScheme);
 
 		return Unit.Value;
 	}
