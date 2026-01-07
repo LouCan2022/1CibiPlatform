@@ -1,10 +1,10 @@
 ﻿namespace Auth.Features.AccountAssignmentNotification;
 public record AccountNotificationCommand(AccountNotificationDTO AccountNotificationDTO) : ICommand<AccountNotificationResult>;
 public record AccountNotificationResult(bool IsSent);
-public class AccountNotificationHandler : ICommandHandler<AccountNotificationCommand, AccountNotificationResult>
+public class AccountAssignmentNotificationHandler : ICommandHandler<AccountNotificationCommand, AccountNotificationResult>
 {
 	private readonly IAppSubRoleService _appSubRoleService;
-	public AccountNotificationHandler(IAppSubRoleService appSubRoleService)
+	public AccountAssignmentNotificationHandler(IAppSubRoleService appSubRoleService)
 	{
 		_appSubRoleService = appSubRoleService;
 	}

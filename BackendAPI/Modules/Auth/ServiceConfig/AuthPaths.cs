@@ -1,4 +1,6 @@
-﻿namespace BackendAPI.Modules.Auth.Path;
+﻿using System.Security.Principal;
+
+namespace BackendAPI.Modules.Auth.Path;
 
 // This class provides route and cluster declarations for the Auth module.
 // Comments explain how to use Metadata and Methods:
@@ -157,6 +159,39 @@ public class AuthPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "auth/getusers" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetUnApprovedUsersEntryPoint",
+				MatchPath: "auth/getunapprovedusers",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "auth/getunapprovedusers" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "EditUserEntryPoint",
+				MatchPath: "auth/edituser",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "auth/edituser" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "SendApprovalNotificationEntryPoint",
+				MatchPath: "account/approvalnotification",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "account/approvalnotification" }
 				}
 			),
 

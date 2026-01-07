@@ -1,0 +1,51 @@
+﻿<MudDialog Style="padding: 8px;">
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="User.email"
+                          Label="Email"
+                          ReadOnly
+                          Adornment="Adornment.Start"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          MaxLength="100"
+                          Class="philsys-rounded-input philsys-uppercase-input"/>
+
+            <MudCheckBox T="bool"
+                         @bind-Value="User.isApproved"
+                         Label="Approve" />
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Default"
+                   OnClick="Cancel"
+                   Style="border-radius: 4px;">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="Submit"
+                   Class="theme-button theme-button-active"
+                   Style="border-radius: 4px;">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form;
+
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public UnApprovedUsersDTO User { get; set; } = new UnApprovedUsersDTO();
+
+    void Cancel() => MudDialog.Cancel();
+
+    async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(User));
+        }
+    }
+}

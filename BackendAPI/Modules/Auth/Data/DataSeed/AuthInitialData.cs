@@ -21,7 +21,8 @@ public class AuthInitialData
 					Email = "admin@cibi.com",
 					PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 					FirstName = "Super",
-					LastName = "Admin"
+					LastName = "Admin",
+					IsApproved = true
 				}
 			};
 	}

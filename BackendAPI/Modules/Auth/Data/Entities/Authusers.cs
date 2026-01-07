@@ -9,5 +9,6 @@ public class Authusers
 	public string LastName { get; set; } = string.Empty;
 	public string? MiddleName { get; set; }
 	public bool IsActive { get; set; } = true;
+	public bool IsApproved { get; set; } = false;
 	public DateTime CreatedAt { get; set; }
 }

@@ -43,7 +43,6 @@ public class LoginService : ILoginService
 
 	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
 	{
-
 		var logContext = new
 		{
 			Action = "LoggingToApi",
@@ -73,6 +72,14 @@ public class LoginService : ILoginService
 		{
 			_logger.LogWarning("Login failed: Invalid password for user: {@Context}", logContext);
 			throw new NotFoundException("Invalid username or password.");
+		}
+
+		var IsApprove = userData.IsApproved;
+
+		if (IsApprove == false)
+		{
+			_logger.LogInformation("User application and role data retrieved for user: {@Context}", logContext);
+			throw new UnauthorizedAccessException("Your account has not been approved yet. Please contact an administrator for assistance.");
 		}
 
 		// produce JWT token
@@ -134,7 +141,6 @@ public class LoginService : ILoginService
 			throw new NotFoundException("Invalid username or password");
 		}
 
-
 		// verifying password
 		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, cred.Password);
 
@@ -149,7 +155,13 @@ public class LoginService : ILoginService
 		var roleId = userData.roleId;
 		var appId = userData.AppId;
 		var subMenuId = userData.SubMenuId;
+		var IsApprove = userData.IsApproved;
 
+		if (IsApprove == false)
+		{
+			_logger.LogInformation("User approval status retrieved for user: {@Context}", logContext);
+			throw new UnauthorizedAccessException("Your account has not been approved yet. Please contact an administrator for assistance.");
+		}
 		if (!appId.Any() ||
 			!subMenuId.Any() ||
 			!roleId.Any())
