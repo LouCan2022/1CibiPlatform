@@ -62,7 +62,7 @@ public class CustomExceptionHandler
 			var errors = validationException.Errors.Select(er => er.ErrorMessage.Replace(".", ""));
 
 			problemDetails.Extensions.Add("ValidationErrors", errors);
-			problemDetails.Detail = string.Join(",", errors);
+			problemDetails.Detail = string.Join(", ", errors);
 		}
 
 		await context.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken);

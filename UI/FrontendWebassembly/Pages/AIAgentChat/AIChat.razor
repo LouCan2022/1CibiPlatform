@@ -1,0 +1,225 @@
+﻿@page "/ai/chat"
+@using MudBlazor
+@using FrontendWebassembly.Services.AIAgentChat
+@using Markdig
+@using Microsoft.AspNetCore.Components
+@inject IAIAgentChatService AIChatService
+@inject FrontendWebassembly.SharedService.LocalStorageService LocalStorage
+@inherits SecurePageBase
+@* aichat/aichat*@
+@attribute [RequirePermission(4, 4)]
+
+
+<MudPaper Class="pa-4 p-10">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudText Typo="Typo.h5" Class="mb-2">AI Chat</MudText>
+        </MudItem>
+
+        <MudItem xs="12">
+            <div class="chat-window">
+                @if (Messages.Count == 0)
+                {
+                    <div class="empty-state">Start the conversation by asking a question.</div>
+                }
+
+                <div class="messages">
+                    @foreach (var msg in Messages)
+                    {
+                        var isUser = msg.Sender == "User";
+                        if (!isUser)
+                        {
+                            <MudChat ChatPosition="ChatBubblePosition.Start">
+                                <MudAvatar Size="Size.Medium" Class="ml-2" Color="Color.Primary" Variant="Variant.Filled" >
+                                       <MudIcon Icon="@Icons.Material.Filled.Android" />
+                                </MudAvatar>
+                                <MudChatBubble>
+                                    <div class="d-flex align-items-start">
+                                        <div class="message-html">@((MarkupString)msg.Html)</div>
+                                    </div>
+                                </MudChatBubble>
+                            </MudChat>
+                        }
+                        else
+                        {
+                            <MudChat ChatPosition="ChatBubblePosition.End">
+                                <MudAvatar Size="Size.Medium" Class="mr-2" Color="Color.Primary" Variant="Variant.Filled">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person" />
+                                </MudAvatar>
+                                <MudChatBubble>
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <div class="mr-2">@msg.Text</div>
+                                    </div>
+                                </MudChatBubble>
+                            </MudChat>
+                        }
+                    }
+
+                    @if (IsTyping)
+                    {
+                        <div class="message-row assistant typing-row">
+                            <MudAvatar Size="Size.Medium" Class="mr-2" Color="Color.Primary">A</MudAvatar>
+                            <MudPaper Elevation="1">
+                                <div class="typing-dots">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </MudPaper>
+                        </div>
+                    }
+                </div>
+            </div>
+        </MudItem>
+
+        <MudItem xs="12">
+            <div class="chat-input d-flex">
+                <MudTextField @bind-Value="CurrentMessage" Placeholder="Type your message..." Class="flex-grow-1 mr-2" Immediate="true" OnKeyDown="SendMessage" />
+                @if (isSending)
+                {
+                    <!-- square red cancel button with an icon -->
+                    <ButtonComponent OnClick="CancelRequest"
+                        Color= "Color.Error"
+                        Style="border-radius: 4px; width: 0px; height: 30px; padding: 0;">
+                        Cancel
+                    </ButtonComponent>
+                }
+            </div>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    class ChatMessage { 
+        public string Sender { get; init; } = string.Empty; 
+        public string Text { get; init; } =  string.Empty; 
+        public string Html { get; init; } = string.Empty; 
+        public DateTime Time { get; init; } = DateTime.UtcNow; 
+    }
+
+    private List<ChatMessage> Messages { get; set; } = new();
+    private string CurrentMessage { get; set; } = string.Empty;
+    private bool IsTyping { get; set; }
+    private bool isSending;
+    private CancellationTokenSource? _cts;
+    private bool _currentRequestActive = false; // indicates UI is awaiting an AI response for the latest request
+
+    // Reuse a Markdown pipeline with advanced extensions and emoji support
+    private static readonly MarkdownPipeline _mdPipeline =
+        new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .UseEmojiAndSmiley()
+            .UsePipeTables()
+            .UseTaskLists()
+            .UseGenericAttributes()
+            .Build();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // subscribe to realtime events
+        AIChatService.TypingStatusChanged += OnTypingStatusChanged;
+        AIChatService.AiResponseReceived += OnAiResponseReceived;
+
+        await base.OnInitializedAsync();
+    }
+
+    private void OnTypingStatusChanged(bool isTyping)
+    {
+        IsTyping = isTyping;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnAiResponseReceived(string message)
+    {
+        // Only handle hub responses when there is an active request (not cancelled)
+        if (!_currentRequestActive)
+            return;
+
+        // convert markdown to html for assistant message using pipeline (supports emoji, tables, code fences, etc.)
+        var html = Markdown.ToHtml(message ?? string.Empty, _mdPipeline);
+        Messages.Add(
+            new ChatMessage { 
+                Sender = "Assistant", 
+                Text = message ?? string.Empty, 
+                Html = html, 
+                Time = DateTime.Now });
+        // mark request completed so stray later hub messages are ignored
+        _currentRequestActive = false;
+        IsTyping = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SendMessage(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter")
+            return;
+
+        if (isSending)
+            return;
+
+        if (string.IsNullOrWhiteSpace(CurrentMessage))
+            return;
+
+        var text = CurrentMessage.Trim();
+        Messages.Add(new ChatMessage { Sender = "User", Text = text, Html = System.Net.WebUtility.HtmlEncode(text), Time = DateTime.Now });
+        CurrentMessage = string.Empty;
+        isSending = true;
+        IsTyping = true;
+
+        // create a new CTS for this request
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        _currentRequestActive = true; // mark this request as active
+
+        StateHasChanged();
+
+        try
+        {
+            // Pass the cancellation token to the service which already accepts it
+            var result = await AIChatService.AskAIAsync(text, _cts.Token);
+
+            // If the service returned a result synchronously (fallback), append it (only if not cancelled)
+            if (!_cts.IsCancellationRequested && result is not null && result.Answers is not null && result.Answers.Any())
+            {
+                _currentRequestActive = false;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            var canceledHtml = Markdown.ToHtml("**Request canceled.**", _mdPipeline);
+            Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Request canceled.", Html = canceledHtml, Time = DateTime.Now });
+            _currentRequestActive = false;
+        }
+        catch (Exception ex)
+        {
+            var errorHtml = Markdown.ToHtml("**Error:** " + ex.Message, _mdPipeline);
+            Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Error: " + ex.Message, Html = errorHtml, Time = DateTime.Now });
+            _currentRequestActive = false;
+        }
+        finally
+        {
+            isSending = false;
+            IsTyping = false;
+            _cts?.Dispose();
+            _cts = null;
+            StateHasChanged();
+        }
+    }
+
+    private void CancelRequest()
+    {
+        if (_cts?.IsCancellationRequested == false)
+        {
+            _cts.Cancel();
+            IsTyping = false;
+            isSending = false;
+            _currentRequestActive = false; // ensure hub responses are ignored
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        AIChatService.TypingStatusChanged -= OnTypingStatusChanged;
+        AIChatService.AiResponseReceived -= OnAiResponseReceived;
+        _cts?.Dispose();
+    }
+}

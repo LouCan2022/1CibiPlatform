@@ -1,7 +1,8 @@
-﻿using FrontendWebassembly.Services.CNX.Implementation;
+using FrontendWebassembly.Services.CNX.Implementation;
 using System.Runtime.Intrinsics.Arm;
 
 namespace FrontendWebassembly.ServiceConfig;
+
 
 public static class FrontendServiceConfig
 {
@@ -62,6 +63,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<IUserManagementService, UserManagementService>();
 		services.AddScoped<ICandidateService, CandidateService>();
 		services.AddScoped<ISSOService, SSOService>();
+		services.AddScoped<IAIAgentChatService, AIChatService>();
 		return services;
 	}
 }

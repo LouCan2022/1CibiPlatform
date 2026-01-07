@@ -1,0 +1,36 @@
+﻿global using Pgvector;
+global using AIAgent.Data.Entities;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using BuildingBlocks.Behaviors;
+global using BuildingBlocks.Exceptions.Handler;
+global using FluentValidation;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Configuration;
+global using System.Reflection;
+global using AIAgent.Data.Context;
+global using BuildingBlocks.CQRS;
+global using AIAgent.DTO;
+global using AIAgent.Services;
+global using Microsoft.SemanticKernel;
+global using Carter;
+global using MediatR;
+global using Microsoft.AspNetCore.Routing;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Http;
+global using BuildingBlocks.SharedDTO;
+global using BuildingBlocks.SharedInterfaces;
+global using BuildingBlocks.SharedConstants;
+global using Microsoft.Extensions.Logging;
+global using System.Collections.Concurrent;
+global using Microsoft.AspNetCore.SignalR;
+global using AIAgent.Hubs;
+global using System.Text;
+global using System.Text.Json;
+global using System.ComponentModel.DataAnnotations;
+global using ClosedXML.Excel;
+global using AIAgent.Skills;
+global using Microsoft.Extensions.Logging.Abstractions;
+global using AIAgent.Skills.ReadExcel;
+
+

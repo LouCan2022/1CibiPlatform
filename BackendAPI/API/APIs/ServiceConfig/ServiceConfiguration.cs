@@ -1,6 +1,4 @@
-﻿using Serilog.Events;
-
-namespace APIs.ServiceConfig;
+﻿namespace APIs.ServiceConfig;
 
 public static class ServiceConfiguration
 {
@@ -9,6 +7,7 @@ public static class ServiceConfiguration
 	private static readonly Assembly _cnxAssembly = typeof(CNXMarker).Assembly;
 	private static readonly Assembly _philsysAssembly = typeof(PhilSysMarker).Assembly;
 	private static readonly Assembly _ssoAssembly = typeof(SSOMarker).Assembly;
+	private static readonly Assembly _aiAgentAssembly = typeof(AIAgentMarker).Assembly;
 
 
 	#region Logging Config
@@ -204,7 +203,8 @@ public static class ServiceConfiguration
 			 _authAssembly,
 			 _cnxAssembly,
 			 _philsysAssembly,
-			 _ssoAssembly
+			 _ssoAssembly,
+			 _aiAgentAssembly
 		 ]));
 
 
@@ -222,6 +222,7 @@ public static class ServiceConfiguration
 		services.AddCNXMediaTR(_cnxAssembly);
 		services.AddPhilSysMediaTR(_philsysAssembly);
 		services.AddSSOMediaTR(_ssoAssembly);
+		services.AddAIAgentMediaTR(_aiAgentAssembly);
 		return services;
 	}
 
@@ -235,6 +236,7 @@ public static class ServiceConfiguration
 		services.AddCNXServices();
 		services.AddPhilSysServices();
 		services.AddSSOServices();
+		services.AddAIAgentServices();
 		return services;
 	}
 	#endregion
@@ -257,5 +259,15 @@ public static class ServiceConfiguration
 		return services;
 	}
 
+	#endregion
+
+	#region AI Agent Config
+	public static IServiceCollection AddAIAgentConfigurationSkills(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		services.AddAIAgentSkills(configuration);
+		return services;
+	}
 	#endregion
 }
