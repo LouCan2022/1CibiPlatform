@@ -29,7 +29,11 @@ public class SSOLogoutHandler : ICommandHandler<SSOLogoutCommand>
 		_logger.LogInformation("User logging out");
 
 		// remove http cookie only
-		_httpContextAccessor.HttpContext!.Response.Cookies.Delete(_userEmailCookieName);
+		_httpContextAccessor.HttpContext!.Response.Cookies.Delete(_userEmailCookieName, new CookieOptions
+		{
+			Domain = "cibi.com.ph",
+			Path = "/"
+		});
 
 		await httpContext!.SignOutAsync(_signinScheme);
 
