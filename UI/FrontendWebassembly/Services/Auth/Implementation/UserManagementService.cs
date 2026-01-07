@@ -418,7 +418,12 @@ public class UserManagementService : IUserManagementService
 			RoleId = editAppSubRoleDTO.RoleId,
 		};
 
-        var response = await _httpClient.PatchAsJsonAsync($"auth/editappsubrole", payload);
+		var payload = new
+		{
+			editAppSubRole
+		};
+
+		var response = await _httpClient.PatchAsJsonAsync($"auth/editappsubrole", payload);
         if (!response.IsSuccessStatusCode)
         {
             Console.WriteLine("❌ Did not Edit the UserAppSubRole Successfully");
