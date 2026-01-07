@@ -87,7 +87,7 @@ public static class ServiceConfiguration
 		});
 	#endregion
 
-	#region JWT Config
+	#region JWT Config and SSO Config
 	public static IServiceCollection AddJwtAuthentication(
 		this IServiceCollection services,
 		IConfiguration configuration,
