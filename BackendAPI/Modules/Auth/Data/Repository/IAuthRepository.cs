@@ -4,6 +4,7 @@ public interface IAuthRepository
 {
 	// Get methods
 	Task<PaginatedResult<UsersDTO>> GetUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<UsersDTO>> GetUnapprovedUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
@@ -16,9 +17,11 @@ public interface IAuthRepository
 	Task<AuthUserAppRole> GetAppSubRoleAsync(int appSubRoleId);
 	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
 	Task<AuthRole> GetRoleAsync(int roleId);
+	Task<Authusers> GetUserAsync(string email);
 
 	// Search methods
 	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<UsersDTO>> SearchUnApprovedUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
@@ -51,6 +54,9 @@ public interface IAuthRepository
 
 	// Registration
 	Task<RegisterResponseDTO> RegisterUserAsync(RegisterRequestDTO userDto);
+
+	//User Edit
+	Task<Authusers> EditUserAsync(Authusers user);
 
 	// Application CRUD
 	Task<bool> AddApplicationAsync(AddApplicationDTO application);

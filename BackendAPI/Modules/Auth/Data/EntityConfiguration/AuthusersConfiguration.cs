@@ -34,6 +34,9 @@ public class AuthusersConfiguration : IEntityTypeConfiguration<Authusers>
 		builder.Property(u => u.IsActive)
 			   .HasDefaultValue(true);
 
+		builder.Property(u => u.IsApproved)
+			   .HasDefaultValue(false);
+
 		builder.Property(u => u.CreatedAt)
 			   .IsRequired()
 			   .HasDefaultValueSql("timezone('utc', now())");
