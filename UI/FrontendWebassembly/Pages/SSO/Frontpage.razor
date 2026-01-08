@@ -47,21 +47,14 @@ else
             </MudCard>
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudCard Class="hover-card rounded-xl cursor-pointer">
+            <MudCard Class="hover-card rounded-xl cursor-pointer"
+                     @onclick="@(() => JSRuntime.InvokeVoidAsync("open", "https://apps.cibi.com.ph/oms_uat/", "_blank"))">
                 <MudCardMedia Image="https://picsum.photos/400/250?random=2" Height="200" />
                 <MudCardContent>
                     <MudText Typo="Typo.h6" Align="Align.Center">OMS</MudText>
                 </MudCardContent>
             </MudCard>
         </MudItem>
-@*         <MudItem xs="12" sm="4">
-            <MudCard Class="hover-card rounded-xl cursor-pointer">
-                <MudCardMedia Image="https://picsum.photos/400/250?random=3" Height="200" />
-                <MudCardContent>
-                    <MudText Typo="Typo.h6" Align="Align.Center">APP</MudText>
-                </MudCardContent>
-            </MudCard>
-        </MudItem> *@
     </MudGrid>
 }
 
