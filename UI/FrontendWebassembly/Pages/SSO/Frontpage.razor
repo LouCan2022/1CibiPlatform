@@ -3,6 +3,8 @@
 @inject NavigationManager NavigationManager;
 @inject ISSOService SSOService;
 @inject IJSRuntime JSRuntime;
+
+<PageTitle>CIBI Apps</PageTitle>
 <style>
     .hover-card {
         transition: all 0.3s ease-in-out;
@@ -40,7 +42,7 @@ else
         <MudItem xs="12" sm="4">
             <MudCard Class="hover-card rounded-xl cursor-pointer"
                      @onclick="@(() => JSRuntime.InvokeVoidAsync("open", "https://pitool.cibi.com.ph/uat/", "_blank"))">
-                <MudCardMedia Image="https://picsum.photos/400/250?random=1" Height="200" />
+                <MudCardMedia Image="images/mfa/PI.png" Height="200" />
                 <MudCardContent>
                     <MudText Typo="Typo.h6" Align="Align.Center">PI</MudText>
                 </MudCardContent>
@@ -49,7 +51,7 @@ else
         <MudItem xs="12" sm="4">
             <MudCard Class="hover-card rounded-xl cursor-pointer"
                      @onclick="@(() => JSRuntime.InvokeVoidAsync("open", "https://apps.cibi.com.ph/oms_uat/", "_blank"))">
-                <MudCardMedia Image="https://picsum.photos/400/250?random=2" Height="200" />
+                <MudCardMedia Image="images/mfa/OMS.png" Height="200" />
                 <MudCardContent>
                     <MudText Typo="Typo.h6" Align="Align.Center">OMS</MudText>
                 </MudCardContent>
