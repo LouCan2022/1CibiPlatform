@@ -5,6 +5,7 @@ public interface IUserService
 	Task<PaginatedResult<UsersDTO>> GetUsersAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken);
+
 	Task<PaginatedResult<UsersDTO>> GetUnApprovedUsersAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken);
