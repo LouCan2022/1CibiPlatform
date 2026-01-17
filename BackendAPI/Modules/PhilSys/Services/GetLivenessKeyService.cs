@@ -3,19 +3,16 @@
 public class GetLivenessKeyService
 {
 	private readonly ILogger<GetLivenessKeyService> _logger;
-	private readonly HybridCache hyrbridCache;
 	private readonly IConfiguration _configuration;
 	private string _livenessKey => _configuration["PhilSys:LivenessSDKPublicKey"] ?? "";
 
-	public GetLivenessKeyService(ILogger<GetLivenessKeyService> logger, HybridCache hyrbridCache, IConfiguration configuration)
+	public GetLivenessKeyService(ILogger<GetLivenessKeyService> logger, IConfiguration configuration)
 	{
 		_logger = logger;
-		this.hyrbridCache = hyrbridCache;
 		_configuration = configuration;
 	}
-	public ValueTask<string> GetLivenessKey()
+	public Task<string> GetLivenessKey()
 	{
-		var cacheKey = "PhilSys_LivenessSDKPublicKey";
 		var logContext = new
 		{
 			Action = "RetrievingLivenessKey",
@@ -24,18 +21,13 @@ public class GetLivenessKeyService
 		};
 
 		_logger.LogInformation("Retrieving Liveness Key: {@Context}", logContext);
-		return hyrbridCache.GetOrCreateAsync<string>(
-			cacheKey,
-			getKey =>
-			{
-				if (string.IsNullOrEmpty(_livenessKey))
-				{
-					_logger.LogError("Liveness Key is not configured: {@Context}", logContext);
-					return new ValueTask<string>(string.Empty);
-				}
+		if (string.IsNullOrEmpty(_livenessKey))
+		{
+			_logger.LogError("Liveness Key is not configured: {@Context}", logContext);
+			return Task.FromResult(string.Empty);
+		}
 
-				_logger.LogInformation("Liveness Key retrieved successfully: {@Context}", logContext);
-				 return new ValueTask<string>(_livenessKey);
-			});
+		_logger.LogInformation("Liveness Key retrieved successfully: {@Context}", logContext);
+		return Task.FromResult(_livenessKey);
 	}
 }
