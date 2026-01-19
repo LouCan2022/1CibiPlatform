@@ -50,7 +50,7 @@ app.UseRouting();
 // enable middleware
 app.UseRateLimiter();
 app.UseWebSockets();
-app.UseCors("DevCors");
+app.UseCors("CorsPolicy");
 
 // diagnostic endpoint to inspect discovered routes/clusters
 app.MapGet("/__routes", (RouteCatalog catalog) => Results.Ok(new { routes = catalog.Routes, clusters = catalog.Clusters }));
