@@ -71,18 +71,18 @@
         </MudItem>
 
         <MudItem xs="12">
-            <div class="chat-input d-flex">
-                <MudTextField @bind-Value="CurrentMessage" Placeholder="Type your message..." Class="flex-grow-1 mr-2" Immediate="true" OnKeyDown="SendMessage" />
-                @if (isSending)
-                {
-                    <!-- square red cancel button with an icon -->
-                    <ButtonComponent OnClick="CancelRequest"
-                        Color= "Color.Error"
-                        Style="border-radius: 4px; width: 0px; height: 30px; padding: 0;">
-                        Cancel
-                    </ButtonComponent>
-                }
-            </div>
+            <MudTextField @bind-Value="CurrentMessage" 
+                          Placeholder="Type your message..." 
+                          Variant="Variant.Outlined"
+                          Class="flex-grow-1" 
+                          Lines="3"
+                          Immediate="true" 
+                          OnKeyDown="SendMessage"
+                          Adornment="@(isSending ? Adornment.End : Adornment.None)"
+                          AdornmentIcon="@Icons.Material.Filled.Cancel"
+                          AdornmentColor="Color.Error"
+                          OnAdornmentClick="CancelRequest"
+                          Disabled="@isSending" />
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -149,7 +149,8 @@
 
     private async Task SendMessage(KeyboardEventArgs e)
     {
-        if (e.Key != "Enter")
+        // Send on Enter, allow Shift+Enter for new line
+        if (e.Key != "Enter" || e.ShiftKey)
             return;
 
         if (isSending)
