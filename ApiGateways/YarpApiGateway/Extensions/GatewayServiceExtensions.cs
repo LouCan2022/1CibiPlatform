@@ -18,7 +18,15 @@ public static class GatewayServiceExtensions
 	#region Gateway Services
 	public static void AddGatewayServices(this WebApplicationBuilder builder)
 	{
-		AddCors(builder.Services);
+		if (builder.Environment.IsDevelopment())
+		{
+			AddDevelopmentCors(builder.Services);
+		}
+
+		if (builder.Environment.IsProduction())
+		{
+			AddProductionCors(builder.Services);
+		}
 		AddRateLimiting(builder.Services);
 		AddModuleDiscoveryAndReverseProxy(builder);
 	}
@@ -26,13 +34,29 @@ public static class GatewayServiceExtensions
 
 	#region Private Methods
 
-	private static void AddCors(IServiceCollection services)
+	private static void AddDevelopmentCors(IServiceCollection services)
 	{
 		services.AddCors(options =>
 		{
-			options.AddPolicy("DevCors", policy =>
+			options.AddPolicy("CorsPolicy", policy =>
 			{
 				policy.WithOrigins("http://localhost:5134")
+				.AllowCredentials()
+				.AllowAnyMethod()
+				.AllowAnyHeader();
+			});
+		});
+	}
+
+	private static void AddProductionCors(IServiceCollection services)
+	{
+		services.AddCors(options =>
+		{
+			options.AddPolicy("CorsPolicy", policy =>
+			{
+				policy.WithOrigins(
+					"http://localhost:5134",
+					"https://apps.cibi.com.ph/oms")
 				.AllowCredentials()
 				.AllowAnyMethod()
 				.AllowAnyHeader();
