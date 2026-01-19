@@ -65,7 +65,8 @@ public static class ServiceConfiguration
 						 policy.WithOrigins(
 							 "http://192.168.34.20:4200",
 							 "http://localhost:5055",
-							 "https://apps.cibi.com.ph/oms")
+							 "https://apps.cibi.com.ph/oms",
+							 "https://apps.cibi.com.ph/oms_uat")
 							 .AllowAnyHeader()
 							 .AllowAnyMethod()
 							 .AllowCredentials();
