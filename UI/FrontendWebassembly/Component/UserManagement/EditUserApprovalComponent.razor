@@ -9,24 +9,21 @@
                           Margin="Margin.Dense"
                           MaxLength="100"
                           Class="philsys-rounded-input philsys-uppercase-input"/>
-
-            <MudCheckBox T="bool"
-                         @bind-Value="User.isApproved"
-                         Label="Approve" />
         </MudForm>
     </DialogContent>
 
     <DialogActions>
         <MudButton Color="Color.Default"
                    OnClick="Cancel"
+                   Class="theme-button-delete"
                    Style="border-radius: 4px;">
-            Cancel
+            Disapprove
         </MudButton>
         <MudButton Color="Color.Primary"
                    OnClick="Submit"
                    Class="theme-button theme-button-active"
                    Style="border-radius: 4px;">
-            Save
+            Approve
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -42,6 +39,7 @@
 
     async Task Submit()
     {
+        User.isApproved = true;
         await form.Validate();
         if (form.IsValid)
         {

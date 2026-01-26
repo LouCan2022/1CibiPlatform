@@ -87,7 +87,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		Func<Task> act = async () => { await _sender.Send(command); };
 
 		// Assert
-		await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage("Your account has no assigned application. Please contact an administrator for assistance.");
+		await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage("Your account has not been approved yet. Please contact an administrator for assistance.");
 	}
 
 
@@ -118,7 +118,8 @@ public class LoginIntegrationTests : BaseIntegrationTest
 			PasswordHash = _passwordHasherService.HashPassword("p@ssw0rd!"),
 			FirstName = "Admin",
 			MiddleName = "Admin",
-			LastName = "Admin"
+			LastName = "Admin",
+			IsApproved = true
 		};
 
 		var userRole = new List<AuthRole>

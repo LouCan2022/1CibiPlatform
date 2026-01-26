@@ -111,13 +111,8 @@ else
 }
 
 @code {
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "email")]
-    public string? email { get; set; }
-
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "userId")]
-    public string? userId { get; set; }
+    public string? email = "";
+    public string? userId = "";
 
     private MudForm form;
     private bool success;
@@ -141,13 +136,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+         userId = await LocalStorageService.GetItemAsync<string>("tempUserId");
+         email =  await LocalStorageService.GetItemAsync<string>("tempUserEmail");
+
         // Check if email parameter exists
         if (string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(userId))
         {
             Navigation.NavigateTo("/register", true);
             return;
         }
-
+       
         var userOtpDetails = new OtpSessionRequestDTO(userId!, email!);
 
         var isUserOtpValidated = await IAuthService.IsOtpSessionValid(userOtpDetails);
