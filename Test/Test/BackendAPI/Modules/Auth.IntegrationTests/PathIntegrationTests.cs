@@ -44,7 +44,6 @@ public class PathIntegrationTests : BaseIntegrationTest
 	[InlineData("/auth/editrole", "PATCH")]
 	[InlineData("/auth/deleterole/123", "DELETE")]
 	[InlineData("/account/notification", "POST")]
-	[InlineData("/sso/login", "GET")]
 	[InlineData("/sso/login/callback", "GET")]
 	[InlineData("/sso/is-user-authenticated", "GET")]
 	[InlineData("/sso/logout", "POST")]

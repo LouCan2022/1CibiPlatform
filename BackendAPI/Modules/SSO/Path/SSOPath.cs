@@ -14,17 +14,6 @@ public class SSOPath : IReverseProxyModule
 		return new[]
 		{
 			new RouteDefinitionDTO(
-				RouteId: "SSOLoginEntryPoint",
-				MatchPath: "sso/login",
-				ClusterId: GatewayConstants.OnePlatformApi,
-				Methods: new[] { GatewayConstants.HttpMethod.Get },
-				Transforms: new Dictionary<string, string>
-				{
-					{ "PathSet", "sso/login" }
-				}
-			),
-
-			new RouteDefinitionDTO(
 				RouteId: "SSOLoginCallBackEntryPoint",
 				MatchPath: "sso/login/callback",
 				ClusterId: GatewayConstants.OnePlatformApi,
