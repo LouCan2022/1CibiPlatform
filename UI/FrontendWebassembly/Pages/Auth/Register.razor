@@ -240,7 +240,7 @@ else
             }
             await LocalStorageService.SetItemAsync("tempUserId", result.id);
             await LocalStorageService.SetItemAsync("tempUserEmail", result.email);
-            Navigation.NavigateTo($"/verify-otp?userId={result.id}&email={result.email}", true);
+            Navigation.NavigateTo("/verify-otp", true);
         }
         catch (Exception ex)
         {
