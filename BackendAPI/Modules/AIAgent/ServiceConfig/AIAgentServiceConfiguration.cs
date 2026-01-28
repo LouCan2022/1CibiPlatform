@@ -42,7 +42,11 @@ public static class AIAgentServiceConfiguration
 		{
 			options.UseNpgsql(
 				configuration.GetConnectionString(connStringSegment),
-				npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
+				npgsqlOptions =>
+				{
+					npgsqlOptions.MigrationsAssembly(assemblyName);
+					npgsqlOptions.UseVector(); // Enable pgvector support
+				}
 			);
 		});
 		return services;
@@ -55,12 +59,26 @@ public static class AIAgentServiceConfiguration
 		this IServiceCollection services,
 		IConfiguration configuration)
 	{
-		services.AddOpenAIChatClient
-			(
-			  modelId: configuration.GetValue<string>("OpenAI:Model")!,
-			  apiKey: configuration.GetValue<string>("OpenAI:ApiKey")!,
-			  endpoint: configuration.GetValue<Uri>("OpenAI:Endpoint")!
-			);
+		var endpoint = configuration.GetValue<string>("OpenAI:Endpoint")!;
+		var apiKey = configuration.GetValue<string>("OpenAI:ApiKey")!;
+		var embeddingModel = configuration.GetValue<string>("OpenAI:EmbeddingModel")!;
+
+		// Register Chat Client (LLM for conversation)
+		services.AddOpenAIChatClient(
+			modelId: configuration.GetValue<string>("OpenAI:Model")!,
+			apiKey: apiKey,
+			endpoint: new Uri(endpoint)
+		);
+
+		// Register the new embedding generator
+		// SKEXP0010: This API is experimental. To suppress the warning, add the pragma below.
+#pragma warning disable SKEXP0010
+		services.AddOpenAIEmbeddingGenerator(
+			modelId: configuration.GetValue<string>("OpenAI:Model")!,
+			apiKey: apiKey,
+			dimensions: 1536
+		);
+#pragma warning restore SKEXP0010
 
 		services.AddKernel();
 

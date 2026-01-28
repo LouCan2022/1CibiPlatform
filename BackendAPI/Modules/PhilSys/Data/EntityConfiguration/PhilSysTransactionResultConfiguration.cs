@@ -4,6 +4,8 @@ public class PhilSysTransactionResultConfiguration : IEntityTypeConfiguration<Ph
 {
 	public void Configure(EntityTypeBuilder<PhilSysTransactionResult> builder)
 	{
+		builder.ToTable("PhilSysTransactionResult", "philsys");
+
 		builder.HasKey(ptr => ptr.Trid);
 
 		builder.Property(ptr => ptr.Trid)

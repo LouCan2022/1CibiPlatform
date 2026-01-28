@@ -55,4 +55,8 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="..\..\Modules\AIAgent\Skills\ReadExcel\**" />
+	</ItemGroup>
+
 </Project>

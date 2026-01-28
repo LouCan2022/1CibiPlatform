@@ -27,4 +27,5 @@ global using PhilSys.Data.Extensions;
 global using AIAgent;
 global using Serilog.Events;
 global using AIAgent.ServiceConfig;
+global using AIAgent.Data.Extensions;
 

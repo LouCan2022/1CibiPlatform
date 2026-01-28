@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace PhilSys.Data.EntityConfiguration;
+﻿namespace PhilSys.Data.EntityConfiguration;
 
 public class PhilSysTransactionConfiguration : IEntityTypeConfiguration<PhilSysTransaction>
 {
 	public void Configure(EntityTypeBuilder<PhilSysTransaction> builder)
 	{
+		builder.ToTable("PhilSysTransaction", "philsys");
+
 		builder.HasKey(pt => pt.Tid);
 
 		builder.Property(pt => pt.Tid)

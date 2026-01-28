@@ -54,21 +54,21 @@ public static class CNXServiceConfiguration
 
     #endregion
 
-    #region Db Config
+    //#region Db Config
 
-    public static IServiceCollection AddCNXInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddDbContext<CNXApplicationDbContext>(options =>
-        {
-            options.UseNpgsql(
-                configuration.GetConnectionString(connStringSegment),
-                npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
-            );
-        });
-        return services;
-    }
+    //public static IServiceCollection AddCNXInfrastructure(
+    //    this IServiceCollection services,
+    //    IConfiguration configuration)
+    //{
+    //    services.AddDbContext<CNXApplicationDbContext>(options =>
+    //    {
+    //        options.UseNpgsql(
+    //            configuration.GetConnectionString(connStringSegment),
+    //            npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
+    //        );
+    //    });
+    //    return services;
+    //}
 
-    #endregion
+    //#endregion
 }
