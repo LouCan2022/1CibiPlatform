@@ -6,7 +6,7 @@ public class AIAgentApplicationDBContext : DbContext
 	{
 	}
 
-	public DbSet<PolicyEntity> Policies { get; set; }
+	public DbSet<AIPolicyEntity> AIPolicies { get; set; }
 
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)

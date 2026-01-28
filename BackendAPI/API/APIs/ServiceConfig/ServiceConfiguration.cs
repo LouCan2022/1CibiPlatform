@@ -194,6 +194,7 @@ public static class ServiceConfiguration
 		services.AddAuthInfrastructure(configuration);
 		services.AddCNXInfrastructure(configuration);
 		services.AddPhilSysInfrastructure(configuration);
+		services.AddAIAgentInfrastructure(configuration);
 		return services;
 	}
 	#endregion
