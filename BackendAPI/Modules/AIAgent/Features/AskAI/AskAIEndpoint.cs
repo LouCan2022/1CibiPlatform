@@ -38,6 +38,7 @@ public record AskAIEndpoint : ICarterModule
 					uploaded = new UploadedFileDto(file.FileName, ms.ToArray());
 				}
 			}
+
 			else if (contentType.StartsWith("application/json", System.StringComparison.OrdinalIgnoreCase))
 			{
 				// Handle application/json — only deserialize when request is JSON
