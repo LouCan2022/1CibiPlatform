@@ -12,8 +12,12 @@ namespace APIs.Migrations.PhilSys
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "philsys");
+
             migrationBuilder.CreateTable(
-                name: "PhilSysTransactions",
+                name: "PhilSysTransaction",
+                schema: "philsys",
                 columns: table => new
                 {
                     Tid = table.Column<Guid>(type: "uuid", nullable: false),
@@ -35,11 +39,12 @@ namespace APIs.Migrations.PhilSys
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PhilSysTransactions", x => x.Tid);
+                    table.PrimaryKey("PK_PhilSysTransaction", x => x.Tid);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PhilSysTransactionResults",
+                name: "PhilSysTransactionResult",
+                schema: "philsys",
                 columns: table => new
                 {
                     Trid = table.Column<int>(type: "integer", nullable: false)
@@ -84,18 +89,20 @@ namespace APIs.Migrations.PhilSys
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PhilSysTransactionResults", x => x.Trid);
+                    table.PrimaryKey("PK_PhilSysTransactionResult", x => x.Trid);
                     table.ForeignKey(
-                        name: "FK_PhilSysTransactionResults_PhilSysTransactions_idv_session_id",
+                        name: "FK_PhilSysTransactionResult_PhilSysTransaction_idv_session_id",
                         column: x => x.idv_session_id,
-                        principalTable: "PhilSysTransactions",
+                        principalSchema: "philsys",
+                        principalTable: "PhilSysTransaction",
                         principalColumn: "Tid",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhilSysTransactionResults_idv_session_id",
-                table: "PhilSysTransactionResults",
+                name: "IX_PhilSysTransactionResult_idv_session_id",
+                schema: "philsys",
+                table: "PhilSysTransactionResult",
                 column: "idv_session_id",
                 unique: true);
         }
@@ -104,10 +111,12 @@ namespace APIs.Migrations.PhilSys
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PhilSysTransactionResults");
+                name: "PhilSysTransactionResult",
+                schema: "philsys");
 
             migrationBuilder.DropTable(
-                name: "PhilSysTransactions");
+                name: "PhilSysTransaction",
+                schema: "philsys");
         }
     }
 }
