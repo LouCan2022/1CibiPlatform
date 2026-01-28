@@ -12,7 +12,7 @@ using PhilSys.Data.Context;
 namespace APIs.Migrations.PhilSys
 {
     [DbContext(typeof(PhilSysDBContext))]
-    [Migration("20251125044653_InitialPhilSysMigration")]
+    [Migration("20260128060616_InitialPhilSysMigration")]
     partial class InitialPhilSysMigration
     {
         /// <inheritdoc />
@@ -93,7 +93,7 @@ namespace APIs.Migrations.PhilSys
 
                     b.HasKey("Tid");
 
-                    b.ToTable("PhilSysTransactions");
+                    b.ToTable("PhilSysTransaction", "philsys");
                 });
 
             modelBuilder.Entity("PhilSys.Data.Entities.PhilSysTransactionResult", b =>
@@ -115,7 +115,7 @@ namespace APIs.Migrations.PhilSys
                     b.HasIndex("idv_session_id")
                         .IsUnique();
 
-                    b.ToTable("PhilSysTransactionResults");
+                    b.ToTable("PhilSysTransactionResult", "philsys");
                 });
 
             modelBuilder.Entity("PhilSys.Data.Entities.PhilSysTransactionResult", b =>
@@ -238,7 +238,7 @@ namespace APIs.Migrations.PhilSys
 
                             b1.HasKey("PhilSysTransactionResultTrid");
 
-                            b1.ToTable("PhilSysTransactionResults");
+                            b1.ToTable("PhilSysTransactionResult", "philsys");
 
                             b1.WithOwner()
                                 .HasForeignKey("PhilSysTransactionResultTrid");

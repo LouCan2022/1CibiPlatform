@@ -192,7 +192,6 @@ public static class ServiceConfiguration
 	{
 		// Add DbContext
 		services.AddAuthInfrastructure(configuration);
-		services.AddCNXInfrastructure(configuration);
 		services.AddPhilSysInfrastructure(configuration);
 		services.AddAIAgentInfrastructure(configuration);
 		return services;
