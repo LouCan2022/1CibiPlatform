@@ -3,6 +3,7 @@
 public record AskAIRequest(
 	string UserId,
 	string Question,
+	string ExplicitSkillName,
 	UploadedFileDto? UploadedFile = null);
 
 public record AskAIResponse(AIAnswerDTO AiAnswer);
@@ -19,6 +20,7 @@ public record AskAIEndpoint : ICarterModule
 		{
 			string userId = string.Empty;
 			string question = string.Empty;
+			string explicitSkillName = string.Empty;
 			UploadedFileDto? uploaded = null;
 
 			var contentType = httpRequest.ContentType ?? string.Empty;
@@ -29,6 +31,7 @@ public record AskAIEndpoint : ICarterModule
 				var form = await httpRequest.ReadFormAsync(cancellationToken);
 				userId = form["UserId"].FirstOrDefault() ?? string.Empty;
 				question = form["Question"].FirstOrDefault() ?? string.Empty;
+				explicitSkillName = form["ExplicitSkillName"].FirstOrDefault() ?? string.Empty;
 
 				var file = form.Files.FirstOrDefault();
 				if (file is not null && !string.IsNullOrWhiteSpace(userId))
@@ -39,13 +42,13 @@ public record AskAIEndpoint : ICarterModule
 				}
 			}
 
-			else if (contentType.StartsWith("application/json", System.StringComparison.OrdinalIgnoreCase))
+			else if (contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
 			{
 				// Handle application/json — only deserialize when request is JSON
 				try
 				{
-					var jsonOptions = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
-					var jsonRequest = await System.Text.Json.JsonSerializer.DeserializeAsync<AskAIRequest>(
+					var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+					var jsonRequest = await JsonSerializer.DeserializeAsync<AskAIRequest>(
 						httpRequest.Body,
 						jsonOptions,
 						cancellationToken);
@@ -58,8 +61,9 @@ public record AskAIEndpoint : ICarterModule
 					userId = jsonRequest.UserId;
 					question = jsonRequest.Question;
 					uploaded = jsonRequest.UploadedFile;
+					explicitSkillName = jsonRequest.ExplicitSkillName;
 				}
-				catch (System.Text.Json.JsonException)
+				catch (JsonException)
 				{
 					return Results.BadRequest("Invalid JSON body");
 				}
@@ -75,7 +79,7 @@ public record AskAIEndpoint : ICarterModule
 				return Results.BadRequest("UserId and Question are required");
 			}
 
-			var query = new AskAIQueryRequest(userId, question, uploaded);
+			var query = new AskAIQueryRequest(userId, question, explicitSkillName, uploaded);
 
 			var aiAnswerResult = await sender.Send(query, cancellationToken);
 
