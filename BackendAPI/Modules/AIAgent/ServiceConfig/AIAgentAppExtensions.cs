@@ -16,11 +16,17 @@ public static class AIAgentAppExtensions
 				return app;
 			}
 
-			// Candidate locations relative to content root
 			var contentRoot = app.Environment.ContentRootPath ?? Directory.GetCurrentDirectory();
+			logger.LogInformation("Content root path: {ContentRoot}", contentRoot);
 
+			// Enhanced candidate locations for both development and Docker deployment
 			var candidates = new[]
 			{
+				// Docker deployment paths (when published to /app)
+				System.IO.Path.Combine(contentRoot, "Skills"),
+				System.IO.Path.Combine(contentRoot, "Modules", "AIAgent", "Skills"),
+				
+				// Development paths
 				System.IO.Path.Combine(contentRoot, "BackendAPI", "Modules", "AIAgent", "Skills"),
 				System.IO.Path.Combine(contentRoot, "Modules", "AIAgent", "Skills"),
 				System.IO.Path.Combine(contentRoot, "BackendAPI", "Modules", "AIAgent"),
@@ -29,14 +35,19 @@ public static class AIAgentAppExtensions
 
 			string? skillsDir = null;
 
+			// Log all candidates being checked
+			logger.LogInformation("Checking {Count} candidate paths for Skills directory", candidates.Length);
 			foreach (var c in candidates)
 			{
+				logger.LogDebug("  Checking: {Path} - Exists: {Exists}", c, Directory.Exists(c));
+
 				if (Directory.Exists(c))
 				{
 					// prefer explicit Skills folder if present
-					if (c.EndsWith(System.IO.Path.Combine("AIAgent", "Skills")))
+					if (c.EndsWith("Skills", StringComparison.OrdinalIgnoreCase))
 					{
 						skillsDir = c;
+						logger.LogInformation("Found Skills directory at: {Path}", skillsDir);
 						break;
 					}
 
@@ -45,6 +56,7 @@ public static class AIAgentAppExtensions
 					if (Directory.Exists(trySkills))
 					{
 						skillsDir = trySkills;
+						logger.LogInformation("Found Skills subdirectory at: {Path}", skillsDir);
 						break;
 					}
 				}
@@ -53,6 +65,8 @@ public static class AIAgentAppExtensions
 			// As a fallback, search entire content root for any .skill.yaml files
 			if (skillsDir is null)
 			{
+				logger.LogInformation("Skills directory not found in candidates, searching entire content root for .skill.yaml files");
+
 				var foundFiles = Directory.EnumerateFiles(contentRoot, "*.skill.yaml", SearchOption.AllDirectories).ToList();
 				if (foundFiles.Any())
 				{
@@ -65,9 +79,12 @@ public static class AIAgentAppExtensions
 					// choose the directory that contains the first file; prefer the containing Skills folder
 					var first = foundFiles.First();
 					var dir = System.IO.Path.GetDirectoryName(first) ?? contentRoot;
+
 					// climb up until we find a folder named 'Skills' or stop at contentRoot
 					var cur = dir;
-					while (!string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase) && cur != null && cur.Length >= contentRoot.Length)
+					while (!string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase) &&
+						   cur != null &&
+						   cur.Length >= contentRoot.Length)
 					{
 						var parent = System.IO.Path.GetDirectoryName(cur);
 						if (string.IsNullOrEmpty(parent) || parent == cur) break;
@@ -75,28 +92,38 @@ public static class AIAgentAppExtensions
 						if (string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase)) break;
 					}
 
-					if (cur is not null && Directory.Exists(cur) && System.IO.Path.GetFileName(cur).Equals("Skills", StringComparison.OrdinalIgnoreCase))
+					if (cur is not null && Directory.Exists(cur) &&
+						string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase))
 					{
 						skillsDir = cur;
+						logger.LogInformation("Resolved Skills directory from manifest location: {Path}", skillsDir);
 					}
 					else
 					{
 						// fallback to the directory of the first file
 						skillsDir = dir;
+						logger.LogInformation("Using directory of first manifest file: {Path}", skillsDir);
 					}
 				}
 			}
 
 			if (skillsDir is null || !Directory.Exists(skillsDir))
 			{
-				logger.LogWarning("Skills directory does not exist (checked candidates and content root): {Root}", contentRoot);
-				logger.LogInformation("Registered {Count} skill manifests from {Dir}", registry.GetAll().Count(), skillsDir ?? "<none>");
+				logger.LogWarning("Skills directory does not exist. Content root: {Root}, Skills dir: {SkillsDir}", contentRoot, skillsDir ?? "<none>");
+				logger.LogInformation("Currently registered skills count: {Count}", registry.GetAll().Count());
 				return app;
 			}
 
 			// List files for diagnostics
 			var manifests = Directory.GetFiles(skillsDir, "*.skill.yaml", SearchOption.AllDirectories).ToList();
 			logger.LogInformation("Using skills directory: {Dir}. Found {Count} manifests.", skillsDir, manifests.Count);
+
+			if (!manifests.Any())
+			{
+				logger.LogWarning("No .skill.yaml manifests found in {Dir}", skillsDir);
+				return app;
+			}
+
 			foreach (var f in manifests)
 			{
 				logger.LogInformation("  Skill manifest: {File}", f);
@@ -105,7 +132,16 @@ public static class AIAgentAppExtensions
 			// Call ScanAndRegister on discovered skills directory
 			registry.ScanAndRegister(skillsDir);
 
-			logger.LogInformation("Registered {Count} skill manifests from {Dir}", registry.GetAll().Count(), skillsDir);
+			var registeredCount = registry.GetAll().Count();
+			logger.LogInformation("Registered {Count} skills from {Dir}", registeredCount, skillsDir);
+
+			// Log each registered skill
+			foreach (var skill in registry.GetAll())
+			{
+				logger.LogInformation("  Registered skill: {Name} - Implementation: {Type}",
+					skill.Name,
+					skill.ImplementationType?.Name ?? "<none>");
+			}
 
 			// Try kernel import via reflection
 			var kernel = app.Services.GetService(typeof(Microsoft.SemanticKernel.Kernel));
@@ -149,27 +185,23 @@ public static class AIAgentAppExtensions
 						importMethod.Invoke(kernel, new object[] { desc.ManifestPath });
 						logger.LogInformation("Imported skill manifest '{Manifest}' for skill '{Skill}'", desc.ManifestPath, desc.Name);
 					}
-					catch (TargetInvocationException tie)
-					{
-						logger.LogWarning(tie, "Kernel import method threw when importing manifest {Manifest}", desc.ManifestPath);
-					}
 					catch (Exception ex)
 					{
-						logger.LogWarning(ex, "Failed to import manifest {Manifest}", desc.ManifestPath);
+						logger.LogWarning(ex, "Failed to import individual manifest for skill '{Skill}'", desc.Name);
 					}
 				}
 			}
 			else
 			{
-				logger.LogInformation("No kernel import method found. You can register adapters manually using SkillRegistry.");
+				logger.LogInformation("No suitable Kernel import method found; skipping automatic Kernel import.");
 			}
+
+			return app;
 		}
 		catch (Exception ex)
 		{
-			var logger2 = app.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
-			logger2?.CreateLogger("AIAgentSkills").LogError(ex, "Error during skill scan/import");
+			logger.LogError(ex, "Unexpected error during UseAIAgentSkills.");
+			return app;
 		}
-
-		return app;
 	}
 }

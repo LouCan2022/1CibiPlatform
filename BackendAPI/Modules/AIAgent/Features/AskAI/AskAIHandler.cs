@@ -3,6 +3,7 @@
 public record AskAIQueryRequest(
 	string UserId,
 	string Question,
+	string ExplicitSkillName,
 	UploadedFileDto? UploadedFile = null) : IQuery<AskAIQueryResult>;
 
 public record AskAIQueryResult(AIAnswerDTO aiAnswerDTO);
@@ -35,6 +36,7 @@ public class AskAIHandler : IQueryHandler<AskAIQueryRequest, AskAIQueryResult>
 			request.UserId,
 			request.Question,
 			request.UploadedFile,
+			request.ExplicitSkillName,
 			cancellationToken
 		);
 
