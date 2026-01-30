@@ -30,22 +30,23 @@ namespace Test.BackendAPI.Infrastructure.PhilSys.Infrastracture
 			_configuration = _scope.ServiceProvider.GetRequiredService<IConfiguration>();
 		}
 
-		// Runs before each test. Ensures database tables used in tests are cleaned to avoid cross-test pollution.
-		public async Task InitializeAsync()
+	// Runs before each test. Ensures database tables used in tests are cleaned to avoid cross-test pollution.
+	public async Task InitializeAsync()
+	{
+		try
 		{
-			try
+			if (_dbContext is not null)
 			{
-				if (_dbContext is not null)
-				{
-					var sql = @"TRUNCATE TABLE ""PhilSysTransactions"" RESTART IDENTITY CASCADE;";
-					await _dbContext.Database.ExecuteSqlRawAsync(sql);
-				}
-			}
-			catch (Exception ex)
-			{
-				throw new Exception("Error during database cleanup in InitializeAsync: " + ex.Message, ex);
+				// Table is in the philsys schema
+				var sql = @"TRUNCATE TABLE philsys.""PhilSysTransaction"" RESTART IDENTITY CASCADE;";
+				await _dbContext.Database.ExecuteSqlRawAsync(sql);
 			}
 		}
+		catch (Exception ex)
+		{
+			throw new Exception("Error during database cleanup in InitializeAsync: " + ex.Message, ex);
+		}
+	}
 
 		public Task DisposeAsync()
 		{
