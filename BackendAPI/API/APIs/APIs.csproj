@@ -56,7 +56,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="..\..\Modules\AIAgent\Skills\ReadExcel\**" />
+		<None Remove="..\..\Modules\AIAgent\Skills\PolicyIngestion\**" />
+		<None Remove="..\..\Modules\AIAgent\Skills\ReadExcel\**" />
 	</ItemGroup>
 
 </Project>

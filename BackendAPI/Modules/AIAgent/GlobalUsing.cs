@@ -1,4 +1,6 @@
 ﻿global using Pgvector;
+global using Npgsql;
+global using Pgvector.EntityFrameworkCore;
 global using AIAgent.Data.Entities;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,7 +10,9 @@ global using FluentValidation;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Configuration;
 global using System.Reflection;
+global using System.IO;
 global using AIAgent.Data.Context;
+global using Microsoft.EntityFrameworkCore.Design;
 global using BuildingBlocks.CQRS;
 global using AIAgent.DTO;
 global using AIAgent.Services;

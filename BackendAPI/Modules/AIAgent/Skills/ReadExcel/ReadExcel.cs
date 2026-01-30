@@ -19,7 +19,7 @@ public sealed class ProcessExcelResult
 	public List<Dictionary<string, string?>> Rows { get; init; } = new();
 }
 
-public sealed class ProcessExcel : ISkill
+public sealed class ReadExcel : ISkill
 {
 	// ISkill implementation: accept raw JsonElement payload and delegate to typed RunAsync
 	public async Task<object?> RunAsync(

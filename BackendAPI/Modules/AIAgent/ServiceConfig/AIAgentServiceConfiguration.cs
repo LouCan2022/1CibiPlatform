@@ -38,14 +38,20 @@ public static class AIAgentServiceConfiguration
 	this IServiceCollection services,
 	IConfiguration configuration)
 	{
+		var connectionString = configuration.GetConnectionString(connStringSegment);
+		
+		var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+		dataSourceBuilder.UseVector();
+		var dataSource = dataSourceBuilder.Build();
+		
 		services.AddDbContext<AIAgentApplicationDBContext>(options =>
 		{
 			options.UseNpgsql(
-				configuration.GetConnectionString(connStringSegment),
+				dataSource,
 				npgsqlOptions =>
 				{
 					npgsqlOptions.MigrationsAssembly(assemblyName);
-					npgsqlOptions.UseVector(); // Enable pgvector support
+					npgsqlOptions.UseVector();
 				}
 			);
 		});
@@ -70,13 +76,19 @@ public static class AIAgentServiceConfiguration
 			endpoint: new Uri(endpoint)
 		);
 
-		// Register the new embedding generator
-		// SKEXP0010: This API is experimental. To suppress the warning, add the pragma below.
+		// ✅ Create HttpClient with Alibaba endpoint for embeddings
+		var embeddingHttpClient = new HttpClient
+		{
+			BaseAddress = new Uri(endpoint)
+		};
+
+		// Register the embedding generator with custom HttpClient
 #pragma warning disable SKEXP0010
 		services.AddOpenAIEmbeddingGenerator(
-			modelId: configuration.GetValue<string>("OpenAI:Model")!,
+			modelId: embeddingModel,
 			apiKey: apiKey,
-			dimensions: 1536
+			dimensions: 1536,
+			httpClient: embeddingHttpClient  // Pass HttpClient with Alibaba endpoint
 		);
 #pragma warning restore SKEXP0010
 

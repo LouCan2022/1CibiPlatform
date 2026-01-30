@@ -101,8 +101,10 @@ public class AIAgentService : IAIAgentService
 			explicitSkillName, skillDef.ImplementationType.Name);
 
 
-		// Invoke skill that implements ISkill
-		var skillInstance = ActivatorUtilities.CreateInstance(_kernel.Services, skillDef.ImplementationType);
+		//  Create a scope to resolve scoped services like DbContext
+		using var scope = _kernel.Services.CreateScope();
+		var skillInstance = ActivatorUtilities.CreateInstance(scope.ServiceProvider, skillDef.ImplementationType);
+
 		if (skillInstance is not ISkill skill)
 		{
 			throw new InvalidOperationException($"Skill '{explicitSkillName}' does not implement ISkill.");
