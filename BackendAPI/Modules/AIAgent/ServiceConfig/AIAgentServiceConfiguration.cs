@@ -1,6 +1,5 @@
 ﻿namespace AIAgent.ServiceConfig;
 
-
 public static class AIAgentServiceConfiguration
 {
 	private const string assemblyName = "APIs";
@@ -26,6 +25,10 @@ public static class AIAgentServiceConfiguration
 	public static IServiceCollection AddAIAgentServices(this IServiceCollection services)
 	{
 		services.AddSingleton<IAIAgentService, AIAgentService>();
+		services.AddScoped<IPolicyRepository, PolicyRepository>();
+		services.AddScoped<IExcelPolicyExtractorService, ExcelPolicyExtractorService>();
+		services.AddScoped<IExcelQuestionExtractor, ExcelQuestionExtractor>();
+		services.AddScoped<IFileStorageService, FileStorageService>();
 		services.AddSignalR();
 		return services;
 	}
@@ -39,11 +42,11 @@ public static class AIAgentServiceConfiguration
 	IConfiguration configuration)
 	{
 		var connectionString = configuration.GetConnectionString(connStringSegment);
-		
+
 		var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
 		dataSourceBuilder.UseVector();
 		var dataSource = dataSourceBuilder.Build();
-		
+
 		services.AddDbContext<AIAgentApplicationDBContext>(options =>
 		{
 			options.UseNpgsql(

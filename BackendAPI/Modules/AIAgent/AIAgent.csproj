@@ -33,4 +33,8 @@
 		<ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Services\ReadExcel\" />
+	</ItemGroup>
+
 </Project>

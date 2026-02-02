@@ -1,22 +1,22 @@
-﻿using Microsoft.Extensions.AI;
-
-
-namespace AIAgent.Skills.PolicyIngestion;
+﻿namespace AIAgent.Skills.PolicyIngestion;
 
 public sealed class PolicyIngestion : ISkill
 {
-	private readonly AIAgentApplicationDBContext _dbContext;
+	private readonly IPolicyRepository _policyRepository;
+	private readonly IExcelPolicyExtractorService _excelExtractor;
 	private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
 	private readonly ILogger<PolicyIngestion> _logger;
 	private const int ChunkSize = 1000; // Characters per chunk
 	private const int ChunkOverlap = 200; // Overlap between chunks
 
 	public PolicyIngestion(
-		AIAgentApplicationDBContext dbContext,
+		IPolicyRepository policyRepository,
+		IExcelPolicyExtractorService excelExtractor,
 		IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
 		ILogger<PolicyIngestion> logger)
 	{
-		_dbContext = dbContext;
+		_policyRepository = policyRepository;
+		_excelExtractor = excelExtractor;
 		_embeddingGenerator = embeddingGenerator;
 		_logger = logger;
 	}
@@ -50,7 +50,7 @@ public sealed class PolicyIngestion : ISkill
 		var fileBytes = Convert.FromBase64String(base64Data);
 
 		// Process Excel file
-		var policies = await ExtractPoliciesFromExcel(fileBytes, cancellationToken);
+		var policies = await _excelExtractor.ExtractPoliciesFromExcelAsync(fileBytes, cancellationToken);
 		_logger.LogInformation("Extracted {Count} policy entries from Excel", policies.Count);
 
 		// Collect all policy entities in a list
@@ -85,52 +85,14 @@ public sealed class PolicyIngestion : ISkill
 		}
 
 		// Add all entities in one operation
-		_dbContext.AIPolicies.AddRange(policyEntities);
-		await _dbContext.SaveChangesAsync(cancellationToken);
+		await _policyRepository.AddPoliciesAsync(policyEntities, cancellationToken);
 
 		_logger.LogInformation("Successfully saved {TotalChunks} chunks with embeddings to database", totalChunks);
 
 		return new
 		{
-			Success = true,
 			Message = $"Successfully ingested {policies.Count} policies ({totalChunks} chunks) from {fileName}",
-			PoliciesProcessed = policies.Count,
-			TotalChunks = totalChunks
 		};
-	}
-
-	private async Task<List<PolicyData>> ExtractPoliciesFromExcel(byte[] fileBytes, CancellationToken cancellationToken)
-	{
-		var policies = new List<PolicyData>();
-
-		using var stream = new MemoryStream(fileBytes);
-		using var workbook = new XLWorkbook(stream);
-		var worksheet = workbook.Worksheet(1); // First sheet
-
-		// Skip header row, start from row 2
-		var rows = worksheet.RowsUsed().Skip(1);
-
-		foreach (var row in rows)
-		{
-			var policyName = row.Cell(1).GetValue<string>(); // Column A: Policy Name
-			var sectionName = row.Cell(2).GetValue<string>(); // Column B: Section Name
-			var content = row.Cell(3).GetValue<string>(); // Column C: Content
-
-			if (string.IsNullOrWhiteSpace(policyName) || string.IsNullOrWhiteSpace(sectionName) || string.IsNullOrWhiteSpace(content))
-			{
-				_logger.LogWarning("Skipping row with empty data at row {RowNumber}", row.RowNumber());
-				continue;
-			}
-
-			policies.Add(new PolicyData
-			{
-				PolicyCode = policyName.Trim(),
-				SectionCode = sectionName.Trim(),
-				Content = content.Trim()
-			});
-		}
-
-		return policies;
 	}
 
 	private List<string> ChunkPolicy(string content)
@@ -197,11 +159,5 @@ public sealed class PolicyIngestion : ISkill
 
 		return new Vector(embeddingArray);
 	}
-
-	private class PolicyData
-	{
-		public string PolicyCode { get; set; } = string.Empty;
-		public string SectionCode { get; set; } = string.Empty;
-		public string Content { get; set; } = string.Empty;
-	}
 }
+

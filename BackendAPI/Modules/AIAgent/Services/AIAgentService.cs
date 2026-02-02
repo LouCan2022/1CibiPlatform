@@ -1,6 +1,4 @@
-﻿using AIAgent.Features.AskAI;
-
-namespace AIAgent.Services;
+﻿namespace AIAgent.Services;
 
 public class AIAgentService : IAIAgentService
 {
@@ -48,12 +46,21 @@ public class AIAgentService : IAIAgentService
 			if (!string.IsNullOrWhiteSpace(explicitSkillName))
 			{
 				return await InvokeExplicitSkill(
-					userId, question, uploadedFile, explicitSkillName,
-					history, historyText, cancellationToken);
+					userId,
+					question,
+					uploadedFile,
+					explicitSkillName,
+					history,
+					historyText,
+					cancellationToken);
 			}
 
 			// ⭐ No skill selected - Return generic response
-			return await HandleGenericQuery(userId, question, history, historyText, cancellationToken);
+			return await HandleGenericQuery(userId,
+				question,
+				history,
+				historyText,
+				cancellationToken);
 		}
 		finally
 		{
@@ -217,30 +224,14 @@ public class AIAgentService : IAIAgentService
 
 		// Check if it's a ProcessExcelResult or similar structure
 		var resultType = result.GetType();
-		var successProp = resultType.GetProperty("Success");
 		var messageProp = resultType.GetProperty("Message");
-		var rowsProp = resultType.GetProperty("Rows");
 
-		if (successProp != null && messageProp != null)
+		if (messageProp != null)
 		{
-			var success = successProp.GetValue(result) as bool? ?? false;
 			var message = messageProp.GetValue(result) as string ?? string.Empty;
-
-			if (!success)
-				return $"❌ {message}";
 
 			var output = new StringBuilder();
 			output.AppendLine($"✅ {message}");
-
-			if (rowsProp != null)
-			{
-				var rows = rowsProp.GetValue(result) as IEnumerable<object>;
-				if (rows != null && rows.Any())
-				{
-					var rowCount = rows.Count();
-					output.AppendLine($"\n📊 Processed {rowCount} row(s)");
-				}
-			}
 
 			return output.ToString();
 		}

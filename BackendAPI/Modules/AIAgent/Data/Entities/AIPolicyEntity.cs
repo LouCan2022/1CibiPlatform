@@ -1,6 +1,4 @@
-﻿using Pgvector;
-
-namespace AIAgent.Data.Entities;
+﻿namespace AIAgent.Data.Entities;
 
 public class AIPolicyEntity
 {
