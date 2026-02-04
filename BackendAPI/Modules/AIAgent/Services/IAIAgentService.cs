@@ -1,6 +1,4 @@
-﻿using AIAgent.Features.AskAI;
-
-namespace AIAgent.Services;
+﻿namespace AIAgent.Services;
 
 public interface IAIAgentService
 {

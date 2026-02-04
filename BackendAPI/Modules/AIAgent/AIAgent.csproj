@@ -27,13 +27,14 @@
 		<None Update="Skills\**\*.skill.yaml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Skills\**\*.cs">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Services\ReadExcel\" />
 	</ItemGroup>
 
 </Project>

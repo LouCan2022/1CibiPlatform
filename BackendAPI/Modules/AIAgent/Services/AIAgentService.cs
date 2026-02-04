@@ -1,6 +1,4 @@
-﻿using AIAgent.Features.AskAI;
-
-namespace AIAgent.Services;
+﻿namespace AIAgent.Services;
 
 public class AIAgentService : IAIAgentService
 {
@@ -48,12 +46,21 @@ public class AIAgentService : IAIAgentService
 			if (!string.IsNullOrWhiteSpace(explicitSkillName))
 			{
 				return await InvokeExplicitSkill(
-					userId, question, uploadedFile, explicitSkillName,
-					history, historyText, cancellationToken);
+					userId,
+					question,
+					uploadedFile,
+					explicitSkillName,
+					history,
+					historyText,
+					cancellationToken);
 			}
 
 			// ⭐ No skill selected - Return generic response
-			return await HandleGenericQuery(userId, question, history, historyText, cancellationToken);
+			return await HandleGenericQuery(userId,
+				question,
+				history,
+				historyText,
+				cancellationToken);
 		}
 		finally
 		{
@@ -101,8 +108,10 @@ public class AIAgentService : IAIAgentService
 			explicitSkillName, skillDef.ImplementationType.Name);
 
 
-		// Invoke skill that implements ISkill
-		var skillInstance = ActivatorUtilities.CreateInstance(_kernel.Services, skillDef.ImplementationType);
+		//  Create a scope to resolve scoped services like DbContext
+		using var scope = _kernel.Services.CreateScope();
+		var skillInstance = ActivatorUtilities.CreateInstance(scope.ServiceProvider, skillDef.ImplementationType);
+
 		if (skillInstance is not ISkill skill)
 		{
 			throw new InvalidOperationException($"Skill '{explicitSkillName}' does not implement ISkill.");
@@ -120,7 +129,7 @@ public class AIAgentService : IAIAgentService
 
 		if (analyzeQuestion == "Not related.")
 		{
-			return new AIAnswerDTO(new List<string> { "Your request is not related on the skillset you picked" }, "");
+			throw new InvalidOperationException("Your request is not related to the selected skill set.");
 		}
 
 
@@ -130,15 +139,18 @@ public class AIAgentService : IAIAgentService
 
 		_logger.LogInformation("Skill {SkillName} completed successfully for user {UserId}", explicitSkillName, userId);
 
+		var messageResponse = skillResult?.GetType().GetProperty("Message")?.GetValue(skillResult)?.ToString();
+		var downloadUrlResponse = skillResult?.GetType().GetProperty("DownloadUrl")?.GetValue(skillResult)?.ToString();
+
 		// Format result
 		var resultText = FormatSkillResult(skillResult);
-		await _hubContext.Clients.Group(userId).ReceiveAiResponse(resultText);
+		await _hubContext.Clients.Group(userId).ReceiveAiResponse(resultText.Answers?.FirstOrDefault()?.ToString()!);
 
 		history.Add(("User", question));
-		history.Add(("Assistant", resultText));
+		history.Add(("Assistant", messageResponse!));
 		TrimHistory(history);
 
-		return new AIAnswerDTO(new List<string> { resultText }, "");
+		return new AIAnswerDTO(new List<string> { messageResponse! }, downloadUrlResponse);
 	}
 
 	private object PrepareSkillPayload(
@@ -208,42 +220,19 @@ public class AIAgentService : IAIAgentService
 		return result.ToString().Trim();
 	}
 
-	private string FormatSkillResult(object? result)
+	private AIAnswerDTO FormatSkillResult(object? result)
 	{
 		if (result == null)
-			return "Skill executed successfully with no output.";
+			return new AIAnswerDTO(new List<string> { "Skill executed successfully with no output." }, null);
 
 		// Check if it's a ProcessExcelResult or similar structure
 		var resultType = result.GetType();
-		var successProp = resultType.GetProperty("Success");
 		var messageProp = resultType.GetProperty("Message");
-		var rowsProp = resultType.GetProperty("Rows");
+		var downloadUrlProp = resultType.GetProperty("DownloadUrl");
 
-		if (successProp != null && messageProp != null)
-		{
-			var success = successProp.GetValue(result) as bool? ?? false;
-			var message = messageProp.GetValue(result) as string ?? string.Empty;
-
-			if (!success)
-				return $"❌ {message}";
-
-			var output = new StringBuilder();
-			output.AppendLine($"✅ {message}");
-
-			if (rowsProp != null)
-			{
-				var rows = rowsProp.GetValue(result) as IEnumerable<object>;
-				if (rows != null && rows.Any())
-				{
-					var rowCount = rows.Count();
-					output.AppendLine($"\n📊 Processed {rowCount} row(s)");
-				}
-			}
-
-			return output.ToString();
-		}
-
-		return result.ToString() ?? "Skill executed successfully.";
+		return new AIAnswerDTO(
+			new List<string> { messageProp?.GetValue(result)?.ToString() ?? "Skill executed successfully." },
+			downloadUrlProp?.GetValue(result)?.ToString());
 	}
 
 	private void TrimHistory(List<(string Role, string Content)> history)

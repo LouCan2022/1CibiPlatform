@@ -1,4 +1,6 @@
-﻿namespace FrontendWebassembly.Services.AIAgentChat.Implementation;
+﻿using Microsoft.AspNetCore.Components.Forms;
+
+namespace FrontendWebassembly.Services.AIAgentChat.Implementation;
 
 public class AIChatService : IAIAgentChatService
 {
@@ -25,6 +27,8 @@ public class AIChatService : IAIAgentChatService
 
 	public async Task<AIAnswerDTO> AskAIAsync(
 		string question,
+		IBrowserFile? file,
+		string? explicitSkillName,
 		CancellationToken cancellationToken)
 	{
 		// Resolve user id (adjust to your LocalStorageService API)
@@ -41,9 +45,36 @@ public class AIChatService : IAIAgentChatService
 			// subscribe to centralized event (registered in EnsureHubConnectionStartedAsync)
 			AiResponseReceived += LocalHandler;
 
-			// Trigger server processing via REST endpoint (this calls your AskAIEndpoint)
-			var req = new { userId = userId, question = question };
-			var httpResponse = await _httpClient.PostAsJsonAsync("aiagent/ask", req, cancellationToken);
+			// Trigger server processing via REST endpoint with optional file upload
+			HttpResponseMessage httpResponse;
+
+			// Check if file is attached - use multipart/form-data for file upload
+			if (file != null)
+			{
+				using var content = new MultipartFormDataContent();
+
+
+				// Add userId, question, and explicitSkillName as form fields
+				content.Add(new StringContent(userId), "UserId");
+				content.Add(new StringContent(question), "Question");
+				content.Add(new StringContent(explicitSkillName ?? string.Empty), "ExplicitSkillName");
+
+
+				// Add file stream content (max 512MB as per your API limit)
+				var fileStream = file.OpenReadStream(maxAllowedSize: 512 * 1024 * 1024);
+				var streamContent = new StreamContent(fileStream);
+				streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+				content.Add(streamContent, "file", file.Name);
+
+				// Post multipart form data to API
+				httpResponse = await _httpClient.PostAsync("aiagent/ask", content, cancellationToken);
+			}
+			else
+			{
+				// No file - use JSON with explicitSkillName
+				var req = new { UserId = userId, Question = question, ExplicitSkillName = explicitSkillName ?? string.Empty };
+				httpResponse = await _httpClient.PostAsJsonAsync("aiagent/ask", req, cancellationToken);
+			}
 
 			if (!httpResponse.IsSuccessStatusCode)
 			{

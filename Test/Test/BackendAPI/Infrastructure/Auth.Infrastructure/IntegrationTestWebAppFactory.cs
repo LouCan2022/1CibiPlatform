@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
@@ -28,6 +29,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
 		builder.UseEnvironment("Testing");
+
+		// Set environment variables for test configuration
+		Environment.SetEnvironmentVariable("OpenAI__Endpoint", "https://test.openai.com");
+		Environment.SetEnvironmentVariable("OpenAI__ApiKey", "test-api-key");
+		Environment.SetEnvironmentVariable("OpenAI__Model", "gpt-4");
+		Environment.SetEnvironmentVariable("OpenAI__EmbeddingModel", "text-embedding-3-small");
 
 		builder.ConfigureTestServices(services =>
 		{

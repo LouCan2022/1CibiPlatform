@@ -27,6 +27,11 @@ public class PoliciesConfiguration : IEntityTypeConfiguration<AIPolicyEntity>
 			.IsRequired();
 
 		builder.Property(e => e.Embedding)
-					.HasColumnType("vector(1536)");
+			.HasColumnType("vector(1536)")
+			.HasColumnName("Embedding");
+
+		builder.HasIndex(x => x.Embedding)
+			.HasMethod("ivfflat")
+			.HasOperators("vector_cosine_ops");
 	}
 }

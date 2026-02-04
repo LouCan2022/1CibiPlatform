@@ -2,6 +2,53 @@ namespace AIAgent.ServiceConfig;
 
 public static class AIAgentAppExtensions
 {
+	/// <summary>
+	/// Finds the common parent directory that contains all the given directories.
+	/// </summary>
+	private static string FindCommonParentDirectory(List<string> directories, string fallback)
+	{
+		if (!directories.Any()) return fallback;
+		if (directories.Count == 1) return directories[0];
+
+		// Normalize paths and split into parts
+		var pathParts = directories
+			.Select(d => d.Replace(System.IO.Path.AltDirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar))
+			.Select(d => d.Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries))
+			.ToList();
+
+		// Find shortest path length
+		var minLength = pathParts.Min(p => p.Length);
+
+		// Find common prefix
+		var commonParts = new List<string>();
+		for (int i = 0; i < minLength; i++)
+		{
+			var part = pathParts[0][i];
+			if (pathParts.All(p => string.Equals(p[i], part, StringComparison.OrdinalIgnoreCase)))
+			{
+				commonParts.Add(part);
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (!commonParts.Any()) return fallback;
+
+		// Reconstruct path
+		var result = string.Join(System.IO.Path.DirectorySeparatorChar.ToString(), commonParts);
+
+		// Handle absolute paths (add leading separator if original paths were absolute)
+		if (directories[0].StartsWith(System.IO.Path.DirectorySeparatorChar.ToString()) ||
+			directories[0].StartsWith(System.IO.Path.AltDirectorySeparatorChar.ToString()))
+		{
+			result = System.IO.Path.DirectorySeparatorChar + result;
+		}
+
+		return Directory.Exists(result) ? result : fallback;
+	}
+
 	public static WebApplication UseAIAgentSkills(this WebApplication app)
 	{
 		var loggerFactory = app.Services.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
@@ -28,15 +75,10 @@ public static class AIAgentAppExtensions
 				
 				// Development paths
 				System.IO.Path.Combine(contentRoot, "BackendAPI", "Modules", "AIAgent", "Skills"),
-				System.IO.Path.Combine(contentRoot, "Modules", "AIAgent", "Skills"),
-				System.IO.Path.Combine(contentRoot, "BackendAPI", "Modules", "AIAgent"),
-				System.IO.Path.Combine(contentRoot, "Modules", "AIAgent"),
 			};
 
 			string? skillsDir = null;
 
-			// Log all candidates being checked
-			logger.LogInformation("Checking {Count} candidate paths for Skills directory", candidates.Length);
 			foreach (var c in candidates)
 			{
 				logger.LogDebug("  Checking: {Path} - Exists: {Exists}", c, Directory.Exists(c));
@@ -76,34 +118,59 @@ public static class AIAgentAppExtensions
 						logger.LogInformation("  Skill manifest: {File}", f);
 					}
 
-					// choose the directory that contains the first file; prefer the containing Skills folder
-					var first = foundFiles.First();
-					var dir = System.IO.Path.GetDirectoryName(first) ?? contentRoot;
+					// Strategy: Find the best common directory that contains all skill files
+					// 1. First, check if any file is under a folder named "Skills" - use that
+					// 2. Otherwise, find the common parent directory of all files
+					string? commonDir = null;
 
-					// climb up until we find a folder named 'Skills' or stop at contentRoot
-					var cur = dir;
-					while (!string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase) &&
-						   cur != null &&
-						   cur.Length >= contentRoot.Length)
+					// Look for a "Skills" directory among the file paths
+					foreach (var file in foundFiles)
 					{
-						var parent = System.IO.Path.GetDirectoryName(cur);
-						if (string.IsNullOrEmpty(parent) || parent == cur) break;
-						cur = parent;
-						if (string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase)) break;
+						var dir = System.IO.Path.GetDirectoryName(file);
+						if (dir is null) continue;
+
+						// Check if "Skills" is in the path
+						var parts = dir.Split(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+						var skillsIndex = Array.FindIndex(parts, p => string.Equals(p, "Skills", StringComparison.OrdinalIgnoreCase));
+
+						if (skillsIndex >= 0)
+						{
+							// Reconstruct path up to and including "Skills"
+							var skillsPath = string.Join(System.IO.Path.DirectorySeparatorChar.ToString(), parts.Take(skillsIndex + 1));
+							if (Directory.Exists(skillsPath))
+							{
+								commonDir = skillsPath;
+								logger.LogInformation("Found 'Skills' directory in path: {Path}", commonDir);
+								break;
+							}
+						}
 					}
 
-					if (cur is not null && Directory.Exists(cur) &&
-						string.Equals(System.IO.Path.GetFileName(cur), "Skills", StringComparison.OrdinalIgnoreCase))
+					// If no "Skills" directory found, find common parent of all files
+					if (commonDir is null && foundFiles.Any())
 					{
-						skillsDir = cur;
-						logger.LogInformation("Resolved Skills directory from manifest location: {Path}", skillsDir);
+						var allDirs = foundFiles.Select(f => System.IO.Path.GetDirectoryName(f))
+							.Where(d => d is not null)
+							.Select(d => d!)
+							.Distinct()
+							.ToList();
+
+						if (allDirs.Count == 1)
+						{
+							// All files in same directory
+							commonDir = allDirs[0];
+							logger.LogInformation("All skill files in same directory: {Path}", commonDir);
+						}
+						else
+						{
+							// Find common parent directory
+							commonDir = FindCommonParentDirectory(allDirs, contentRoot);
+							logger.LogInformation("Found common parent directory for {Count} skill locations: {Path}", allDirs.Count, commonDir);
+						}
 					}
-					else
-					{
-						// fallback to the directory of the first file
-						skillsDir = dir;
-						logger.LogInformation("Using directory of first manifest file: {Path}", skillsDir);
-					}
+
+					skillsDir = commonDir ?? contentRoot;
+					logger.LogInformation("Using skills directory: {Path}", skillsDir);
 				}
 			}
 
@@ -205,3 +272,4 @@ public static class AIAgentAppExtensions
 		}
 	}
 }
+
