@@ -129,7 +129,7 @@ public class AIAgentService : IAIAgentService
 
 		if (analyzeQuestion == "Not related.")
 		{
-			return new AIAnswerDTO(new List<string> { "Your request is not related on the skillset you picked" }, "");
+			throw new InvalidOperationException("Your request is not related to the selected skill set.");
 		}
 
 
@@ -139,15 +139,18 @@ public class AIAgentService : IAIAgentService
 
 		_logger.LogInformation("Skill {SkillName} completed successfully for user {UserId}", explicitSkillName, userId);
 
+		var messageResponse = skillResult?.GetType().GetProperty("Message")?.GetValue(skillResult)?.ToString();
+		var downloadUrlResponse = skillResult?.GetType().GetProperty("DownloadUrl")?.GetValue(skillResult)?.ToString();
+
 		// Format result
 		var resultText = FormatSkillResult(skillResult);
-		await _hubContext.Clients.Group(userId).ReceiveAiResponse(resultText);
+		await _hubContext.Clients.Group(userId).ReceiveAiResponse(resultText.Answers?.FirstOrDefault()?.ToString()!);
 
 		history.Add(("User", question));
-		history.Add(("Assistant", resultText));
+		history.Add(("Assistant", messageResponse!));
 		TrimHistory(history);
 
-		return new AIAnswerDTO(new List<string> { resultText }, "");
+		return new AIAnswerDTO(new List<string> { messageResponse! }, downloadUrlResponse);
 	}
 
 	private object PrepareSkillPayload(
@@ -217,26 +220,19 @@ public class AIAgentService : IAIAgentService
 		return result.ToString().Trim();
 	}
 
-	private string FormatSkillResult(object? result)
+	private AIAnswerDTO FormatSkillResult(object? result)
 	{
 		if (result == null)
-			return "Skill executed successfully with no output.";
+			return new AIAnswerDTO(new List<string> { "Skill executed successfully with no output." }, null);
 
 		// Check if it's a ProcessExcelResult or similar structure
 		var resultType = result.GetType();
 		var messageProp = resultType.GetProperty("Message");
+		var downloadUrlProp = resultType.GetProperty("DownloadUrl");
 
-		if (messageProp != null)
-		{
-			var message = messageProp.GetValue(result) as string ?? string.Empty;
-
-			var output = new StringBuilder();
-			output.AppendLine($"✅ {message}");
-
-			return output.ToString();
-		}
-
-		return result.ToString() ?? "Skill executed successfully.";
+		return new AIAnswerDTO(
+			new List<string> { messageProp?.GetValue(result)?.ToString() ?? "Skill executed successfully." },
+			downloadUrlProp?.GetValue(result)?.ToString());
 	}
 
 	private void TrimHistory(List<(string Role, string Content)> history)

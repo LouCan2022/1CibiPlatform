@@ -20,6 +20,7 @@ public class DownloadFileEndpoint : ICarterModule
 		.WithName("DownloadFile")
 		.WithTags("AIAgent")
 		.Produces(StatusCodes.Status200OK)
-		.Produces(StatusCodes.Status404NotFound);
+		.Produces(StatusCodes.Status404NotFound)
+		.RequireAuthorization();
 	}
 }

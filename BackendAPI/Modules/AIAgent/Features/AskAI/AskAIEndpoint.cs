@@ -45,28 +45,22 @@ public record AskAIEndpoint : ICarterModule
 			else if (contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
 			{
 				// Handle application/json — only deserialize when request is JSON
-				try
-				{
-					var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-					var jsonRequest = await JsonSerializer.DeserializeAsync<AskAIRequest>(
-						httpRequest.Body,
-						jsonOptions,
-						cancellationToken);
+				var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+				var jsonRequest = await JsonSerializer.DeserializeAsync<AskAIRequest>(
+					httpRequest.Body,
+					jsonOptions,
+					cancellationToken);
 
-					if (jsonRequest is null)
-					{
-						return Results.BadRequest("Invalid JSON body");
-					}
-
-					userId = jsonRequest.UserId;
-					question = jsonRequest.Question;
-					uploaded = jsonRequest.UploadedFile;
-					explicitSkillName = jsonRequest.ExplicitSkillName;
-				}
-				catch (JsonException)
+				if (jsonRequest is null)
 				{
 					return Results.BadRequest("Invalid JSON body");
 				}
+
+				userId = jsonRequest.UserId;
+				question = jsonRequest.Question;
+				uploaded = jsonRequest.UploadedFile;
+				explicitSkillName = jsonRequest.ExplicitSkillName;
+
 			}
 			else
 			{
@@ -85,7 +79,8 @@ public record AskAIEndpoint : ICarterModule
 
 			var result = new AskAIResponse(aiAnswerResult.aiAnswerDTO);
 
-			return Results.Ok(result);
+			return Results.Ok(result.AiAnswer);
+
 		}).WithName("AskAI")
 			.WithTags("AI Agent")
 			.Produces<AskAIResponse>(StatusCodes.Status200OK)

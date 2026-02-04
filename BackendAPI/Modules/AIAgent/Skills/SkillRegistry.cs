@@ -16,15 +16,15 @@ public sealed class SkillRegistry
 	{
 		if (desc is null) throw new ArgumentNullException(nameof(desc));
 		_skills[desc.Name] = desc;
-		_logger.LogInformation("Registered skill: {SkillName} with implementation: {ImplementationType}", 
-			desc.Name, 
+		_logger.LogInformation("Registered skill: {SkillName} with implementation: {ImplementationType}",
+			desc.Name,
 			desc.ImplementationType?.FullName ?? "None");
 	}
 
 	public bool TryGet(string name, out SkillDescriptor? desc) => _skills.TryGetValue(name, out desc);
 
 	public IEnumerable<SkillDescriptor> GetAll() => _skills.Values;
-	
+
 	/// <summary>
 	/// Diagnostic method to log all currently registered skills
 	/// </summary>
@@ -39,7 +39,7 @@ public sealed class SkillRegistry
 		{
 			foreach (var kvp in _skills)
 			{
-				_logger.LogInformation("  • [{Key}] ? {Name} | Type: {Type} | Manifest: {Manifest}", 
+				_logger.LogInformation("  • [{Key}] ? {Name} | Type: {Type} | Manifest: {Manifest}",
 					kvp.Key,
 					kvp.Value.Name,
 					kvp.Value.ImplementationType?.FullName ?? "? No Implementation",
@@ -64,7 +64,7 @@ public sealed class SkillRegistry
 		{
 			_logger.LogInformation("  - {YamlFile}", yf);
 		}
-		
+
 		var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
 		foreach (var yf in yamlFiles)

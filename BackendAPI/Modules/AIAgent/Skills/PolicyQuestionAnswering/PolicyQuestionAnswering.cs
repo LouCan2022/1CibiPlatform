@@ -82,7 +82,8 @@ public sealed class PolicyQuestionAnswering : ISkill
 
 		return new
 		{
-			Message = $"Successfully answered {answeredCount} out of {questions.Count} questions from {fileName}. Download your answered file here: {downloadUrl}"
+			Message = $"Successfully answered {answeredCount} out of {questions.Count} questions from {fileName}. Download your answered file here",
+			DownloadUrl = downloadUrl
 		};
 	}
 

@@ -1,31 +1,512 @@
-.chat-window { max-height: 60vh; overflow:auto; padding: 12px; border-radius:8px; background: var(--mud-palette-surface); }
-.messages { display:flex; flex-direction:column; gap:12px; }
-.message-row { display:flex; align-items:flex-start; }
-.message-row.user { justify-content:flex-end; }
-.message-row.user .message-bubble { background: var(--mud-palette-primary); color: white; margin-left: 12px; }
-.message-row.assistant .message-bubble { background: var(--mud-palette-surface); color: var(--mud-palette-text-primary); margin-right: 12px; }
-.message-bubble { padding:10px 12px; border-radius:10px; max-width:70%; }
-.message-text { white-space:pre-wrap; }
-.message-time { font-size:0.7rem; opacity:0.7; margin-top:6px; text-align:right; }
-.empty-state { text-align:center; padding:20px; color:var(--mud-palette-text-secondary); }
-.chat-input { display:flex; align-items:center; margin-top:12px; }
-.typing-dots { display:inline-flex; gap:6px; align-items:center; }
-.typing-dots span { width:8px; height:8px; background:var(--mud-palette-text-primary); border-radius:50%; display:inline-block; animation: blink 1s infinite; opacity:0.85; }
-.typing-dots span:nth-child(2) { animation-delay: .2s }
-.typing-dots span:nth-child(3) { animation-delay: .4s }
-@keyframes blink { 0% { transform: translateY(0); opacity: 0.4 } 50% { transform: translateY(-4px); opacity: 1 } 100% { transform: translateY(0); opacity:0.4 } }
-/* formatted HTML inside assistant bubble */
-.message-html p { margin: 0 0 8px 0; }
-.message-html pre { background: var(--mud-palette-background); padding:12px; border-radius:6px; overflow:auto; }
-.message-html code { background: rgba(0,0,0,0.04); padding:2px 6px; border-radius:4px; font-family: monospace; }
-.message-html table { border-collapse:collapse; width:100%; }
-.message-html table td, .message-html table th { border:1px solid rgba(0,0,0,0.08); padding:6px 8px; }
-.message-html ul, .message-html ol { padding-left:18px; margin:0 0 8px 0; }
-/* custom bullet emoji for unordered lists */
-.message-html ul li { list-style:none; position:relative; padding-left:20px; }
-.message-html ul li:before { content: "\1F538"; /* small diamond emoji as bullet */ position:absolute; left:0; top:0; }
-/* task list checkboxes */
-.message-html input[type="checkbox"] { transform: scale(1.1); margin-right:8px; }
-/* code block language label (if GenericAttributes used to add language attribute) */
-.message-html pre[data-language] { position:relative; }
-.message-html pre[data-language]::before { content: attr(data-language); position:absolute; top:-18px; right:8px; font-size:0.75rem; color:rgba(0,0,0,0.6); }
+/* ============================================
+   MAIN CHAT CONTAINER - Full height layout
+   ============================================ */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--mud-palette-surface);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chat-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ============================================
+   CHAT HEADER - Fixed top section
+   ============================================ */
+.chat-header {
+    background: var(--mud-palette-surface);
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+    z-index: 10;
+}
+
+/* Skill selector styling */
+.skill-selector {
+    min-width: 250px;
+}
+
+.skill-select {
+    background: var(--mud-palette-background);
+}
+
+.skill-select ::deep .mud-input-root {
+    font-size: 0.875rem;
+}
+
+/* ============================================
+   CHAT WINDOW - Scrollable messages area
+   ============================================ */
+.chat-window {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 24px;
+    background: var(--mud-palette-background);
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for chat window */
+.chat-window::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-window::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-window::-webkit-scrollbar-thumb {
+    background: var(--mud-palette-lines-default);
+    border-radius: 4px;
+}
+
+.chat-window::-webkit-scrollbar-thumb:hover {
+    background: var(--mud-palette-text-secondary);
+}
+
+/* ============================================
+   MESSAGES CONTAINER - Message list layout
+   ============================================ */
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ============================================
+   MESSAGE ROW - Individual message container
+   ============================================ */
+.message-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideIn 0.3s ease-out;
+}
+
+/* User messages aligned to right */
+.message-row.user {
+    flex-direction: row-reverse;
+}
+
+/* Assistant messages aligned to left */
+.message-row.assistant {
+    flex-direction: row;
+}
+
+/* Message slide-in animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   MESSAGE CONTENT - Bubble and metadata
+   ============================================ */
+.message-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    min-width: 100px;
+}
+
+.message-row.user .message-content {
+    align-items: flex-end;
+}
+
+.message-row.assistant .message-content {
+    align-items: flex-start;
+}
+
+/* ============================================
+   MESSAGE BUBBLES - Chat bubble styling
+   ============================================ */
+.message-bubble {
+    padding: 14px 18px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* User bubble - Primary color background */
+.user-bubble {
+    background: var(--mud-palette-primary);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+/* Assistant bubble - Surface background */
+.assistant-bubble {
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    border: 1px solid var(--mud-palette-lines-default);
+    border-bottom-left-radius: 4px;
+}
+
+/* Typing bubble with pulsing animation */
+.typing-bubble {
+    padding: 18px 24px;
+}
+
+/* ============================================
+   MESSAGE TEXT & HTML CONTENT
+   ============================================ */
+.message-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.6;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-top: 6px;
+    padding: 0 4px;
+}
+
+/* ============================================
+   AVATAR STYLING
+   ============================================ */
+.message-avatar {
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+/* ============================================
+   FORMATTED HTML CONTENT (Markdown output)
+   ============================================ */
+.message-html {
+    line-height: 1.6;
+}
+
+.message-html p {
+    margin: 0 0 10px 0;
+}
+
+.message-html p:last-child {
+    margin-bottom: 0;
+}
+
+/* Code blocks with syntax highlighting support */
+.message-html pre {
+    background: var(--mud-palette-background);
+    padding: 12px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 8px 0;
+    border: 1px solid var(--mud-palette-lines-default);
+}
+
+.message-html code {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.message-html pre code {
+    background: transparent;
+    padding: 0;
+}
+
+/* Tables */
+.message-html table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 10px 0;
+    font-size: 0.95em;
+}
+
+.message-html table td,
+.message-html table th {
+    border: 1px solid var(--mud-palette-lines-default);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.message-html table th {
+    background: var(--mud-palette-background);
+    font-weight: 600;
+}
+
+/* Lists */
+.message-html ul,
+.message-html ol {
+    padding-left: 24px;
+    margin: 8px 0;
+}
+
+.message-html ul li {
+    list-style: none;
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 4px;
+}
+
+/* Custom emoji bullet for lists */
+.message-html ul li:before {
+    content: "?";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--mud-palette-primary);
+    font-weight: bold;
+}
+
+/* Task list checkboxes */
+.message-html input[type="checkbox"] {
+    transform: scale(1.1);
+    margin-right: 8px;
+}
+
+/* Blockquotes */
+.message-html blockquote {
+    border-left: 4px solid var(--mud-palette-primary);
+    padding-left: 16px;
+    margin: 10px 0;
+    color: var(--mud-palette-text-secondary);
+    font-style: italic;
+}
+
+/* Links */
+.message-html a {
+    color: var(--mud-palette-primary);
+    text-decoration: none;
+}
+
+.message-html a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   TYPING INDICATOR - Animated dots
+   ============================================ */
+.typing-dots {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--mud-palette-text-secondary);
+    border-radius: 50%;
+    display: inline-block;
+    animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   EMPTY STATE - Initial prompt
+   ============================================ */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--mud-palette-text-secondary);
+    height: 100%;
+}
+
+/* ============================================
+   CHAT INPUT AREA - Bottom section
+   ============================================ */
+.chat-input-container {
+    background: var(--mud-palette-surface);
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.chat-input-wrapper {
+    position: relative;
+}
+
+/* ============================================
+   INPUT FIELD CONTAINER - Flexible layout
+   ============================================ */
+.input-area {
+    position: relative;
+}
+
+.input-field-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--mud-palette-background);
+    border: 2px solid var(--mud-palette-lines-default);
+    border-radius: 24px;
+    padding: 8px 12px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-field-container:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 3px rgba(var(--mud-palette-primary-rgb), 0.1);
+}
+
+/* File attach button */
+.attach-button {
+    flex-shrink: 0;
+}
+
+/* Message input field - grows to fill space */
+.message-input {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Remove MudTextField outline since we have custom border */
+.message-input ::deep .mud-input-outlined {
+    border: none !important;
+}
+
+.message-input ::deep .mud-input-root {
+    padding: 0 !important;
+}
+
+/* Send button */
+.send-button {
+    flex-shrink: 0;
+}
+
+/* ============================================
+   FILE PREVIEW - Selected file display
+   ============================================ */
+.file-preview {
+    max-width: 500px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.file-attachment-preview {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ============================================
+   DOWNLOAD SECTION - AI response file
+   ============================================ */
+.download-section {
+    padding-top: 12px;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+/* ============================================
+   DRAG & DROP OVERLAY - Visual feedback
+   ============================================ */
+.drop-zone-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(var(--mud-palette-primary-rgb), 0.1);
+    backdrop-filter: blur(4px);
+    border: 3px dashed var(--mud-palette-primary);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 100;
+    animation: pulse 1.5s ease-in-out infinite;
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - Mobile optimization
+   ============================================ */
+@media (max-width: 960px) {
+    .chat-container {
+        height: calc(100vh - 80px);
+        border-radius: 0;
+    }
+
+    .message-content {
+        max-width: 85%;
+    }
+
+    .chat-window {
+        padding: 16px;
+    }
+
+    .messages {
+        gap: 16px;
+    }
+
+    .file-preview {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .message-content {
+        max-width: 90%;
+    }
+
+    .message-bubble {
+        padding: 12px 16px;
+    }
+
+    .chat-window {
+        padding: 12px;
+    }
+
+    .chat-input-wrapper {
+        padding: 12px !important;
+    }
+
+    .input-field-container {
+        padding: 6px 10px;
+    }
+}
