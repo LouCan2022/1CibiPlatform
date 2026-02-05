@@ -70,6 +70,10 @@ public class Candidate
 
 	[JsonPropertyName("documents")]
 	public List<Documents> Documents { get; set; } = [];
+
+	public BIForm BIForm { get; set; } = new BIForm();
+	public string InitialReportDate { get; set; } = string.Empty;
+	public string FinalReportDate { get; set; } = string.Empty;
 }
 
 public class Documents
@@ -109,7 +113,7 @@ public class DocumentFile
 	public string? Url { get; set; }
 
 	[JsonPropertyName("ocr_verified")]
-	public bool? Ocr_Verified { get; set; }
+	public string? Ocr_Verified { get; set; }
 
 	[JsonPropertyName("created_at")]
 	public string? Created_At { get; set; }

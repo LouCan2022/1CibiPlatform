@@ -16,46 +16,43 @@ public class GetCandidateService
         this._configuration = configuration;
     }
 
-
-    public async Task<PaginatedCNX> GetCampaignInvitationsAsync(
-        string searchData,
+	public async Task<PaginatedCNX> GetCampaignInvitationsAsync(
+		string searchData,
 		string page,
-        CancellationToken ct = default)
-    {
+		CancellationToken ct = default)
+	{
 		PaginatedCNX candidatesDTO = new();
-        var apiKey = _configuration.GetValue<string>("CNXTalkpushsKey:Key");
-        var filterCheck = _configuration.GetValue<string>("CNXTalkpushsKey:FilterCheck");
+		var apiKey = _configuration.GetValue<string>("CNXTalkpushsKey:Key");
+		var filterCheck = _configuration.GetValue<string>("CNXTalkpushsKey:FilterCheck");
 		BIForm? BIForm = null;
 		string? InitialReportDate = null;
 		string? FinalReportDate = null;
 
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            throw new InvalidOperationException("API key is not configured.");
-        }
+		if (string.IsNullOrEmpty(apiKey))
+		{
+			throw new InvalidOperationException("API key is not configured.");
+		}
 
-        var requestURI = BuildRequestUri(searchData, apiKey, filterCheck, page);
+		var requestURI = BuildRequestUri(searchData, apiKey, filterCheck, page);
 
-        _logger.LogInformation("=== REQUEST ===");
+		_logger.LogInformation("=== REQUEST ===");
 
-        var response = await SendRequestAsync(requestURI, ct);
+		var response = await SendRequestAsync(requestURI, ct);
 
-        _logger.LogInformation("=== RESPONSE ===");
-        _logger.LogInformation("Status: {Status}", response.StatusCode);
+		_logger.LogInformation("=== RESPONSE ===");
+		_logger.LogInformation("Status: {Status}", response.StatusCode);
 
-        // READ THE ERROR RESPONSE BEFORE THROWING
-        var responseBody = await response.Content.ReadAsStringAsync(ct);
-        _logger.LogInformation("Body: {Body}", responseBody);
+		var responseBody = await response.Content.ReadAsStringAsync(ct);
+		_logger.LogInformation("Body: {Body}", responseBody);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("API returned error. Status: {Status}, Body: {Body}",
-                response.StatusCode, responseBody);
-            throw new HttpRequestException($"API Error: {response.StatusCode} - {responseBody}");
-        }
+		if (!response.IsSuccessStatusCode)
+		{
+			_logger.LogError("API returned error. Status: {Status}, Body: {Body}",
+				response.StatusCode, responseBody);
+			throw new HttpRequestException($"API Error: {response.StatusCode} - {responseBody}");
+		}
 
-		var result = await response.Content.ReadFromJsonAsync<CampaignInvitationResponseDTO>(
-            cancellationToken: ct);
+		var result = await response.Content.ReadFromJsonAsync<CampaignInvitationResponseDTO>(cancellationToken: ct);
 
 		if (result?.Candidates != null)
 		{
@@ -67,61 +64,63 @@ public class GetCandidateService
 					.Where(d => !string.IsNullOrWhiteSpace(d.Tag) && allowedTags.Contains(d.Tag))
 					.ToList();
 
+				string? candidateBIFormFileName = "";
+				string? candidateBIFormFileUrl = "";
+				string candidateInitialReportDate = "";
+				string candidateFinalReportDate = "";
+
 				var biFormDoc = candidate.Documents?.FirstOrDefault(d => d.Tag == "BI Form");
 				if (biFormDoc != null)
 				{
-					foreach (var file in biFormDoc!.Files!)
+					var biFormFile = biFormDoc.Files?.FirstOrDefault();
+					if (biFormFile != null)
 					{
-						BIForm = new BIForm { FileName = file!.Name, FileURL = file.Url };
+						candidateBIFormFileName = biFormFile.Name;
+						candidateBIFormFileUrl = biFormFile.Url;
 					}
 				}
 
-				// Handle Initial BI Report
 				var initialBIReport = candidate.Documents?.FirstOrDefault(d => d.Tag == "Initial BI Report");
-
 				if (initialBIReport?.Files != null && initialBIReport.Files.Any())
 				{
-					foreach (var file in initialBIReport.Files)
+					var initialFile = initialBIReport.Files.FirstOrDefault(f => !string.IsNullOrWhiteSpace(f.Created_At));
+					if (initialFile != null)
 					{
-						if (!string.IsNullOrWhiteSpace(file?.Created_At))
-						{
-							// Convert the Created_At field to DateTime
-							InitialReportDate = StringToDateTime(file.Created_At);
-							break; // Exit after the first valid file
-						}
+						candidateInitialReportDate = LocalTimeConverter(initialFile.Created_At!); 
 					}
 				}
 
-				// Handle Final BI Report
 				var finalBIReport = candidate.Documents?.FirstOrDefault(d => d.Tag == "Final BI Report");
-
 				if (finalBIReport?.Files != null && finalBIReport.Files.Any())
 				{
-					foreach (var file in finalBIReport.Files)
+					var finalFile = finalBIReport.Files.FirstOrDefault(f => !string.IsNullOrWhiteSpace(f.Created_At));
+					if (finalFile != null)
 					{
-						if (!string.IsNullOrWhiteSpace(file?.Created_At))
-						{
-							// Convert the Created_At field to DateTime
-							FinalReportDate = StringToDateTime(file.Created_At);
-							break; // Exit after the first valid file
-						}
+						candidateFinalReportDate = LocalTimeConverter(finalFile.Created_At!);
 					}
 				}
+
+				candidate.BIForm = new BIForm
+				{
+					FileName = candidateBIFormFileName,
+					FileURL = candidateBIFormFileUrl
+				};
+
+				candidate.InitialReportDate = candidateInitialReportDate;
+				candidate.FinalReportDate = candidateFinalReportDate;
 			}
+
+			var mapDTO = MapToDtos(result); 
+			candidatesDTO.Total = result.Total;
+			candidatesDTO.Current_Page = result.Pages;
+			candidatesDTO.Total = result.Total;
+			candidatesDTO.Candidate = mapDTO;
 		}
-
-		var mapDTO = MapToDtos(result!, BIForm!, InitialReportDate, FinalReportDate);
-
-		candidatesDTO.Total = result.Total;
-		candidatesDTO.Current_Page = result.Pages;
-		candidatesDTO.Total = result.Total;
-		candidatesDTO.Candidate = mapDTO;
-
-        return candidatesDTO!;
-    }
+		return candidatesDTO!;
+	}
 
 
-	private string StringToDateTime(string date)
+	private string LocalTimeConverter(string date)
 	{
 		DateTimeOffset dto = DateTimeOffset.Parse(date);
 
@@ -156,7 +155,7 @@ public class GetCandidateService
         return QueryHelpers.AddQueryString("campaign_invitations", queryParams!);
     }
 
-    private static List<CandidateResponseDto> MapToDtos(CampaignInvitationResponseDTO candidates, BIForm biForm, string? InitialBIReportDate, string? FinalBIReportDate)
+    private static List<CandidateResponseDto> MapToDtos(CampaignInvitationResponseDTO candidates)
     {
         return candidates.Candidates.Select(c => new CandidateResponseDto(
             c.CandidateId,
@@ -187,9 +186,9 @@ public class GetCandidateService
             c.Others?.ExtractedPhilhealthNumber,
             c.Others?.PagIbigNumber,
             c.Others?.ExtractedPagIbigNumber,
-			biForm,
-			InitialBIReportDate,
-			FinalBIReportDate
+			c.BIForm,
+			c.InitialReportDate,
+			c.FinalReportDate
 			)).ToList();
     }
 }
