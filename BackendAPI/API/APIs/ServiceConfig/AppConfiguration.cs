@@ -1,4 +1,6 @@
-﻿namespace APIs.ServiceConfig;
+﻿using AIAgent.Hubs;
+
+namespace APIs.ServiceConfig;
 
 public static class AppConfiguration
 {
@@ -64,7 +66,7 @@ public static class AppConfiguration
 			return app;
 		}
 
-		app.MapHub<AIAgent.Hubs.AIAgentHub>(configuration["SignalRHub:Endpoint"]!);
+		app.MapHub<AIAgentHub>(configuration["SignalRHub:Endpoint"]!);
 		app.UseWebSockets();
 		return app;
 	}

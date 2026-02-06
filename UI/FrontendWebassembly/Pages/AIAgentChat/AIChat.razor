@@ -3,24 +3,84 @@
 @using FrontendWebassembly.Services.AIAgentChat
 @using Markdig
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
 @inject IAIAgentChatService AIChatService
 @inject FrontendWebassembly.SharedService.LocalStorageService LocalStorage
+@inject IJSRuntime JS
+@inject IConfiguration Configuration
 @inherits SecurePageBase
 @* aichat/aichat*@
 @attribute [RequirePermission(4, 4)]
 
 
-<MudPaper Class="pa-4 p-10">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudText Typo="Typo.h5" Class="mb-2">AI Chat</MudText>
+<MudPaper Class="chat-container" Elevation="0" 
+     @ondrop:preventDefault 
+     @ondragover:preventDefault>
+<MudGrid Spacing="0" Class="chat-grid">
+        <!-- Chat Header -->
+        <MudItem xs="12" Class="chat-header">
+            <div class="d-flex align-items-center justify-space-between pa-4">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="d-flex align-items-center">
+                        <MudIcon Icon="@Icons.Material.Filled.SmartToy" Size="Size.Large" Class="mr-3" Color="Color.Primary" />
+                        <div>
+                            <MudText Typo="Typo.h6" Class="mb-0">AI Assistant</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Always ready to help</MudText>
+                        </div>
+                    </div>
+                    
+                    <!-- Skill Selector Dropdown -->
+                    <div class="skill-selector">
+                        <MudSelect T="string" 
+                                   @bind-Value="SelectedSkill" 
+                                   Label="Select Skill" 
+                                   Variant="Variant.Outlined" 
+                                   Dense="true"
+                                   Disabled="@isSending"
+                                   Class="skill-select">
+                            <MudSelectItem T="string" Value="@("PolicyIngestion")">
+                                <div class="d-flex align-items-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Small" Class="mr-2" />
+                                    Policy Ingestion
+                                </div>
+                            </MudSelectItem>
+                            <MudSelectItem T="string" Value="@("PolicyQuestionAnswering")">
+                                <div class="d-flex align-items-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.QuestionAnswer" Size="Size.Small" Class="mr-2" />
+                                    Policy Q&A
+                                </div>
+                            </MudSelectItem>
+                            <MudSelectItem T="string" Value="@("ReadExcel")">
+                                <div class="d-flex align-items-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.TableChart" Size="Size.Small" Class="mr-2" />
+                                    Read Excel
+                                </div>
+                            </MudSelectItem>
+                        </MudSelect>
+                    </div>
+                </div>
+                
+                @if (isSending)
+                {
+                    <!-- Show processing indicator when AI is thinking -->
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Icon="@Icons.Material.Filled.Psychology">Processing...</MudChip>
+                }
+            </div>
+            <MudDivider />
         </MudItem>
 
+        <!-- Chat Messages Area -->
         <MudItem xs="12">
-            <div class="chat-window">
+            <div class="chat-window" @ref="_chatWindowRef">
                 @if (Messages.Count == 0)
                 {
-                    <div class="empty-state">Start the conversation by asking a question.</div>
+                    <!-- Empty state with helpful prompt -->
+                    <div class="empty-state">
+                        <MudIcon Icon="@Icons.Material.Filled.Chat" Size="Size.Large" Color="Color.Primary" Class="mb-4" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Start a conversation</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Ask me anything or upload a file to analyze</MudText>
+                    </div>
                 }
 
                 <div class="messages">
@@ -29,78 +89,211 @@
                         var isUser = msg.Sender == "User";
                         if (!isUser)
                         {
-                            <MudChat ChatPosition="ChatBubblePosition.Start">
-                                <MudAvatar Size="Size.Medium" Class="ml-2" Color="Color.Primary" Variant="Variant.Filled" >
-                                       <MudIcon Icon="@Icons.Material.Filled.Android" />
+                            <!-- AI Assistant Message -->
+                            <div class="message-row assistant">
+                                <MudAvatar Size="Size.Medium" Class="message-avatar" Color="Color.Primary" Variant="Variant.Filled">
+                                    <MudIcon Icon="@Icons.Material.Filled.SmartToy" />
                                 </MudAvatar>
-                                <MudChatBubble>
-                                    <div class="d-flex align-items-start">
+                                <div class="message-content">
+                                    <div class="message-bubble assistant-bubble">
                                         <div class="message-html">@((MarkupString)msg.Html)</div>
+                                        @if (!string.IsNullOrEmpty(msg.DownloadUrl))
+                                        {
+                                            <!-- Show download button if AI returned a file -->
+                                            <div class="download-section mt-3">
+                                                <MudButton Variant="Variant.Outlined" 
+                                                          StartIcon="@Icons.Material.Filled.Download" 
+                                                          Color="Color.Primary" 
+                                                          Size="Size.Small"
+                                                          Href="@GetFullDownloadUrl(msg.DownloadUrl)" 
+                                                          Target="_blank">
+                                                    Download File
+                                                </MudButton>
+                                            </div>
+                                        }
                                     </div>
-                                </MudChatBubble>
-                            </MudChat>
+                                    <MudText Typo="Typo.caption" Class="message-time">@msg.Time.ToString("hh:mm tt")</MudText>
+                                </div>
+                            </div>
                         }
                         else
                         {
-                            <MudChat ChatPosition="ChatBubblePosition.End">
-                                <MudAvatar Size="Size.Medium" Class="mr-2" Color="Color.Primary" Variant="Variant.Filled">
+                            <!-- User Message -->
+                            <div class="message-row user">
+                                <div class="message-content">
+                                    @if (!string.IsNullOrEmpty(msg.FileName))
+                                    {
+                                        <!-- Show file attachment indicator -->
+                                        <div class="file-attachment-preview mb-2">
+                                            <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.AttachFile" Color="Color.Primary">@msg.FileName</MudChip>
+                                        </div>
+                                    }
+                                    <div class="message-bubble user-bubble">
+                                        <div class="message-text">@msg.Text</div>
+                                    </div>
+                                    <MudText Typo="Typo.caption" Class="message-time">@msg.Time.ToString("hh:mm tt")</MudText>
+                                </div>
+                                <MudAvatar Size="Size.Medium" Class="message-avatar" Color="Color.Secondary" Variant="Variant.Filled">
                                     <MudIcon Icon="@Icons.Material.Filled.Person" />
                                 </MudAvatar>
-                                <MudChatBubble>
-                                    <div class="d-flex align-items-center justify-content-end">
-                                        <div class="mr-2">@msg.Text</div>
-                                    </div>
-                                </MudChatBubble>
-                            </MudChat>
+                            </div>
                         }
                     }
 
                     @if (IsTyping)
                     {
+                        <!-- AI Typing Indicator -->
                         <div class="message-row assistant typing-row">
-                            <MudAvatar Size="Size.Medium" Class="mr-2" Color="Color.Primary">A</MudAvatar>
-                            <MudPaper Elevation="1">
-                                <div class="typing-dots">
-                                    <span></span><span></span><span></span>
+                            <MudAvatar Size="Size.Medium" Class="message-avatar" Color="Color.Primary" Variant="Variant.Filled">
+                                <MudIcon Icon="@Icons.Material.Filled.SmartToy" />
+                            </MudAvatar>
+                            <div class="message-content">
+                                <div class="message-bubble assistant-bubble typing-bubble">
+                                    <div class="typing-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
                                 </div>
-                            </MudPaper>
+                            </div>
                         </div>
                     }
                 </div>
             </div>
         </MudItem>
 
-        <MudItem xs="12">
-            <MudTextField @bind-Value="CurrentMessage" 
-                          Placeholder="Type your message..." 
-                          Variant="Variant.Outlined"
-                          Class="flex-grow-1" 
-                          Lines="3"
-                          Immediate="true" 
-                          OnKeyDown="SendMessage"
-                          Adornment="@(isSending ? Adornment.End : Adornment.None)"
-                          AdornmentIcon="@Icons.Material.Filled.Cancel"
-                          AdornmentColor="Color.Error"
-                          OnAdornmentClick="CancelRequest"
-                          Disabled="@isSending" />
+        <!-- Chat Input Area -->
+        <MudItem xs="12" Class="chat-input-container">
+            <MudDivider />
+            <div class="chat-input-wrapper pa-4">
+                <!-- Drag and Drop Zone (shown when dragging) -->
+                @if (IsDragging)
+                {
+                    <div class="drop-zone-overlay" @onclick="TriggerFileInput">
+                        <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" />
+                        <MudText Typo="Typo.h6">Click to select file</MudText>
+                        <MudText Typo="Typo.caption">Or use the attach button below</MudText>
+                    </div>
+                }
+
+                <!-- File Preview (shown when file is selected) -->
+                @if (SelectedFile != null)
+                {
+                    <div class="file-preview mb-3">
+                        <MudPaper Elevation="2" Class="pa-3 d-flex align-items-center justify-space-between">
+                            <div class="d-flex align-items-center">
+                                <MudIcon Icon="@GetFileIcon(SelectedFile.Name)" Size="Size.Medium" Class="mr-3" Color="Color.Primary" />
+                                <div>
+                                    <MudText Typo="Typo.body2"><strong>@SelectedFile.Name</strong></MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@FormatFileSize(SelectedFile.Size)</MudText>
+                                </div>
+                            </div>
+                            <!-- Remove file button -->
+                            <MudIconButton Icon="@Icons.Material.Filled.Close" 
+                                          Size="Size.Small" 
+                                          OnClick="RemoveFile" 
+                                          Color="Color.Error" />
+                        </MudPaper>
+                    </div>
+                }
+
+                <!-- Input Area with File Upload -->
+                <div class="input-area"
+                     @ondragenter="HandleDragEnter"
+                     @ondragenter:preventDefault
+                     @ondragleave="HandleDragLeave"
+                     @ondragover="HandleDragOver"
+                     @ondragover:preventDefault
+                     @ondrop="HandleDrop"
+                     @ondrop:preventDefault>
+                    
+                    <div class="input-field-container">
+                        <!-- File upload button -->
+                        <InputFile id="fileInput" OnChange="HandleFileSelected" hidden accept="*/*" />
+                        <MudIconButton Icon="@Icons.Material.Filled.AttachFile" 
+                                      Color="Color.Primary" 
+                                      Size="Size.Medium"
+                                      Disabled="@isSending"
+                                      OnClick="TriggerFileInput" 
+                                      Class="attach-button" />
+                        
+                        <!-- Message input field -->
+                        <MudTextField @bind-Value="CurrentMessage" 
+                                      Placeholder="Type your message or drag & drop a file..." 
+                                      Variant="Variant.Outlined"
+                                      Class="message-input" 
+                                      Lines="1"
+                                      Immediate="true" 
+                                      OnKeyDown="SendMessage"
+                                      Disabled="@isSending"
+                                      DisableUnderLine="true" />
+                        
+                        <!-- Send/Cancel button -->
+                        @if (isSending)
+                        {
+                            <!-- Cancel button when sending -->
+                            <MudIconButton Icon="@Icons.Material.Filled.Cancel" 
+                                          Color="Color.Error" 
+                                          Size="Size.Medium"
+                                          OnClick="CancelRequest" 
+                                          Class="send-button" />
+                        }
+                        else
+                        {
+                            <!-- Send button -->
+                            <MudIconButton Icon="@Icons.Material.Filled.Send" 
+                                          Color="Color.Primary" 
+                                          Size="Size.Medium"
+                                          Disabled="@(string.IsNullOrWhiteSpace(CurrentMessage) && SelectedFile == null)"
+                                          OnClick="SendMessageClick" 
+                                          Class="send-button" />
+                        }
+                    </div>
+                </div>
+
+                <!-- Helper text -->
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                    Press Enter to send, Shift+Enter for new line. Max file size: 512MB
+                </MudText>
+            </div>
         </MudItem>
     </MudGrid>
 </MudPaper>
 
 @code {
+
+
+
+
+
+
+
+    // ChatMessage model with file and download URL support
     class ChatMessage { 
         public string Sender { get; init; } = string.Empty; 
         public string Text { get; init; } =  string.Empty; 
         public string Html { get; init; } = string.Empty; 
-        public DateTime Time { get; init; } = DateTime.UtcNow; 
+        public DateTime Time { get; init; } = DateTime.UtcNow;
+        public string? FileName { get; init; } = null; // File name if message has attachment
+        public string? DownloadUrl { get; init; } = null; // Download URL if AI returned a file
     }
 
+    // UI State Properties
     private List<ChatMessage> Messages { get; set; } = new();
     private string CurrentMessage { get; set; } = string.Empty;
     private bool IsTyping { get; set; }
     private bool isSending;
     private CancellationTokenSource? _cts;
     private bool _currentRequestActive = false; // indicates UI is awaiting an AI response for the latest request
+
+    // File Upload Properties
+    private IBrowserFile? SelectedFile { get; set; } = null; // Currently selected file
+    private bool IsDragging { get; set; } = false; // Drag & drop state
+    private ElementReference _chatWindowRef; // Reference to chat window for auto-scroll
+
+    // Skill Selection Property
+    private string SelectedSkill { get; set; } = string.Empty; // Selected AI skill (empty = auto-select)
+
+    // Cache API base URL for WASM performance
+    private string? _apiBaseUrl;
 
     // Reuse a Markdown pipeline with advanced extensions and emoji support
     private static readonly MarkdownPipeline _mdPipeline =
@@ -112,8 +305,32 @@
             .UseGenericAttributes()
             .Build();
 
+    // Helper method to build full download URL from relative path
+    private string GetFullDownloadUrl(string? relativeUrl)
+    {
+        if (string.IsNullOrEmpty(relativeUrl))
+            return string.Empty;
+
+        // If the URL is already absolute, return as-is
+        if (relativeUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            relativeUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return relativeUrl;
+        }
+
+        // Get cached API base URL (initialized in OnInitializedAsync)
+        var apiBaseUrl = _apiBaseUrl ?? string.Empty;
+
+        // Combine API base with relative path (remove leading slash from relative path if present)
+        var cleanPath = relativeUrl.TrimStart('/');
+        return $"{apiBaseUrl}/{cleanPath}";
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        // Cache API base URL from configuration (WASM optimization)
+        _apiBaseUrl = Configuration["ApiBase"]?.TrimEnd('/');
+
         // subscribe to realtime events
         AIChatService.TypingStatusChanged += OnTypingStatusChanged;
         AIChatService.AiResponseReceived += OnAiResponseReceived;
@@ -121,12 +338,14 @@
         await base.OnInitializedAsync();
     }
 
+    // Handle typing indicator changes from SignalR
     private void OnTypingStatusChanged(bool isTyping)
     {
         IsTyping = isTyping;
         InvokeAsync(StateHasChanged);
     }
 
+    // Handle AI response received from SignalR with download URL support
     private void OnAiResponseReceived(string message)
     {
         // Only handle hub responses when there is an active request (not cancelled)
@@ -135,33 +354,67 @@
 
         // convert markdown to html for assistant message using pipeline (supports emoji, tables, code fences, etc.)
         var html = Markdown.ToHtml(message ?? string.Empty, _mdPipeline);
+
+        // Get the last request to check if it had a download URL
+        string? downloadUrl = null;
+        // Note: Download URL will be set later when AskAIAsync returns
+
         Messages.Add(
             new ChatMessage { 
-                Sender = "Assistant", 
-                Text = message ?? string.Empty, 
-                Html = html, 
-                Time = DateTime.Now });
+            Sender = "Assistant", 
+            Text = message ?? string.Empty, 
+            Html = html,
+            DownloadUrl = downloadUrl,
+            Time = DateTime.Now });
         // mark request completed so stray later hub messages are ignored
         _currentRequestActive = false;
         IsTyping = false;
         InvokeAsync(StateHasChanged);
     }
 
+    // Send message on Enter key (Shift+Enter for new line)
     private async Task SendMessage(KeyboardEventArgs e)
     {
         // Send on Enter, allow Shift+Enter for new line
         if (e.Key != "Enter" || e.ShiftKey)
             return;
 
+        await SendMessageInternal();
+    }
+
+    // Send message on button click
+    private async Task SendMessageClick()
+    {
+        await SendMessageInternal();
+    }
+
+    // Internal method to send message with optional file
+    private async Task SendMessageInternal()
+    {
         if (isSending)
             return;
 
-        if (string.IsNullOrWhiteSpace(CurrentMessage))
+        // Require either message text or file
+        if (string.IsNullOrWhiteSpace(CurrentMessage) && SelectedFile == null)
             return;
 
-        var text = CurrentMessage.Trim();
-        Messages.Add(new ChatMessage { Sender = "User", Text = text, Html = System.Net.WebUtility.HtmlEncode(text), Time = DateTime.Now });
+        var text = string.IsNullOrWhiteSpace(CurrentMessage) ? "(File attached)" : CurrentMessage.Trim();
+        var fileName = SelectedFile?.Name;
+        var fileToSend = SelectedFile;
+
+        // Add user message to chat
+        Messages.Add(new ChatMessage { 
+        Sender = "User", 
+        Text = text, 
+        Html = System.Net.WebUtility.HtmlEncode(text), 
+        FileName = fileName,
+        Time = DateTime.Now 
+    });
+
+        // Clear input fields
         CurrentMessage = string.Empty;
+        SelectedFile = null;
+
         isSending = true;
         IsTyping = true;
 
@@ -174,29 +427,62 @@
 
         try
         {
-            // Pass the cancellation token to the service which already accepts it
-            var result = await AIChatService.AskAIAsync(text, _cts.Token);
+            // Pass the cancellation token, file, and selected skill to the service
+            var skillToUse = string.IsNullOrWhiteSpace(SelectedSkill) ? null : SelectedSkill;
+            var result = await AIChatService.AskAIAsync(text, fileToSend, skillToUse, _cts.Token);
 
-            // If the service returned a result synchronously (fallback), append it (only if not cancelled)
-            if (!_cts.IsCancellationRequested && result is not null && result.Answers is not null && result.Answers.Any())
+
+            if (!string.IsNullOrEmpty(result.ErrorMessage))
             {
+                var errorHtml = Markdown.ToHtml("**Error:** " + result.ErrorMessage, _mdPipeline);
+                Messages.Add(new ChatMessage { 
+                    Sender = "Assistant",
+                    Text = "Error: " + result.ErrorMessage, 
+                    Html = errorHtml, 
+                    Time = DateTime.Now });
                 _currentRequestActive = false;
+                return;
             }
-        }
-        catch (OperationCanceledException)
-        {
-            var canceledHtml = Markdown.ToHtml("**Request canceled.**", _mdPipeline);
-            Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Request canceled.", Html = canceledHtml, Time = DateTime.Now });
-            _currentRequestActive = false;
-        }
-        catch (Exception ex)
-        {
-            var errorHtml = Markdown.ToHtml("**Error:** " + ex.Message, _mdPipeline);
-            Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Error: " + ex.Message, Html = errorHtml, Time = DateTime.Now });
-            _currentRequestActive = false;
-        }
-        finally
-        {
+
+             // If the service returned a result with download URL, update the last AI message
+             // If download URL is present, we may need to update the last message
+            if (!string.IsNullOrEmpty(result.DownloadUrl))
+            {
+                // Find the last assistant message and update it with download URL
+                var lastAssistantMsg = Messages.LastOrDefault(m => m.Sender == "Assistant");
+                if (lastAssistantMsg != null)
+                {
+                    // Remove and re-add with download URL
+
+                    Messages.Remove(lastAssistantMsg);
+
+                    Messages.Add(new ChatMessage
+                        {
+                            Sender = lastAssistantMsg.Sender,
+                            Text = lastAssistantMsg.Text,
+                            Html = lastAssistantMsg.Html,
+                            DownloadUrl = result.DownloadUrl,
+                            Time = lastAssistantMsg.Time
+                        });
+                    _currentRequestActive = false;
+                    return;
+                }
+            }
+    }
+    catch (OperationCanceledException)
+    {
+        var canceledHtml = Markdown.ToHtml("**Request canceled.**", _mdPipeline);
+        Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Request canceled.", Html = canceledHtml, Time = DateTime.Now });
+        _currentRequestActive = false;
+    }
+    catch (Exception ex)
+    {
+        var errorHtml = Markdown.ToHtml("**Error:** " + ex.Message, _mdPipeline);
+        Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Error: " + ex.Message, Html = errorHtml, Time = DateTime.Now });
+        _currentRequestActive = false;
+    }
+    finally
+    {
             isSending = false;
             IsTyping = false;
             _cts?.Dispose();
@@ -205,6 +491,7 @@
         }
     }
 
+    // Cancel ongoing AI request
     private void CancelRequest()
     {
         if (_cts?.IsCancellationRequested == false)
@@ -217,6 +504,95 @@
         }
     }
 
+    // Handle file selection from input dialog
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        // Get the selected file (max 512MB as per API limit)
+        SelectedFile = e.File;
+        StateHasChanged();
+    }
+
+    // Trigger hidden file input click
+    private async Task TriggerFileInput()
+    {
+        // Use JavaScript interop to trigger file input click
+        await JS.InvokeVoidAsync("eval", "document.getElementById('fileInput').click()");
+    }
+
+    // Remove selected file
+    private void RemoveFile()
+    {
+        SelectedFile = null;
+        StateHasChanged();
+    }
+
+    // Handle drag enter event
+    private void HandleDragEnter()
+    {
+        IsDragging = true;
+        StateHasChanged();
+    }
+
+    // Handle drag over event (required to allow drop)
+    private void HandleDragOver(DragEventArgs e)
+    {
+        // Keep the drag state active
+        IsDragging = true;
+    }
+
+    // Handle drag leave event
+    private void HandleDragLeave()
+    {
+        IsDragging = false;
+        StateHasChanged();
+    }
+
+    // Handle drop event - prevent default browser behavior (opening/downloading file)
+    private void HandleDrop(DragEventArgs e)
+    {
+        // Prevent browser from opening/downloading the file
+        IsDragging = false;
+        
+        // Note: In Blazor WASM, we cannot access e.DataTransfer.Files directly
+        // So we just hide the overlay and let user click to select the file
+        StateHasChanged();
+        
+        // Auto-trigger file input when something is dropped
+        _ = TriggerFileInput();
+    }
+
+    // Get appropriate icon based on file extension
+    private string GetFileIcon(string fileName)
+    {
+        var extension = System.IO.Path.GetExtension(fileName).ToLowerInvariant();
+        return extension switch
+        {
+            ".pdf" => Icons.Material.Filled.PictureAsPdf,
+            ".doc" or ".docx" => Icons.Material.Filled.Description,
+            ".xls" or ".xlsx" => Icons.Material.Filled.TableChart,
+            ".jpg" or ".jpeg" or ".png" or ".gif" => Icons.Material.Filled.Image,
+            ".zip" or ".rar" => Icons.Material.Filled.FolderZip,
+            ".txt" => Icons.Material.Filled.TextSnippet,
+            ".csv" => Icons.Material.Filled.TableView,
+            _ => Icons.Material.Filled.InsertDriveFile
+        };
+    }
+
+    // Format file size for display
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    // Cleanup on component disposal
     public void Dispose()
     {
         AIChatService.TypingStatusChanged -= OnTypingStatusChanged;

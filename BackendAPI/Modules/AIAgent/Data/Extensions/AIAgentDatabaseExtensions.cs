@@ -10,5 +10,7 @@ public static class AIAgentDatabaseExtensions
 
 		context.Database.MigrateAsync().GetAwaiter().GetResult();
 	}
-
 }
+
+
+

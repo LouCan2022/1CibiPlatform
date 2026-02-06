@@ -1,6 +1,4 @@
-﻿using System.Security.Principal;
-
-namespace Auth.Path;
+﻿namespace Auth.Path;
 
 // This class provides route and cluster declarations for the Auth module.
 // Comments explain how to use Metadata and Methods:

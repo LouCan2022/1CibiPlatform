@@ -23,7 +23,15 @@ public class AIAgentPath : IReverseProxyModule
 				MatchPath: "hubs/aiagent/{**catch-all}",
 				ClusterId: GatewayConstants.OnePlatformApi,
 				Methods: new [] { GatewayConstants.HttpMethod.Post , GatewayConstants.HttpMethod.Get }
-			)
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "DownloadFile",
+				MatchPath: "api/files/{**catch-all}",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get }
+			),
+
 		};
 	}
 
