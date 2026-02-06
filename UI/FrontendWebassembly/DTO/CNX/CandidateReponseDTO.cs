@@ -30,6 +30,15 @@ public record CandidateResponseDTO
 	public string? ExtractedPhilhealthNumber { get; set; }
 	public string? PagIbigNumber { get; set; }
 	public string? ExtractedPagIbigNumber { get; set; }
+	public BIForm? BIForm { get; set; }
+	public string? InitialBIReportDate { get; set; }
+	public string? FinalBIReportDate { get; set; }
+}
+
+public class BIForm
+{
+	public string? FileName { get; set; }
+	public string? FileURL { get; set; }
 }
 
 public record PaginatedCNX

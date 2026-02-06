@@ -12,8 +12,8 @@ using Pgvector;
 namespace APIs.Migrations.AIAgent
 {
     [DbContext(typeof(AIAgentApplicationDBContext))]
-    [Migration("20260128032155_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20260130035605_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,7 @@ namespace APIs.Migrations.AIAgent
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("AIAgent.Data.Entities.AIPolicyEntity", b =>
@@ -47,7 +48,8 @@ namespace APIs.Migrations.AIAgent
 
                     b.Property<Vector>("Embedding")
                         .IsRequired()
-                        .HasColumnType("vector(1536)");
+                        .HasColumnType("vector(1536)")
+                        .HasColumnName("Embedding");
 
                     b.Property<string>("PolicyCode")
                         .IsRequired()
@@ -60,6 +62,11 @@ namespace APIs.Migrations.AIAgent
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Embedding");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Embedding"), "ivfflat");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Embedding"), new[] { "vector_cosine_ops" });
 
                     b.ToTable("AIPolicy", "ai");
                 });

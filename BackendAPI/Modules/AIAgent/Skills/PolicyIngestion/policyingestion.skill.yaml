@@ -1,0 +1,47 @@
+name: PolicyIngestion
+description: Ingests policy documents from Excel files, chunks the content, generates embeddings, and stores them in the database for RAG-based retrieval.
+
+input:
+  type: object
+  required:
+    - fileData
+    - fileName
+  properties:
+    fileData:
+      type: string
+      description: Base64-encoded Excel file content containing policy data
+    fileName:
+      type: string
+      description: Name of the Excel file being processed
+
+output:
+  type: object
+  properties:
+    Success:
+      type: boolean
+      description: Indicates whether the ingestion was successful
+    Message:
+      type: string
+      description: Summary message of the ingestion result
+    PoliciesProcessed:
+      type: integer
+      description: Number of policy entries extracted from the Excel file
+    TotalChunks:
+      type: integer
+      description: Total number of text chunks created and stored with embeddings
+
+examples:
+  - input:
+      fileData: "UEsDBBQABgAI..."
+      fileName: "company-policies.xlsx"
+    output:
+      Success: true
+      Message: "Successfully ingested 25 policies (150 chunks) from company-policies.xlsx"
+      PoliciesProcessed: 25
+      TotalChunks: 150
+
+notes:
+  - Excel file must have columns: Policy Name (A), Section Name (B), Content (C)
+  - Content is automatically chunked into 1000-character segments with 200-character overlap
+  - Embeddings are generated for each chunk using the configured embedding model
+  - All chunks are stored in the database with their embeddings for semantic search

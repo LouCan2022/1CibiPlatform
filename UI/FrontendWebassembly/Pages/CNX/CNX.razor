@@ -55,6 +55,9 @@
         <MudTh>Extracted PhilHealth Number</MudTh>
         <MudTh>Pag-IBIG Number</MudTh>
         <MudTh>Extracted Pag-IBIG Number</MudTh>
+        <MudTh>BI Form</MudTh>
+        <MudTh>Initial BI Report Date</MudTh>
+        <MudTh>Final BI Report Date</MudTh>
     </HeaderTemplate>
 
     <RowTemplate Context="candidate">
@@ -86,6 +89,22 @@
         <MudTd DataLabel="Extracted PhilHealth Number">@candidate.ExtractedPhilhealthNumber</MudTd>
         <MudTd DataLabel="Pag-IBIG Number">@candidate.PagIbigNumber</MudTd>
         <MudTd DataLabel="Extracted Pag-IBIG Number">@candidate.ExtractedPagIbigNumber</MudTd>
+        <MudTd DataLabel="BI Form">
+
+            <a href="@candidate.BIForm!.FileURL" target="_blank"
+                   style="color: #1E88E5; text-decoration: underline; font-weight: bold;">
+                    @candidate.BIForm.FileName
+                </a>
+        </MudTd>
+
+        <MudTd DataLabel="Initial BI Report Date">
+            @candidate.InitialBIReportDate
+        </MudTd>
+
+        <MudTd DataLabel="Final BI Report Date">
+            @candidate.FinalBIReportDate
+        </MudTd>
+
     </RowTemplate>
 </TableComponent>
 

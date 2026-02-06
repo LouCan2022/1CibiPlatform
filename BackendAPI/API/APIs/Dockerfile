@@ -1,4 +1,4 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+﻿# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
@@ -17,6 +17,7 @@ COPY ["BackendAPI/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "Backend
 COPY ["BackendAPI/Modules/CNX/CNX.csproj", "BackendAPI/Modules/CNX/"]
 COPY ["BackendAPI/Modules/PhilSys/PhilSys.csproj", "BackendAPI/Modules/PhilSys/"]
 COPY ["BackendAPI/Modules/SSO/SSO.csproj", "BackendAPI/Modules/SSO/"]
+COPY ["BackendAPI/Modules/AIAgent/AIAgent.csproj", "BackendAPI/Modules/AIAgent/"]
 RUN dotnet restore "./BackendAPI/API/APIs/APIs.csproj"
 COPY . .
 WORKDIR "/src/BackendAPI/API/APIs"
@@ -31,4 +32,9 @@ RUN dotnet publish "./APIs.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:Us
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# ⭐ IMPORTANT: Copy Skills directory with .skill.yaml files
+# dotnet publish doesn't include non-compiled files like .yaml by default
+COPY --from=build /src/BackendAPI/Modules/AIAgent/Skills ./Modules/AIAgent/Skills
+
 ENTRYPOINT ["dotnet", "APIs.dll"]

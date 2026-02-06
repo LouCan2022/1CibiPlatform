@@ -1,6 +1,5 @@
 ﻿namespace CNX.DTO;
 
-
 public record CandidateResponseDto(
     int CandidateId,
     string? JobRequisitionId = null,
@@ -29,5 +28,14 @@ public record CandidateResponseDto(
     string? PhilhealthNumber = null,
     string? ExtractedPhilhealthNumber = null,
     string? PagIbigNumber = null,
-    string? ExtractedPagIbigNumber = null
+    string? ExtractedPagIbigNumber = null,
+	BIForm? BIForm = null,
+	string? InitialBIReportDate = null,
+	string? FinalBIReportDate = null
 );
+
+public class BIForm
+{
+	public string? FileName { get; set; }
+	public string? FileURL { get; set; }
+}

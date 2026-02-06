@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ClosedXML" Version="0.103.0" />
+		<PackageReference Include="ClosedXML" Version="0.104.0" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.68.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.68.0" />
 		<PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
@@ -24,7 +24,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="Skills\**\*.skill.yaml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Services\ReadExcel\" />
 	</ItemGroup>
 
 </Project>

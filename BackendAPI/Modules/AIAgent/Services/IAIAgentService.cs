@@ -1,6 +1,4 @@
-﻿using AIAgent.Features.AskAI;
-
-namespace AIAgent.Services;
+﻿namespace AIAgent.Services;
 
 public interface IAIAgentService
 {
@@ -8,6 +6,7 @@ public interface IAIAgentService
 		string userId,
 		string question,
 		UploadedFileDto? uploadedFile,
+		string? explicitSkillName,
 		CancellationToken cancellationToken);
 
 	void ClearConversation(string userId);
