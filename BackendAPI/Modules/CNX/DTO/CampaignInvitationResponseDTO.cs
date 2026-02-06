@@ -67,6 +67,56 @@ public class Candidate
 
     [JsonPropertyName("labels")]
     public List<string> Labels { get; set; } = [];
+
+	[JsonPropertyName("documents")]
+	public List<Documents> Documents { get; set; } = [];
+
+	public BIForm BIForm { get; set; } = new BIForm();
+	public string InitialReportDate { get; set; } = string.Empty;
+	public string FinalReportDate { get; set; } = string.Empty;
+}
+
+public class Documents
+{
+	[JsonPropertyName("id")]
+	public int Id { get; set; }
+
+	[JsonPropertyName("created_at")]
+	public string? Created_At { get; set; }
+
+	[JsonPropertyName("verification_status")]
+	public string? Verification_Status { get; set; }
+
+	[JsonPropertyName("tag")]
+	public string? Tag { get; set; }
+
+	[JsonPropertyName("is_verifiable")]
+	public bool Is_Verifiable { get; set; }
+
+	[JsonPropertyName("files")]
+	public List<DocumentFile>? Files { get; set; }
+}
+
+
+public class DocumentFile
+{
+	[JsonPropertyName("id")]
+	public int Id { get; set; }
+
+	[JsonPropertyName("name")]
+	public string? Name { get; set; }
+
+	[JsonPropertyName("content_type")]
+	public string? Content_Type { get; set; }
+
+	[JsonPropertyName("url")]
+	public string? Url { get; set; }
+
+	[JsonPropertyName("ocr_verified")]
+	public string? Ocr_Verified { get; set; }
+
+	[JsonPropertyName("created_at")]
+	public string? Created_At { get; set; }
 }
 
 public class OthersData

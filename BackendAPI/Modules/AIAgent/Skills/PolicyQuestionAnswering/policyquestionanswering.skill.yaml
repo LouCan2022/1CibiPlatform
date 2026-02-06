@@ -1,0 +1,22 @@
+name: PolicyQuestionAnswering
+description: Extracts questions from an Excel file, searches for answers in the vector database using RAG, and returns an Excel file with answers along with a download URL.
+
+input:
+  type: object
+  required:
+    - Base64File
+    - FileName
+  properties:
+    Base64File:
+      type: string
+      description: Base64-encoded Excel file content containing questions (Question column) and empty answers (Answer column)
+    FileName:
+      type: string
+      description: Name of the Excel file being processed
+
+output:
+type: object
+properties:
+  Message:
+    type: string
+    description: Summary message including total questions answered, file name, and download URL link

@@ -37,7 +37,8 @@ namespace Test.BackendAPI.Infrastructure.PhilSys.Infrastracture
 			{
 				if (_dbContext is not null)
 				{
-					var sql = @"TRUNCATE TABLE ""PhilSysTransactions"" RESTART IDENTITY CASCADE;";
+					// Table is in the philsys schema
+					var sql = @"TRUNCATE TABLE philsys.""PhilSysTransaction"" RESTART IDENTITY CASCADE;";
 					await _dbContext.Database.ExecuteSqlRawAsync(sql);
 				}
 			}

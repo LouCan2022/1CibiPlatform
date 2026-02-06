@@ -7,13 +7,16 @@ using Pgvector;
 namespace APIs.Migrations.AIAgent
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "ai");
+
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:vector", ",,");
 
             migrationBuilder.CreateTable(
                 name: "AIPolicy",
@@ -33,6 +36,14 @@ namespace APIs.Migrations.AIAgent
                 {
                     table.PrimaryKey("PK_AIPolicy", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AIPolicy_Embedding",
+                schema: "ai",
+                table: "AIPolicy",
+                column: "Embedding")
+                .Annotation("Npgsql:IndexMethod", "ivfflat")
+                .Annotation("Npgsql:IndexOperators", new[] { "vector_cosine_ops" });
         }
 
         /// <inheritdoc />

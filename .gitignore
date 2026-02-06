@@ -402,3 +402,4 @@ FodyWeavers.xsd
 /monitoring/loki-data
 BackendAPI/API/.env
 .env
+/BackendAPI/API/APIs/wwwroot/files
