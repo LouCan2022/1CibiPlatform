@@ -26,10 +26,11 @@
 
   <ItemGroup>
     <Folder Include="BackendAPI\BuildingBlocks.UnitTests\" />
+    <Folder Include="BackendAPI\Modules\AIAgent.UnitTests\PolicyQuestionAnswering\" />
     <Folder Include="BackendAPI\Modules\CNX.UnitTests\" />
     <Folder Include="BackendAPI\Modules\CNX.IntegrationTests\" />
-    <Folder Include="BackendAPI\Modules\SSO.IntegrationTests\" />
-    <Folder Include="BackendAPI\Modules\SSO.UnitTests\" />
+    <Folder Include="BackendAPI\Modules\AIAgent.IntegrationTests\" />
+    <Folder Include="BackendAPI\Modules\NewFolder\" />
     <Folder Include="UI\" />
   </ItemGroup>
 
