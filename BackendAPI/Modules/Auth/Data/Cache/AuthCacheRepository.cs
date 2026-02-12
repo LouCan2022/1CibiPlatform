@@ -418,7 +418,7 @@ public class AuthCacheRepository : IAuthRepository
 
 		if (updated != null)
 			await _hybridCache.RemoveByTagAsync(UsersTag);
-			await _hybridCache.RemoveByTagAsync(UnApprovedUsersTag);
+		await _hybridCache.RemoveByTagAsync(UnApprovedUsersTag);
 
 		return updated!;
 	}
@@ -437,6 +437,4 @@ public class AuthCacheRepository : IAuthRepository
 	{
 		return await _authRepository.GetUserAsync(email);
 	}
-
-	
 }
