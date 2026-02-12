@@ -2,11 +2,12 @@
 
 public class AuthAttempts
 {
-	public Guid userId { get; set; }
+	public Guid UserId { get; set; }
+	public string? Email { get; set; }
 
-	public int attempts { get; set; }
+	public int Attempts { get; set; }
 
-	public string message { get; set; }
+	public string? Message { get; set; }
 
-	public DateTime createAt { get; set; } = DateTime.UtcNow;
+	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

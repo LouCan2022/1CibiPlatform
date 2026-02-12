@@ -1,11 +1,12 @@
-using Auth.Services;
 using Auth.Data.Repository;
 using Auth.Service;
+using Auth.Services;
 using BuildingBlocks.SharedServices.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 {
@@ -21,7 +22,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public Mock<IJWTService> MockJwtService { get; private set; }
 		public Mock<IRefreshTokenService> MockRefreshTokenService { get; private set; }
 		public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; private set; }
-
+		public Mock<HybridCache> MockHybridCache { get; private set; }
 		// Loggers
 		public Mock<ILogger<RegisterService>> MockRegisterLogger { get; private set; }
 		public Mock<ILogger<LoginService>> MockLoginLogger { get; private set; }
@@ -104,6 +105,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 				MockJwtService.Object,
 				MockRefreshTokenService.Object,
 				MockHttpContextAccessor.Object,
+				MockHybridCache!.Object,
 				MockLoginLogger.Object);
 
 			RefreshTokenService = new RefreshTokenService(

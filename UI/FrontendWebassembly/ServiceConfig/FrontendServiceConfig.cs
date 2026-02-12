@@ -61,6 +61,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<ICandidateService, CandidateService>();
 		services.AddScoped<ISSOService, SSOService>();
 		services.AddScoped<IAIAgentChatService, AIChatService>();
+
 		return services;
 	}
 }

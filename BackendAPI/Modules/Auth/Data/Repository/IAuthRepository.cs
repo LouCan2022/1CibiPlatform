@@ -9,6 +9,7 @@ public interface IAuthRepository
 	Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> GetAppSubRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<RolesDTO>> GetRolesAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<AuthAttempts>> GetLockedUsersAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<LoginDTO> GetUserDataAsync(LoginWebCred cred);
 	Task<UserDataDTO> GetNewUserDataAsync(Guid userId);
 	Task<Authusers> GetRawUserAsync(Guid id);
@@ -18,6 +19,7 @@ public interface IAuthRepository
 	Task<AuthSubMenu> GetSubMenuAsync(int applicationId);
 	Task<AuthRole> GetRoleAsync(int roleId);
 	Task<Authusers> GetUserAsync(string email);
+	Task<AuthAttempts> GetLockedUserAsync(Guid userId);
 
 	// Search methods
 	Task<PaginatedResult<UsersDTO>> SearchUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
@@ -26,13 +28,17 @@ public interface IAuthRepository
 	Task<PaginatedResult<SubMenusDTO>> SearchSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<AppSubRolesDTO>> SearchAppSubRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<PaginatedResult<RolesDTO>> SearchRoleAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
+	Task<PaginatedResult<AuthAttempts>> SearchLockedUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken);
 	Task<AuthRefreshToken> SearchUserRefreshToken(Guid userId, string refreshToken);
 
+	// Delete methods
+	Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser);
 
 	// Save methods
 	Task<bool> SaveUserAsync(Authusers user);
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
 	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);
+	Task<bool> SaveLockedUserAsync(AuthAttempts userAttempt);
 
 	// OTP / Verification methods
 	Task<bool> InsertOtpVerification(OtpVerification otpVerification);
