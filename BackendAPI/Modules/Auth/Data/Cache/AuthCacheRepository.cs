@@ -13,7 +13,7 @@ public class AuthCacheRepository : IAuthRepository
 	private const string UnApprovedUsersTag = "unapprovedusers";
 	private const string LockedUsersTag = "lockedusers";
 	private const string UserLockoutTimeTag = "userlockoutdate";
-
+	private readonly string _userAttemptTag = "user_attempt";
 	public AuthCacheRepository(
 		IAuthRepository authRepository,
 		HybridCache hybridCache)
@@ -471,13 +471,15 @@ public class AuthCacheRepository : IAuthRepository
 			async (token) => await _authRepository.GetLockedUserAsync(userId),
 			tags: [UserLockoutTimeTag]);
 	}
-
 	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
 	{
+		var cacheKey = $"{_userAttemptTag}_{lockedUser.UserId}";
+
 		var result = await _authRepository.DeleteLockedUserAsync(lockedUser);
 
 		if (result)
 			await _hybridCache.RemoveByTagAsync(LockedUsersTag);
+		await _hybridCache.RemoveAsync(cacheKey);
 
 		return result;
 	}
