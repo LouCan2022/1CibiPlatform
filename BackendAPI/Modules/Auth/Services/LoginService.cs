@@ -340,7 +340,6 @@ public class LoginService : ILoginService
 			var timeDifference = DateTime.UtcNow - lockedUserfromDB.CreatedAt;
 			if (timeDifference.TotalMinutes >= _accountLockDuration)
 			{
-				RemoveAttempts(UserID.ToString()).Wait();
 				bool IsDeleted = await _authRepository.DeleteLockedUserAsync(lockedUserfromDB);
 				return false;
 			}
