@@ -22,7 +22,6 @@ public class AuthCacheRepository : IAuthRepository
 		_hybridCache = hybridCache;
 	}
 
-
 	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)

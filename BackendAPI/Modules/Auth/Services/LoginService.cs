@@ -17,7 +17,6 @@ public class LoginService : ILoginService
 	private readonly bool _isHttps;
 	private readonly int _accountLockDuration;
 	private readonly int _maxFailedAttemptsBeforeLock;
-	private readonly int _maxFailedAttemptsBeforeWarning;
 	private readonly string _isUserLoginTag = "is_user_login";
 	private readonly string _userAttemptTag = "user_attempt";
 
@@ -45,11 +44,8 @@ public class LoginService : ILoginService
 		_httpCookieOnlyRefreshTokenKey = _configuration.GetValue<string>("AuthWeb:AuthWebHttpCookieOnlyKey") ?? "";
 		_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
 		_isHttps = _configuration.GetValue<bool>("AuthWeb:isHttps");
-		_accountLockDuration = _configuration.GetValue<int>("AuthWeb:AccountLockDurationInMinutes");
-		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeLockout");
-		_maxFailedAttemptsBeforeWarning = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeWarning");
+		_accountLockDuration = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeLockout");
 	}
-
 
 	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
 	{
@@ -350,7 +346,7 @@ public class LoginService : ILoginService
 			}
 		}
 
-		if (currentAttempts >= _maxFailedAttemptsBeforeWarning)
+		if (currentAttempts >= _maxFailedAttemptsBeforeLock)
 		{
 			_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
 			return true;
@@ -359,26 +355,19 @@ public class LoginService : ILoginService
 		return false;
 	}
 
-	/// <summary>
 	/// Checks if user is still locked out. Returns true if attempts >= 3 and cache hasn't expired yet
-	/// </summary>
 	protected virtual async Task<bool> IsAccountLocked(string userid)
 	{
 		var currentAttempts = await GetAttempts(userid);
 		return currentAttempts >= 3;
 	}
 
-	/// <summary>
 	/// Gets the timestamp when the lockout will expire
-	/// Note: This requires storing timestamp with attempts
-	/// </summary>
 	protected virtual async Task<DateTime?> GetLockoutExpirationTime(string userid)
 	{
 		var attempts = await GetAttempts(userid);
 		if (attempts >= 3)
 		{
-			// The cache will expire 15 minutes after the last attempt was set
-			// Since we don't store the timestamp, we return estimated time
 			return DateTime.UtcNow.AddMinutes(15);
 		}
 		return null;
