@@ -22,7 +22,6 @@ public class AuthCacheRepository : IAuthRepository
 		_hybridCache = hybridCache;
 	}
 
-
 	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
 		PaginationRequest paginationRequest,
 		CancellationToken cancellationToken)
@@ -475,13 +474,10 @@ public class AuthCacheRepository : IAuthRepository
 
 	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
 	{
-		var cacheKey = $"user_attempt_{lockedUser.UserId}";
-
 		var result = await _authRepository.DeleteLockedUserAsync(lockedUser);
 
 		if (result)
 			await _hybridCache.RemoveByTagAsync(LockedUsersTag);
-			await _hybridCache.RemoveAsync(cacheKey);
 
 		return result;
 	}
