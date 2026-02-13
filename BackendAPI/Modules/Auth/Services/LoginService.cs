@@ -97,6 +97,9 @@ public class LoginService : ILoginService
 			throw new NotFoundException("Invalid username or password.");
 		}
 
+		// Clear login attempts on successful login
+		await RemoveAttempts(userData.Id.ToString());
+
 		var IsApprove = userData.IsApproved;
 
 		if (IsApprove == false)
@@ -104,9 +107,6 @@ public class LoginService : ILoginService
 			_logger.LogInformation("User application and role data retrieved for user: {@Context}", logContext);
 			throw new UnauthorizedAccessException("Your account has not been approved yet. Please contact an administrator for assistance.");
 		}
-
-		// Clear login attempts on successful login
-		await RemoveAttempts(userData.Id.ToString());
 
 		// produce JWT token
 		string jwtToken = this._jWTService.GetAccessToken(userData);
