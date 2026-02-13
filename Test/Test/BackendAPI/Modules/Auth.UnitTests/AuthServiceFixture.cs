@@ -59,6 +59,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 			MockJwtService = new Mock<IJWTService>();
 			MockRefreshTokenService = new Mock<IRefreshTokenService>();
 			MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+			MockHybridCache = new Mock<HybridCache>();
 
 			MockRegisterLogger = new Mock<ILogger<RegisterService>>();
 			MockLoginLogger = new Mock<ILogger<LoginService>>();
@@ -80,7 +81,9 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 					new KeyValuePair<string,string>("Jwt:ExpiryInMinutes","60"),
 					new KeyValuePair<string,string>("AuthWeb:AuthWebHttpCookieOnlyKey","refreshKey"),
 					new KeyValuePair<string,string>("AuthWeb:CookieExpiryInDayIsRememberMe","7"),
-					new KeyValuePair<string,string>("AuthWeb:isHttps","false")
+					new KeyValuePair<string,string>("AuthWeb:isHttps","false"),
+					new KeyValuePair<string,string>("AuthWeb:AccountLockDurationInMinutes","15"),
+					new KeyValuePair<string,string>("AuthWeb:MaxFailedAttemptsBeforeLockout","3")
 				})
 				.Build();
 

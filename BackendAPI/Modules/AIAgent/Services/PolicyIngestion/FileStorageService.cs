@@ -1,4 +1,4 @@
-namespace AIAgent.Services;
+namespace AIAgent.Services.PolicyIngestion;
 
 public class FileStorageService : IFileStorageService
 {
@@ -10,7 +10,7 @@ public class FileStorageService : IFileStorageService
 	{
 		_logger = logger;
 		_storageDirectory = configuration.GetValue<string>("FileStorage:Directory") ?? System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
-		
+
 		if (!Directory.Exists(_storageDirectory))
 		{
 			Directory.CreateDirectory(_storageDirectory);
@@ -24,9 +24,9 @@ public class FileStorageService : IFileStorageService
 		var filePath = System.IO.Path.Combine(_storageDirectory, uniqueFileName);
 
 		await File.WriteAllBytesAsync(filePath, fileBytes, cancellationToken);
-		
+
 		_logger.LogInformation("Saved file: {FileName} at {Path}", uniqueFileName, filePath);
-		
+
 		return uniqueFileName;
 	}
 
