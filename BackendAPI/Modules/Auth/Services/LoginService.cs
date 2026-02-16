@@ -15,7 +15,7 @@ public class LoginService : ILoginService
 	private readonly string _httpCookieOnlyRefreshTokenKey;
 	private readonly int _cookieExpiryinDaysKey;
 	private readonly bool _isHttps;
-	private readonly int _accountLockDuration;
+	private readonly double _accountLockDuration;
 	private readonly int _maxFailedAttemptsBeforeLock;
 	private readonly string _isUserLoginTag = "is_user_login";
 	private readonly string _userAttemptTag = "user_attempt";
@@ -44,7 +44,7 @@ public class LoginService : ILoginService
 		_httpCookieOnlyRefreshTokenKey = _configuration.GetValue<string>("AuthWeb:AuthWebHttpCookieOnlyKey") ?? "";
 		_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
 		_isHttps = _configuration.GetValue<bool>("AuthWeb:isHttps");
-		_accountLockDuration = _configuration.GetValue<int>("AuthWeb:AccountLockDurationInMinutes");
+		_accountLockDuration = _configuration.GetValue<double>("AuthWeb:AccountLockDurationInMinutes");
 		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeLockout");
 	}
 
@@ -351,7 +351,7 @@ public class LoginService : ILoginService
 			CreatedAt = DateTime.UtcNow
 		};
 
-		// checking in cache if user is exist there so that we will not hit databse prematurely 
+		// checking in cache if user is exist there(cache) so that we would not hit database prematurely 
 		if (currentAttempts == _maxFailedAttemptsBeforeLock)
 		{
 			bool IsSaved = await _authRepository.SaveLockedUserAsync(lockedUser);
