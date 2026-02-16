@@ -3,6 +3,7 @@ using System;
 using Auth.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.Auth
 {
     [DbContext(typeof(AuthApplicationDbContext))]
-    partial class AuthApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260212024040_AddAuthAttemptsTableMigration")]
+    partial class AddAuthAttemptsTableMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,28 +59,24 @@ namespace APIs.Migrations.Auth
 
             modelBuilder.Entity("Auth.Data.Entities.AuthAttempts", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("userId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Attempts")
+                    b.Property<int>("attempts")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("createAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Message")
+                    b.Property<string>("message")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("userId");
 
                     b.ToTable("AuthAttempts");
                 });

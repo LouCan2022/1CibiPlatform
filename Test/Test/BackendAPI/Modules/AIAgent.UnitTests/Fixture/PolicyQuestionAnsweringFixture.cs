@@ -1,5 +1,5 @@
 using AIAgent.Data.Repositories;
-using AIAgent.Services;
+using AIAgent.Services.PolicyIngestion;
 using AIAgent.Skills.PolicyQuestionAnswering;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;

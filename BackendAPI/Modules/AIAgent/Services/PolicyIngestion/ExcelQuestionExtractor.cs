@@ -1,4 +1,4 @@
-namespace AIAgent.Services;
+namespace AIAgent.Services.PolicyIngestion;
 
 public class ExcelQuestionExtractor : IExcelQuestionExtractor
 {

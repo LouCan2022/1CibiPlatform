@@ -104,12 +104,47 @@ public class AuthRepository : IAuthRepository
 		);
 	}
 
+	public async Task<PaginatedResult<AuthAttempts>> GetLockedUsersAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var totalRecords = await _dbcontext
+			.AuthAttempts
+			.LongCountAsync(cancellationToken);
+
+		var lockedUsers = await _dbcontext.AuthAttempts
+						.OrderBy(a => a.UserId)
+						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+						.Take(paginationRequest.PageSize)
+						.Select(aa => new AuthAttempts { 
+							CreatedAt = aa.CreatedAt, 
+							Email = aa.Email,
+							UserId = aa.UserId})
+						.AsNoTracking()
+						.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AuthAttempts>
+		(
+			paginationRequest.PageIndex,
+			paginationRequest.PageSize,
+			totalRecords,
+			lockedUsers
+		);
+	}
+
 	public async Task<Authusers> GetUserAsync(string email)
 	{
 		var user = await _dbcontext.AuthUsers.FirstOrDefaultAsync(u => u.Email == email);
 
 		return user!;
 	}
+
+	public async Task<AuthAttempts> GetLockedUserAsync(Guid userId)
+	{
+		var lockedUser = await _dbcontext.AuthAttempts
+					 .Where(aa => aa.UserId == userId)
+					 .FirstOrDefaultAsync();
+		return lockedUser!;
+	}
+
 	public async Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var totalRecords = await _dbcontext
@@ -207,6 +242,36 @@ public class AuthRepository : IAuthRepository
 			  users
 			);
 	}
+
+	public async Task<PaginatedResult<AuthAttempts>> SearchLockedUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+
+		var usersQuery = _dbcontext.AuthAttempts
+				.Where(aa => (EF.Functions.ILike(aa.Email!, $"%{paginationRequest.SearchTerm}%")));
+
+		var totalRecords = await usersQuery.CountAsync(cancellationToken);
+
+		var lockedUsers = await usersQuery
+					.OrderBy(aa => aa.UserId)
+					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
+					.Take(paginationRequest.PageSize)
+					.Select(aa => new AuthAttempts {
+						UserId = aa.UserId,
+						Email = aa.Email, 
+						CreatedAt = aa.CreatedAt
+					})
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
+
+		return new PaginatedResult<AuthAttempts>
+			(
+			  paginationRequest.PageIndex,
+			  paginationRequest.PageSize,
+			  totalRecords,
+			  lockedUsers
+			);
+	}
+
 	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var applicationsQuery = _dbcontext.AuthApplications
@@ -350,6 +415,15 @@ public class AuthRepository : IAuthRepository
 		return true;
 	}
 
+	public async Task<bool> SaveLockedUserAsync(AuthAttempts userAttempt)
+	{
+		await _dbcontext.AuthAttempts.AddAsync(userAttempt);
+
+		var result = await _dbcontext.SaveChangesAsync();
+
+		return true;
+	}
+
 	public async Task<bool> SaveRefreshTokenAsync(
 		Guid userId,
 		string hashToken,
@@ -480,6 +554,15 @@ public class AuthRepository : IAuthRepository
 
 		return true;
 
+	}
+
+	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
+	{
+		_dbcontext.AuthAttempts.Remove(lockedUser);
+
+		await _dbcontext.SaveChangesAsync();
+
+		return true;
 	}
 
 	public async Task<OtpVerification> OtpVerificationUserData(OtpVerificationRequestDTO otpVerification)
