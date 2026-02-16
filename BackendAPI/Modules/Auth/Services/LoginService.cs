@@ -85,7 +85,7 @@ public class LoginService : ILoginService
 		if (isAlreadyLocked)
 		{
 			_logger.LogWarning("Account is locked due to too many failed attempts: {@Context}", logContext);
-			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 		}
 
 		// verifying password
@@ -104,7 +104,7 @@ public class LoginService : ILoginService
 			if (errorAttempts)
 			{
 				_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
-				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 			}
 
 			throw new NotFoundException("Invalid username or password.");
@@ -190,7 +190,7 @@ public class LoginService : ILoginService
 		if (isAlreadyLocked)
 		{
 			_logger.LogWarning("Account is locked due to too many failed attempts: {@Context}", logContext);
-			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 		}
 
 		// verifying password
@@ -209,7 +209,7 @@ public class LoginService : ILoginService
 			if (errorAttempts)
 			{
 				_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
-				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 			}
 
 			throw new NotFoundException("Invalid username or password.");
@@ -372,7 +372,6 @@ public class LoginService : ILoginService
 				lockedUser = null;
 				var userId = lockedUserfromDB.UserId;
 				bool IsDeleted = await _authRepository.DeleteLockedUserAsync(lockedUserfromDB);
-				await RemoveAttempts(userId.ToString());
 				return false;
 			}
 

@@ -165,7 +165,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		// Fourth attempt (attempt = 4, account gets locked)
 		var act = async () => await service.LoginAsync("user", "wrong4");
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 	}
 
 	[Fact]
@@ -193,7 +193,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 
 		// Assert
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 	}
 
 	[Fact]
