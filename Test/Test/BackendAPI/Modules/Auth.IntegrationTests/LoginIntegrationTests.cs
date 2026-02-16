@@ -108,7 +108,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 	}
 
 	[Fact]
-	public async Task Login_ShouldThrow_AfterThreeFailedAttempts()
+	public async Task Login_ShouldThrow_AfterFourFailedAttempts()
 	{
 		// Arrange
 		await SeedUserData();
@@ -132,16 +132,26 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		var attemptsAfter2 = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
 		attemptsAfter2.Should().BeNull(); // Not locked after 2 attempts (warning threshold)
 
-		// Act & Assert - Third failed attempt (attempt count = 3) - should lock account
-		var command3 = new LoginCommand("john@example.com", "wrongpassword3");
+
+		// Act & Assert - Second failed attempt (attempt count = 3)
+		var command3 = new LoginCommand("john@example.com", "wrongpassword2");
 		Func<Task> act3 = async () => { await _sender.Send(command3); };
+		await act3.Should().ThrowAsync<NotFoundException>().WithMessage("Invalid username or password.");
+
+		// Verify still not locked after 2 attempts
+		var attemptsAfter3 = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
+		attemptsAfter3.Should().BeNull(); // Not locked after 2 attempts (warning threshold)
+
+		// Act & Assert - Third failed attempt (attempt count = 4) - should lock account
+		var command4 = new LoginCommand("john@example.com", "wrongpassword3");
+		Func<Task> act4 = async () => { await _sender.Send(command4); };
 		await act3.Should().ThrowAsync<UnauthorizedAccessException>()
 			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
 
 		// Verify account is now locked
 		var lockedAttempts = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
 		lockedAttempts.Should().NotBeNull();
-		lockedAttempts!.Attempts.Should().Be(3);
+		lockedAttempts!.Attempts.Should().Be(4);
 	}
 
 	[Fact]
@@ -185,16 +195,26 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		var attemptsAfter2 = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
 		attemptsAfter2.Should().BeNull(); // Not locked after 2 attempts (warning threshold)
 
-		// Act & Assert - Third failed attempt (attempt count = 3) - should lock account
-		var command3 = new LoginWebCommand(new LoginWebCred("john@example.com", "wrongpassword3", false));
-		Func<Task> act3 = async () => { await _sender.Send(command3); };
-		await act3.Should().ThrowAsync<UnauthorizedAccessException>()
+
+		var command3 = new LoginWebCommand(new LoginWebCred("john@example.com", "wrongpassword2", false));
+		Func<Task> act3 = async () => { await _sender.Send(command2); };
+		await act2.Should().ThrowAsync<NotFoundException>().WithMessage("Invalid username or password.");
+
+		// Verify still not locked after 3 attempts
+		var attemptsAfter3 = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
+		attemptsAfter2.Should().BeNull(); // Not locked after 3 attempts (warning threshold)
+
+
+		// Act & Assert - Third failed attempt (attempt count = 4) - should lock account
+		var command4 = new LoginWebCommand(new LoginWebCred("john@example.com", "wrongpassword3", false));
+		Func<Task> act4 = async () => { await _sender.Send(command4); };
+		await act4.Should().ThrowAsync<UnauthorizedAccessException>()
 			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
 
 		// Verify account is now locked
 		var lockedAttempts = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
 		lockedAttempts.Should().NotBeNull();
-		lockedAttempts!.Attempts.Should().Be(3);
+		lockedAttempts!.Attempts.Should().Be(4);
 	}
 
 	[Fact]
@@ -389,7 +409,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		{
 			UserId = userId,
 			Email = "locked@example.com",
-			Attempts = 3,
+			Attempts = 4,
 			Message = "Account is locked due to too many failed attempts.",
 			CreatedAt = DateTime.UtcNow.AddMinutes(-5) // Locked 5 minutes ago, still within lockout period
 		};

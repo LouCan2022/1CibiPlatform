@@ -83,7 +83,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 					new KeyValuePair<string,string>("AuthWeb:CookieExpiryInDayIsRememberMe","7"),
 					new KeyValuePair<string,string>("AuthWeb:isHttps","false"),
 					new KeyValuePair<string,string>("AuthWeb:AccountLockDurationInMinutes","15"),
-					new KeyValuePair<string,string>("AuthWeb:MaxFailedAttemptsBeforeLockout","3")
+					new KeyValuePair<string,string>("AuthWeb:MaxFailedAttemptsBeforeLockout","4")
 				})
 				.Build();
 

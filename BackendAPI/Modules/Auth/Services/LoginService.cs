@@ -351,6 +351,7 @@ public class LoginService : ILoginService
 			CreatedAt = DateTime.UtcNow
 		};
 
+		// checking in cache if user is exist there so that we will not hit databse prematurely 
 		if (currentAttempts == _maxFailedAttemptsBeforeLock)
 		{
 			bool IsSaved = await _authRepository.SaveLockedUserAsync(lockedUser);
@@ -362,11 +363,19 @@ public class LoginService : ILoginService
 		if (lockedUserfromDB is not null)
 		{
 			var timeDifference = DateTime.UtcNow - lockedUserfromDB.CreatedAt;
+			var attempts = lockedUserfromDB.Attempts;
 			if (timeDifference.TotalMinutes >= _accountLockDuration)
 			{
 				bool IsDeleted = await _authRepository.DeleteLockedUserAsync(lockedUserfromDB);
 				return false;
 			}
+
+			// if users got 4 attempts and the time has not yet exceeded to lock time duration
+			if (attempts == _maxFailedAttemptsBeforeLock)
+			{
+				return true;
+			}
+		
 		}
 
 		if (currentAttempts >= _maxFailedAttemptsBeforeLock)

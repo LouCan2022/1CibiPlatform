@@ -75,7 +75,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 	}
 
 	[Fact]
-	public async Task LoginAsync_ShouldThrow_WhenAccountLockedAfterThreeAttempts()
+	public async Task LoginAsync_ShouldThrow_WhenAccountLockedAfterFourAttempts()
 	{
 		// Arrange
 		var service = _fixture.LoginService;
@@ -93,13 +93,13 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		_fixture.MockAuthRepository.Setup(x => x.GetLockedUserAsync(userId))
 			.ReturnsAsync(() =>
 			{
-				if (cacheStore.ContainsKey(cacheKey) && cacheStore[cacheKey] >= 3)
+				if (cacheStore.ContainsKey(cacheKey) && cacheStore[cacheKey] >= 4)
 				{
 					return new AuthAttempts
 					{
 						UserId = userId,
 						Email = "email@example.com",
-						Attempts = cacheStore[cacheKey],
+						Attempts = 4,
 						Message = "Account is locked due to too many failed attempts.",
 						CreatedAt = DateTime.UtcNow
 					};
@@ -157,8 +157,13 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		await Assert.ThrowsAsync<NotFoundException>(() => service.LoginAsync("user", "wrong2"));
 		cacheStore[cacheKey].Should().Be(2);
 
-		// Third attempt (attempt = 3, account gets locked)
-		var act = async () => await service.LoginAsync("user", "wrong3");
+
+		// Second attempt (attempt = 4)
+		await Assert.ThrowsAsync<NotFoundException>(() => service.LoginAsync("user", "wrong3"));
+		cacheStore[cacheKey].Should().Be(3);
+
+		// Fourth attempt (attempt = 4, account gets locked)
+		var act = async () => await service.LoginAsync("user", "wrong4");
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
 			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
 	}
@@ -174,7 +179,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		{
 			UserId = userId,
 			Email = "email@example.com",
-			Attempts = 3,
+			Attempts = 4,
 			Message = "Account is locked due to too many failed attempts.",
 			CreatedAt = DateTime.UtcNow.AddMinutes(-5) // Locked 5 minutes ago
 		};
