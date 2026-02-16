@@ -1,4 +1,4 @@
-﻿namespace Auth.Services;
+namespace Auth.Services;
 
 public class LoginService : ILoginService
 {
@@ -8,13 +8,17 @@ public class LoginService : ILoginService
 	private readonly IJWTService _jWTService;
 	private readonly IRefreshTokenService _refreshTokenService;
 	private readonly IHttpContextAccessor _httpContextAccessor;
+	private readonly HybridCache _hybridCache;
 	private readonly ILogger<LoginService> _logger;
 	private readonly string _httpCookieOnlyKey;
 	private readonly double _expiryinMinutesKey;
 	private readonly string _httpCookieOnlyRefreshTokenKey;
 	private readonly int _cookieExpiryinDaysKey;
 	private readonly bool _isHttps;
+	private readonly int _accountLockDuration;
+	private readonly int _maxFailedAttemptsBeforeLock;
 	private readonly string _isUserLoginTag = "is_user_login";
+	private readonly string _userAttemptTag = "user_attempt";
 
 	public LoginService(
 	IAuthRepository authRepository,
@@ -23,6 +27,7 @@ public class LoginService : ILoginService
 	IJWTService jWTService,
 	IRefreshTokenService refreshTokenService,
 	IHttpContextAccessor httpContextAccessor,
+	HybridCache hybridCache,
 	ILogger<LoginService> logger)
 	{
 		this._authRepository = authRepository;
@@ -31,6 +36,7 @@ public class LoginService : ILoginService
 		this._jWTService = jWTService;
 		this._refreshTokenService = refreshTokenService;
 		this._httpContextAccessor = httpContextAccessor;
+		this._hybridCache = hybridCache;
 		this._logger = logger;
 
 		_httpCookieOnlyKey = _configuration.GetValue<string>("HttpCookieOnlyKey") ?? "";
@@ -38,8 +44,9 @@ public class LoginService : ILoginService
 		_httpCookieOnlyRefreshTokenKey = _configuration.GetValue<string>("AuthWeb:AuthWebHttpCookieOnlyKey") ?? "";
 		_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
 		_isHttps = _configuration.GetValue<bool>("AuthWeb:isHttps");
+		_accountLockDuration = _configuration.GetValue<int>("AuthWeb:AccountLockDurationInMinutes");
+		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeLockout");
 	}
-
 
 	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
 	{
@@ -65,13 +72,46 @@ public class LoginService : ILoginService
 			throw new NotFoundException("Invalid username or password.");
 		}
 
+		// Check if account is already locked before attempting login
+		var currentAttempts = await GetAttempts(userData.Id.ToString());
+
+		var isAlreadyLocked = await ErrorThreeAttempts(
+			userData.Id,
+			userData.Email,
+			currentAttempts, logContext);
+
+		if (isAlreadyLocked)
+		{
+			_logger.LogWarning("Account is locked due to too many failed attempts: {@Context}", logContext);
+			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+		}
+
 		// verifying password
 		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, password);
 
 		if (!isPasswordValid)
 		{
-			_logger.LogWarning("Login failed: Invalid password for user: {@Context}", logContext);
+			// Increment failed login attempts
+			currentAttempts++;
+			await SetAttempts(userData.Id.ToString(), currentAttempts);
+
+			var errorAttempts = await ErrorThreeAttempts(userData.Id, userData.Email, currentAttempts, logContext);
+
+			_logger.LogWarning("Login failed: Invalid password for user. Attempt {Attempt}/{Max} {@Context}", currentAttempts, _maxFailedAttemptsBeforeLock, logContext);
+
+			if (errorAttempts)
+			{
+				_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
+				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+			}
+
 			throw new NotFoundException("Invalid username or password.");
+		}
+
+		// Password is valid - clear any existing failed attempts
+		if (currentAttempts > 0)
+		{
+			await RemoveAttempts(userData.Id.ToString());
 		}
 
 		var IsApprove = userData.IsApproved;
@@ -141,13 +181,42 @@ public class LoginService : ILoginService
 			throw new NotFoundException("Invalid username or password");
 		}
 
+		// Check if account is already locked before attempting login
+		var currentAttempts = await GetAttempts(userData.Id.ToString());
+		var isAlreadyLocked = await ErrorThreeAttempts(userData.Id, userData.Email, currentAttempts, logContext);
+
+		if (isAlreadyLocked)
+		{
+			_logger.LogWarning("Account is locked due to too many failed attempts: {@Context}", logContext);
+			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+		}
+
 		// verifying password
 		bool isPasswordValid = this._passwordHasherService.VerifyPassword(userData.PasswordHash, cred.Password);
 
 		if (!isPasswordValid)
 		{
-			_logger.LogWarning("Login failed: Invalid password for user: {@Context}", logContext);
+			// Increment failed login attempts
+			currentAttempts++;
+			await SetAttempts(userData.Id.ToString(), currentAttempts);
+
+			var errorAttempts = await ErrorThreeAttempts(userData.Id, userData.Email, currentAttempts, logContext);
+
+			_logger.LogWarning("Login failed: Invalid password for user. Attempt {Attempt}/{Max} {@Context}", currentAttempts, _maxFailedAttemptsBeforeLock, logContext);
+
+			if (errorAttempts)
+			{
+				_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
+				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+			}
+
 			throw new NotFoundException("Invalid username or password.");
+		}
+
+		// Password is valid - clear any existing failed attempts
+		if (currentAttempts > 0)
+		{
+			await RemoveAttempts(userData.Id.ToString());
 		}
 
 		// produce refresh token
@@ -232,6 +301,108 @@ public class LoginService : ILoginService
 			DateTime.Now.ToString(),
 			DateTime.Now.AddMinutes(_expiryinMinutesKey).ToString()
 		);
+	}
+
+	protected virtual async Task<int> GetAttempts(string userid)
+	{
+		var cacheKey = $"{_userAttemptTag}_{userid}";
+
+		return await _hybridCache.GetOrCreateAsync<string, int>(
+			cacheKey,
+			userid,
+			async (userId, token) => 0,
+			null,
+			tags: [_userAttemptTag]);
+	}
+
+	protected virtual async Task SetAttempts(string userid, int attemptCount)
+	{
+		var cacheKey = $"{_userAttemptTag}_{userid}";
+
+		// Remove old cache entry first
+		await _hybridCache.RemoveAsync(cacheKey);
+
+		// Set new attempt count
+		await _hybridCache.SetAsync(
+			cacheKey,
+			attemptCount,
+			null,
+			tags: [_userAttemptTag]);
+	}
+
+	protected virtual async Task RemoveAttempts(string userid)
+	{
+		var cacheKey = $"{_userAttemptTag}_{userid}";
+		await _hybridCache.RemoveAsync(cacheKey);
+	}
+
+	protected async virtual Task<bool> ErrorThreeAttempts(
+		Guid UserID,
+		string email,
+		int currentAttempts,
+		object logContext)
+	{
+		var lockedUser = new AuthAttempts
+		{
+			UserId = UserID,
+			Email = email,
+			Attempts = currentAttempts,
+			Message = "Account is locked due to too many failed attempts.",
+			CreatedAt = DateTime.UtcNow
+		};
+
+		// checking in cache if user is exist there so that we will not hit databse prematurely 
+		if (currentAttempts == _maxFailedAttemptsBeforeLock)
+		{
+			bool IsSaved = await _authRepository.SaveLockedUserAsync(lockedUser);
+			return true;
+		}
+
+		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
+
+		if (lockedUserfromDB is not null)
+		{
+			var timeDifference = DateTime.UtcNow - lockedUserfromDB.CreatedAt;
+			var attempts = lockedUserfromDB.Attempts;
+			if (timeDifference.TotalMinutes >= _accountLockDuration)
+			{
+				bool IsDeleted = await _authRepository.DeleteLockedUserAsync(lockedUserfromDB);
+				return false;
+			}
+
+			// if users got 4 attempts and the time has not yet exceeded to lock time duration
+			if (attempts == _maxFailedAttemptsBeforeLock)
+			{
+				return true;
+			}
+		
+		}
+
+		if (currentAttempts >= _maxFailedAttemptsBeforeLock)
+		{
+			_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
+			return true;
+		}
+
+		return false;
+	}
+
+	/// Checks if user is still locked out. Returns true if attempts >= 3 and cache hasn't expired yet
+	protected virtual async Task<bool> IsAccountLocked(string userid)
+	{
+		var currentAttempts = await GetAttempts(userid);
+		return currentAttempts >= 3;
+	}
+
+	/// Gets the timestamp when the lockout will expire
+	protected virtual async Task<DateTime?> GetLockoutExpirationTime(string userid)
+	{
+		var attempts = await GetAttempts(userid);
+		if (attempts >= 3)
+		{
+			return DateTime.UtcNow.AddMinutes(15);
+		}
+		return null;
 	}
 
 	protected virtual void SetAccessTokenCookie(

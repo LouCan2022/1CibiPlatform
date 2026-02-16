@@ -108,6 +108,29 @@ public class UserManagementService : IUserManagementService
 		return response.submenus!;
 	}
 
+	public async Task<PaginatedResult<LockedUsersDTO>> GetLockedUsersAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default)
+	{
+		var query = $"auth/getlockedusers?pageNumber={PageNumber}&pageSize={PageSize}";
+		if (!string.IsNullOrEmpty(SearchTerm))
+			query += $"&SearchTerm={Uri.EscapeDataString(SearchTerm)}";
+
+		var response = await _httpClient.GetFromJsonAsync<LockedUsersResponseDTO>(query, ct);
+
+		if (response == null)
+		{
+			_logger.LogWarning("Did not get the locked users successfully");
+
+			return new PaginatedResult<LockedUsersDTO>(
+				pageIndex: PageNumber ?? 1,
+				pageSize: PageSize ?? 10,
+				count: 0,
+				data: Enumerable.Empty<LockedUsersDTO>()
+			);
+		}
+
+		return response.lockedusers!;
+	}
+
 	public async Task<PaginatedResult<RolesDTO>> GetRolesAsync(
 		int? PageNumber = 1,
 		int? PageSize = 10,
@@ -204,7 +227,7 @@ public class UserManagementService : IUserManagementService
 		return successContent!;
 	}
 
-	public async Task<bool> DeleteUserAppSbRoleAsync(int AppSubRoleId)
+	public async Task<bool> DeleteUserAppSubRoleAsync(int AppSubRoleId)
 	{
 		var response = await _httpClient.DeleteAsync($"auth/deleteappsubrole/{AppSubRoleId}");
 		if (!response.IsSuccessStatusCode)
@@ -215,6 +238,20 @@ public class UserManagementService : IUserManagementService
 
 		var successContent = await response.Content.ReadFromJsonAsync<bool>();
 		_logger.LogInformation("Deleted the AppSubRole successfully (AppSubRoleId: {AppSubRoleId})", AppSubRoleId);
+		return successContent!;
+	}
+
+	public async Task<bool> DeleteLockedUserAsync(Guid lockedUserId)
+	{
+		var response = await _httpClient.DeleteAsync($"auth/deletelockeduser/{lockedUserId}");
+		if (!response.IsSuccessStatusCode)
+		{
+			_logger.LogWarning("Did not delete the Locked User successfully (LockedUserId: {LockedUserId})", lockedUserId);
+			return false;
+		}
+
+		var successContent = await response.Content.ReadFromJsonAsync<bool>();
+		_logger.LogInformation("Deleted the AppSubRole successfully (LockedUserId: {LockedUserId})", lockedUserId);
 		return successContent!;
 	}
 

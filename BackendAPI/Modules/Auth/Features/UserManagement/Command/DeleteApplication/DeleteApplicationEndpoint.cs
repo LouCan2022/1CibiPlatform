@@ -1,5 +1,4 @@
 ﻿namespace Auth.Features.UserManagement.Command.DeleteApplication;
-
 public record DeleteApplicationRequest(int AppId);
 public record DeleteApplicationResponse(bool IsDeleted);
 public class DeleteApplicationEndpoint : ICarterModule

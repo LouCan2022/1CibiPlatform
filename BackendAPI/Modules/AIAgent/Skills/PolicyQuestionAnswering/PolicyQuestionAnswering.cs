@@ -87,7 +87,9 @@ public sealed class PolicyQuestionAnswering : ISkill
 		};
 	}
 
-	private async Task<string> FindAnswerFromVectorDatabase(string question, CancellationToken cancellationToken)
+	private async Task<string> FindAnswerFromVectorDatabase(
+		string question,
+		CancellationToken cancellationToken)
 	{
 		var questionEmbedding = await GenerateEmbedding(question, cancellationToken);
 
@@ -106,7 +108,10 @@ public sealed class PolicyQuestionAnswering : ISkill
 		return answer;
 	}
 
-	private async Task<string> GenerateAnswerWithLLM(string question, string context, CancellationToken cancellationToken)
+	private async Task<string> GenerateAnswerWithLLM(
+		string question,
+		string context,
+		CancellationToken cancellationToken)
 	{
 		var template = """
 			You are a policy expert assistant. Answer the following question based ONLY on the provided policy context.
@@ -131,7 +136,9 @@ public sealed class PolicyQuestionAnswering : ISkill
 		return result?.ToString().Trim() ?? "Unable to generate an answer.";
 	}
 
-	private async Task<Vector> GenerateEmbedding(string text, CancellationToken cancellationToken)
+	private async Task<Vector> GenerateEmbedding(
+		string text,
+		CancellationToken cancellationToken)
 	{
 		var results = await _embeddingGenerator.GenerateAsync(
 			new[] { text },
