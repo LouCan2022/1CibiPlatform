@@ -22,6 +22,8 @@ public class AuthApplicationDbContext : DbContext
 
 	public DbSet<PasswordResetToken> PasswordResetToken { get; set; }
 
+	public DbSet<AuthAttempts> AuthAttempts { get; set; }
+
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthApplicationDbContext).Assembly);

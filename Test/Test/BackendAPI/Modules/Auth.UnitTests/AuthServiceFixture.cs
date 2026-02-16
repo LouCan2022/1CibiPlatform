@@ -1,11 +1,12 @@
-using Auth.Services;
 using Auth.Data.Repository;
 using Auth.Service;
+using Auth.Services;
 using BuildingBlocks.SharedServices.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
 
 namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 {
@@ -21,7 +22,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 		public Mock<IJWTService> MockJwtService { get; private set; }
 		public Mock<IRefreshTokenService> MockRefreshTokenService { get; private set; }
 		public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; private set; }
-
+		public Mock<HybridCache> MockHybridCache { get; private set; }
 		// Loggers
 		public Mock<ILogger<RegisterService>> MockRegisterLogger { get; private set; }
 		public Mock<ILogger<LoginService>> MockLoginLogger { get; private set; }
@@ -58,6 +59,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 			MockJwtService = new Mock<IJWTService>();
 			MockRefreshTokenService = new Mock<IRefreshTokenService>();
 			MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+			MockHybridCache = new Mock<HybridCache>();
 
 			MockRegisterLogger = new Mock<ILogger<RegisterService>>();
 			MockLoginLogger = new Mock<ILogger<LoginService>>();
@@ -79,7 +81,9 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 					new KeyValuePair<string,string>("Jwt:ExpiryInMinutes","60"),
 					new KeyValuePair<string,string>("AuthWeb:AuthWebHttpCookieOnlyKey","refreshKey"),
 					new KeyValuePair<string,string>("AuthWeb:CookieExpiryInDayIsRememberMe","7"),
-					new KeyValuePair<string,string>("AuthWeb:isHttps","false")
+					new KeyValuePair<string,string>("AuthWeb:isHttps","false"),
+					new KeyValuePair<string,string>("AuthWeb:AccountLockDurationInMinutes","15"),
+					new KeyValuePair<string,string>("AuthWeb:MaxFailedAttemptsBeforeLockout","4")
 				})
 				.Build();
 
@@ -104,6 +108,7 @@ namespace Test.BackendAPI.Modules.Auth.UnitTests.Fixture
 				MockJwtService.Object,
 				MockRefreshTokenService.Object,
 				MockHttpContextAccessor.Object,
+				MockHybridCache!.Object,
 				MockLoginLogger.Object);
 
 			RefreshTokenService = new RefreshTokenService(

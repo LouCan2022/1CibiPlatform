@@ -4,6 +4,7 @@ public interface IUserManagementService
 {
 	Task<PaginatedResult<UsersDTO>> GetUsersAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken cancellationToken = default);
 	Task<PaginatedResult<UnApprovedUsersDTO>> GetUnApprovedUsersAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default);
+	Task<PaginatedResult<LockedUsersDTO>> GetLockedUsersAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken ct = default);
 	Task<PaginatedResult<ApplicationsDTO>> GetApplicationsAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken cancellationToken = default);
 	Task<PaginatedResult<SubMenusDTO>> GetSubMenusAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken cancellationToken = default);
 	Task<PaginatedResult<RolesDTO>> GetRolesAsync(int? PageNumber = 1, int? PageSize = 10, string? SearchTerm = null, CancellationToken cancellationToken = default);
@@ -12,7 +13,8 @@ public interface IUserManagementService
 	Task<bool> DeleteApplicationAsync(int AppId);
 	Task<bool> DeleteSubMenuAsync(int SubMenuId);
 	Task<bool> DeleteRoleAsync(int RoleId);
-	Task<bool> DeleteUserAppSbRoleAsync(int AppSubRoleId);
+	Task<bool> DeleteUserAppSubRoleAsync(int AppSubRoleId);
+	Task<bool> DeleteLockedUserAsync(Guid lockedUserId);
 
 	Task<bool> AddApplicationAsync(AddApplicationDTO addApplicationDTO);
 	Task<bool> AddSubMenuAsync(AddSubMenuDTO addSubMenuDTO);

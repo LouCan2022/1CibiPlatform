@@ -4,6 +4,7 @@ using BuildingBlocks.SharedServices.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 {
@@ -16,7 +17,6 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		public Mock<IPhilSysResultRepository> MockPhilSysResultRepository { get; private set; }
 		public Mock<IHttpClientFactory> MockHttpClientFactory { get; private set; }
 		public Mock<IPhilSysService> MockPhilSysService { get; private set; }
-		public Mock<HttpClient> MockHttpClient { get; private set; }
 
 		// Loggers
 		public Mock<ILogger<DeleteTransactionService>> MockDeleteTransactionLogger { get; private set; }
@@ -36,6 +36,7 @@ namespace Test.BackendAPI.Modules.PhilSys.UnitTests.Fixture
 		public PartnerSystemService PartnerSystemService { get; private set; }
 		public UpdateFaceLivenessSessionService UpdateFaceLivenessSessionService { get; private set; }
 		public PhilSysService PhilSysService { get; private set; }
+
 		public PhilSysServiceFixture()
 		{
 			// init mocks

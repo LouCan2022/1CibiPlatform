@@ -381,6 +381,28 @@ public class AuthPaths : IReverseProxyModule
 			),
 
 			new RouteDefinitionDTO(
+				RouteId: "GetLockedUserEntryPoint",
+				MatchPath: "auth/getlockedusers",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "auth/getlockedusers" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "DeleteLockedUserEntryPoint",
+				MatchPath: "auth/deletelockeduser/{lockUserId}",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Delete },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathRemovePrefix", "auth/" }
+				}
+			),
+
+			new RouteDefinitionDTO(
 				RouteId: "FrontEndEntryPoint",
 				MatchPath: "/{**catchall}",
 				ClusterId: GatewayConstants.OnePlatformUI

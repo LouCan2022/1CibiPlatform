@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Test.BackendAPI.Infrastructure.Auth.Infrastructure;
 
@@ -18,6 +19,7 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 	protected readonly AuthApplicationDbContext _dbContext;
 	protected readonly IHttpContextAccessor _httpContextAccessor;
 	protected readonly IConfiguration _configuration;
+	protected readonly HybridCache _hybridCache;
 
 	protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
 	{
@@ -28,6 +30,7 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		_dbContext = _scope.ServiceProvider.GetRequiredService<AuthApplicationDbContext>();
 		_httpContextAccessor = _scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
 		_configuration = _scope.ServiceProvider.GetRequiredService<IConfiguration>();
+		_hybridCache = _scope.ServiceProvider.GetRequiredService<HybridCache>();
 	}
 
 	// Runs before each test. Ensures database tables used in tests are cleaned to avoid cross-test pollution.
@@ -38,8 +41,15 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 			if (_dbContext is not null)
 			{
 
-				var sql = @"TRUNCATE TABLE ""AuthUserAppRoles"", ""AuthRefreshToken"", ""PasswordResetToken"", ""OtpVerification"", ""AuthSubmenu"", ""AuthRoles"", ""AuthUsers"", ""AuthApplications"" RESTART IDENTITY CASCADE;";
+				var sql = @"TRUNCATE TABLE ""AuthUserAppRoles"", ""AuthRefreshToken"", ""PasswordResetToken"", ""OtpVerification"", ""AuthAttempts"", ""AuthSubmenu"", ""AuthRoles"", ""AuthUsers"", ""AuthApplications"" RESTART IDENTITY CASCADE;";
 				await _dbContext.Database.ExecuteSqlRawAsync(sql);
+			}
+
+			// Clear HybridCache to avoid cross-test pollution
+			if (_hybridCache is not null)
+			{
+				await _hybridCache.RemoveByTagAsync("user_attempt");
+				await _hybridCache.RemoveByTagAsync("is_user_login");
 			}
 		}
 		catch (Exception ex)

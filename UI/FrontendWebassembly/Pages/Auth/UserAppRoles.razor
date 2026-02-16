@@ -13,14 +13,41 @@
                  @bind-ActivePanelIndex="_activeIndex"
                  OnActivePanelIndexChanged="OnTabChanged"
                  Class="philsys-custom-tabs mb-5">
-                <MudTabPanel Text="Approval" Class="@GetTabClass(0)" Style="text-transform:none; min-width:120px;" />
-                <MudTabPanel Text="User" Class="@GetTabClass(1)" Style="text-transform:none; min-width:120px;" />
-                <MudTabPanel Text="Appplication" Class="@GetTabClass(2)"  Style="text-transform:none; min-width: 120px;" />
-                <MudTabPanel Text="SubMenu" Class="@GetTabClass(3)" Style="text-transform:none; min-width: 120px;" />
-                <MudTabPanel Text="Role" Class="@GetTabClass(4)" Style="text-transform:none; min-width: 120px;" />
-                <MudTabPanel Text="User's AppSubRole" Class="@GetTabClass(5)" Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="Locked User" Class="@GetTabClass(0)" Style="text-transform:none; min-width:120px;" />
+                <MudTabPanel Text="Approval" Class="@GetTabClass(1)" Style="text-transform:none; min-width:120px;" />
+                <MudTabPanel Text="User" Class="@GetTabClass(2)" Style="text-transform:none; min-width:120px;" />
+                <MudTabPanel Text="Appplication" Class="@GetTabClass(3)"  Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="SubMenu" Class="@GetTabClass(4)" Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="Role" Class="@GetTabClass(5)" Style="text-transform:none; min-width: 120px;" />
+                <MudTabPanel Text="User's AppSubRole" Class="@GetTabClass(6)" Style="text-transform:none; min-width: 120px;" />
 </MudTabs>
 @if (_activeIndex == 0)
+{
+    <TableComponent TItem="LockedUsersDTO"
+                    @ref="lockedUsersTable"
+                    Title="Locked User/s"
+                    EnableSearch="true"
+                    LoadServerData="LoadLockedUsersServerData"
+                    SearchString="@searchStringLockedUser"
+                    ColumnCount="3"
+                    SearchStringChanged="@((string val) => searchStringLockedUser = val)">
+        <HeaderTemplate>
+            <MudTh>Email</MudTh>
+            <MudTh>Locked At</MudTh>
+            <MudTh>Unlock</MudTh>
+        </HeaderTemplate>
+
+        <RowTemplate Context="lockeduser">
+            <MudTd DataLabel="Email">@lockeduser.Email</MudTd>
+            <MudTd DataLabel="Locked At">@lockeduser.CreatedAt</MudTd>
+            <MudTd DataLabel="Unlock">
+                <MudIconButton Icon="@Icons.Material.Filled.LockOpen" Color="Color.Error" Size="Size.Medium"
+                               OnClick="@(() => ConfirmUnlockAccount(lockeduser.UserId))"></MudIconButton>
+            </MudTd>
+        </RowTemplate>
+    </TableComponent>
+}
+else if (_activeIndex == 1)
 {
     <TableComponent TItem="UnApprovedUsersDTO"
                     @ref="unapprovedUsersTable"
@@ -44,7 +71,7 @@
         </RowTemplate>
     </TableComponent>
 }
-else if (_activeIndex == 1)
+else if (_activeIndex == 2)
 {
     <TableComponent TItem="UsersDTO"
                     @ref="usersTable"
@@ -70,7 +97,7 @@ else if (_activeIndex == 1)
     </TableComponent>
 }
 
-else if (_activeIndex == 2)
+else if (_activeIndex == 3)
 {
     <TableComponent TItem="ApplicationsDTO"
                     @ref="applicationsTable"
@@ -104,7 +131,7 @@ else if (_activeIndex == 2)
     </TableComponent>
 }
 
-else if (_activeIndex == 3)
+else if (_activeIndex == 4)
 {
     <TableComponent TItem="SubMenusDTO"
                     @ref="subMenusTable"
@@ -142,7 +169,7 @@ else if (_activeIndex == 3)
     </TableComponent>
 }
 
-else if (_activeIndex == 4)
+else if (_activeIndex == 5)
 {
     <TableComponent TItem="RolesDTO"
                     @ref="rolesTable"
@@ -180,7 +207,7 @@ else if (_activeIndex == 4)
     </TableComponent>
 }
 
-else if (_activeIndex == 5)
+else if (_activeIndex == 6)
 {
     <TableComponent TItem="AppSubRolesDTO"
                     @ref="appSubRolesTable"
@@ -223,12 +250,14 @@ else if (_activeIndex == 5)
 @code {
     private int _activeIndex = 0;
     private string _searchStringUnApprovedUser;
+    private string _searchStringLockedUser;
     private string _searchStringUser;
     private string _searchStringApp;
     private string _searchStringSub;
     private string _searchStringRole;
     private string _searchStringAppSubRole;
     private TableComponent<UnApprovedUsersDTO> unapprovedUsersTable;
+    private TableComponent<LockedUsersDTO> lockedUsersTable;
     private TableComponent<UsersDTO> usersTable;
     private TableComponent<ApplicationsDTO> applicationsTable;
     private TableComponent<SubMenusDTO> subMenusTable;
@@ -307,6 +336,12 @@ else if (_activeIndex == 5)
         set => UpdateSearch(ref _searchStringUnApprovedUser, value, unapprovedUsersTable);
     }
 
+    private string searchStringLockedUser
+    {
+        get => _searchStringLockedUser;
+        set => UpdateSearch(ref _searchStringLockedUser, value, lockedUsersTable);
+    }
+
     private string searchStringUser
     {
         get => _searchStringUser;
@@ -360,6 +395,20 @@ else if (_activeIndex == 5)
             searchStringUnApprovedUser
         );
         return new TableData<UnApprovedUsersDTO>
+        {
+            TotalItems = (int)result.Count,
+            Items = result.Data
+        };
+    }
+
+    private async Task<TableData<LockedUsersDTO>> LoadLockedUsersServerData(TableState state, CancellationToken cancellationToken)
+    {
+        var result = await UserManagementService.GetLockedUsersAsync(
+            state.Page + 1,
+            state.PageSize,
+            searchStringUnApprovedUser
+        );
+        return new TableData<LockedUsersDTO>
         {
             TotalItems = (int)result.Count,
             Items = result.Data
@@ -502,6 +551,25 @@ else if (_activeIndex == 5)
         }
     }
 
+    private async Task ConfirmUnlockAccount(Guid id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", $"Are you sure you want to unlock this account?" },
+            { "ButtonText", "Unlock" }
+        };
+
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<DeleteDialogConfirmation>("Unlocking User Account", parameters, options)!;
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+           await DeleteLockedUser(id);
+        }
+    }
+
     // Command Execution 
     private async Task DeleteApplication(int AppId)
     {
@@ -526,8 +594,15 @@ else if (_activeIndex == 5)
 
     private async Task DeleteAppSubRole(int AppSubRoleId)
     {
-        await UserManagementService.DeleteUserAppSbRoleAsync(AppSubRoleId);
+        await UserManagementService.DeleteUserAppSubRoleAsync(AppSubRoleId);
         await appSubRolesTable.TableRef.ReloadServerData();
+        return;
+    }
+
+    private async Task DeleteLockedUser(Guid lockedUserId)
+    {
+        await UserManagementService.DeleteLockedUserAsync(lockedUserId);
+        await lockedUsersTable.TableRef.ReloadServerData();
         return;
     }
 

@@ -11,8 +11,9 @@ public class AuthCacheRepository : IAuthRepository
 	private const string AppSubRolesTag = "appsubroles";
 	private const string RolesTag = "roles";
 	private const string UnApprovedUsersTag = "unapprovedusers";
-
-
+	private const string LockedUsersTag = "lockedusers";
+	private const string UserLockoutTimeTag = "userlockoutdate";
+	private readonly string _userAttemptTag = "user_attempt";
 	public AuthCacheRepository(
 		IAuthRepository authRepository,
 		HybridCache hybridCache)
@@ -20,7 +21,6 @@ public class AuthCacheRepository : IAuthRepository
 		_authRepository = authRepository;
 		_hybridCache = hybridCache;
 	}
-
 
 	public async Task<PaginatedResult<UsersDTO>> GetUserAsync(
 		PaginationRequest paginationRequest,
@@ -112,6 +112,18 @@ public class AuthCacheRepository : IAuthRepository
 			cancellationToken: cancellationToken);
 	}
 
+	public async Task<PaginatedResult<AuthAttempts>> GetLockedUsersAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"lockedusers_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<AuthAttempts>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.GetLockedUsersAsync(req, token),
+			tags: [LockedUsersTag],
+			cancellationToken: cancellationToken);
+	}
+
 	public async Task<PaginatedResult<ApplicationsDTO>> SearchApplicationsAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
 	{
 		var cacheKey = $"applications_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}_search_{paginationRequest.SearchTerm}";
@@ -121,6 +133,18 @@ public class AuthCacheRepository : IAuthRepository
 			paginationRequest,
 			async (req, token) => await _authRepository.SearchApplicationsAsync(req, token),
 			tags: [ApplicationsTag],
+			cancellationToken: cancellationToken);
+	}
+
+	public async Task<PaginatedResult<AuthAttempts>> SearchLockedUserAsync(PaginationRequest paginationRequest, CancellationToken cancellationToken)
+	{
+		var cacheKey = $"lockedusers_page_{paginationRequest.PageIndex}_size_{paginationRequest.PageSize}_search_{paginationRequest.SearchTerm}";
+
+		return await _hybridCache.GetOrCreateAsync<PaginationRequest, PaginatedResult<AuthAttempts>>(
+			cacheKey,
+			paginationRequest,
+			async (req, token) => await _authRepository.SearchLockedUserAsync(req, token),
+			tags: [LockedUsersTag],
 			cancellationToken: cancellationToken);
 	}
 
@@ -418,7 +442,7 @@ public class AuthCacheRepository : IAuthRepository
 
 		if (updated != null)
 			await _hybridCache.RemoveByTagAsync(UsersTag);
-			await _hybridCache.RemoveByTagAsync(UnApprovedUsersTag);
+		await _hybridCache.RemoveByTagAsync(UnApprovedUsersTag);
 
 		return updated!;
 	}
@@ -438,5 +462,35 @@ public class AuthCacheRepository : IAuthRepository
 		return await _authRepository.GetUserAsync(email);
 	}
 
-	
+	public async Task<AuthAttempts> GetLockedUserAsync(Guid userId)
+	{
+		var cacheKey = $"userlockoutdate{userId}";
+
+		return await _hybridCache.GetOrCreateAsync<AuthAttempts>(
+			cacheKey,
+			async (token) => await _authRepository.GetLockedUserAsync(userId),
+			tags: [UserLockoutTimeTag]);
+	}
+	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
+	{
+		var cacheKey = $"{_userAttemptTag}_{lockedUser.UserId}";
+
+		var result = await _authRepository.DeleteLockedUserAsync(lockedUser);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(LockedUsersTag);
+		await _hybridCache.RemoveAsync(cacheKey);
+
+		return result;
+	}
+
+	public async Task<bool> SaveLockedUserAsync(AuthAttempts userAttempt)
+	{
+		var result = await _authRepository.SaveLockedUserAsync(userAttempt);
+
+		if (result)
+			await _hybridCache.RemoveByTagAsync(LockedUsersTag);
+
+		return result;
+	}
 }
