@@ -353,14 +353,14 @@ public class LoginService : ILoginService
 			CreatedAt = DateTime.UtcNow
 		};
 
+		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
+
 		// checking in cache if user is exist there(cache) so that we would not hit database prematurely 
-		if (currentAttempts == _maxFailedAttemptsBeforeLock)
+		if (currentAttempts == _maxFailedAttemptsBeforeLock && lockedUserfromDB is null)
 		{
 			bool IsSaved = await _authRepository.SaveLockedUserAsync(lockedUser);
 			return true;
-		}
-
-		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
+		}	
 
 		if (lockedUserfromDB is not null)
 		{
@@ -377,7 +377,6 @@ public class LoginService : ILoginService
 			{
 				return true;
 			}
-		
 		}
 
 		if (currentAttempts >= _maxFailedAttemptsBeforeLock)
