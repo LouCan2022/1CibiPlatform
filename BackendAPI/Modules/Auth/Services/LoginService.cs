@@ -355,6 +355,7 @@ public class LoginService : ILoginService
 
 		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
 
+
 		// checking in cache if user is exist there(cache) so that we would not hit database prematurely 
 		if (currentAttempts == _maxFailedAttemptsBeforeLock && lockedUserfromDB is null)
 		{
@@ -368,7 +369,10 @@ public class LoginService : ILoginService
 			var attempts = lockedUserfromDB.Attempts;
 			if (timeDifference.TotalMinutes >= _accountLockDuration)
 			{
+				lockedUser = null;
+				var userId = lockedUserfromDB.UserId;
 				bool IsDeleted = await _authRepository.DeleteLockedUserAsync(lockedUserfromDB);
+				await RemoveAttempts(userId.ToString());
 				return false;
 			}
 

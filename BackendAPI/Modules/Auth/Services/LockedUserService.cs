@@ -21,11 +21,13 @@ public class LockedUserService : ILockerUserService
 		};
 
 		var lockedUser = await _authRepository.GetLockedUserAsync(lockedUserId);
+
 		if (lockedUser == null)
 		{
 			_logger.LogError("{LockedUser} was not found during delete operation: {@Context}", lockedUserId, logContext);
 			throw new NotFoundException($"Locked user with ID {lockedUserId} was not found.");
 		}
+
 		var isDeleted = await _authRepository.DeleteLockedUserAsync(lockedUser);
 		return isDeleted;
 	}
