@@ -1,5 +1,6 @@
 ﻿using Auth.Data.Entities;
 using Auth.Features.UserManagement.Command.DeleteLockedUser;
+using Auth.Features.UserManagement.Query.GetApplications;
 using Auth.Features.UserManagement.Query.GetLockedUsers;
 using BuildingBlocks.Exceptions;
 using FluentAssertions;
@@ -31,6 +32,24 @@ public class LockedUserIntegrationTests : BaseIntegrationTest
 		result.LockedUsers.Should().NotBeNull();
 		result.LockedUsers.Data.Should().NotBeNull();
 		result.LockedUsers.Data.Count().Should().Be(3);
+	}
+
+	[Fact]
+	public async Task GetLockedUsers_ShouldReturnLockedUserList_BasedOnSearchTerm()
+	{
+		// Arrange
+		await SeedLockedUsers();
+
+		var query = new GetLockedUsersQueryRequest(PageNumber: 1, PageSize: 1, SearchTerm: "a@example.com");
+
+		// Act
+		var result = await _sender.Send(query);
+
+		// Assert
+		result.Should().NotBeNull();
+
+		result.LockedUsers.Count.Should().Be(1);
+		result.LockedUsers.Data.ElementAt(0).Email.Should().Be("a@example.com");
 	}
 
 	[Fact]
