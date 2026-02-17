@@ -209,7 +209,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 			Email = "email@example.com",
 			Attempts = 3,
 			Message = "Account is locked due to too many failed attempts.",
-			CreatedAt = DateTime.UtcNow.AddMinutes(-20) // Locked 20 minutes ago (expired)
+			CreatedAt = DateTime.UtcNow.AddMinutes(-70) // Locked 20 minutes ago (expired)
 		};
 
 		_fixture.MockAuthRepository.Setup(x => x.GetUserDataAsync(It.IsAny<LoginWebCred>())).ReturnsAsync(loginDto);

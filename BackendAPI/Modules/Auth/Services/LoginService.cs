@@ -391,24 +391,6 @@ public class LoginService : ILoginService
 		return false;
 	}
 
-	/// Checks if user is still locked out. Returns true if attempts >= 3 and cache hasn't expired yet
-	protected virtual async Task<bool> IsAccountLocked(string userid)
-	{
-		var currentAttempts = await GetAttempts(userid);
-		return currentAttempts >= 3;
-	}
-
-	/// Gets the timestamp when the lockout will expire
-	protected virtual async Task<DateTime?> GetLockoutExpirationTime(string userid)
-	{
-		var attempts = await GetAttempts(userid);
-		if (attempts >= 3)
-		{
-			return DateTime.UtcNow.AddMinutes(15);
-		}
-		return null;
-	}
-
 	protected virtual void SetAccessTokenCookie(
 		string accessToken)
 	{
