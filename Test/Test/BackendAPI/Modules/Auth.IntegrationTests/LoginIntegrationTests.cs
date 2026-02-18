@@ -411,7 +411,8 @@ public class LoginIntegrationTests : BaseIntegrationTest
 			Email = "locked@example.com",
 			Attempts = 4,
 			Message = "Account is locked due to too many failed attempts.",
-			CreatedAt = DateTime.UtcNow.AddMinutes(-5) // Locked 5 minutes ago, still within lockout period
+			CreatedAt = DateTime.UtcNow.AddMinutes(-5), // Locked 5 minutes ago, still within lockout period
+			LockReleaseAt = DateTime.UtcNow.AddMinutes(40)
 		};
 
 		var userRole = new List<AuthRole>
