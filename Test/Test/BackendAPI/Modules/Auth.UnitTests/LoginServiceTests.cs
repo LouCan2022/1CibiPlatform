@@ -165,7 +165,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 		// Fourth attempt (attempt = 4, account gets locked)
 		var act = async () => await service.LoginAsync("user", "wrong4");
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 	}
 
 	[Fact]
@@ -193,7 +193,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 
 		// Assert
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 	}
 
 	[Fact]
@@ -209,7 +209,7 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 			Email = "email@example.com",
 			Attempts = 3,
 			Message = "Account is locked due to too many failed attempts.",
-			CreatedAt = DateTime.UtcNow.AddMinutes(-20) // Locked 20 minutes ago (expired)
+			CreatedAt = DateTime.UtcNow.AddMinutes(-70) // Locked 20 minutes ago (expired)
 		};
 
 		_fixture.MockAuthRepository.Setup(x => x.GetUserDataAsync(It.IsAny<LoginWebCred>())).ReturnsAsync(loginDto);

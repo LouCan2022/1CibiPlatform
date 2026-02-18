@@ -85,7 +85,7 @@ public class LoginService : ILoginService
 		if (isAlreadyLocked)
 		{
 			_logger.LogWarning("Account is locked due to too many failed attempts: {@Context}", logContext);
-			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 		}
 
 		// verifying password
@@ -104,7 +104,7 @@ public class LoginService : ILoginService
 			if (errorAttempts)
 			{
 				_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
-				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 			}
 
 			throw new NotFoundException("Invalid username or password.");
@@ -190,7 +190,7 @@ public class LoginService : ILoginService
 		if (isAlreadyLocked)
 		{
 			_logger.LogWarning("Account is locked due to too many failed attempts: {@Context}", logContext);
-			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+			throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 		}
 
 		// verifying password
@@ -209,7 +209,7 @@ public class LoginService : ILoginService
 			if (errorAttempts)
 			{
 				_logger.LogWarning("Account temporarily locked due to too many failed attempts: {@Context}", logContext);
-				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again after {_accountLockDuration} minutes.");
+				throw new UnauthorizedAccessException($"Too many failed login attempts. Please try again later.");
 			}
 
 			throw new NotFoundException("Invalid username or password.");
@@ -355,6 +355,7 @@ public class LoginService : ILoginService
 
 		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
 
+
 		// checking in cache if user is exist there(cache) so that we would not hit database prematurely 
 		if (currentAttempts == _maxFailedAttemptsBeforeLock && lockedUserfromDB is null)
 		{
@@ -368,6 +369,8 @@ public class LoginService : ILoginService
 			var attempts = lockedUserfromDB.Attempts;
 			if (timeDifference.TotalMinutes >= _accountLockDuration)
 			{
+				lockedUser = null;
+				var userId = lockedUserfromDB.UserId;
 				bool IsDeleted = await _authRepository.DeleteLockedUserAsync(lockedUserfromDB);
 				return false;
 			}
@@ -386,24 +389,6 @@ public class LoginService : ILoginService
 		}
 
 		return false;
-	}
-
-	/// Checks if user is still locked out. Returns true if attempts >= 3 and cache hasn't expired yet
-	protected virtual async Task<bool> IsAccountLocked(string userid)
-	{
-		var currentAttempts = await GetAttempts(userid);
-		return currentAttempts >= 3;
-	}
-
-	/// Gets the timestamp when the lockout will expire
-	protected virtual async Task<DateTime?> GetLockoutExpirationTime(string userid)
-	{
-		var attempts = await GetAttempts(userid);
-		if (attempts >= 3)
-		{
-			return DateTime.UtcNow.AddMinutes(15);
-		}
-		return null;
 	}
 
 	protected virtual void SetAccessTokenCookie(

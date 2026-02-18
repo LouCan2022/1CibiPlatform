@@ -12,8 +12,9 @@ public class AuthCacheRepository : IAuthRepository
 	private const string RolesTag = "roles";
 	private const string UnApprovedUsersTag = "unapprovedusers";
 	private const string LockedUsersTag = "lockedusers";
-	private const string UserLockoutTimeTag = "userlockoutdate";
+	private readonly string UserLockoutDate = "userlockoutdate";
 	private readonly string _userAttemptTag = "user_attempt";
+
 	public AuthCacheRepository(
 		IAuthRepository authRepository,
 		HybridCache hybridCache)
@@ -464,22 +465,27 @@ public class AuthCacheRepository : IAuthRepository
 
 	public async Task<AuthAttempts> GetLockedUserAsync(Guid userId)
 	{
-		var cacheKey = $"userlockoutdate{userId}";
+		var cacheKey = $"{UserLockoutDate}_{userId}";
 
 		return await _hybridCache.GetOrCreateAsync<AuthAttempts>(
 			cacheKey,
 			async (token) => await _authRepository.GetLockedUserAsync(userId),
-			tags: [UserLockoutTimeTag]);
+			tags: [UserLockoutDate]);
 	}
+
 	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
 	{
-		var cacheKey = $"{_userAttemptTag}_{lockedUser.UserId}";
+		var cachekeyForDate = $"{UserLockoutDate}_{lockedUser.UserId}";
+		var cacheKeyForAttempt = $"{_userAttemptTag}_{lockedUser.UserId}";
 
 		var result = await _authRepository.DeleteLockedUserAsync(lockedUser);
 
-		if (result)
+		if(result)
+		{
+			await  _hybridCache.RemoveAsync(cacheKeyForAttempt);
 			await _hybridCache.RemoveByTagAsync(LockedUsersTag);
-		await _hybridCache.RemoveAsync(cacheKey);
+		    await _hybridCache.RemoveAsync(cachekeyForDate);
+		}
 
 		return result;
 	}
@@ -487,9 +493,13 @@ public class AuthCacheRepository : IAuthRepository
 	public async Task<bool> SaveLockedUserAsync(AuthAttempts userAttempt)
 	{
 		var result = await _authRepository.SaveLockedUserAsync(userAttempt);
+		var cachekeyForDate = $"{UserLockoutDate}_{userAttempt.UserId}";
 
 		if (result)
+		{
 			await _hybridCache.RemoveByTagAsync(LockedUsersTag);
+			await _hybridCache.RemoveAsync(cachekeyForDate);
+		}
 
 		return result;
 	}

@@ -50,6 +50,8 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 			{
 				await _hybridCache.RemoveByTagAsync("user_attempt");
 				await _hybridCache.RemoveByTagAsync("is_user_login");
+				await _hybridCache.RemoveByTagAsync("lockedusers");
+				await _hybridCache.RemoveByTagAsync("userlockoutdate");
 			}
 		}
 		catch (Exception ex)

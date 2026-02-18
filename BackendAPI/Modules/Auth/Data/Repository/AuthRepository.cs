@@ -140,8 +140,7 @@ public class AuthRepository : IAuthRepository
 	public async Task<AuthAttempts> GetLockedUserAsync(Guid userId)
 	{
 		var lockedUser = await _dbcontext.AuthAttempts
-					 .Where(aa => aa.UserId == userId)
-					 .FirstOrDefaultAsync();
+					 .FirstOrDefaultAsync(aa => aa.UserId == userId);
 		return lockedUser!;
 	}
 
@@ -559,9 +558,8 @@ public class AuthRepository : IAuthRepository
 
 	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
 	{
-		_dbcontext.AuthAttempts.Remove(lockedUser);
-
-		await _dbcontext.SaveChangesAsync();
+	    await _dbcontext.AuthAttempts.
+			  Where(aa => aa.UserId == lockedUser.UserId).ExecuteDeleteAsync();
 
 		return true;
 	}
