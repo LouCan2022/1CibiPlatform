@@ -44,10 +44,8 @@ public class LoginService : ILoginService
 		_httpCookieOnlyRefreshTokenKey = _configuration.GetValue<string>("AuthWeb:AuthWebHttpCookieOnlyKey") ?? "";
 		_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
 		_isHttps = _configuration.GetValue<bool>("AuthWeb:isHttps");
-		_accountLockDuration = _configuration.GetValue<int?>("AuthWeb:AccountLockDurationInMinutes")
-					  ?? int.Parse(Environment.GetEnvironmentVariable("AUTHWEB__ACCOUNTLOCKDURATION")!);
-		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int?>("AuthWeb:MaxFailedAttemptsBeforeLockout")
-					  ?? int.Parse(Environment.GetEnvironmentVariable("AUTHWEB__MAXFAILEDATTEMPTSBEFORELOCKOUT")!);
+		_accountLockDuration = _configuration.GetValue<int>("AuthWeb:AccountLockDurationInMinutes");
+		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeLockout");
 	}
 
 	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
