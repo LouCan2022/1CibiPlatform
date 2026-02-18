@@ -32,9 +32,9 @@ public interface IAuthRepository
 	Task<AuthRefreshToken> SearchUserRefreshToken(Guid userId, string refreshToken);
 
 	// Delete methods
-	Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser);
+	Task<bool> DeleteLockedUserAsync(AuthAttempts authAttempts);
 
-	// Save methods
+	// Save methodsZ
 	Task<bool> SaveUserAsync(Authusers user);
 	Task<bool> SaveRefreshTokenAsync(Guid userId, string hashToken, DateTime expiryDate);
 	Task<bool> SaveToResetPasswordToken(PasswordResetToken passwordResetToken);

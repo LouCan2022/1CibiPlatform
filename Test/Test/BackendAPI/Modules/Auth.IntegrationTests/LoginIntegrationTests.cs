@@ -146,7 +146,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		var command4 = new LoginCommand("john@example.com", "wrongpassword3");
 		Func<Task> act4 = async () => { await _sender.Send(command4); };
 		await act3.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 
 		// Verify account is now locked
 		var lockedAttempts = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
@@ -167,7 +167,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 
 		// Assert
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 	}
 
 	[Fact]
@@ -209,7 +209,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 		var command4 = new LoginWebCommand(new LoginWebCred("john@example.com", "wrongpassword3", false));
 		Func<Task> act4 = async () => { await _sender.Send(command4); };
 		await act4.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 
 		// Verify account is now locked
 		var lockedAttempts = await _dbContext.AuthAttempts.FirstOrDefaultAsync(a => a.UserId == userId);
@@ -230,7 +230,7 @@ public class LoginIntegrationTests : BaseIntegrationTest
 
 		// Assert
 		await act.Should().ThrowAsync<UnauthorizedAccessException>()
-			.WithMessage("Too many failed login attempts. Please try again after 15 minutes.");
+			.WithMessage("Too many failed login attempts. Please try again later.");
 	}
 
 	[Fact]
