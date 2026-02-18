@@ -348,7 +348,8 @@ public class LoginService : ILoginService
 			Email = email,
 			Attempts = currentAttempts,
 			Message = "Account is locked due to too many failed attempts.",
-			CreatedAt = DateTime.UtcNow
+			CreatedAt = DateTime.UtcNow,
+			LockReleaseAt = DateTime.UtcNow.AddMinutes(_accountLockDuration)
 		};
 
 		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
@@ -363,9 +364,8 @@ public class LoginService : ILoginService
 
 		if (lockedUserfromDB is not null)
 		{
-			var timeDifference = DateTime.UtcNow - lockedUserfromDB.CreatedAt;
 			var attempts = lockedUserfromDB.Attempts;
-			if (timeDifference.TotalMinutes >= _accountLockDuration)
+			if (DateTime.UtcNow >= lockedUserfromDB.LockReleaseAt)
 			{
 				lockedUser = null;
 				var userId = lockedUserfromDB.UserId;

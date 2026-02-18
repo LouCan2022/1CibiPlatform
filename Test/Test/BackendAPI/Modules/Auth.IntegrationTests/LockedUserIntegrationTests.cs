@@ -100,9 +100,9 @@ public class LockedUserIntegrationTests : BaseIntegrationTest
 	{
 		var attempts = new List<AuthAttempts>
 		{
-			new AuthAttempts { UserId = Guid.NewGuid(), Message = "Account is locked due to too many failed attempts.", Email = "a@example.com", Attempts = 4, CreatedAt = DateTime.UtcNow },
-			new AuthAttempts { UserId = Guid.NewGuid(), Message = "Account is locked due to too many failed attempts.", Email = "b@example.com", Attempts = 4, CreatedAt = DateTime.UtcNow },
-			new AuthAttempts { UserId = Guid.NewGuid(), Message = "Account is locked due to too many failed attempts.", Email = "c@example.com", Attempts = 5, CreatedAt = DateTime.UtcNow }
+			new AuthAttempts { UserId = Guid.NewGuid(), Message = "Account is locked due to too many failed attempts.", Email = "a@example.com", Attempts = 4, CreatedAt = DateTime.UtcNow, LockReleaseAt = DateTime.UtcNow.AddMinutes(40) },
+			new AuthAttempts { UserId = Guid.NewGuid(), Message = "Account is locked due to too many failed attempts.", Email = "b@example.com", Attempts = 4, CreatedAt = DateTime.UtcNow, LockReleaseAt = DateTime.UtcNow.AddMinutes(30) },
+			new AuthAttempts { UserId = Guid.NewGuid(), Message = "Account is locked due to too many failed attempts.", Email = "c@example.com", Attempts = 5, CreatedAt = DateTime.UtcNow, LockReleaseAt = DateTime.UtcNow.AddMinutes(20) }
 		};
 
 		_dbContext.AuthAttempts.AddRange(attempts);
