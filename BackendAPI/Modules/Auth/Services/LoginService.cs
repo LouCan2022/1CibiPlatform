@@ -44,10 +44,8 @@ public class LoginService : ILoginService
 		_httpCookieOnlyRefreshTokenKey = _configuration.GetValue<string>("AuthWeb:AuthWebHttpCookieOnlyKey") ?? "";
 		_cookieExpiryinDaysKey = _configuration.GetValue<int>("AuthWeb:CookieExpiryInDayIsRememberMe");
 		_isHttps = _configuration.GetValue<bool>("AuthWeb:isHttps");
-		_accountLockDuration = _configuration.GetValue<int?>("AuthWeb:AccountLockDurationInMinutes")
-					  ?? int.Parse(Environment.GetEnvironmentVariable("AUTHWEB__ACCOUNTLOCKDURATION")!);
-		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int?>("AuthWeb:MaxFailedAttemptsBeforeLockout")
-					  ?? int.Parse(Environment.GetEnvironmentVariable("AUTHWEB__MAXFAILEDATTEMPTSBEFORELOCKOUT")!);
+		_accountLockDuration = _configuration.GetValue<int>("AuthWeb:AccountLockDurationInMinutes");
+		_maxFailedAttemptsBeforeLock = _configuration.GetValue<int>("AuthWeb:MaxFailedAttemptsBeforeLockout");
 	}
 
 	public async Task<LoginResponseDTO> LoginAsync(string username, string password)
@@ -350,7 +348,8 @@ public class LoginService : ILoginService
 			Email = email,
 			Attempts = currentAttempts,
 			Message = "Account is locked due to too many failed attempts.",
-			CreatedAt = DateTime.UtcNow
+			CreatedAt = DateTime.UtcNow,
+			LockReleaseAt = DateTime.UtcNow.AddMinutes(_accountLockDuration)
 		};
 
 		var lockedUserfromDB = await _authRepository.GetLockedUserAsync(UserID);
@@ -365,9 +364,8 @@ public class LoginService : ILoginService
 
 		if (lockedUserfromDB is not null)
 		{
-			var timeDifference = DateTime.UtcNow - lockedUserfromDB.CreatedAt;
 			var attempts = lockedUserfromDB.Attempts;
-			if (timeDifference.TotalMinutes >= _accountLockDuration)
+			if (DateTime.UtcNow >= lockedUserfromDB.LockReleaseAt)
 			{
 				lockedUser = null;
 				var userId = lockedUserfromDB.UserId;

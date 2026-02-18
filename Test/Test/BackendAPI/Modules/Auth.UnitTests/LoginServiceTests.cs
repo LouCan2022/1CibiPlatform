@@ -101,7 +101,8 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 						Email = "email@example.com",
 						Attempts = 4,
 						Message = "Account is locked due to too many failed attempts.",
-						CreatedAt = DateTime.UtcNow
+						CreatedAt = DateTime.UtcNow,
+						LockReleaseAt = DateTime.UtcNow.AddMinutes(40)
 					};
 				}
 				return null;
@@ -181,7 +182,8 @@ public class LoginServiceTests : IClassFixture<AuthServiceFixture>
 			Email = "email@example.com",
 			Attempts = 4,
 			Message = "Account is locked due to too many failed attempts.",
-			CreatedAt = DateTime.UtcNow.AddMinutes(-5) // Locked 5 minutes ago
+			CreatedAt = DateTime.UtcNow.AddMinutes(-5), // Locked 5 minutes ago
+			LockReleaseAt = DateTime.UtcNow.AddMinutes(40)
 		};
 
 		_fixture.MockAuthRepository.Setup(x => x.GetUserDataAsync(It.IsAny<LoginWebCred>())).ReturnsAsync(loginDto);

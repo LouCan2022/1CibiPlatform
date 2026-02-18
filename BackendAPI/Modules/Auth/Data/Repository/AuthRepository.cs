@@ -111,10 +111,12 @@ public class AuthRepository : IAuthRepository
 			.LongCountAsync(cancellationToken);
 
 		var lockedUsers = await _dbcontext.AuthAttempts
+						.Where(aa => aa.LockReleaseAt > DateTime.UtcNow)
 						.OrderBy(a => a.UserId)
 						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 						.Take(paginationRequest.PageSize)
 						.Select(aa => new AuthAttempts { 
+							LockReleaseAt = aa.LockReleaseAt,	
 							CreatedAt = aa.CreatedAt, 
 							Email = aa.Email,
 							UserId = aa.UserId})
@@ -251,10 +253,12 @@ public class AuthRepository : IAuthRepository
 		var totalRecords = await usersQuery.CountAsync(cancellationToken);
 
 		var lockedUsers = await usersQuery
+					.Where(aa => aa.LockReleaseAt > DateTime.UtcNow)
 					.OrderBy(aa => aa.UserId)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
 					.Select(aa => new AuthAttempts {
+						LockReleaseAt = aa.LockReleaseAt,
 						UserId = aa.UserId,
 						Email = aa.Email, 
 						CreatedAt = aa.CreatedAt
