@@ -3,6 +3,7 @@
 @inject IUserManagementService UserManagementService
 @inject IDialogService DialogService
 @inherits SecurePageBase
+@inject IConfiguration Configuration
 @attribute [RequirePermission(3, 3)]
 
 <MudTabs Rounded="false"
@@ -34,12 +35,14 @@
         <HeaderTemplate>
             <MudTh>Email</MudTh>
             <MudTh>Locked At</MudTh>
+            <MudTh>Lock Release At</MudTh>
             <MudTh>Unlock</MudTh>
         </HeaderTemplate>
 
         <RowTemplate Context="lockeduser">
             <MudTd DataLabel="Email">@lockeduser.Email</MudTd>
             <MudTd DataLabel="Locked At">@lockeduser.CreatedAt</MudTd>
+            <MudTd DataLabel="Locked Release At">@lockeduser.LockReleaseAt</MudTd>
             <MudTd DataLabel="Unlock">
                 <MudIconButton Icon="@Icons.Material.Filled.LockOpen" Color="Color.Error" Size="Size.Medium"
                                OnClick="@(() => ConfirmUnlockAccount(lockeduser.UserId))"></MudIconButton>
@@ -263,6 +266,12 @@ else if (_activeIndex == 6)
     private TableComponent<SubMenusDTO> subMenusTable;
     private TableComponent<RolesDTO> rolesTable;
     private TableComponent<AppSubRolesDTO> appSubRolesTable;
+    private int _accountLockDuration;
+
+    protected override void OnInitialized()
+    {
+        _accountLockDuration = Configuration.GetValue<int>("AuthWeb:AccountLockDurationInMinutes");
+    }
 
     private void OnTabChanged(int index)
     {
