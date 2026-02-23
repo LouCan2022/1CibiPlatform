@@ -41,5 +41,5 @@ global using AIAgent.Services.PolicyIngestion;
 global using Microsoft.Extensions.AI;
 global using YamlDotNet.RepresentationModel;
 global using AIAgent.Features.AskAI;
-
+global using AIAgent.Services.DownloadPolicyTemplate;
 

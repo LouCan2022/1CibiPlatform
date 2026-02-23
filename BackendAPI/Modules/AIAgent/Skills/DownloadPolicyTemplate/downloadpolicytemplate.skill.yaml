@@ -1,0 +1,21 @@
+name: DownloadPolicyTemplate
+description: Retrieves the policy template file download URL.
+
+input:
+  type: object
+  properties: {}
+
+output:
+  type: object
+  properties:
+    Message:
+      type: string
+      description: Status message indicating the template is ready for download
+    DownloadUrl:
+      type: string
+      description: URL to download the policy template file
+
+examples:
+  - output:
+      Message: "Template is ready for download."
+      DownloadUrl: "https://storage.example.com/policy-templates/policy-template.xlsx"

@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="BackendAPI\BuildingBlocks.UnitTests\" />
-    <Folder Include="BackendAPI\Modules\AIAgent.UnitTests\PolicyQuestionAnswering\" />
     <Folder Include="BackendAPI\Modules\CNX.UnitTests\" />
     <Folder Include="BackendAPI\Modules\CNX.IntegrationTests\" />
     <Folder Include="BackendAPI\Modules\AIAgent.IntegrationTests\" />
