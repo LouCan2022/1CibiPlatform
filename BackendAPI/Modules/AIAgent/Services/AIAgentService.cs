@@ -8,6 +8,12 @@ public class AIAgentService : IAIAgentService
 	private readonly SkillRegistry _skillRegistry;
 	private readonly ConcurrentDictionary<string, List<(string Role, string Content)>> _conversations = new();
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _userLocks = new();
+	private static readonly HashSet<string> FileInputKeys = new(StringComparer.OrdinalIgnoreCase)
+	{
+		"fileData",
+		"fileName",
+		"base64File"
+	};
 
 	private const int MaxHistoryMessages = 20;
 
@@ -82,14 +88,6 @@ public class AIAgentService : IAIAgentService
 		_logger.LogInformation("User {UserId} explicitly requested skill: {SkillName}", userId, explicitSkillName);
 
 
-		//Validate uploadfile if null
-		if (uploadedFile == null)
-		{
-			_logger.LogWarning("No file uploaded for skill {SkillName} by user {UserId}", explicitSkillName, userId);
-			throw new InvalidOperationException("A file must be uploaded to use this skill.");
-		}
-
-
 		if (!_skillRegistry.TryGet(explicitSkillName, out var skillDef) || skillDef?.ImplementationType == null)
 		{
 			var errorMsg = $"Skill '{explicitSkillName}' not found or not implemented.";
@@ -103,6 +101,14 @@ public class AIAgentService : IAIAgentService
 
 			return new AIAnswerDTO(new List<string> { errorMsg }, null);
 		}
+
+		//Validate uploadfile if null
+		if (uploadedFile == null && RequiresUploadedFile(skillDef))
+		{
+			_logger.LogWarning("No file uploaded for skill {SkillName} by user {UserId}", explicitSkillName, userId);
+			throw new InvalidOperationException("A file must be uploaded to use this skill.");
+		}
+
 
 		_logger.LogDebug("Creating skill instance for {SkillName} with type {ImplementationType}",
 			explicitSkillName, skillDef.ImplementationType.Name);
@@ -173,7 +179,71 @@ public class AIAgentService : IAIAgentService
 			};
 		}
 
-		return new { UserQuestion = question };
+		return new
+		{
+			UserQuestion = question,
+			HistoryText = historyText,
+			Skills = skills
+		};
+	}
+
+	private bool RequiresUploadedFile(SkillDescriptor skillDef)
+	{
+		if (string.IsNullOrWhiteSpace(skillDef.ManifestPath) || !File.Exists(skillDef.ManifestPath))
+		{
+			return true;
+		}
+
+		try
+		{
+			var yamlText = File.ReadAllText(skillDef.ManifestPath);
+			var yaml = new YamlStream();
+			yaml.Load(new StringReader(yamlText));
+			if (!yaml.Documents.Any())
+			{
+				return true;
+			}
+
+			if (yaml.Documents[0].RootNode is not YamlMappingNode root)
+			{
+				return true;
+			}
+
+			if (!root.Children.TryGetValue(new YamlScalarNode("input"), out var inputNode))
+			{
+				return false;
+			}
+
+			if (inputNode is not YamlMappingNode inputMapping)
+			{
+				return false;
+			}
+
+			if (!inputMapping.Children.TryGetValue(new YamlScalarNode("required"), out var requiredNode))
+			{
+				return false;
+			}
+
+			if (requiredNode is not YamlSequenceNode requiredSequence)
+			{
+				return false;
+			}
+
+			foreach (var required in requiredSequence.Children.OfType<YamlScalarNode>())
+			{
+				if (!string.IsNullOrWhiteSpace(required.Value) && FileInputKeys.Contains(required.Value))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Failed to parse skill manifest for {SkillName} at {ManifestPath}", skillDef.Name, skillDef.ManifestPath);
+			return true;
+		}
 	}
 
 
