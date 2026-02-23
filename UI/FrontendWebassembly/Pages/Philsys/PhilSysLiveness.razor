@@ -126,6 +126,8 @@
         showLoader = true;
         StateHasChanged();
 
+        byte[] photoBytes = Convert.FromBase64String(photo);
+
         information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId, photo);
         _completed = true;
 
