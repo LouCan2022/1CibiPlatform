@@ -203,12 +203,8 @@
 
                 <!-- Input Area with File Upload -->
                 <div class="input-area"
-                     @ondragenter="HandleDragEnter"
                      @ondragenter:preventDefault
-                     @ondragleave="HandleDragLeave"
-                     @ondragover="HandleDragOver"
                      @ondragover:preventDefault
-                     @ondrop="HandleDrop"
                      @ondrop:preventDefault>
                     
                     <div class="input-field-container">
@@ -450,8 +446,8 @@
                 return;
             }
 
-             // If the service returned a result with download URL, update the last AI message
-             // If download URL is present, we may need to update the last message
+            // If the service returned a result with download URL, update the last AI message
+            // If download URL is present, we may need to update the last message
             if (!string.IsNullOrEmpty(result.DownloadUrl))
             {
                 // Find the last assistant message and update it with download URL
@@ -474,21 +470,21 @@
                     return;
                 }
             }
-    }
-    catch (OperationCanceledException)
-    {
-        var canceledHtml = Markdown.ToHtml("**Request canceled.**", _mdPipeline);
-        Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Request canceled.", Html = canceledHtml, Time = DateTime.Now });
-        _currentRequestActive = false;
-    }
-    catch (Exception ex)
-    {
-        var errorHtml = Markdown.ToHtml("**Error:** " + ex.Message, _mdPipeline);
-        Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Error: " + ex.Message, Html = errorHtml, Time = DateTime.Now });
-        _currentRequestActive = false;
-    }
-    finally
-    {
+        }
+        catch (OperationCanceledException)
+        {
+            var canceledHtml = Markdown.ToHtml("**Request canceled.**", _mdPipeline);
+            Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Request canceled.", Html = canceledHtml, Time = DateTime.Now });
+            _currentRequestActive = false;
+        }
+        catch (Exception ex)
+        {
+            var errorHtml = Markdown.ToHtml("**Error:** " + ex.Message, _mdPipeline);
+            Messages.Add(new ChatMessage { Sender = "Assistant", Text = "Error: " + ex.Message, Html = errorHtml, Time = DateTime.Now });
+            _currentRequestActive = false;
+        }
+        finally
+        {
             isSending = false;
             IsTyping = false;
             _cts?.Dispose();
@@ -521,6 +517,7 @@
     // Trigger hidden file input click
     private async Task TriggerFileInput()
     {
+        await Task.Delay(50);
         // Use JavaScript interop to trigger file input click
         await JS.InvokeVoidAsync("triggerFileInput", "fileInput");
     }
@@ -530,41 +527,6 @@
     {
         SelectedFile = null;
         StateHasChanged();
-    }
-
-    // Handle drag enter event
-    private void HandleDragEnter()
-    {
-        IsDragging = true;
-        StateHasChanged();
-    }
-
-    // Handle drag over event (required to allow drop)
-    private void HandleDragOver(DragEventArgs e)
-    {
-        // Keep the drag state active
-        IsDragging = true;
-    }
-
-    // Handle drag leave event
-    private void HandleDragLeave()
-    {
-        IsDragging = false;
-        StateHasChanged();
-    }
-
-    // Handle drop event - prevent default browser behavior (opening/downloading file)
-    private void HandleDrop(DragEventArgs e)
-    {
-        // Prevent browser from opening/downloading the file
-        IsDragging = false;
-        
-        // Note: In Blazor WASM, we cannot access e.DataTransfer.Files directly
-        // So we just hide the overlay and let user click to select the file
-        StateHasChanged();
-        
-        // Auto-trigger file input when something is dropped
-        _ = TriggerFileInput();
     }
 
     // Get appropriate icon based on file extension
