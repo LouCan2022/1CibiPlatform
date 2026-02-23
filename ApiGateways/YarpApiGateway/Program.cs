@@ -47,6 +47,21 @@ var app = builder.Build();
 
 app.UseRouting();
 
+// CSP Configuration
+app.Use(async (context, next) =>
+{
+	context.Response.Headers["Content-Security-Policy"] =
+		"default-src 'self'; " +
+		"script-src 'self'; " +
+		"style-src 'self' 'unsafe-inline'; " +
+		"img-src 'self' data: blob:; " +
+		"font-src 'self'; " +
+		"connect-src 'self' https: wss:; " +
+		"object-src 'none';";
+
+	await next();
+});
+
 // enable middleware
 app.UseRateLimiter();
 app.UseWebSockets();
