@@ -1,48 +1,47 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
-    <PackageReference Include="FluentAssertions" Version="[7.0.0]" />
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Moq.EntityFrameworkCore" Version="8.0.1.2" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="Testcontainers.PostgreSql" Version="4.8.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="xunit" Version="2.9.2" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+		<PackageReference Include="FluentAssertions" Version="[7.0.0]" />
+		<PackageReference Include="Moq" Version="4.20.72" />
+		<PackageReference Include="Moq.EntityFrameworkCore" Version="8.0.1.2" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+		<PackageReference Include="Testcontainers.PostgreSql" Version="4.8.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="BackendAPI\BuildingBlocks.UnitTests\" />
-    <Folder Include="BackendAPI\Modules\AIAgent.UnitTests\PolicyQuestionAnswering\" />
-    <Folder Include="BackendAPI\Modules\CNX.UnitTests\" />
-    <Folder Include="BackendAPI\Modules\CNX.IntegrationTests\" />
-    <Folder Include="BackendAPI\Modules\AIAgent.IntegrationTests\" />
-    <Folder Include="BackendAPI\Modules\NewFolder\" />
-    <Folder Include="UI\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="BackendAPI\BuildingBlocks.UnitTests\" />
+		<Folder Include="BackendAPI\Modules\CNX.UnitTests\" />
+		<Folder Include="BackendAPI\Modules\CNX.IntegrationTests\" />
+		<Folder Include="BackendAPI\Modules\AIAgent.UnitTests\" />
+		<Folder Include="BackendAPI\Modules\AIAgent.IntegrationTests\" />
+		<Folder Include="UI\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\ApiGateways\YarpApiGateway\YarpApiGateway.csproj" />
-    <ProjectReference Include="..\..\BackendAPI\API\APIs\APIs.csproj" />
-    <ProjectReference Include="..\..\BackendAPI\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
-    <ProjectReference Include="..\..\BackendAPI\Modules\Auth\Auth.csproj" />
-    <ProjectReference Include="..\..\BackendAPI\Modules\CNX\CNX.csproj" />
-    <ProjectReference Include="..\..\BackendAPI\Modules\PhilSys\PhilSys.csproj" />
-    <ProjectReference Include="..\..\BackendAPI\Modules\SSO\SSO.csproj" />
-    <ProjectReference Include="..\..\UI\FrontendWebassembly\FrontendWebassembly.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\ApiGateways\YarpApiGateway\YarpApiGateway.csproj" />
+		<ProjectReference Include="..\..\BackendAPI\API\APIs\APIs.csproj" />
+		<ProjectReference Include="..\..\BackendAPI\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
+		<ProjectReference Include="..\..\BackendAPI\Modules\Auth\Auth.csproj" />
+		<ProjectReference Include="..\..\BackendAPI\Modules\CNX\CNX.csproj" />
+		<ProjectReference Include="..\..\BackendAPI\Modules\PhilSys\PhilSys.csproj" />
+		<ProjectReference Include="..\..\BackendAPI\Modules\SSO\SSO.csproj" />
+		<ProjectReference Include="..\..\UI\FrontendWebassembly\FrontendWebassembly.csproj" />
+	</ItemGroup>
 
 </Project>

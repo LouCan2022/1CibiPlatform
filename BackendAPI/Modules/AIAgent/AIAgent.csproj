@@ -20,6 +20,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+		<Folder Include="Services\ReadExcelService\" />
 		<PackageReference Include="YamlDotNet" Version="13.1.0" />
 	</ItemGroup>
 
@@ -34,7 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Services\ReadExcel\" />
+		<Folder Include="Services\ReadExcel\" />
 	</ItemGroup>
 
 </Project>

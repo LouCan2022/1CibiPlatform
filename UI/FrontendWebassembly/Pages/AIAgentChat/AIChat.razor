@@ -39,6 +39,12 @@
                                    Dense="true"
                                    Disabled="@isSending"
                                    Class="skill-select">
+                            <MudSelectItem T="string" Value="@("DownloadPolicyTemplate")">
+                                <div class="d-flex align-items-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.CloudDownload" Size="Size.Small" Class="mr-2" />
+                                    Download Policy Template
+                                </div>
+                            </MudSelectItem>
                             <MudSelectItem T="string" Value="@("PolicyIngestion")">
                                 <div class="d-flex align-items-center">
                                     <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Small" Class="mr-2" />

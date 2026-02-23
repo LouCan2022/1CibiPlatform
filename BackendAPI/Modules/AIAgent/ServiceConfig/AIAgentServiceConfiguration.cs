@@ -29,6 +29,7 @@ public static class AIAgentServiceConfiguration
 		services.AddScoped<IExcelPolicyExtractorService, ExcelPolicyExtractorService>();
 		services.AddScoped<IExcelQuestionExtractor, ExcelQuestionExtractor>();
 		services.AddScoped<IFileStorageService, FileStorageService>();
+		services.AddScoped<IPolicyTemplateFileStorageService, PolicyTemplateFileStorageService>();
 		services.AddSignalR();
 		return services;
 	}
