@@ -52,7 +52,7 @@ app.Use(async (context, next) =>
 {
 	context.Response.Headers["Content-Security-Policy"] =
 		"default-src 'self'; " +
-		"script-src 'self'; " +
+		"script-src 'self' 'wasm-unsafe-eval'; " +
 		"style-src 'self' 'unsafe-inline'; " +
 		"img-src 'self' data: blob:; " +
 		"font-src 'self'; " +
