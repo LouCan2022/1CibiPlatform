@@ -517,7 +517,6 @@
     // Trigger hidden file input click
     private async Task TriggerFileInput()
     {
-        await Task.Delay(50);
         // Use JavaScript interop to trigger file input click
         await JS.InvokeVoidAsync("triggerFileInput", "fileInput");
     }
