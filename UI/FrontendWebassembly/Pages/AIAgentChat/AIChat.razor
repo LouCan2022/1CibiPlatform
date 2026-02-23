@@ -522,7 +522,7 @@
     private async Task TriggerFileInput()
     {
         // Use JavaScript interop to trigger file input click
-        await JS.InvokeVoidAsync("eval", "document.getElementById('fileInput').click()");
+        await JS.InvokeVoidAsync("triggerFileInput", "fileInput");
     }
 
     // Remove selected file
