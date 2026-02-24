@@ -54,7 +54,7 @@ app.Use(async (context, next) =>
 		"default-src 'self'; " +
 		"script-src 'self' 'wasm-unsafe-eval'; " +
 		"style-src 'self' 'unsafe-inline'; " +
-		"img-src 'self' data: blob:; " +
+		"img-src 'self' data: blob: https://ekycbucket.s3.ap-southeast-1.amazonaws.com; " +
 		"font-src 'self'; " +
 		"frame-src 'self' https://liveness.everify.gov.ph; " +   
 		"media-src 'self' https://liveness.everify.gov.ph; " +
