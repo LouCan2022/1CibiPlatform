@@ -52,7 +52,7 @@ app.Use(async (context, next) =>
 {
 	context.Response.Headers["Content-Security-Policy"] =
 		"default-src 'self'; " +
-		"script-src 'self' 'wasm-unsafe-eval' 'sha256-aX5x3UBwU3jRUxUvC6zDKTs9SD2CvbCthQMJykJzGN0='; " +
+		"script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline'; " +
 		"style-src 'self' 'unsafe-inline'; " +
 		"img-src 'self' data: blob: https://ekycbucket.s3.ap-southeast-1.amazonaws.com; " +
 		"font-src 'self'; " +
