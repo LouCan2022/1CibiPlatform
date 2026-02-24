@@ -26,12 +26,12 @@ public class PhilSysPaths : IReverseProxyModule
 
 			new RouteDefinitionDTO(
 				RouteId: "UpdateFaceLivenessSessionEntryPoint",
-				MatchPath: "/philsys/idv/updatefacelivenesssession",
+				MatchPath: "philsys/idv/updatefacelivenesssession",
 				ClusterId: GatewayConstants.OnePlatformApi,
 				Methods: new [] { GatewayConstants.HttpMethod.Patch },
 				Transforms: new Dictionary<string, string>
 				{
-					{ "PathSet", "/updatefacelivenesssession" }
+					{ "PathSet", "updatefacelivenesssession" }
 				}
 			),
 
