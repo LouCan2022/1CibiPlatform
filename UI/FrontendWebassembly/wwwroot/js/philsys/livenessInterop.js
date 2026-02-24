@@ -10,8 +10,6 @@
         if (data && data.result && data.result.session_id) {
             const sessionId = data.result.session_id;
 
-            console.log("✅ Liveness Check Completed for Token:", HashToken);
-
             dotNetHelper.invokeMethodAsync('OnLivenessCompleted', sessionId);
 
         } else {
