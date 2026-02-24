@@ -9,7 +9,7 @@
     }).then((data) => {
         if (data && data.result && data.result.session_id) {
             const sessionId = data.result.session_id;
-            const photo = data.result.photo.Replace("data:image/jpeg;base64,", "");
+            const photo = data.result.photo.replace("data:image/jpeg;base64,", "");
 
             console.log("✅ Liveness Check Completed for Token:", HashToken);
 

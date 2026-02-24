@@ -1,5 +1,5 @@
 ﻿namespace PhilSys.Features.UpdateFaceLivenessSession;
-public record UpdateFaceLivenessSessionCommand(string HashToken, string FaceLivenessSessionId, string Photo) : ICommand<UpdateFaceLivenessSessionResult>;
+public record UpdateFaceLivenessSessionCommand(string HashToken, string FaceLivenessSessionId, byte[] Photo) : ICommand<UpdateFaceLivenessSessionResult>;
 
 public record UpdateFaceLivenessSessionResult(VerificationResponseDTO VerificationResponseDTO);
 public class UpdateFaceLivenessSessionHandler : ICommandHandler<UpdateFaceLivenessSessionCommand, UpdateFaceLivenessSessionResult>

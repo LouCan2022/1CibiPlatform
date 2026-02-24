@@ -28,7 +28,7 @@ public class PhilSysRepository : IPhilSysRepository
 		return transaction;
 	}
 
-	public async Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSessionId, string Photo)
+	public async Task<PhilSysTransaction> UpdateFaceLivenessSessionAsync(string HashToken, string FaceLivenessSessionId, byte[] Photo)
 	{
 		var transaction = await _dbcontext.PhilSysTransactions.FirstOrDefaultAsync(x => x.HashToken == HashToken);
 

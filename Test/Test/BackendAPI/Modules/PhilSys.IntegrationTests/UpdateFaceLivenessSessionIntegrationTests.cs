@@ -38,8 +38,7 @@ public class UpdateFaceLivenessSessionIntegrationTests_CreateFactoryWithHandler 
 			Suffix = null,
 			BirthDate = "2001-08-20",
 			WebHookUrl = "/",
-			ImageinBase64 = "base64-photo-string",
-
+			ImageinBase64 = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 },
 			IsTransacted = false,
 			HashToken = hashed,
 			ExpiresAt = DateTime.UtcNow.AddMinutes(10),

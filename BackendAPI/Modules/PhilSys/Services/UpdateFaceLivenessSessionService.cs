@@ -32,7 +32,7 @@ public class UpdateFaceLivenessSessionService
 	public async Task<VerificationResponseDTO> UpdateFaceLivenessSessionAsync(
 		string HashToken,
 		string FaceLivenessSessionId,
-		string Photo
+		byte[] Photo
 		)
 	{
 		string accessToken = string.Empty;

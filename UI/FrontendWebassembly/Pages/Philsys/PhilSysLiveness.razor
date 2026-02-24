@@ -128,7 +128,7 @@
 
         byte[] photoBytes = Convert.FromBase64String(photo);
 
-        information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId, photo);
+        information = await IPhilSysService.UpdateFaceLivenessSessionAsync(HashToken, sessionId, photoBytes);
         _completed = true;
 
         if (!string.IsNullOrEmpty(information.error_message))
