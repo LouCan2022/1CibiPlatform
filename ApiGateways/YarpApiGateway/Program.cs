@@ -58,7 +58,6 @@ app.Use(async (context, next) =>
 		"font-src 'self'; " +
 		"frame-src 'self' https://liveness.everify.gov.ph; " +   
 		"media-src 'self' https://liveness.everify.gov.ph; " +
-		"connect-src 'self' https: wss:; " +
 		"connect-src 'self' https: wss: https://s.go-mpulse.net; " +
 		"object-src 'none';";
 
