@@ -56,6 +56,8 @@ app.Use(async (context, next) =>
 		"style-src 'self' 'unsafe-inline'; " +
 		"img-src 'self' data: blob:; " +
 		"font-src 'self'; " +
+		"frame-src 'self' https://liveness.everify.gov.ph; " +   
+		"media-src 'self' https://liveness.everify.gov.ph; " +
 		"connect-src 'self' https: wss:; " +
 		"object-src 'none';";
 
