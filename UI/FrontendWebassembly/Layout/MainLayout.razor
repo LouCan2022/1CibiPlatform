@@ -47,12 +47,67 @@
                                 @foreach (var subId in subMenuIds)
                                 {
                                     var (subPath, subDescription, subIcon) = SubMenuList.List[subId];
-                                    <MudNavLink Href="@($"{path.ToLower()}/{subPath.ToLower()}")"
-                                                Match="NavLinkMatch.Prefix"
-                                                Icon="@subIcon"
-                                                ActiveClass="@GetActiveNavClass()">
-                                        @subDescription
-                                    </MudNavLink>
+
+                                    // GENERAL → has children
+                                    if (subDescription == "General")
+                                    {
+                                        <MudNavGroup Title="General" Icon="@subIcon" Expanded="false">
+
+                                            <MudNavLink Href="@($"{path.ToLower()}/general/personal-settings")"
+                                                        Match="NavLinkMatch.Prefix"
+                                                        Icon="@Icons.Material.Filled.Person">
+                                                Personal Settings
+                                            </MudNavLink>
+
+                                            <MudNavLink Href="@($"{path.ToLower()}/general/users")"
+                                                        Match="NavLinkMatch.Prefix"
+                                                        Icon="@Icons.Material.Filled.Group">
+                                                Users
+                                            </MudNavLink>
+
+                                        </MudNavGroup>
+                                    }
+                                    // SECURITY CONTROL → has children
+                                    else if (subDescription == "Security Control")
+                                    {
+                                        <MudNavGroup Title="Security Control" Icon="@subIcon" Expanded="false">
+
+                                            <MudNavLink Href="@($"{path.ToLower()}/securitycontrol/profiles")"
+                                                        Match="NavLinkMatch.Prefix"
+                                                        Icon="@Icons.Material.Filled.Badge">
+                                                Profiles
+                                            </MudNavLink>
+
+                                            <MudNavLink Href="@($"{path.ToLower()}/securitycontrol/territory-management")"
+                                                        Match="NavLinkMatch.Prefix"
+                                                        Icon="@Icons.Material.Filled.Map">
+                                                Territory Management
+                                            </MudNavLink>
+
+                                            <MudNavLink Href="@($"{path.ToLower()}/securitycontrol/login-history")"
+                                                        Match="NavLinkMatch.Prefix"
+                                                        Icon="@Icons.Material.Filled.History">
+                                                Login History
+                                            </MudNavLink>
+
+                                            <MudNavLink Href="@($"{path.ToLower()}/securitycontrol/audit-log")"
+                                                        Match="NavLinkMatch.Prefix"
+                                                        Icon="@Icons.Material.Filled.FactCheck">
+                                                Audit Log
+                                            </MudNavLink>
+
+                                        </MudNavGroup>
+                                    }
+                                    // NORMAL submenu
+                                    else
+                                    {
+                                        <MudNavLink Href="@($"{path.ToLower()}/{subPath.ToLower()}")"
+                                                    Match="NavLinkMatch.Prefix"
+                                                    Icon="@subIcon"
+                                                    ActiveClass="@GetActiveNavClass()">
+                                            @subDescription
+                                        </MudNavLink>
+                                    }
                                 }
                             </MudNavGroup>
                         }
