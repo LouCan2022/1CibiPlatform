@@ -36,15 +36,30 @@
 
                     <!-- Navigation menu that fills remaining space -->
                     <MudNavMenu Class="flex-grow-1">
-                        @for (int i = 0; i < Apps.Count; i++)
-                        {
-                            var appId = Apps[i];
-                            var (path, appDescription, appIcon) = ApplicationListDescriptionIcon.List[appId];
 
-                            var subMenuIds = SubMenus[i];
+                        @{
+                            var combined = Apps
+                            .Select((appId, index) => new
+                            {
+                                AppId = appId,
+                                SubMenus = SubMenus[index]
+                            })
+                            .OrderBy(x =>
+                            {
+                                var (_, desc, _) = ApplicationListDescriptionIcon.List[x.AppId];
+                                return AppOrder.ContainsKey(desc) ? AppOrder[desc] : 100;
+                            })
+                            .ToList();
+                        }
+
+                        @foreach (var item in combined)
+                        {
+                            var (path, appDescription, appIcon) =
+                            ApplicationListDescriptionIcon.List[item.AppId];
 
                             <MudNavGroup Title="@appDescription" Expanded="false" Icon="@appIcon">
-                                @foreach (var subId in subMenuIds)
+
+                                @foreach (var subId in item.SubMenus)
                                 {
                                     var (subPath, subDescription, subIcon) = SubMenuList.List[subId];
 
@@ -109,8 +124,10 @@
                                         </MudNavLink>
                                     }
                                 }
+
                             </MudNavGroup>
                         }
+
                     </MudNavMenu>
 
                     <!-- Logout at the very bottom -->
@@ -170,7 +187,15 @@ else
 
 @code {
 
-
+    private readonly Dictionary<string, int> AppOrder = new()
+    {
+        { "Credit Bureau", 1 },
+        { "S&I", 2 },
+        { "PhilSys", 3 },
+        { "CNX", 4 },
+        { "AI", 5 },
+        { "Settings", int.MaxValue }
+    };
 
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
