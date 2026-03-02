@@ -46,8 +46,8 @@
                             })
                             .OrderBy(x =>
                             {
-                                var (_, desc, _) = ApplicationListDescriptionIcon.List[x.AppId];
-                                return AppOrder.ContainsKey(desc) ? AppOrder[desc] : 100;
+                                var(_, _, _) = ApplicationListDescriptionIcon.List[x.AppId];
+                                return AppOrder.ContainsKey(x.AppId) ? AppOrder[x.AppId] : 100;
                             })
                             .ToList();
                         }
@@ -187,14 +187,14 @@ else
 
 @code {
 
-    private readonly Dictionary<string, int> AppOrder = new()
+    private readonly Dictionary<int, int> AppOrder = new()
     {
-        { "Credit Bureau", 1 },
-        { "S&I", 2 },
-        { "PhilSys", 3 },
-        { "CNX", 4 },
-        { "AI", 5 },
-        { "Settings", int.MaxValue }
+        { 5, 1 }, // Credit Bureau
+        { 6, 2 }, // S&I
+        { 2, 3 }, // PhilSys
+        { 1, 4 }, // CNX
+        { 4, 5 }, // AI
+        { 3, int.MaxValue } // Settings
     };
 
     private bool _drawerOpen = true;
