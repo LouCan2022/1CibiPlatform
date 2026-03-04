@@ -115,11 +115,13 @@ public class AuthRepository : IAuthRepository
 						.OrderBy(a => a.UserId)
 						.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 						.Take(paginationRequest.PageSize)
-						.Select(aa => new AuthAttempts { 
-							LockReleaseAt = aa.LockReleaseAt,	
-							CreatedAt = aa.CreatedAt, 
+						.Select(aa => new AuthAttempts
+						{
+							LockReleaseAt = aa.LockReleaseAt,
+							CreatedAt = aa.CreatedAt,
 							Email = aa.Email,
-							UserId = aa.UserId})
+							UserId = aa.UserId
+						})
 						.AsNoTracking()
 						.ToListAsync(cancellationToken);
 
@@ -257,10 +259,11 @@ public class AuthRepository : IAuthRepository
 					.OrderBy(aa => aa.UserId)
 					.Skip((paginationRequest.PageIndex - 1) * paginationRequest.PageSize)
 					.Take(paginationRequest.PageSize)
-					.Select(aa => new AuthAttempts {
+					.Select(aa => new AuthAttempts
+					{
 						LockReleaseAt = aa.LockReleaseAt,
 						UserId = aa.UserId,
-						Email = aa.Email, 
+						Email = aa.Email,
 						CreatedAt = aa.CreatedAt
 					})
 					.AsNoTracking()
@@ -398,10 +401,13 @@ public class AuthRepository : IAuthRepository
 		return userData!;
 	}
 
-	public async Task<PasswordResetToken> GetUserTokenAsync(string tokenHash)
+	public async Task<PasswordResetToken> GetUserTokenAsync(
+		Guid userId,
+		string tokenHash)
 	{
 		var passwordResetToken = await _dbcontext.PasswordResetToken
-			.Where(prt => prt.TokenHash == tokenHash &&
+			.Where(prt => prt.UserId == userId &&
+						  prt.TokenHash == tokenHash &&
 						  prt.IsUsed == false)
 			.FirstOrDefaultAsync();
 
@@ -562,7 +568,7 @@ public class AuthRepository : IAuthRepository
 
 	public async Task<bool> DeleteLockedUserAsync(AuthAttempts lockedUser)
 	{
-	    await _dbcontext.AuthAttempts.
+		await _dbcontext.AuthAttempts.
 			  Where(aa => aa.UserId == lockedUser.UserId).ExecuteDeleteAsync();
 
 		return true;

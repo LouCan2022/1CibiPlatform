@@ -34,7 +34,7 @@ public class PasswordTokenIntegrationTests : BaseIntegrationTest
 		_dbContext.PasswordResetToken.Add(passwordToken);
 		await _dbContext.SaveChangesAsync();
 
-		var requestDto = new ForgotPasswordTokenRequestDTO(tokenHash);
+		var requestDto = new ForgotPasswordTokenRequestDTO(user.Id, tokenHash);
 
 		var command = new IsChangePasswordTokenValidCommand(requestDto);
 
@@ -164,7 +164,7 @@ public class PasswordTokenIntegrationTests : BaseIntegrationTest
 		Func<Task> act = async () => { await _sender.Send(command); };
 
 		// Assert
-		await act.Should().ThrowAsync<NotFoundException>().WithMessage("User not found.");
+		await act.Should().ThrowAsync<UnauthorizedAccessException>().WithMessage("Invalid or expired token.");
 	}
 
 	private async Task<Authusers> SeedUserData()

@@ -1,3 +1,3 @@
 ﻿namespace FrontendWebassembly.DTO.Auth;
 
-public record ForgotPasswordTokenRequestDTO(string tokenHash);
+public record ForgotPasswordTokenRequestDTO(Guid userId, string tokenHash);

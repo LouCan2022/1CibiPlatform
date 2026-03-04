@@ -1,6 +1,4 @@
-﻿using MediatR;
-
-namespace Auth.Services;
+﻿namespace Auth.Services;
 
 public class ForgotPasswordService : IForgotPasswordService
 {
@@ -106,18 +104,17 @@ public class ForgotPasswordService : IForgotPasswordService
 		return user.Id;
 	}
 
-	public async Task<bool> IsTokenValid(string tokeHash)
+	public async Task<bool> IsTokenValid(Guid userId, string tokenHash)
 	{
 		var logContext = new
 		{
 			Action = "CheckingTokenIfValid",
 			Step = "StartChecking",
-			TokenContext = tokeHash,
+			TokenContext = tokenHash,
 			Timestamp = DateTime.UtcNow
 		};
 
-		var token = await _authRepository.GetUserTokenAsync(tokeHash);
-
+		var token = await _authRepository.GetUserTokenAsync(userId, tokenHash);
 		if (token == null || token.IsUsed || token.ExpiresAt < DateTime.UtcNow)
 		{
 			_logger.LogWarning("Invalid or expired token: {@Context}", logContext);
@@ -134,7 +131,7 @@ public class ForgotPasswordService : IForgotPasswordService
 		string tokenHash,
 		string newPassword)
 	{
-		var isTokenValid = this.IsTokenValid(tokenHash);
+		var isTokenValid = this.IsTokenValid(id, tokenHash);
 
 		var logContext = new
 		{
@@ -174,7 +171,7 @@ public class ForgotPasswordService : IForgotPasswordService
 		}
 
 
-		var token = await _authRepository.GetUserTokenAsync(tokenHash);
+		var token = await _authRepository.GetUserTokenAsync(id, tokenHash);
 
 		token.IsUsed = true;
 		token.UsedAt = DateTime.UtcNow;
