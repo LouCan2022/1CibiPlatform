@@ -32,7 +32,7 @@ public class ForgotPasswordService : IForgotPasswordService
 		this._passwordTokenExpiryMinutes = _configuration.GetValue<int>("Email:PasswordTokenExpirationInMinutes");
 	}
 
-	public async Task<Guid> ForgotPasswordAsync(string email)
+	public async Task<bool> ForgotPasswordAsync(string email)
 	{
 
 		var logContext = new
@@ -101,48 +101,24 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		_logger.LogInformation("Password reset token generated and email sent for user: {@Context}", logContext);
 
-		return user.Id;
-	}
-
-	public async Task<bool> IsTokenValid(Guid userId, string tokenHash)
-	{
-		var logContext = new
-		{
-			Action = "CheckingTokenIfValid",
-			Step = "StartChecking",
-			TokenContext = tokenHash,
-			Timestamp = DateTime.UtcNow
-		};
-
-		var token = await _authRepository.GetUserTokenAsync(userId, tokenHash);
-		if (token == null || token.IsUsed || token.ExpiresAt < DateTime.UtcNow)
-		{
-			_logger.LogWarning("Invalid or expired token: {@Context}", logContext);
-			return false;
-		}
-
-		_logger.LogInformation("Token is valid: {@Context}", logContext);
-
 		return true;
 	}
 
 	public async Task<bool> ResetPasswordAsync(
-		Guid id,
 		string tokenHash,
 		string newPassword)
 	{
-		var isTokenValid = this.IsTokenValid(id, tokenHash);
+		var isTokenValid = await this.IsTokenValidInternal(tokenHash);
 
 		var logContext = new
 		{
 			Action = "ResetPassword",
 			Step = "StartResetting",
-			UserId = id,
 			TokenContext = tokenHash,
 			Timestamp = DateTime.UtcNow
 		};
 
-		if (!isTokenValid.Result)
+		if (isTokenValid.userId == Guid.Empty)
 		{
 			_logger.LogWarning("Invalid or expired token for user: {@Context}", logContext);
 			throw new UnauthorizedAccessException("Invalid or expired token.");
@@ -150,7 +126,7 @@ public class ForgotPasswordService : IForgotPasswordService
 
 		_logger.LogInformation("ResetPasswordAsync called for user: {@Context}", logContext);
 
-		var userNewPassword = await _authRepository.GetRawUserAsync(id);
+		var userNewPassword = await _authRepository.GetRawUserAsync(isTokenValid.userId);
 
 		if (userNewPassword == null)
 		{
@@ -171,7 +147,7 @@ public class ForgotPasswordService : IForgotPasswordService
 		}
 
 
-		var token = await _authRepository.GetUserTokenAsync(id, tokenHash);
+		var token = await _authRepository.GetUserTokenAsync(tokenHash);
 
 		token.IsUsed = true;
 		token.UsedAt = DateTime.UtcNow;
@@ -186,6 +162,38 @@ public class ForgotPasswordService : IForgotPasswordService
 		}
 
 		_logger.LogInformation("Password updated successfully for user ID: {@Context}", logContext);
+
+		return true;
+	}
+
+	private async Task<PasswordResetTokenDTO> IsTokenValidInternal(string tokenHash)
+	{
+		var token = await _authRepository.GetUserTokenAsync(tokenHash);
+		if (token == null || token.IsUsed || token.ExpiresAt < DateTime.UtcNow)
+		{
+			return new PasswordResetTokenDTO(Guid.Empty);
+		}
+		return new PasswordResetTokenDTO(token.UserId);
+	}
+
+	public async Task<bool> IsTokenValid(string tokenHash)
+	{
+		var logContext = new
+		{
+			Action = "CheckingTokenIfValid",
+			Step = "StartChecking",
+			TokenContext = tokenHash,
+			Timestamp = DateTime.UtcNow
+		};
+
+		var token = await _authRepository.GetUserTokenAsync(tokenHash);
+		if (token == null || token.IsUsed || token.ExpiresAt < DateTime.UtcNow)
+		{
+			_logger.LogWarning("Invalid or expired token: {@Context}", logContext);
+			return false;
+		}
+
+		_logger.LogInformation("Token is valid: {@Context}", logContext);
 
 		return true;
 	}
