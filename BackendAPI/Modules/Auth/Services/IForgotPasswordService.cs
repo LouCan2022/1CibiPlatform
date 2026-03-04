@@ -6,6 +6,6 @@ public interface IForgotPasswordService
 
 	Task<bool> ResetPasswordAsync(Guid id, string hashToken, string newPassword);
 
-	Task<bool> IsTokenValid(string tokeHash);
+	Task<bool> IsTokenValid(Guid userId, string tokenHash);
 
 }

@@ -313,6 +313,7 @@ public class AuthService : IAuthService
 		{
 			forgotPasswordTokenRequestDTO = new
 			{
+				userId = forgotPasswordTokenRequestDTO.userId,
 				tokenHash = forgotPasswordTokenRequestDTO.tokenHash
 			}
 		};
