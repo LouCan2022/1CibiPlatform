@@ -169,9 +169,9 @@ public class AuthCacheRepository : IAuthRepository
 		return await _authRepository.GetUserDataAsync(cred);
 	}
 
-	public async Task<PasswordResetToken> GetUserTokenAsync(Guid userId, string tokenHash)
+	public async Task<PasswordResetToken> GetUserTokenAsync(string tokenHash)
 	{
-		return await _authRepository.GetUserTokenAsync(userId, tokenHash);
+		return await _authRepository.GetUserTokenAsync(tokenHash);
 	}
 
 	public async Task<bool> InsertOtpVerification(OtpVerification otpVerification)
