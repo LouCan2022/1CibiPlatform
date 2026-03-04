@@ -401,13 +401,10 @@ public class AuthRepository : IAuthRepository
 		return userData!;
 	}
 
-	public async Task<PasswordResetToken> GetUserTokenAsync(
-		Guid userId,
-		string tokenHash)
+	public async Task<PasswordResetToken> GetUserTokenAsync(string tokenHash)
 	{
 		var passwordResetToken = await _dbcontext.PasswordResetToken
-			.Where(prt => prt.UserId == userId &&
-						  prt.TokenHash == tokenHash &&
+			.Where(prt => prt.TokenHash == tokenHash &&
 						  prt.IsUsed == false)
 			.FirstOrDefaultAsync();
 
