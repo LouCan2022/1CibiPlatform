@@ -91,7 +91,7 @@ public class ForgotPasswordServiceTests : IClassFixture<AuthServiceFixture>
 		var service = _fixture.ForgotPasswordService;
 		var userId = Guid.NewGuid();
 		var tokenHash = "invalidtoken";
-		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(tokenHash)).ReturnsAsync((PasswordResetToken?)null);
+		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(userId, tokenHash)).ReturnsAsync((PasswordResetToken?)null);
 
 		// Act
 		Func<Task> act = async () => await service.ResetPasswordAsync(userId, tokenHash, "newpass");
@@ -108,7 +108,7 @@ public class ForgotPasswordServiceTests : IClassFixture<AuthServiceFixture>
 		var userId = Guid.NewGuid();
 		var tokenHash = "validtoken";
 		var token = new PasswordResetToken { UserId = userId, IsUsed = false, ExpiresAt = DateTime.UtcNow.AddMinutes(10), TokenHash = tokenHash };
-		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(tokenHash)).ReturnsAsync(token);
+		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(userId, tokenHash)).ReturnsAsync(token);
 		_fixture.MockAuthRepository.Setup(x => x.GetRawUserAsync(userId)).ReturnsAsync((Authusers?)null);
 
 		// Act
@@ -127,7 +127,7 @@ public class ForgotPasswordServiceTests : IClassFixture<AuthServiceFixture>
 		var tokenHash = "validtoken";
 		var token = new PasswordResetToken { UserId = userId, IsUsed = false, ExpiresAt = DateTime.UtcNow.AddMinutes(10), TokenHash = tokenHash };
 		var user = new Authusers { Id = userId, Email = "e@e.com", FirstName = "F", LastName = "L" };
-		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(tokenHash)).ReturnsAsync(token);
+		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(userId, tokenHash)).ReturnsAsync(token);
 		_fixture.MockAuthRepository.Setup(x => x.GetRawUserAsync(userId)).ReturnsAsync(user);
 		_fixture.MockPasswordHasherService.Setup(x => x.HashPassword(It.IsAny<string>())).Returns("newhashed");
 		_fixture.MockAuthRepository.Setup(x => x.UpdateAuthUserPassword(It.IsAny<Authusers>())).ReturnsAsync(false);
@@ -148,7 +148,7 @@ public class ForgotPasswordServiceTests : IClassFixture<AuthServiceFixture>
 		var tokenHash = "validtoken";
 		var token = new PasswordResetToken { UserId = userId, IsUsed = false, ExpiresAt = DateTime.UtcNow.AddMinutes(10), TokenHash = tokenHash };
 		var user = new Authusers { Id = userId, Email = "e@e.com", FirstName = "F", LastName = "L" };
-		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(tokenHash)).ReturnsAsync(token);
+		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(userId, tokenHash)).ReturnsAsync(token);
 		_fixture.MockAuthRepository.Setup(x => x.GetRawUserAsync(userId)).ReturnsAsync(user);
 		_fixture.MockPasswordHasherService.Setup(x => x.HashPassword(It.IsAny<string>())).Returns("newhashed");
 		_fixture.MockAuthRepository.Setup(x => x.UpdateAuthUserPassword(It.IsAny<Authusers>())).ReturnsAsync(true);
@@ -170,7 +170,7 @@ public class ForgotPasswordServiceTests : IClassFixture<AuthServiceFixture>
 		var tokenHash = "validtoken";
 		var token = new PasswordResetToken { UserId = userId, IsUsed = false, ExpiresAt = DateTime.UtcNow.AddMinutes(10), TokenHash = tokenHash };
 		var user = new Authusers { Id = userId, Email = "e@e.com", FirstName = "F", LastName = "L" };
-		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(tokenHash)).ReturnsAsync(token);
+		_fixture.MockAuthRepository.Setup(x => x.GetUserTokenAsync(userId, tokenHash)).ReturnsAsync(token);
 		_fixture.MockAuthRepository.Setup(x => x.GetRawUserAsync(userId)).ReturnsAsync(user);
 		_fixture.MockPasswordHasherService.Setup(x => x.HashPassword(It.IsAny<string>())).Returns("newhashed");
 		_fixture.MockAuthRepository.Setup(x => x.UpdateAuthUserPassword(It.IsAny<Authusers>())).ReturnsAsync(true);

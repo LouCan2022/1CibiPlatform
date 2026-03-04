@@ -8,6 +8,9 @@ public sealed class IsChangePasswordTokenValidValidator : AbstractValidator<IsCh
 {
 	public IsChangePasswordTokenValidValidator()
 	{
+		RuleFor(x => x.ForgotPasswordTokenRequestDTO.userId)
+				.NotEmpty().WithMessage("User ID is required.");
+
 		RuleFor(x => x.ForgotPasswordTokenRequestDTO.tokenHash)
 			.NotEmpty().WithMessage("Token is required.");
 	}
@@ -27,7 +30,10 @@ public class IsChangePasswordTokenValidHandler : ICommandHandler<IsChangePasswor
 		IsChangePasswordTokenValidCommand request,
 		CancellationToken cancellationToken)
 	{
-		var isValid = await _forgotPassword.IsTokenValid(request.ForgotPasswordTokenRequestDTO.tokenHash);
+		var isValid = await _forgotPassword.IsTokenValid(
+			request.ForgotPasswordTokenRequestDTO.userId,
+			request.ForgotPasswordTokenRequestDTO.tokenHash);
+
 		return new IsChangePasswordTokenValidResult(isValid);
 	}
 }
