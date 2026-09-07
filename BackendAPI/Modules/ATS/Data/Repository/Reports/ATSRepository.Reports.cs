@@ -80,7 +80,13 @@ public partial class ATSRepository
 		Guid? requiredRequestorId,
 		CancellationToken cancellationToken)
 	{
-		var pageQuery = BuildSearchReportRowsQuery(searchTerm, startDate, endDate, authorizedClientIds, requiredRequestorId);
+		var pageQuery = BuildSearchReportRowsQuery(
+			searchTerm,
+			startDate,
+			endDate,
+			authorizedClientIds,
+			requiredRequestorId);
+
 		if (afterId.HasValue)
 			pageQuery = ApplyReportsSeek(pageQuery, afterCreatedAt, afterId.Value);
 
@@ -109,10 +115,8 @@ public partial class ATSRepository
 	{
 		return _dbcontext.EmailInvitationRequests
 			.AsNoTracking()
-			.Where(eir => (authorizedClientIds == null
-					|| (eir.ClientId.HasValue && authorizedClientIds.Contains(eir.ClientId.Value)))
-				&& (!requiredRequestorId.HasValue
-					|| eir.RequestorId == requiredRequestorId.Value))
+			.Where(eir => (authorizedClientIds == null || (eir.ClientId.HasValue && authorizedClientIds.Contains(eir.ClientId.Value)))
+				&& (!requiredRequestorId.HasValue || eir.RequestorId == requiredRequestorId.Value))
 			.Select(eir => new ReportRowDTO
 			{
 				EmailInvitationID = eir.EmailInvitationID,

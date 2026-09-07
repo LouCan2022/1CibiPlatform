@@ -20,7 +20,8 @@ public class OMSTicketingRepositoryIntegrationTests : BaseIntegrationTest
 	private async Task<EmailInvitationRequest> SeedQueuedOrderAsync(
 		string ticketStatus = TicketStatus.Pending,
 		int ticketAttempts = 0,
-		bool isTicketed = false)
+		bool isTicketed = false,
+		string rushNormal = OrderType.Normal)
 	{
 		var order = new EmailInvitationRequest
 		{
@@ -31,7 +32,7 @@ public class OMSTicketingRepositoryIntegrationTests : BaseIntegrationTest
 			MobileNumber = "09171234567",
 			PackageId = DefaultPackageId,
 			SelectPackage = "CRIMINAL RECORDS CHECK",
-			RushNormal = "Normal",
+			RushNormal = rushNormal,
 			HashToken = Guid.NewGuid().ToString("N"),
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddHours(24),
@@ -73,6 +74,23 @@ public class OMSTicketingRepositoryIntegrationTests : BaseIntegrationTest
 
 		// Resolved through the foreign key, so the report type is still found.
 		payload.PackageDescription.Should().Be("182");
+	}
+
+	// The turnaround the client ordered decides the OMS TurnAroundTimeID, so it has to
+	// survive the projection rather than the mapper falling back to a fixed value.
+	[Theory]
+	[InlineData(OrderType.Rush)]
+	[InlineData(OrderType.Normal)]
+	public async Task GetTicketPayloadsAsync_ShouldCarryTheOrderType(string rushNormal)
+	{
+		var order = await SeedQueuedOrderAsync(rushNormal: rushNormal);
+
+		var payloads = await _repository.GetTicketPayloadsAsync(
+			[order.EmailInvitationID],
+			CancellationToken.None);
+
+		payloads.Should().ContainSingle()
+			.Which.RushNormal.Should().Be(rushNormal);
 	}
 
 	[Fact]
