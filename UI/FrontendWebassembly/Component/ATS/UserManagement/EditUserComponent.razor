@@ -219,7 +219,7 @@
                                             <span>Select all</span>
                                         </MudMenuItem>
                                         <MudDivider />
-                                        @foreach (var module in Modules)
+                                        @foreach (var module in VisibleModules)
                                         {
                                             var isSelected = SelectedModuleIds.Contains(module.ModuleId);
                                             <MudMenuItem AutoClose="false"

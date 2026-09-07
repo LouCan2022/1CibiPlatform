@@ -7,6 +7,7 @@ public partial class EditUserComponent
 	private const string ATSRoleIdStorageKey = "ATSRoleId";
 	private MudForm? UserForm;
 	private bool _canAssignAllRoles;
+	private bool _canViewAllModules;
 
 	[Inject]
 	private IAccessService AccessService { get; set; } = default!;
@@ -37,9 +38,15 @@ public partial class EditUserComponent
 	private string? AuthUserError { get; set; }
 	private IReadOnlyCollection<int> SelectedModuleIds { get; set; } = new HashSet<int>();
 	private string? ModuleError { get; set; }
-	private IEnumerable<ModuleDetailsDTO> SelectedModules => Modules
+	// Restricted administration modules stay hidden from the menu and the chips
+	// for admins outside the SuperAdmin / Platform Manager ladder, but any such
+	// module already assigned to the user is kept in SelectedModuleIds so saving
+	// never silently strips what this admin cannot see.
+	private IEnumerable<ModuleDetailsDTO> VisibleModules => Modules
+		.Where(module => ModuleList.IsVisibleForAdministration(module.ModuleId, _canViewAllModules));
+	private IEnumerable<ModuleDetailsDTO> SelectedModules => VisibleModules
 		.Where(module => SelectedModuleIds.Contains(module.ModuleId));
-	private IReadOnlyCollection<int> ActiveModuleIds => Modules
+	private IReadOnlyCollection<int> ActiveModuleIds => VisibleModules
 		.Where(module => module.IsActive)
 		.Select(module => module.ModuleId)
 		.ToArray();
@@ -87,6 +94,7 @@ public partial class EditUserComponent
 		var isPlatformSuperAdmin = await AccessService.HasRoleAsync(RoleList.SuperAdminId);
 		var atsRoleId = await GetStoredATSRoleIdAsync();
 		_canAssignAllRoles = isPlatformSuperAdmin || atsRoleId == AtsRoleList.PlatformManagerId;
+		_canViewAllModules = isPlatformSuperAdmin || atsRoleId == AtsRoleList.PlatformManagerId;
 	}
 
 	private async Task<int> GetStoredATSRoleIdAsync()
