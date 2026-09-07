@@ -15,5 +15,6 @@ public sealed class ReportRowDTO
 	public DateTime? OrderCreatedAt { get; init; }
 	public DateTime? OrderCompletedAt { get; init; }
 	public string? SelectPackage { get; init; }
+	public string? RushNormal { get; init; }
 	public string? HitStatus { get; init; }
 }

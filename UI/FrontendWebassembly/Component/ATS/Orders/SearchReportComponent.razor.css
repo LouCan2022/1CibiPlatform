@@ -445,6 +445,9 @@
 .report-status.unknown { background: #eef0f5; color: #6b7690; }
 ::deep .report-date { color: var(--text-2) !important; white-space: nowrap; }
 .report-package { display: inline-flex; padding: 4px 10px; border: 1px solid var(--border-strong); border-radius: 20px; background: var(--blue-tint-2); color: var(--blue-600); font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.report-order-type { display: inline-flex; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.report-order-type.is-rush { background: #fcf1dd; color: #b5790f; }
+.report-order-type.is-normal { background: #f1f4fa; color: #5b6b8c; }
 .report-hit { display: inline-flex; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
 .report-hit.clear { background: #e4f7ed; color: #1e9e64; }
 .report-hit.not-clear { background: #eef0f5; color: #6b7690; }

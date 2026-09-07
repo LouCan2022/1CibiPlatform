@@ -125,6 +125,7 @@ public partial class ATSRepository
 				OrderCreatedAt = eir.OrderCreatedAt,
 				OrderCompletedAt = eir.OrderCompletedAt,
 				SelectPackage = eir.SelectPackage,
+				RushNormal = eir.RushNormal,
 				HitStatus = _dbcontext.ReportDetails
 					.Where(rd => rd.EmailInvitationRequestId == eir.EmailInvitationID)
 					.OrderByDescending(rd => rd.ReportUploadedAt)

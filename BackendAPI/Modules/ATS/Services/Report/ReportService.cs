@@ -242,6 +242,7 @@ public class ReportService : IReportService
 			OrderCreatedAt = x.OrderCreatedAt,
 			OrderCompletedAt = x.OrderCompletedAt,
 			SelectedPackage = x.SelectPackage,
+			RushNormal = x.RushNormal,
 			Requestor = x.Requestor,
 			TicketNumber = x.TicketNumber,
 			HitStatus = x.HitStatus

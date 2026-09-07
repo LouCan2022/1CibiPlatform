@@ -16,7 +16,7 @@ public partial class SearchReportComponent
 	private bool _isStatusLegendExpanded = false;
 	private bool _canUploadReport;
 	private bool _canEditSubjectName;
-	private int ReportColumnCount => 10
+	private int ReportColumnCount => 11
 		+ (_canUploadReport ? 1 : 0)
 		+ (_canEditSubjectName ? 1 : 0);
 
@@ -73,6 +73,9 @@ public partial class SearchReportComponent
 
 	private static string GetHitStatusClass(string? status) => HitStatusDisplay.GetClass(status);
 	private static string GetHitStatusText(string? status) => HitStatusDisplay.GetText(status);
+
+	private static string GetOrderTypeClass(string? orderType) => OrderTypeDisplay.GetClass(orderType);
+	private static string GetOrderTypeText(string? orderType) => OrderTypeDisplay.GetText(orderType);
 
 	private string searchString
 	{
