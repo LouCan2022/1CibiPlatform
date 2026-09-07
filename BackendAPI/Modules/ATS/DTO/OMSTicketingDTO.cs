@@ -22,6 +22,10 @@ public record TicketablePayloadDTO
 
 	public Guid? RequestorId { get; set; }
 
+	// "Rush" or "Normal": the turnaround the order was placed at, which decides the OMS
+	// TurnAroundTimeID rather than every ticket going out at one hard-coded value.
+	public string? RushNormal { get; set; }
+
 	// From PersonalDetails when the application form has already been submitted.
 	public DateOnly? DOB { get; set; }
 
