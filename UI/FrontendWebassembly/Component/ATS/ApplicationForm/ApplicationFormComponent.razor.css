@@ -101,6 +101,34 @@
     align-self: start;
 }
 
+/* MudDatePicker wraps its input in .mud-picker; flush the wrapper so the field
+   sits level with the Suffix/Sex selects in the same row. */
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-picker,
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-picker-inline {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0;
+}
+
+/* On the selects, oneplatform-rounded-input sits ON .mud-input-control, so the
+   generic `.oneplatform-rounded-input .mud-input-control { margin-top: 0 }` rule
+   below never touches them and MudBlazor's dense-with-label margin (8px top,
+   4px bottom) applies. On the picker the control is nested inside .mud-picker,
+   so that rule strips its top margin; restore the same 8px/4px here. */
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-input-control {
+    margin: 8px 0 4px !important;
+}
+
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-input-outlined :is(.mud-input-slot, input) {
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    display: flex;
+    align-items: center;
+}
+
 .ats-step-three-scope.ats-step-three-scope ::deep .oneplatform-rounded-input {
     width: 100%;
 }
