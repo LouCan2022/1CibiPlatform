@@ -22,21 +22,24 @@
         }
 
         <aside class="ats-console-sidebar">
-            <div class="ats-console-sidebar-scroll">
-                <div class="ats-console-logo">
-                    <div class="ats-console-logo-mark">
-                        <svg class="ats-logo-facets" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <polygon points="50,5 10,35 50,50" fill="var(--ats-sky-300)"></polygon>
-                            <polygon points="50,5 90,35 50,50" fill="var(--ats-sky-300)" opacity="0.7"></polygon>
-                            <polygon points="10,35 10,70 50,50" fill="var(--ats-blue-500)" opacity="0.85"></polygon>
-                            <polygon points="90,35 90,70 50,50" fill="var(--ats-blue-500)"></polygon>
-                            <polygon points="10,70 50,95 50,50" fill="var(--ats-navy-900)" opacity="0.55"></polygon>
-                            <polygon points="90,70 50,95 50,50" fill="var(--ats-navy-900)" opacity="0.85"></polygon>
-                        </svg>
-                        <span class="ats-logo-text ats-console-brand-text">ATS</span>
-                    </div>
+            @* The logo lives outside the scroll area so it stays put — inside it,
+               the nav scrollbar appearing would shift it left and scrolling would
+               move it off-screen. *@
+            <div class="ats-console-logo">
+                <div class="ats-console-logo-mark">
+                    <svg class="ats-logo-facets" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="50,5 10,35 50,50" fill="var(--ats-sky-300)"></polygon>
+                        <polygon points="50,5 90,35 50,50" fill="var(--ats-sky-300)" opacity="0.7"></polygon>
+                        <polygon points="10,35 10,70 50,50" fill="var(--ats-blue-500)" opacity="0.85"></polygon>
+                        <polygon points="90,35 90,70 50,50" fill="var(--ats-blue-500)"></polygon>
+                        <polygon points="10,70 50,95 50,50" fill="var(--ats-navy-900)" opacity="0.55"></polygon>
+                        <polygon points="90,70 50,95 50,50" fill="var(--ats-navy-900)" opacity="0.85"></polygon>
+                    </svg>
+                    <span class="ats-logo-text ats-console-brand-text">ATS</span>
                 </div>
+            </div>
 
+            <div class="ats-console-sidebar-scroll">
                 @foreach (var module in ModuleList.List
                     .Where(item => ModuleList.IsPrimaryNavigationModule(item.Key) && _accessibleModuleIds.Contains(item.Key))
                     .OrderBy(item => item.Key))
