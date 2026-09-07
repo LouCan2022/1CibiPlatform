@@ -375,9 +375,9 @@ public partial class BulkUploadSubjectsDialog
 	{
 		var middleInitial = string.IsNullOrWhiteSpace(subject.MiddleInitial)
 			? string.Empty
-			: $" {subject.MiddleInitial.Trim()}.";
+			: $"{subject.MiddleInitial.Trim()}";
 
-		var fullName = $"{subject.FirstName}{middleInitial} {subject.LastName}".Trim();
+		var fullName = $"{subject.FirstName} {middleInitial} {subject.LastName}".Trim();
 
 		return string.IsNullOrWhiteSpace(fullName) ? "Unnamed subject" : fullName;
 	}
