@@ -80,6 +80,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<IReportService, ReportService>();
 		services.AddScoped<IBulkUploadService, BulkUploadService>();
 		services.AddScoped<IOMSTicketingService, OMSTicketingService>();
+		services.AddScoped<IAuditTrailService, AuditTrailService>();
 		services.AddScoped<IDashboardService, DashboardService>();
 		services.AddScoped<IPackageManagementService, PackageManagementService>();
 		services.AddScoped<IClientManagementService, ClientManagementService>();

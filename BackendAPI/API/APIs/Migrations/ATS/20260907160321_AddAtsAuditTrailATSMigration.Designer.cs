@@ -3,6 +3,7 @@ using System;
 using ATS.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace APIs.Migrations.ATS
 {
     [DbContext(typeof(ATSDBContext))]
-    partial class ATSDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260907160321_AddAtsAuditTrailATSMigration")]
+    partial class AddAtsAuditTrailATSMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -373,9 +376,6 @@ namespace APIs.Migrations.ATS
                     b.Property<int?>("AtsRoleId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Changes")
-                        .HasColumnType("jsonb");
-
                     b.Property<int>("DurationMs")
                         .HasColumnType("integer");
 
@@ -401,10 +401,6 @@ namespace APIs.Migrations.ATS
                     b.Property<string>("Payload")
                         .IsRequired()
                         .HasColumnType("jsonb");
-
-                    b.Property<string>("Site")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("TraceId")
                         .HasMaxLength(64)

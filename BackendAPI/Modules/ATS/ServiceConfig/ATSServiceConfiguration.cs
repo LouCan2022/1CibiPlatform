@@ -27,6 +27,10 @@ public static class ATSServiceConfiguration
 			config.RegisterServicesFromAssembly(assembly);
 			config.AddOpenBehavior(typeof(ValidationBehavior<,>));
 			config.AddOpenBehavior(typeof(LoggingBehavior<,>));
+
+			// Last, so validation runs first: a request rejected as invalid never reached
+			// a handler and must not be recorded as an action someone took.
+			config.AddOpenBehavior(typeof(AtsAuditBehavior<,>));
 		});
 
 		services.AddValidatorsFromAssembly(assembly);
@@ -65,6 +69,20 @@ public static class ATSServiceConfiguration
 		// Same reasoning: TicketStatus moves within one Quartz tick, and the claim
 		// query must never be served from a cache.
 		services.AddScoped<IOMSTicketingRepository, OMSTicketingRepository>();
+
+		// Also uncached: the audit trail is append-only and the screen exists to show what
+		// just happened, so a cached first page would hide the newest action.
+		services.AddScoped<IAtsAuditRepository, AtsAuditRepository>();
+		services.AddScoped<IAtsAuditService, AtsAuditService>();
+
+		// Singleton: the queue has to outlive the request scope that writes to it. The
+		// concrete type is registered as well so the drain can read the channel - see the
+		// note on AtsAuditDrainService's constructor.
+		services.AddSingleton<AtsAuditWriter>();
+		services.AddSingleton<IAtsAuditWriter>(provider => provider.GetRequiredService<AtsAuditWriter>());
+		services.AddHostedService<AtsAuditDrainService>();
+		services.AddHostedService<AtsAuditRetentionService>();
+
 		services.AddScoped<IOrderHistoryFactory, OrderHistoryFactory>();
 		services.AddScoped<IOrderHistoryService, OrderHistoryService>();
 
@@ -143,12 +161,26 @@ public static class ATSServiceConfiguration
 		this IServiceCollection services,
 		IConfiguration configuration)
 	{
-		services.AddDbContext<ATSDBContext>(options =>
+		// Every AtsAuditOptions value has a working default, so an absent section is
+		// valid: the audit trail runs with the agreed 30-day retention out of the box.
+		services.Configure<AtsAuditOptions>(
+			configuration.GetSection(AtsAuditOptions.SectionName));
+
+		// The audit change collector and its interceptor are scoped, so the context is
+		// built from the request's provider rather than a static lambda.
+		services.AddScoped<IAtsAuditChangeCollector, AtsAuditChangeCollector>();
+		services.AddScoped<AtsAuditChangeInterceptor>();
+
+		services.AddDbContext<ATSDBContext>((serviceProvider, options) =>
 		{
 			options.UseNpgsql(
 				configuration.GetConnectionString(connStringSegment),
 				npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
 			);
+
+			// Captures before/after values for the audit trail. Reads the change tracker
+			// only - it never writes, and a command that saves nothing costs nothing.
+			options.AddInterceptors(serviceProvider.GetRequiredService<AtsAuditChangeInterceptor>());
 		});
 
 

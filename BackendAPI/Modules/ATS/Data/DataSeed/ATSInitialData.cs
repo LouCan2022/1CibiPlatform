@@ -449,6 +449,15 @@ public class ATSInitialData
 			   IsActive = true,
 			   CreatedAt = DateTime.UtcNow,
 			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.AuditTrail,
+			   ModuleName = "Audit Trail",
+			   ModuleDescription = "User action audit trail module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
 		   }
 	];
 	#endregion
