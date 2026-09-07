@@ -65,6 +65,7 @@ public class OMSTicketingProcessorServiceTests
 		EmailAddress = "juan@example.com",
 		MobileNumber = "09171234567",
 		SelectPackage = "CRIMINAL RECORDS CHECK",
+		RushNormal = "Normal",
 		PackageDescription = "182",
 		Site = "24 - 7 INTOUCH- CEBU",
 		RequestorId = RequestorId,
