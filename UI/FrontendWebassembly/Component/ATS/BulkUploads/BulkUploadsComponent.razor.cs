@@ -207,10 +207,7 @@ public partial class BulkUploadsComponent
 		_ => "unknown"
 	};
 
-	private static string GetOrderTypeClass(string? orderType) =>
-		string.Equals(orderType, "Rush", StringComparison.OrdinalIgnoreCase)
-			? "is-rush"
-			: "is-normal";
+	private static string GetOrderTypeClass(string? orderType) => OrderTypeDisplay.GetClass(orderType);
 
 	private static string FormatAbsolute(DateTime dateCreated) =>
 		dateCreated.ToLocalTime().ToString("MMMM dd, yyyy h:mm tt");

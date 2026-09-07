@@ -103,10 +103,17 @@
                                              Variant="Variant.Text"
                                              Dense="true"
                                              Class="ac-package-menu">
+                                        <MudMenuItem AutoClose="false"
+                                                     OnClick="ToggleAllPackages">
+                                            <MudIcon Icon="@SelectAllPackagesIcon" Size="Size.Small" />
+                                            <span>Select all</span>
+                                        </MudMenuItem>
+                                        <MudDivider />
                                         @foreach (var package in Packages.Where(package => package.IsActive))
                                         {
                                             var isSelected = SelectedPackageIds.Contains(package.PackageId);
-                                            <MudMenuItem OnClick="@(() => TogglePackage(package.PackageId))">
+                                            <MudMenuItem AutoClose="false"
+                                                         OnClick="@(() => TogglePackage(package.PackageId))">
                                                 <MudIcon Icon="@(isSelected ? Icons.Material.Filled.CheckBox : Icons.Material.Outlined.CheckBoxOutlineBlank)" Size="Size.Small" />
                                                 <span>@package.PackageName</span>
                                             </MudMenuItem>

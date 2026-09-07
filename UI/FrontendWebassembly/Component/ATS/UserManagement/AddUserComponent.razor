@@ -182,6 +182,12 @@
                                              Variant="Variant.Text"
                                              Dense="true"
                                              Class="au-module-menu">
+                                        <MudMenuItem AutoClose="false"
+                                                     OnClick="ToggleAllModules">
+                                            <MudIcon Icon="@SelectAllModulesIcon" Size="Size.Small" />
+                                            <span>Select all</span>
+                                        </MudMenuItem>
+                                        <MudDivider />
                                         @foreach (var module in VisibleModules.Where(module => module.IsActive))
                                         {
                                             var isSelected = SelectedModuleIds.Contains(module.ModuleId);

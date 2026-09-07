@@ -159,6 +159,7 @@
             <MudTh>Date Created</MudTh>
             <MudTh>Date Completed</MudTh>
             <MudTh>Selected Package</MudTh>
+            <MudTh>Turnaround Time</MudTh>
             <MudTh>Hit Status</MudTh>
             @if (_canUploadReport)
             {
@@ -196,6 +197,7 @@
             <MudTd Class="report-date" DataLabel="Date Created">@(r.OrderCreatedAt?.ToLocalTime().ToString("MMMM dd, yyyy h:mm tt") ?? "—")</MudTd>
             <MudTd Class="report-date" DataLabel="Date Completed">@(r.OrderCompletedAt?.ToLocalTime().ToString("MMMM dd, yyyy h:mm tt") ?? "—")</MudTd>
             <MudTd DataLabel="Selected Package"><span class="report-package">@r.SelectedPackage</span></MudTd>
+            <MudTd DataLabel="Turnaround Time"><span class="report-order-type @GetOrderTypeClass(r.RushNormal)">@GetOrderTypeText(r.RushNormal)</span></MudTd>
             <MudTd DataLabel="Hit Status"><span class="report-hit @GetHitStatusClass(r.HitStatus)">@GetHitStatusText(r.HitStatus)</span></MudTd>
             @if (_canUploadReport)
             {

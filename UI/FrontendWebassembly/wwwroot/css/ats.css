@@ -2059,10 +2059,12 @@
         background: transparent;
     }
 
+/* Sits above the scroll area so the nav scrollbar never shifts or hides it. */
 .ats-console-logo {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     padding: 0 0 15px;
     font-weight: 700;
     font-size: 15px;

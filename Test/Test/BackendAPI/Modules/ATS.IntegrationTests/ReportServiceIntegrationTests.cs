@@ -148,6 +148,7 @@ public class ReportServiceIntegrationTests : BaseIntegrationTest
 			orderCompletedAt: new DateTime(2026, 8, 15, 12, 0, 0, DateTimeKind.Utc));
 		ada.FirstName = "Ada";
 		ada.LastName = "Lovelace";
+		ada.RushNormal = "Rush";
 		ada.ClientId = clientId;
 		ada.RequestorId = userId;
 		ada.OrderCreatedAt = new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc);
@@ -203,6 +204,7 @@ public class ReportServiceIntegrationTests : BaseIntegrationTest
 			SubjectName = "Ada Lovelace",
 			OrderStatus = "Completed",
 			SelectedPackage = "Basic Screening",
+			RushNormal = "Rush",
 			HitStatus = "Not Clear"
 		});
 	}

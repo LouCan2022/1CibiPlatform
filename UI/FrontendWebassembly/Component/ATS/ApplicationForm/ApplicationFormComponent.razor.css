@@ -101,6 +101,34 @@
     align-self: start;
 }
 
+/* MudDatePicker wraps its input in .mud-picker; flush the wrapper so the field
+   sits level with the Suffix/Sex selects in the same row. */
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-picker,
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-picker-inline {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0;
+}
+
+/* On the selects, oneplatform-rounded-input sits ON .mud-input-control, so the
+   generic `.oneplatform-rounded-input .mud-input-control { margin-top: 0 }` rule
+   below never touches them and MudBlazor's dense-with-label margin (8px top,
+   4px bottom) applies. On the picker the control is nested inside .mud-picker,
+   so that rule strips its top margin; restore the same 8px/4px here. */
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-input-control {
+    margin: 8px 0 4px !important;
+}
+
+.ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-birthdate-field .mud-input-outlined :is(.mud-input-slot, input) {
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    display: flex;
+    align-items: center;
+}
+
 .ats-step-three-scope.ats-step-three-scope ::deep .oneplatform-rounded-input {
     width: 100%;
 }
@@ -1293,6 +1321,7 @@
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-add-employer-card {
+    position: relative;
     display: flex;
     width: 100%;
     min-height: 46px;
@@ -1308,9 +1337,27 @@
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-add-employer-card .mud-checkbox {
+    position: static;
     width: 100%;
     margin: 0;
     justify-content: center;
+}
+
+/* Like the ownership pills: the toggle lives on the inner checkbox label, so
+   only the text was clickable; stretch its hit area over the whole card.
+   MudBlazor's .mud-input-control-input-container is position:relative and would
+   trap the ::after overlay, so it must be static for the overlay to reach the card. */
+.ats-step-five-scope.ats-step-five-scope ::deep .ats-add-employer-card .mud-input-control-input-container {
+    position: static;
+    width: 100%;
+}
+
+.ats-step-five-scope.ats-step-five-scope ::deep .ats-add-employer-card .mud-checkbox::after {
+    position: absolute;
+    content: "";
+    inset: 0;
+    border-radius: 12px;
+    cursor: pointer;
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-add-employer-card :is(.mud-icon-button, .mud-icon-root, svg) {
@@ -1638,6 +1685,7 @@
 }
 
 .ats-final-step-scope.ats-final-step-scope ::deep .ats-add-reference-card {
+    position: relative;
     display: flex;
     width: 100%;
     min-height: 46px;
@@ -1648,13 +1696,30 @@
     border-radius: 12px;
     background: #fbfcff;
     color: var(--final-blue);
+    cursor: pointer;
     transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .ats-final-step-scope.ats-final-step-scope ::deep .ats-add-reference-card .mud-checkbox {
+    position: static;
     width: 100%;
     margin: 0;
     justify-content: center;
+}
+
+/* Stretch the checkbox label's hit area over the whole card (see employer card).
+   The input container must be static so the ::after overlay anchors to the card. */
+.ats-final-step-scope.ats-final-step-scope ::deep .ats-add-reference-card .mud-input-control-input-container {
+    position: static;
+    width: 100%;
+}
+
+.ats-final-step-scope.ats-final-step-scope ::deep .ats-add-reference-card .mud-checkbox::after {
+    position: absolute;
+    content: "";
+    inset: 0;
+    border-radius: 12px;
+    cursor: pointer;
 }
 
 .ats-final-step-scope.ats-final-step-scope ::deep .ats-add-reference-card :is(.mud-icon-button, .mud-icon-root, svg) {
