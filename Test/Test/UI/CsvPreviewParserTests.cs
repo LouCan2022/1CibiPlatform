@@ -139,6 +139,21 @@ public class CsvPreviewParserTests
 	}
 
 	[Fact]
+	public void Parse_ShouldIgnoreRowsWhoseOnlyContentIsInDroppedColumns()
+	{
+		// A row that is empty in the template columns but has a stray note past
+		// MobileNumber is spreadsheet debris, not a candidate. It used to render as an
+		// all-"(Blank)" row and block the upload.
+		var csv = $"{Header},Notes\nDela Cruz,Juan,S,juan@example.com,09171234567,\n,,,,,some stray note";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows.Should().ContainSingle();
+		result.TotalRowCount.Should().Be(1);
+		result.Rows[0][0].Should().Be("Dela Cruz");
+	}
+
+	[Fact]
 	public void Parse_ShouldFlagSwappedColumnsAsOffTemplate()
 	{
 		// The template's sequence is the standard. All five columns are present here,

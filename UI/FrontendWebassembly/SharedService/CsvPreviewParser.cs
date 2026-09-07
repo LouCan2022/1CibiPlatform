@@ -95,10 +95,15 @@ public static class CsvPreviewParser
 			.Where(canonical => !fileHeaders.Contains(canonical, StringComparer.OrdinalIgnoreCase))
 			.ToList();
 
-		// Ignore rows that are entirely blank - a trailing newline is not a record.
+		// Ignore rows that are blank in the kept columns - a trailing newline is not a
+		// record, and neither is a row whose only content sits in the dropped debris
+		// columns (a note or helper formula past MobileNumber). Judging blankness on
+		// the whole record used to surface those as all-"(Blank)" rows that blocked
+		// an otherwise importable file.
 		var dataRows = records
 			.Skip(1)
-			.Where(fields => fields.Any(field => !string.IsNullOrWhiteSpace(field)))
+			.Where(fields => keptIndexes.Any(index =>
+				index < fields.Count && !string.IsNullOrWhiteSpace(fields[index])))
 			.ToList();
 
 		result.TotalRowCount = dataRows.Count;
