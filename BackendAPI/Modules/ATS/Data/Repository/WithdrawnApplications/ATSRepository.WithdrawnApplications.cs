@@ -2,10 +2,11 @@ namespace ATS.Data.Repository;
 
 public partial class ATSRepository
 {
-	// Keyset page over withdrawn invitations ordered by EmailInvitationID (unique PK).
-	// Pure query — the service decodes the cursor and mints the next one.
+	// Keyset over OrderCreatedAt descending. EmailInvitationID is only a stable
+	// tiebreaker for equal creation timestamps.
 	public async Task<List<EmailInvitationRequestListDTO>> GetWithdrawnPageAsync(
 		string? searchTerm,
+		DateTime? afterCreatedAt,
 		Guid? afterId,
 		int take,
 		IReadOnlyCollection<int>? authorizedClientIds,
@@ -14,10 +15,20 @@ public partial class ATSRepository
 	{
 		var usersQuery = BuildWithdrawnQuery(searchTerm, authorizedClientIds, requiredRequestorId);
 		if (afterId.HasValue)
-			usersQuery = usersQuery.Where(eir => eir.EmailInvitationID.CompareTo(afterId.Value) > 0);
+		{
+			var cursorId = afterId.Value;
+			usersQuery = afterCreatedAt.HasValue
+				? usersQuery.Where(eir => eir.OrderCreatedAt != null
+					&& (eir.OrderCreatedAt < afterCreatedAt.Value
+						|| (eir.OrderCreatedAt == afterCreatedAt.Value && eir.EmailInvitationID.CompareTo(cursorId) > 0)))
+				: usersQuery.Where(eir =>
+					(eir.OrderCreatedAt == null && eir.EmailInvitationID.CompareTo(cursorId) > 0)
+					|| eir.OrderCreatedAt != null);
+		}
 
 		return await usersQuery
-					.OrderBy(eir => eir.EmailInvitationID)
+					.OrderByDescending(eir => eir.OrderCreatedAt)
+					.ThenBy(eir => eir.EmailInvitationID)
 					.Take(take)
 					.Select(eir => new EmailInvitationRequestListDTO
 					{
@@ -26,7 +37,14 @@ public partial class ATSRepository
 						FirstName = eir.FirstName,
 						LastName = eir.LastName,
 						Requestor = eir.Requestor,
-						OrderStatus = eir.OrderStatus,
+						TicketNumber = eir.TicketNumber,
+						OrderCreatedAt = eir.OrderCreatedAt,
+						WithdrawnAt = _dbcontext.OrderStatusHistories
+							.Where(history => history.EmailInvitationRequestId == eir.EmailInvitationID
+								&& history.EventType == OrderHistoryEventType.ApplicationFormWithdrawn)
+							.OrderByDescending(history => history.OccurredAt)
+							.Select(history => (DateTime?)history.OccurredAt)
+							.FirstOrDefault(),
 					})
 					.ToListAsync(cancellationToken);
 	}
@@ -57,6 +75,7 @@ public partial class ATSRepository
 				EF.Functions.ILike(eir.MiddleInitial ?? string.Empty, $"%{searchTerm}%") ||
 				EF.Functions.ILike(eir.LastName!, $"%{searchTerm}%") ||
 				EF.Functions.ILike(eir.Requestor ?? string.Empty, $"%{searchTerm}%") ||
+				EF.Functions.ILike(eir.TicketNumber ?? string.Empty, $"%{searchTerm}%") ||
 				EF.Functions.ILike(eir.EmailAddress!, $"%{searchTerm}%"));
 
 		return usersQuery;

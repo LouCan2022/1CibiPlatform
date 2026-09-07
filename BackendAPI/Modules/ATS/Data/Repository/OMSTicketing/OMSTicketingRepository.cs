@@ -130,6 +130,7 @@ public sealed class OMSTicketingRepository : IOMSTicketingRepository
 				MobileNumber = invitation.MobileNumber,
 				SelectPackage = invitation.SelectPackage,
 				RequestorId = invitation.RequestorId,
+				RushNormal = invitation.RushNormal,
 				DOB = personal != null ? personal.DOB : null,
 				PersonalMobileNumber = personal != null ? personal.MobileNumber : null,
 				SSS = personal != null ? personal.SSS : null,

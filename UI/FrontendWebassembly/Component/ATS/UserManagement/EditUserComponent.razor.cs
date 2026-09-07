@@ -7,6 +7,7 @@ public partial class EditUserComponent
 	private const string ATSRoleIdStorageKey = "ATSRoleId";
 	private MudForm? UserForm;
 	private bool _canAssignAllRoles;
+	private bool _canViewAllModules;
 
 	[Inject]
 	private IAccessService AccessService { get; set; } = default!;
@@ -37,8 +38,25 @@ public partial class EditUserComponent
 	private string? AuthUserError { get; set; }
 	private IReadOnlyCollection<int> SelectedModuleIds { get; set; } = new HashSet<int>();
 	private string? ModuleError { get; set; }
-	private IEnumerable<ModuleDetailsDTO> SelectedModules => Modules
+	// Restricted administration modules stay hidden from the menu and the chips
+	// for admins outside the SuperAdmin / Platform Manager ladder, but any such
+	// module already assigned to the user is kept in SelectedModuleIds so saving
+	// never silently strips what this admin cannot see.
+	private IEnumerable<ModuleDetailsDTO> VisibleModules => Modules
+		.Where(module => ModuleList.IsVisibleForAdministration(module.ModuleId, _canViewAllModules));
+	private IEnumerable<ModuleDetailsDTO> SelectedModules => VisibleModules
 		.Where(module => SelectedModuleIds.Contains(module.ModuleId));
+	private IReadOnlyCollection<int> ActiveModuleIds => VisibleModules
+		.Where(module => module.IsActive)
+		.Select(module => module.ModuleId)
+		.ToArray();
+	private bool AllModulesSelected => ActiveModuleIds.Count > 0
+		&& ActiveModuleIds.All(SelectedModuleIds.Contains);
+	private string SelectAllModulesIcon => AllModulesSelected
+		? Icons.Material.Filled.CheckBox
+		: SelectedModuleIds.Count > 0
+			? Icons.Material.Filled.IndeterminateCheckBox
+			: Icons.Material.Outlined.CheckBoxOutlineBlank;
 	private IEnumerable<RoleDetailsDTO> AssignableRoles
 	{
 		get
@@ -76,6 +94,7 @@ public partial class EditUserComponent
 		var isPlatformSuperAdmin = await AccessService.HasRoleAsync(RoleList.SuperAdminId);
 		var atsRoleId = await GetStoredATSRoleIdAsync();
 		_canAssignAllRoles = isPlatformSuperAdmin || atsRoleId == AtsRoleList.PlatformManagerId;
+		_canViewAllModules = isPlatformSuperAdmin || atsRoleId == AtsRoleList.PlatformManagerId;
 	}
 
 	private async Task<int> GetStoredATSRoleIdAsync()
@@ -160,6 +179,13 @@ public partial class EditUserComponent
 
 		OnSelectedModuleIdsChanged(moduleIds);
 	}
+
+	// Selecting all only adds active modules; inactive ones already on the user
+	// stay selected either way and are only removable through their chip.
+	private void ToggleAllModules() =>
+		OnSelectedModuleIdsChanged(AllModulesSelected
+			? SelectedModuleIds.Except(ActiveModuleIds)
+			: SelectedModuleIds.Concat(ActiveModuleIds));
 
 	private void RemoveModule(int moduleId) =>
 		OnSelectedModuleIdsChanged(SelectedModuleIds.Where(id => id != moduleId));

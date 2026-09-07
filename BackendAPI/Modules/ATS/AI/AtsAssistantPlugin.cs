@@ -90,7 +90,7 @@ public sealed class AtsAssistantPlugin
 	[KernelFunction]
 	[Description("Search background check orders by the candidate or subject name, dont ever produce your own table format to show the subjects result, " +
 		"just say sample that this is all the subjects base on that name its up to you how you gonna say it. Use this to "
-		+ "answer any question about the status, package, requestor or result of a person's order.")]
+		+ "answer any question about the status, package, requestor or result of a person's order and don't invent details that are not there.")]
 	public async Task<IReadOnlyList<AtsOrderSummaryDTO>> SearchOrdersBySubjectAsync(
 		[Description("Full or partial candidate name, for example 'Russel Gutierrez'.")]
 		string name,
@@ -111,8 +111,7 @@ public sealed class AtsAssistantPlugin
 		}
 
 		var reports = await _atsRepository.SearchReportsPageAsync(
-			afterRank: null,
-			afterCompletedAt: null,
+			afterCreatedAt: null,
 			afterId: null,
 			take: MaxSearchResults,
 			searchTerm: name.Trim(),
@@ -139,22 +138,6 @@ public sealed class AtsAssistantPlugin
 		LastSearchResults.AddRange(orders);
 
 		return orders;
-	}
-
-	[KernelFunction]
-	[Description("Get the dated status timeline of a single order. Only call this with an order id "
-		+ "returned by SearchOrdersBySubject.")]
-	public async Task<IReadOnlyList<OrderStatusHistoryDTO>> GetOrderStatusHistoryAsync(
-		[Description("The EmailInvitationRequestId returned by SearchOrdersBySubject.")]
-		Guid orderId,
-		CancellationToken cancellationToken)
-	{
-		if (orderId == Guid.Empty)
-		{
-			return Array.Empty<OrderStatusHistoryDTO>();
-		}
-
-		return await _orderHistoryService.GetAsync(orderId, cancellationToken);
 	}
 
 	[KernelFunction]

@@ -148,8 +148,10 @@ public class ReportServiceIntegrationTests : BaseIntegrationTest
 			orderCompletedAt: new DateTime(2026, 8, 15, 12, 0, 0, DateTimeKind.Utc));
 		ada.FirstName = "Ada";
 		ada.LastName = "Lovelace";
+		ada.RushNormal = "Rush";
 		ada.ClientId = clientId;
 		ada.RequestorId = userId;
+		ada.OrderCreatedAt = new DateTime(2026, 8, 10, 12, 0, 0, DateTimeKind.Utc);
 		ada.ReportDetails =
 		[
 			CreateReport(ada.EmailInvitationID, "Initial Report", "Clear", "ada-initial.pdf", new DateTime(2026, 8, 10, 8, 0, 0, DateTimeKind.Utc)),
@@ -164,10 +166,12 @@ public class ReportServiceIntegrationTests : BaseIntegrationTest
 		grace.LastName = "Hopper";
 		grace.ClientId = clientId;
 		grace.RequestorId = userId;
+		grace.OrderCreatedAt = new DateTime(2026, 8, 12, 12, 0, 0, DateTimeKind.Utc);
 
 		var pending = CreateInvitation("Pending", orderStatus: "In Progress");
 		pending.ClientId = clientId;
 		pending.RequestorId = userId;
+		pending.OrderCreatedAt = new DateTime(2026, 8, 14, 12, 0, 0, DateTimeKind.Utc);
 		await AddInvitationsAsync(ada, grace, pending);
 
 		// Act
@@ -186,7 +190,9 @@ public class ReportServiceIntegrationTests : BaseIntegrationTest
 		// Assert
 		unfiltered.TotalCount.Should().Be(3);
 		unfiltered.Items.Should().HaveCount(3);
-		unfiltered.Items.First().EmailInvitationRequestId.Should().Be(grace.EmailInvitationID);
+		unfiltered.Items.Select(item => item.EmailInvitationRequestId)
+			.Should().Equal(pending.EmailInvitationID, grace.EmailInvitationID, ada.EmailInvitationID);
+		unfiltered.Items.First().OrderCreatedAt.Should().Be(pending.OrderCreatedAt);
 		unfiltered.Items.Single(item => item.EmailInvitationRequestId == ada.EmailInvitationID)
 			.HitStatus.Should().Be("Not Clear");
 
@@ -198,6 +204,7 @@ public class ReportServiceIntegrationTests : BaseIntegrationTest
 			SubjectName = "Ada Lovelace",
 			OrderStatus = "Completed",
 			SelectedPackage = "Basic Screening",
+			RushNormal = "Rush",
 			HitStatus = "Not Clear"
 		});
 	}
