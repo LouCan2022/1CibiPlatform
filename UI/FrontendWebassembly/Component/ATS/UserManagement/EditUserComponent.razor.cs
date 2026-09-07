@@ -39,6 +39,17 @@ public partial class EditUserComponent
 	private string? ModuleError { get; set; }
 	private IEnumerable<ModuleDetailsDTO> SelectedModules => Modules
 		.Where(module => SelectedModuleIds.Contains(module.ModuleId));
+	private IReadOnlyCollection<int> ActiveModuleIds => Modules
+		.Where(module => module.IsActive)
+		.Select(module => module.ModuleId)
+		.ToArray();
+	private bool AllModulesSelected => ActiveModuleIds.Count > 0
+		&& ActiveModuleIds.All(SelectedModuleIds.Contains);
+	private string SelectAllModulesIcon => AllModulesSelected
+		? Icons.Material.Filled.CheckBox
+		: SelectedModuleIds.Count > 0
+			? Icons.Material.Filled.IndeterminateCheckBox
+			: Icons.Material.Outlined.CheckBoxOutlineBlank;
 	private IEnumerable<RoleDetailsDTO> AssignableRoles
 	{
 		get
@@ -160,6 +171,13 @@ public partial class EditUserComponent
 
 		OnSelectedModuleIdsChanged(moduleIds);
 	}
+
+	// Selecting all only adds active modules; inactive ones already on the user
+	// stay selected either way and are only removable through their chip.
+	private void ToggleAllModules() =>
+		OnSelectedModuleIdsChanged(AllModulesSelected
+			? SelectedModuleIds.Except(ActiveModuleIds)
+			: SelectedModuleIds.Concat(ActiveModuleIds));
 
 	private void RemoveModule(int moduleId) =>
 		OnSelectedModuleIdsChanged(SelectedModuleIds.Where(id => id != moduleId));

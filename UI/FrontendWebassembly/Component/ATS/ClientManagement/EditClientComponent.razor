@@ -102,10 +102,17 @@
                                              Variant="Variant.Text"
                                              Dense="true"
                                              Class="ec-package-menu">
+                                        <MudMenuItem AutoClose="false"
+                                                     OnClick="ToggleAllPackages">
+                                            <MudIcon Icon="@SelectAllPackagesIcon" Size="Size.Small" />
+                                            <span>Select all</span>
+                                        </MudMenuItem>
+                                        <MudDivider />
                                         @foreach (var package in Packages)
                                         {
                                             var isSelected = SelectedPackageIds.Contains(package.PackageId);
-                                            <MudMenuItem Disabled="@(!package.IsActive && !isSelected)"
+                                            <MudMenuItem AutoClose="false"
+                                                         Disabled="@(!package.IsActive && !isSelected)"
                                                          OnClick="@(() => TogglePackage(package.PackageId))">
                                                 <MudIcon Icon="@(isSelected ? Icons.Material.Filled.CheckBox : Icons.Material.Outlined.CheckBoxOutlineBlank)" Size="Size.Small" />
                                                 <span>@package.PackageName@(!package.IsActive ? " (Inactive)" : string.Empty)</span>

@@ -213,10 +213,18 @@
                                              Variant="Variant.Text"
                                              Dense="true"
                                              Class="eu-module-menu">
+                                        <MudMenuItem AutoClose="false"
+                                                     OnClick="ToggleAllModules">
+                                            <MudIcon Icon="@SelectAllModulesIcon" Size="Size.Small" />
+                                            <span>Select all</span>
+                                        </MudMenuItem>
+                                        <MudDivider />
                                         @foreach (var module in Modules)
                                         {
                                             var isSelected = SelectedModuleIds.Contains(module.ModuleId);
-                                            <MudMenuItem Disabled="@(!module.IsActive && !isSelected)" OnClick="@(() => ToggleModule(module.ModuleId))">
+                                            <MudMenuItem AutoClose="false"
+                                                         Disabled="@(!module.IsActive && !isSelected)"
+                                                         OnClick="@(() => ToggleModule(module.ModuleId))">
                                                 <MudIcon Icon="@(isSelected ? Icons.Material.Filled.CheckBox : Icons.Material.Outlined.CheckBoxOutlineBlank)" Size="Size.Small" />
                                                 <span>@module.ModuleName@(!module.IsActive ? " (Inactive)" : string.Empty)</span>
                                             </MudMenuItem>
