@@ -10,15 +10,11 @@ namespace Test.BackendAPI.Modules.ATS.IntegrationTests;
 
 public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 {
-	private readonly string _atsTestFolder;
 	byte[] sampleFileContent = Convert.FromBase64String("SGVsbG8gV29ybGQ=");
 	string bulkFileName = $"{Guid.CreateVersion7()}-bulkfile.csv";
 
 	public InsertBulkSubjectIntegrationTest(IntegrationTestWebAppFactory factory) : base(factory)
 	{
-		_atsTestFolder = _configuration
-				.GetSection("AlibabaOss")
-				.GetValue<string>("ATSTestFolder") ?? string.Empty;
 	}
 
 	private IFormFile CreateFakeFormFile(byte[] content, string fileName)
@@ -60,7 +56,17 @@ public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 
 		if (result.isAdded == true)
 		{
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{bulkFileName}");
+			// Delete by the key the row actually persisted rather than
+			// reconstructing it, so cleanup stays correct however
+			// UploadAsync builds keys.
+			var storedFileKey = _dbContext.BulkUploadFileDetails
+				.Where(file => file.FileName == bulkFileName)
+				.Select(file => file.FileKey)
+				.FirstOrDefault();
+			if (!string.IsNullOrWhiteSpace(storedFileKey))
+			{
+				await _objectStorageService.DeleteAsync(storedFileKey);
+			}
 		}
 	}
 

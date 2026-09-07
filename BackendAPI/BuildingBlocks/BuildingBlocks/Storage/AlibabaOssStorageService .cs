@@ -31,9 +31,14 @@ public sealed class AlibabaOssStorageService : IObjectStorageService
 	{
 		ArgumentNullException.ThrowIfNull(stream);
 
+		// The GUID keeps keys unique even when two uploads share a filename;
+		// without it a same-named upload silently overwrites the other object
+		// while both DB rows keep pointing at the one surviving key. The test
+		// folder is therefore only a prefix, never a replacement for the key.
+		var uniqueKey = $"{folderName}/{Guid.CreateVersion7():N}-{fileName}";
 		var objectKey = string.IsNullOrEmpty(_atsTestFolder)
-			? $"{folderName}/{Guid.CreateVersion7():N}-{fileName}"
-			: $"{_atsTestFolder.TrimEnd('/')}/{fileName}";
+			? uniqueKey
+			: $"{_atsTestFolder.TrimEnd('/')}/{uniqueKey}";
 
 		await Task.Run(() => { 
 			ct.ThrowIfCancellationRequested(); 
