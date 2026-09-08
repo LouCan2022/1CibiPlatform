@@ -2019,6 +2019,7 @@
 
 .ats-download-preview.mud-button-disabled {
     color: #9aa7bd !important;
+}
 
 .ats-download-submit.theme-button-inactive {
     color: var(--c-on-dark-fg) !important;
