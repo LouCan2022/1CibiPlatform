@@ -1,11 +1,11 @@
 ﻿.ats-appform-modern,
 .philsys-modern {
-    --modern-bg: #F4F7FB;
-    --modern-card: #FFFFFF;
-    --modern-border: #E3E9F1;
-    --modern-title: #0B1F3A;
-    --modern-sub: #6B7B92;
-    --modern-blue: #2C7FB8;
+    --modern-bg: var(--c-page-bg);
+    --modern-card: var(--c-surface);
+    --modern-border: var(--c-border-soft);
+    --modern-title: var(--c-navy-900);
+    --modern-sub: var(--c-fg-muted);
+    --modern-blue: var(--c-blue-500);
 }
 
 .philsys-wrapper {
@@ -19,7 +19,7 @@
 }
 
 .philsys-tab-pannel-active {
-    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%) !important;
+    background: var(--c-brand-bar-gradient) !important;
     color: white !important;
 }
 
@@ -70,7 +70,7 @@
     justify-content: center;
     align-items: center;
     padding: 24px;
-    background: #F4F7FB;
+    background: var(--c-page-bg);
 }
 
     .philsys-liveness-page:has(.philsys-result-shell) {
@@ -105,7 +105,7 @@
 }
 
     .philsys-modern .philsys-custom-tabs {
-        background: #EEF3F9;
+        background: var(--c-surface-sunken);
         border-radius: 10px;
         padding: 4px;
     }
@@ -118,7 +118,7 @@
         }
 
             .philsys-modern .philsys-custom-tabs .mud-tab.mud-tab-active {
-                background: #fff;
+                background: var(--c-surface);
                 color: var(--modern-title);
             }
 
@@ -138,13 +138,13 @@
     }
 
         .philsys-modern .philsys-modern-pill.success {
-            background: #E7F5EC;
-            color: #1E8E5A;
+            background: var(--c-success-bg);
+            color: var(--c-success);
         }
 
         .philsys-modern .philsys-modern-pill.error {
-            background: #FCECE7;
-            color: #D8503A;
+            background: var(--c-danger-bg);
+            color: var(--c-danger);
         }
 
 .philsys-lookup-shell {

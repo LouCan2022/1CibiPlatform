@@ -9,23 +9,23 @@
    Declared locally because those tokens are scoped to their own page roots. */
 
 .api-docs {
-    --navy-900: #0a1c3f;
-    --navy-800: #0f2a5c;
-    --blue-600: #2f6fed;
-    --blue-500: #4d8bff;
-    --bg: #f4f6fb;
-    --card: #fff;
-    --border: #e2e6f0;
-    --border-soft: #eef1f7;
-    --text-900: #101828;
-    --text-600: #4b5468;
-    --text-400: #8992a6;
-    --green-700: #0f7b3e;
-    --green-bg: #e9f9ef;
-    --amber-700: #a15c07;
-    --amber-bg: #fdf1dd;
-    --red-700: #b42318;
-    --red-bg: #fdecec;
+    --navy-900: var(--c-navy-900);
+    --navy-800: var(--c-navy-800);
+    --blue-600: var(--c-blue-500);
+    --blue-500: var(--c-blue-500);
+    --bg: var(--c-page-bg);
+    --card: var(--c-surface);
+    --border: var(--c-border-soft);
+    --border-soft: var(--c-border-soft);
+    --text-900: var(--c-slate-text-900);
+    --text-600: var(--c-fg-muted);
+    --text-400: var(--c-fg-subtle);
+    --green-700: var(--c-success);
+    --green-bg: var(--c-success-bg);
+    --amber-700: var(--c-warn);
+    --amber-bg: var(--c-warn-bg);
+    --red-700: var(--c-danger);
+    --red-bg: var(--c-danger-bg);
 
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
@@ -78,8 +78,8 @@
     height: 34px;
     flex: 0 0 auto;
     border-radius: 9px;
-    background: linear-gradient(100deg, var(--navy-900) 0%, var(--blue-600) 100%);
-    color: #fff;
+    background: var(--c-dialog-header-gradient);
+    color: var(--c-on-dark-fg);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .4px;
@@ -117,7 +117,7 @@
 }
 
 .api-docs-nav-link:hover {
-    background: #f3f6fc;
+    background: var(--c-surface-sunken);
     color: var(--navy-900);
 }
 
@@ -125,16 +125,16 @@
    in app.css. The active entry is the one visual anchor in a long rail, so it carries
    the product's identity rather than another shade of blue. */
 .api-docs-nav-link.is-active {
-    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%);
+    background: var(--c-brand-bar-gradient);
     box-shadow: 0 4px 12px -4px rgb(16 34 71 / 45%);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-weight: 700;
 }
 
 /* Hover must not repaint the gradient away. */
 .api-docs-nav-link.is-active:hover {
-    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%);
-    color: #fff;
+    background: var(--c-brand-bar-gradient);
+    color: var(--c-on-dark-fg);
 }
 
 /* The method chip sits on the gradient when active, so it needs its own contrast
@@ -145,7 +145,7 @@
 .api-docs-nav-link.is-active .api-docs-nav-method.is-post,
 .api-docs-nav-link.is-active .api-docs-nav-method.is-patch,
 .api-docs-nav-link.is-active .api-docs-nav-method.is-delete {
-    color: #fff;
+    color: var(--c-on-dark-fg);
     opacity: .85;
 }
 
@@ -238,7 +238,7 @@
     border: 1px solid var(--border);
     border-left: 3px solid var(--blue-500);
     border-radius: 10px;
-    background: #f7faff;
+    background: var(--c-surface-sunken);
     color: var(--text-600);
     font-size: 13px;
     line-height: 1.6;
@@ -281,7 +281,7 @@
 
 .api-docs-method.is-get,
 .api-docs-nav-method.is-get {
-    background: #eef3fe;
+    background: var(--c-blue-tint);
     color: var(--blue-600);
 }
 
@@ -401,7 +401,7 @@
 }
 
 .api-docs-copy:hover {
-    background: #f3f6fc;
+    background: var(--c-surface-sunken);
     color: var(--blue-600);
 }
 
@@ -484,7 +484,7 @@
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
     .api-docs {
         display: block;
     }

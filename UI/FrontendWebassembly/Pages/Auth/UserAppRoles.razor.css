@@ -1,23 +1,23 @@
 .user-app-roles-page {
-    --um-navy-950: #071230;
-    --um-navy-900: #0a1c3f;
-    --um-navy-800: #0f2a5c;
-    --um-blue-600: #2f6fed;
-    --um-blue-500: #4d8bff;
-    --um-bg: #f4f6fb;
-    --um-card: #ffffff;
-    --um-border: #e2e6f0;
-    --um-border-soft: #eef1f7;
-    --um-text-900: #101828;
-    --um-text-600: #4b5468;
-    --um-text-400: #8992a6;
-    --um-red-600: #e5484d;
-    --um-red-bg: #fdecec;
-    --um-action-blue: #1d5fd1;
-    --um-action-blue-bg: #edf3fc;
-    --um-action-blue-bg-hover: #e3ecfb;
-    --um-action-blue-border: #c2d2f0;
-    --um-brand-gradient: linear-gradient(100deg, var(--um-navy-950) 0%, var(--um-navy-800) 45%, var(--um-blue-600) 100%);
+    --um-navy-950: var(--c-slate-950);
+    --um-navy-900: var(--c-navy-900);
+    --um-navy-800: var(--c-navy-800);
+    --um-blue-600: var(--c-blue-500);
+    --um-blue-500: var(--c-blue-500);
+    --um-bg: var(--c-page-bg);
+    --um-card: var(--c-surface);
+    --um-border: var(--c-border-soft);
+    --um-border-soft: var(--c-border-soft);
+    --um-text-900: var(--c-slate-text-900);
+    --um-text-600: var(--c-fg-muted);
+    --um-text-400: var(--c-fg-subtle);
+    --um-red-600: var(--c-danger);
+    --um-red-bg: var(--c-danger-bg);
+    --um-action-blue: var(--c-blue-600);
+    --um-action-blue-bg: var(--c-blue-tint);
+    --um-action-blue-bg-hover: var(--c-blue-tint-2);
+    --um-action-blue-border: var(--c-border-strong);
+    --um-brand-gradient: var(--c-sidebar-gradient);
     display: flex;
     width: 100%;
     min-width: 0;
@@ -34,7 +34,7 @@
     padding: 0 18px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(120deg, #132a54, #1d5fd1);
+    background: var(--c-primary-gradient);
     box-shadow: 0 8px 20px -6px rgba(29, 95, 209, .5) !important;
     font-size: 13px !important;
     font-weight: 700;
@@ -246,7 +246,7 @@
     border-radius: 9px;
     background: var(--um-brand-gradient) !important;
     box-shadow: 0 6px 14px -4px rgba(15, 42, 92, .35);
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-family: "Inter", sans-serif;
     font-size: 13px;
     font-weight: 700;
@@ -272,7 +272,7 @@
 .user-app-roles-page ::deep .user-management-panel thead .mud-table-cell {
     padding: 12px 22px;
     border-bottom: 1px solid var(--um-border-soft);
-    background: #fbfcfe;
+    background: var(--c-surface-sunken);
     color: var(--um-text-400);
     font-family: "Inter", sans-serif;
     font-size: 11px;
@@ -301,11 +301,11 @@
 }
 
 .user-app-roles-page ::deep .user-management-panel tbody .mud-table-row:nth-child(even) {
-    background: #fafbfd;
+    background: var(--c-surface-sunken);
 }
 
 .user-app-roles-page ::deep .user-management-panel tbody .mud-table-row:hover {
-    background: #eef3fe;
+    background: var(--c-blue-tint);
 }
 
 .user-app-roles-page ::deep .user-management-panel tbody .mud-table-row:last-child .mud-table-cell {
@@ -376,7 +376,7 @@
 
 .user-app-roles-page ::deep .user-management-panel .um-icon-action-danger.mud-icon-button {
     border-color: rgba(229, 72, 77, .28);
-    background: #fff5f5;
+    background: var(--c-danger-bg);
     color: var(--um-red-600) !important;
 }
 

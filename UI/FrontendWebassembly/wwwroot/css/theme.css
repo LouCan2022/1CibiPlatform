@@ -1,0 +1,262 @@
+/* ---------------------------------------------------------------------------
+   Shared design tokens for CIBI OnePlatform.
+
+   THIS IS THE ONLY PLACE A COLOUR IS ALLOWED TO BE A LITERAL.
+   Do NOT run Tools/tokenize-css.sh over this file - it rewrites literals into
+   var() references, which here would make every token define itself.
+
+   Every other stylesheet either uses these `--c-*` tokens directly, or keeps its
+   own historical token names and re-points them at these (see the alias blocks in
+   the per-feature sheets, e.g. `.au-shell { --au-text-1: var(--c-fg-strong) }`).
+   The alias approach exists because token NAMES collide across features -
+   `--navy-900` is #0b1b3d in ATS but #0a1c3f in PlatformLogs, and `--border` had
+   four different values - so hoisting the names to :root would silently change
+   colours. Re-pointing values per scope avoids that entirely.
+
+   Dark mode is a class on <html>, set by the inline script in index.html before
+   Blazor boots (anti-FOUC) and kept in sync by ThemeService. Because the tokens
+   are redefined on `html.dark`, every sheet that reads a token flips for free.
+
+   Breakpoints match MudBlazor's own ladder so CSS and the C# `Breakpoint` enum
+   agree. NOTE: MudTable's Breakpoint.Sm card mode fires at max-width 960px, NOT
+   600px (Breakpoint.Xs is the 600px one). Several older comments in this repo
+   claimed otherwise and were wrong; that mismatch is what left the 601-960px band
+   rendering stacked cards inside a still-880px-wide table.
+     600px   MudBlazor Xs / phone
+     960px   MudBlazor Sm / MudTable card mode
+     1280px  MudBlazor Md
+   Custom properties can't be used in @media queries, so those values are written
+   literally in media rules - this comment is the source of truth for which to use.
+   --------------------------------------------------------------------------- */
+
+:root {
+    /* ---- Surfaces ---- */
+    --c-app-bg: #ffffff;
+    --c-page-bg: #f4f7fb;
+    --c-surface: #ffffff;
+    --c-surface-raised: #ffffff;
+    --c-surface-sunken: #f8f9fc;
+    --c-surface-hover: #fafbff;
+    --c-surface-input: #fcfdff;
+
+    /* ---- Foreground ---- */
+    --c-fg-strong: #16233f;
+    --c-fg-muted: #5b6b8c;
+    --c-fg-subtle: #8a97b5;
+    --c-fg-on-brand: #ffffff;
+
+    /* ---- Borders ---- */
+    --c-border: #d9e3f5;
+    --c-border-soft: #e4eaf6;
+    --c-border-strong: #c2d2f0;
+
+    /* ---- Brand ramp ---- */
+    --c-navy-900: #0b1b3d;
+    --c-navy-800: #132a54;
+    --c-navy-700: #1c3a70;
+    --c-blue-600: #1d5fd1;
+    --c-blue-500: #2e7ce0;
+    --c-blue-tint: #edf3fc;
+    --c-blue-tint-2: #e3ecfb;
+
+    /* Secondary "modern slate" ramp: Home, PlatformLogs, ApiDocs, Dashboard
+       filters. Deliberately a distinct hue from the ATS navy above - these are
+       two different brand expressions, not duplicates to be merged. */
+    --c-slate-950: #071230;
+    --c-slate-900: #0a1c3f;
+    --c-slate-800: #0f2a5c;
+    --c-indigo-600: #2f6fed;
+    --c-indigo-500: #4d8bff;
+    --c-slate-bg: #f4f6fb;
+    --c-slate-border: #e2e6f0;
+    --c-slate-border-soft: #eef1f7;
+    --c-slate-text-900: #101828;
+    --c-slate-text-600: #4b5468;
+    --c-slate-text-400: #8992a6;
+
+    /* ---- Status ---- */
+    --c-success: #1e9e64;
+    --c-success-bg: #e4f7ed;
+    --c-warn: #b5790f;
+    --c-warn-bg: #fcf1dd;
+    --c-danger: #d64545;
+    --c-danger-bg: #fdecec;
+    --c-danger-strong: #c0453e;
+    --c-info: #1d5fd1;
+    --c-info-bg: #eef4ff;
+    --c-neutral-bg: #eef0f5;
+    --c-neutral-fg: #6b7690;
+
+    /* Employment Verification keeps its own magenta identity; it is a separate
+       brand surface, not a variant of the ATS blue. */
+    --c-ev-accent: #d9468d;
+    --c-ev-accent-strong: #a52a70;
+    --c-ev-accent-soft: #e14f9b;
+    --c-ev-tint: #fff0f7;
+    --c-ev-tint-2: #fff8fc;
+    --c-ev-border: #f2d9e7;
+    --c-ev-fg: #7d245d;
+    --c-ev-fg-muted: #95667f;
+    --c-ev-page-gradient: linear-gradient(135deg, #fff2fa 0%, #f8e6f7 48%, #ffe2ed 100%);
+
+    /* ---- Effects ---- */
+    --c-shadow-card: 0 12px 32px -12px rgba(11, 27, 61, 0.12);
+    --c-shadow-raised: 0 8px 24px -18px rgba(11, 31, 58, 0.25);
+    --c-shadow-drawer: 0 18px 40px rgba(11, 31, 58, 0.35);
+    --c-overlay: rgba(11, 31, 58, 0.35);
+    --c-focus-ring: rgba(46, 124, 224, 0.25);
+    --c-brand-gradient: linear-gradient(120deg, #132a54, #1d5fd1);
+    --c-header-gradient: linear-gradient(120deg, #0b1b3d 0%, #1c3a70 55%, #1d5fd1 130%);
+
+    /* Surfaces that are dark in BOTH themes and always carry white text: the ATS
+       sidebar, dialog headers, the primary button. They must not be built from the
+       ramp tokens above, because those invert on dark and would turn these light.
+       In dark mode they only deepen, so they still read as the same component. */
+    --c-on-dark-fg: #ffffff;
+    --c-on-dark-fg-muted: rgba(255, 255, 255, 0.72);
+    --c-on-dark-border: rgba(255, 255, 255, 0.14);
+    --c-on-dark-hover: rgba(255, 255, 255, 0.08);
+    --c-sidebar-gradient: linear-gradient(100deg, #071230 0%, #0f2a5c 45%, #2f6fed 100%);
+    --c-dialog-header-gradient: linear-gradient(120deg, #0b1b3d 0%, #1c3a70 55%, #1d5fd1 130%);
+    --c-primary-gradient: linear-gradient(120deg, #132a54, #1d5fd1);
+    --c-avatar-gradient: linear-gradient(135deg, #2e7ce0, #132a54);
+
+    /* Login "Hello, Friend!" aside. Its own stops rather than the ramp, for the same
+       reason as the gradients above - it is a dark panel with white text in both
+       themes. Light mode keeps the original navy -> blue. */
+    --c-auth-panel-from: #0b1b3d;
+    --c-auth-panel-to: #1d5fd1;
+
+    /* The navy -> blue -> cyan brand bar: .theme-button, active tabs, accent strips.
+       Always carries white text. */
+    --c-brand-bar-gradient: linear-gradient(90deg, #0b1b3d 0%, #2e7ce0 50%, #68c0d6 100%);
+
+    /* ATS sidebar logo facets. Theme-independent: the mark always sits on the dark
+       sidebar panel above. */
+    --c-logo-light: #7fc4e8;
+    --c-logo-mid: #2c7fb8;
+    --c-logo-dark: #0b1f3a;
+
+    /* Solid-filled pills that always carry white text (e.g. the "+3 more" chip). */
+    --c-chip-solid-bg: #0b1b3d;
+
+    /* Dispute flow accent - the one place the app uses orange as a primary. */
+    --c-accent-orange: #d3540e;
+    --c-accent-orange-500: #ea7317;
+
+    /* Charts are drawn from C# (ATSDashboardComponent.razor.cs), but the surface
+       they sit on is CSS. Keep the plot background here so the two agree. */
+    --c-chart-surface: #ffffff;
+    --c-chart-grid: #e4eaf6;
+}
+
+html.dark,
+html.dark-startup {
+    /* ---- Surfaces ----
+       A cool near-black rather than pure #000, so elevation reads as lighter
+       layers instead of grey haze. Raised > surface > sunken. */
+    --c-app-bg: #0e131c;
+    --c-page-bg: #0e131c;
+    --c-surface: #161c28;
+    --c-surface-raised: #1c2432;
+    --c-surface-sunken: #11161f;
+    --c-surface-hover: #1f2836;
+    --c-surface-input: #131924;
+
+    /* ---- Foreground ----
+       Not pure white: #e8edf7 against #161c28 is ~13:1, comfortably AAA, without
+       the halation pure white causes on dark backgrounds. */
+    --c-fg-strong: #e8edf7;
+    --c-fg-muted: #a3b0c8;
+    --c-fg-subtle: #7c8aa5;
+    --c-fg-on-brand: #ffffff;
+
+    /* ---- Borders ---- */
+    --c-border: #2a3446;
+    --c-border-soft: #222b3a;
+    --c-border-strong: #3a4763;
+
+    /* ---- Brand ramp ----
+       Inverted: the light-mode navies are indistinguishable from the dark page
+       background, so "900" becomes the lightest tint that still reads as brand,
+       and the tints become dim washes rather than pale blues. */
+    --c-navy-900: #cfe0ff;
+    --c-navy-800: #1e3a66;
+    --c-navy-700: #24406f;
+    --c-blue-600: #6ea8ff;
+    --c-blue-500: #8dbaff;
+    --c-blue-tint: #1a2537;
+    --c-blue-tint-2: #21304a;
+
+    --c-slate-950: #cfe0ff;
+    --c-slate-900: #d5e2f7;
+    --c-slate-800: #24406f;
+    --c-indigo-600: #7ea6ff;
+    --c-indigo-500: #9dbcff;
+    --c-slate-bg: #0e131c;
+    --c-slate-border: #2a3446;
+    --c-slate-border-soft: #222b3a;
+    --c-slate-text-900: #e8edf7;
+    --c-slate-text-600: #a3b0c8;
+    --c-slate-text-400: #7c8aa5;
+
+    /* ---- Status ----
+       Foregrounds lightened for contrast on dark; the *-bg tints become dim
+       washes rather than pale pastels. */
+    --c-success: #4ade9b;
+    --c-success-bg: #12301f;
+    --c-warn: #e0a94a;
+    --c-warn-bg: #33270f;
+    --c-danger: #ff7b7b;
+    --c-danger-bg: #35191c;
+    --c-danger-strong: #ff8a83;
+    --c-info: #6ea8ff;
+    --c-info-bg: #172234;
+    --c-neutral-bg: #222b3a;
+    --c-neutral-fg: #a3b0c8;
+
+    --c-ev-accent: #f07ab5;
+    --c-ev-accent-strong: #f79ac9;
+    --c-ev-accent-soft: #e884ba;
+    --c-ev-tint: #2a1622;
+    --c-ev-tint-2: #1d1219;
+    --c-ev-border: #43263a;
+    --c-ev-fg: #f6d7e7;
+    --c-ev-fg-muted: #c9a3b8;
+    --c-ev-page-gradient: linear-gradient(135deg, #17101a 0%, #1d1219 48%, #201017 100%);
+
+    /* ---- Effects ----
+       Shadows carry almost no weight on dark surfaces; depth comes from the
+       surface ramp instead, so these are deepened rather than tinted. */
+    --c-shadow-card: 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+    --c-shadow-raised: 0 8px 24px -14px rgba(0, 0, 0, 0.7);
+    --c-shadow-drawer: 0 18px 40px rgba(0, 0, 0, 0.7);
+    --c-overlay: rgba(0, 0, 0, 0.6);
+    --c-focus-ring: rgba(110, 168, 255, 0.35);
+    --c-brand-gradient: linear-gradient(120deg, #1e3a66, #2f5fa8);
+    --c-header-gradient: linear-gradient(120deg, #16213a 0%, #1e3a66 55%, #2f5fa8 130%);
+
+    /* Deepened, not inverted - these stay dark with white text in both themes so
+       the sidebar and dialog headers keep their identity. */
+    --c-sidebar-gradient: linear-gradient(100deg, #050a16 0%, #0b1b38 45%, #1e4a9e 100%);
+    --c-dialog-header-gradient: linear-gradient(120deg, #0a1428 0%, #16294c 55%, #1f4a96 130%);
+    --c-primary-gradient: linear-gradient(120deg, #16294c, #2560bd);
+    --c-avatar-gradient: linear-gradient(135deg, #2560bd, #16294c);
+
+    /* Same stops as --c-dialog-header-gradient, so the login aside reads as the same
+       surface as the Edit user dialog header. */
+    --c-auth-panel-from: #0a1428;
+    --c-auth-panel-to: #1f4a96;
+
+    /* Deepened so white text still reads; the cyan end is dimmed rather than dropped
+       so the bar keeps its brand identity. */
+    --c-brand-bar-gradient: linear-gradient(90deg, #0a1428 0%, #2560bd 50%, #2f7f96 100%);
+    --c-chip-solid-bg: #2b3d54;
+    --c-accent-orange: #e8763a;
+    --c-accent-orange-500: #f08d4f;
+
+    --c-chart-surface: #161c28;
+    --c-chart-grid: #2a3446;
+
+    color-scheme: dark;
+}

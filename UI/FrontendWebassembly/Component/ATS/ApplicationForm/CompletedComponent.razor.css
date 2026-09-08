@@ -6,18 +6,18 @@
 }
 
 .ats-completed-card {
-    --completed-navy-900: #0b1b3d;
-    --completed-border: #e4eaf6;
-    --completed-text-2: #5b6b8c;
-    --completed-red: #d64545;
-    --completed-red-tint: #fbe9e9;
-    --completed-red-border: #f1c7c7;
+    --completed-navy-900: var(--c-navy-900);
+    --completed-border: var(--c-border-soft);
+    --completed-text-2: var(--c-fg-muted);
+    --completed-red: var(--c-danger);
+    --completed-red-tint: var(--c-danger-bg);
+    --completed-red-border: var(--c-border-strong);
     width: min(460px, calc(100vw - 40px));
     max-width: 100%;
     padding: 38px 34px 34px;
     border: 1px solid var(--completed-border);
     border-radius: 20px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow:
         0 0 0 6px rgba(46, 124, 224, 0.1),
         0 18px 40px -16px rgba(11, 27, 61, 0.25);

@@ -9,7 +9,13 @@ public partial class ATSDashboardComponent
 	private const double StackedChartRight = 16;
 	private const double StackedChartTop = 14;
 	private const double StackedChartBottom = 36;
-	private static readonly string[] AreaChartColors =
+	// Series colours are passed to MudBlazor chart options as plain strings, so unlike
+	// the rest of the UI they cannot come from the CSS tokens in css/theme.css. The
+	// light set is tuned for a white plot area; the dark set lifts lightness and drops
+	// saturation so the same series stay distinguishable on the dark card without
+	// glowing. Keep the two arrays the same length and order - series identity is
+	// positional.
+	private static readonly string[] AreaChartColorsLight =
 	[
 		"#4D8DE8",
 		"#9B7ADB",
@@ -19,13 +25,37 @@ public partial class ATSDashboardComponent
 		"#E06C75"
 	];
 
-	private static readonly string[] CategoryChartColors =
+	private static readonly string[] AreaChartColorsDark =
+	[
+		"#7FB2F5",
+		"#B99DEB",
+		"#F5CC8A",
+		"#4FC7D9",
+		"#5B8FD6",
+		"#F0908F"
+	];
+
+	private static readonly string[] CategoryChartColorsLight =
 	[
 		"#16A9BE",
 		"#4D7FEA",
 		"#1055A6",
 		"#9C79DF"
 	];
+
+	private static readonly string[] CategoryChartColorsDark =
+	[
+		"#4FC7D9",
+		"#7FA6F5",
+		"#5B8FD6",
+		"#BB9DEB"
+	];
+
+	private string[] AreaChartColors =>
+		Theme.IsDarkMode ? AreaChartColorsDark : AreaChartColorsLight;
+
+	private string[] CategoryChartColors =>
+		Theme.IsDarkMode ? CategoryChartColorsDark : CategoryChartColorsLight;
 
 	private ATSDashboardDTO _dashboard = new();
 	private string _selectedRequester = AllRequesters;
@@ -46,7 +76,9 @@ public partial class ATSDashboardComponent
 	private List<ChartSeries<double>> _turnaroundTimeSeries = [];
 	private string[] _turnaroundTimeLabels = [];
 
-	private readonly DonutChartOptions _donutChartOptions = new()
+	// Properties, not readonly fields: the palette depends on the current theme, so a
+	// once-initialised instance would keep the light colours after a toggle.
+	private DonutChartOptions _donutChartOptions => new()
 	{
 		ChartPalette = CategoryChartColors,
 		DonutRingRatio = 0.3,
@@ -54,7 +86,7 @@ public partial class ATSDashboardComponent
 		ShowValues = false
 	};
 
-	private readonly LineChartOptions _lineChartOptions = new()
+	private LineChartOptions _lineChartOptions => new()
 	{
 		ChartPalette = AreaChartColors,
 		LineStrokeWidth = 3,
@@ -478,9 +510,10 @@ public partial class ATSDashboardComponent
 	private static string FormatSvgNumber(double value) =>
 		FormattableString.Invariant($"{value:0.###}");
 
-	private static string GetAreaLegendColor(int index) => GetPaletteColor(AreaChartColors, index);
+	// Not static: the palettes are theme-dependent instance properties.
+	private string GetAreaLegendColor(int index) => GetPaletteColor(AreaChartColors, index);
 
-	private static string GetCategoryLegendColor(int index) => GetPaletteColor(CategoryChartColors, index);
+	private string GetCategoryLegendColor(int index) => GetPaletteColor(CategoryChartColors, index);
 
 	private static string GetPaletteColor(IReadOnlyList<string> palette, int index) =>
 		palette[index % palette.Count];

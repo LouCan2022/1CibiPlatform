@@ -6,20 +6,20 @@
 }
 
 .asr-shell {
-    --asr-navy-900: #0b1b3d;
-    --asr-navy-800: #132a54;
-    --asr-navy-700: #1c3a70;
-    --asr-blue-600: #1d5fd1;
-    --asr-blue-500: #2e7ce0;
-    --asr-blue-tint: #edf3fc;
-    --asr-border: #d9e3f5;
-    --asr-border-strong: #c2d2f0;
-    --asr-text-1: #16233f;
-    --asr-text-2: #5b6b8c;
-    --asr-text-3: #8a97b5;
+    --asr-navy-900: var(--c-navy-900);
+    --asr-navy-800: var(--c-navy-800);
+    --asr-navy-700: var(--c-navy-700);
+    --asr-blue-600: var(--c-blue-600);
+    --asr-blue-500: var(--c-blue-500);
+    --asr-blue-tint: var(--c-blue-tint);
+    --asr-border: var(--c-border);
+    --asr-border-strong: var(--c-border-strong);
+    --asr-text-1: var(--c-fg-strong);
+    --asr-text-2: var(--c-fg-muted);
+    --asr-text-3: var(--c-fg-subtle);
     width: 100%;
     overflow: hidden;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--asr-text-1);
     font-family: "Inter", sans-serif;
 }
@@ -28,7 +28,7 @@
     position: relative;
     overflow: hidden;
     padding: 28px 32px 18px;
-    background: linear-gradient(120deg, var(--asr-navy-900) 0%, var(--asr-navy-700) 55%, var(--asr-blue-600) 130%);
+    background: var(--c-dialog-header-gradient);
 }
 
 .asr-header::before {
@@ -68,7 +68,7 @@
     border: 1px solid rgba(255, 255, 255, .22);
     border-radius: 13px;
     background: rgba(255, 255, 255, .14);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .asr-icon-badge svg {
@@ -82,7 +82,7 @@
 }
 
 .asr-header-text h1 {
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 22px;
     font-weight: 600;
@@ -91,7 +91,7 @@
 
 .asr-header-text p {
     margin-top: 4px;
-    color: #c6d5f5;
+    color: var(--c-on-dark-fg-muted);
     font-size: 13.5px;
 }
 
@@ -106,7 +106,7 @@
     border: 1px solid rgba(255, 255, 255, .2);
     border-radius: 9px;
     background: rgba(255, 255, 255, .1);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
 }
 
@@ -122,7 +122,7 @@
 
 .asr-body {
     padding: 28px 32px 8px;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 /* Child content is rendered by the dialog components, so style it through
@@ -132,7 +132,7 @@
     margin-bottom: 18px;
     border: 1px solid var(--asr-border);
     border-radius: 14px;
-    background: #fcfdff;
+    background: var(--c-surface-sunken);
 }
 
 .asr-body ::deep .asr-section-head {
@@ -154,7 +154,7 @@
     justify-content: center;
     border-radius: 7px;
     background: var(--asr-navy-900);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 12px;
     font-weight: 600;
@@ -195,10 +195,10 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    border: 2px solid #dce9fd;
+    border: 2px solid var(--c-border-strong);
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--asr-blue-500), var(--asr-navy-800));
-    color: #fff;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 15px;
     font-weight: 600;
@@ -249,7 +249,7 @@
 
 .asr-body ::deep .asr-required {
     margin-left: 2px;
-    color: #d64545;
+    color: var(--c-danger);
 }
 
 .asr-body ::deep .asr-input-wrap .mud-input-control {
@@ -259,7 +259,7 @@
 .asr-body ::deep .asr-input-wrap .mud-input {
     min-height: 42px;
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--asr-text-1);
     font-family: "Inter", sans-serif;
     font-size: 14px;
@@ -307,7 +307,7 @@
 }
 
 .asr-body ::deep .asr-input-wrap .mud-input.mud-disabled {
-    background: #f3f5fa;
+    background: var(--c-surface-sunken);
     color: var(--asr-text-3);
     opacity: 1;
 }
@@ -318,7 +318,7 @@
 }
 
 .asr-body ::deep .asr-input-wrap .mud-input-error .mud-input-outlined-border {
-    border-color: #d64545;
+    border-color: var(--c-danger);
 }
 
 .asr-footer {
@@ -327,7 +327,7 @@
     gap: 10px;
     padding: 20px 32px 26px;
     border-top: 1px solid var(--asr-border);
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .asr-footer ::deep .asr-button {
@@ -351,19 +351,19 @@
 
 .asr-footer ::deep .asr-button-cancel {
     border: 1.5px solid var(--asr-border-strong);
-    background: #fff;
+    background: var(--c-surface);
     color: var(--asr-text-2);
 }
 
 .asr-footer ::deep .asr-button-cancel:hover {
-    background: #f4f7fc;
+    background: var(--c-surface-sunken);
 }
 
 .asr-footer ::deep .asr-button-save {
     border: 0;
-    background: linear-gradient(120deg, var(--asr-navy-800), var(--asr-blue-600));
+    background: var(--c-primary-gradient);
     box-shadow: 0 8px 20px -6px rgba(29, 95, 209, .55);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .asr-footer ::deep .asr-button-save:hover {

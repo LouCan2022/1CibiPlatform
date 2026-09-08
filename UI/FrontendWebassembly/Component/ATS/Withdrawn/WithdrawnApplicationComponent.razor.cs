@@ -54,7 +54,7 @@ public partial class WithdrawnApplicationComponent
 				nameof(YesNoDialogComponent.InfoColor),Color.Warning
 			},
 			{
-				nameof(YesNoDialogComponent.InfoBGColor),"#FCF1DD"
+				nameof(YesNoDialogComponent.InfoBGColor),"var(--c-warn-bg)"
 			},
 			{
 				nameof(YesNoDialogComponent.ThemeButtonColor),"theme-button-warning"
