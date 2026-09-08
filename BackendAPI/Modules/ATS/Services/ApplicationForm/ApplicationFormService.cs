@@ -345,6 +345,22 @@ public class ApplicationFormService : IApplicationFormService
 		professionalExperiences.Emp1COEUploadFileKey = emp1COEKey;
 		professionalExperiences.Emp2COEUploadFileKey = emp2COEKey;
 		professionalExperiences.Emp3COEUploadFileKey = emp3COEKey;
+
+		// The form sends Unix epoch (1970-01-01) as a stand-in end date when the
+		// applicant is still employed there, because the request validator requires
+		// the field. Epoch is not a real employment end date - store null instead so
+		// downstream consumers (employment verification, reports) don't present a
+		// "Jan 1970" employment period. Runs after validation on purpose.
+		var epoch = DateOnly.FromDateTime(DateTime.UnixEpoch);
+
+		if (professionalExperiences.Emp1EndDate == epoch)
+			professionalExperiences.Emp1EndDate = null;
+
+		if (professionalExperiences.Emp2EndDate == epoch)
+			professionalExperiences.Emp2EndDate = null;
+
+		if (professionalExperiences.Emp3EndDate == epoch)
+			professionalExperiences.Emp3EndDate = null;
 		professionalExperiences.CreatedDate = DateTime.UtcNow;
 
 		if (!string.IsNullOrWhiteSpace(professionalExperiencesDTO.Emp1CompanyCity))
