@@ -79,7 +79,7 @@
     justify-content: center;
     flex: 0 0 auto;
     border-radius: 7px;
-    background: var(--navy-900);
+    background: var(--c-chip-solid-bg);
     color: var(--c-on-dark-fg);
     font-size: 12px;
     font-weight: 600;

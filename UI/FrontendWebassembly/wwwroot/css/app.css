@@ -14,8 +14,8 @@ a,
 
 .btn-primary {
     color: var(--c-on-dark-fg);
-    background-color: var(--c-blue-600);
-    border-color: var(--c-blue-600);
+    background-color: var(--c-chip-solid-bg);
+    border-color: var(--c-chip-solid-bg);
 }
 
 .btn:focus,

@@ -30,7 +30,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--c-blue-500), var(--assignment-navy));
+    background: var(--c-avatar-gradient);
     color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 12px;

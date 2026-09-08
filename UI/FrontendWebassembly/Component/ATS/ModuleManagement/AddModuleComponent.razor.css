@@ -160,7 +160,7 @@
     width: 24px;
     height: 24px;
     border-radius: 7px;
-    background: var(--am-navy-900);
+    background: var(--c-chip-solid-bg);
     color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 12px;
