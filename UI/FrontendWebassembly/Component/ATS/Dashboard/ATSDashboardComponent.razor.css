@@ -25,11 +25,10 @@
     --ats-filter-text-900: var(--c-slate-text-900);
     --ats-filter-text-600: var(--c-fg-muted);
     --ats-filter-text-400: var(--c-fg-subtle);
-    --ats-filter-gradient: linear-gradient(
-        100deg,
-        var(--ats-filter-navy-950) 0%,
-        var(--ats-filter-navy-800) 45%,
-        var(--ats-filter-blue-600) 100%);
+    /* Only consumer is the Reset button, which carries white text - so it takes the
+       fixed sidebar stops rather than the ramp, which lightens under html.dark and
+       left the button pale with white text on it. */
+    --ats-filter-gradient: var(--c-sidebar-gradient);
 }
 
 ::deep .ats-dashboard-filter-card {

@@ -22,11 +22,11 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--ats-detail-stack-md);
-    background: linear-gradient(
-        120deg,
-        var(--ats-detail-navy-900) 0%,
-        var(--ats-detail-navy-700) 55%,
-        var(--ats-detail-blue-600) 130%);
+    /* Fixed stops, not the brand ramp: --c-navy-900 inverts to a light tint under
+       html.dark (it is mostly a text colour elsewhere), which turned this header pale
+       while its white title and muted subtitle stayed put. Same treatment as every
+       other dialog header. */
+    background: var(--c-dialog-header-gradient);
     border-radius: 18px 18px 0 0;
 }
 

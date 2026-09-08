@@ -8,12 +8,10 @@
     --confirmation-text-900: var(--c-slate-text-900);
     --confirmation-text-600: var(--c-fg-muted);
     --confirmation-text-400: var(--c-fg-subtle);
-    --confirmation-gradient: linear-gradient(
-        100deg,
-        var(--confirmation-navy-950) 0%,
-        var(--confirmation-navy-800) 45%,
-        var(--confirmation-blue-600) 100%
-    );
+    /* Consumers (the icon badge and the confirm button) both carry white text, so this
+       uses the fixed sidebar stops rather than the ramp - the ramp lightens under
+       html.dark and would leave white text on a pale surface. */
+    --confirmation-gradient: var(--c-sidebar-gradient);
     position: relative;
     width: 100%;
     padding: 34px 32px 28px;
@@ -117,7 +115,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--confirmation-blue-600);
+    background: var(--c-chip-solid-bg);
     color: var(--c-on-dark-fg);
 }
 
