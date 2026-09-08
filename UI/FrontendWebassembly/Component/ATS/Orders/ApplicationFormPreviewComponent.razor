@@ -1,0 +1,155 @@
+@namespace FrontendWebassembly.Component.ATS
+
+<MudDialog Class="ats-appform-preview-dialog ats-scroll-dialog" Style="padding: 0;">
+    <DialogContent>
+        <div class="ats-appform-preview-shell ats-dialog-shell">
+            <div class="ats-appform-preview-header ats-dialog-header">
+                <div class="ats-appform-preview-header-row">
+                    <div class="ats-appform-preview-header-left">
+                        <span class="ats-appform-preview-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6.5A1.5 1.5 0 005 3.5v17A1.5 1.5 0 006.5 22h11a1.5 1.5 0 001.5-1.5V8l-5-6z" /><path d="M14 2v5.5A1.5 1.5 0 0015.5 9H21M8.5 13h7M8.5 16.5h4" /></svg>
+                        </span>
+                        <div>
+                            <MudText Typo="Typo.h5" Class="ats-appform-preview-title">Application form preview</MudText>
+                            <MudText Typo="Typo.body1" Class="ats-appform-preview-subtitle">
+                                @Preview?.SubjectName@(string.IsNullOrWhiteSpace(Preview?.FilledFormAt) ? "" : $" · submitted {Preview!.FilledFormAt}")
+                            </MudText>
+                        </div>
+                    </div>
+                    <button type="button" class="ats-appform-preview-close" aria-label="Close preview" @onclick="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="ats-appform-preview-body ats-dialog-body">
+                @if (Preview?.Personal is { } p)
+                {
+                    <section class="ats-appform-preview-section">
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Personal details</MudText>
+                        <dl class="ats-appform-preview-grid">
+                            @PreviewField("Position applied for", p.PositionAppliedFor)
+                            @PreviewField("First name", p.FirstName)
+                            @PreviewField("Middle name", p.MiddleName)
+                            @PreviewField("Last name", p.LastName)
+                            @PreviewField("Suffix", p.Suffix)
+                            @PreviewField("Sex", p.Sex)
+                            @PreviewField("Date of birth", p.DateOfBirth)
+                            @PreviewField("Marital status", p.MaritalStatus)
+                            @PreviewField("Nationality", p.Nationality)
+                            @PreviewField("Mobile number", p.MobileNumber)
+                            @PreviewField("Telephone number", p.TelephoneNumber)
+                            @PreviewField("Email address", p.EmailAddress)
+                            @PreviewField("Alternate email", p.EmailAlternative)
+                            @PreviewField("SSS", p.SSS)
+                            @PreviewField("TIN", p.TIN)
+                        </dl>
+                    </section>
+                }
+
+                @if (Preview?.Address is { } a)
+                {
+                    <section class="ats-appform-preview-section">
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Address</MudText>
+                        <dl class="ats-appform-preview-grid">
+                            @PreviewField("Current address", a.CurrentAddress)
+                            @PreviewField("Current city", a.CurrentCity)
+                            @PreviewField("Current province", a.CurrentProvince)
+                            @PreviewField("Current country", a.CurrentCountry)
+                            @PreviewField("Current postal code", a.CurrentPostalCode)
+                            @PreviewField("Type of ownership", a.CurrentTypeOfOwnership)
+                            @PreviewField("Permanent address", a.PermanentAddress)
+                            @PreviewField("Permanent city", a.PermanentCity)
+                            @PreviewField("Permanent province", a.PermanentProvince)
+                            @PreviewField("Permanent country", a.PermanentCountry)
+                            @PreviewField("Permanent postal code", a.PermanentPostalCode)
+                        </dl>
+                    </section>
+                }
+
+                @if (Preview?.Education is { } e)
+                {
+                    <section class="ats-appform-preview-section">
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Education</MudText>
+                        <dl class="ats-appform-preview-grid">
+                            @PreviewField("Highest attainment", e.HighestEducationalAttainment)
+                            @PreviewField("School", e.SchoolName)
+                            @PreviewField("Degree", e.Degree)
+                            @PreviewField("Graduation date", e.GraduationDate)
+                        </dl>
+                    </section>
+                }
+
+                @if (Preview?.License is { } l)
+                {
+                    <section class="ats-appform-preview-section">
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Professional license</MudText>
+                        <dl class="ats-appform-preview-grid">
+                            @PreviewField("License", l.LicenseName)
+                            @PreviewField("License no.", l.LicenseNumber)
+                            @PreviewField("Expiry date", l.LicenseExpiryDate)
+                        </dl>
+                    </section>
+                }
+
+                @foreach (var (employer, index) in (Preview?.Employers ?? []).Select((e, i) => (e, i)))
+                {
+                    <section class="ats-appform-preview-section">
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Employer @(index + 1)</MudText>
+                        <dl class="ats-appform-preview-grid">
+                            @PreviewField("Company", employer.CompanyName)
+                            @PreviewField("Job title", employer.JobTitle)
+                            @PreviewField("Company address", employer.CompanyAddress)
+                            @PreviewField("Start date", employer.StartDate)
+                            @PreviewField("End date", employer.EndDate)
+                            @PreviewField("Currently employed", employer.CurrentlyEmployed)
+                            @PreviewField("Reason for leaving", employer.ReasonForLeaving)
+                            @PreviewField("Supervisor", employer.SupervisorName)
+                            @PreviewField("Supervisor contact", employer.SupervisorContactNumber)
+                            @PreviewField("Supervisor email", employer.SupervisorEmail)
+                        </dl>
+                    </section>
+                }
+
+                @foreach (var (reference, index) in (Preview?.References ?? []).Select((r, i) => (r, i)))
+                {
+                    <section class="ats-appform-preview-section">
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Reference @(index + 1)</MudText>
+                        <dl class="ats-appform-preview-grid">
+                            @PreviewField("Full name", reference.FullName)
+                            @PreviewField("Relationship", reference.ProfessionalRelationship)
+                            @PreviewField("Affiliated company", reference.AffiliatedCompany)
+                            @PreviewField("Email", reference.Email)
+                            @PreviewField("Contact number", reference.ContactNumber)
+                            @PreviewField("Mode of contact", reference.ModeOfContact)
+                            @PreviewField("Best time to contact", reference.BestTimeToContact)
+                        </dl>
+                    </section>
+                }
+            </div>
+
+            <div class="ats-appform-preview-footer ats-dialog-footer">
+                <MudButton Variant="Variant.Outlined" Class="ats-appform-preview-close-btn" OnClick="Close">Close</MudButton>
+            </div>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    // Blank answers are omitted so the preview reads as what was actually filled in.
+    private static RenderFragment PreviewField(string label, string? value) => builder =>
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "ats-appform-preview-field");
+        builder.OpenElement(2, "dt");
+        builder.AddContent(3, label);
+        builder.CloseElement();
+        builder.OpenElement(4, "dd");
+        builder.AddContent(5, value);
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+}

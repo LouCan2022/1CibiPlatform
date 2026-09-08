@@ -2,6 +2,7 @@
 @inject IReportService ReportService
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudDialog Class="ats-download-dialog ats-scroll-dialog" Style="padding: 0;">
     <DialogContent>
@@ -136,6 +137,14 @@
         </div>
 
         <div class="ats-download-actions ats-dialog-footer">
+            <MudTooltip Text="@(CanPreviewForm ? "View the answers submitted on the application form" : "The application form has not been filled up yet")">
+                <MudButton Variant="Variant.Outlined"
+                           Class="ats-download-preview"
+                           Disabled="@(!CanPreviewForm || isLoadingPreview)"
+                           StartIcon="@Icons.Material.Outlined.Visibility"
+                           OnClick="OpenFormPreviewAsync">@(isLoadingPreview ? "Loading..." : "Preview form")</MudButton>
+            </MudTooltip>
+
             <MudButton Variant="Variant.Outlined"
                        Class="ats-download-cancel"
                        OnClick="Cancel">Cancel</MudButton>

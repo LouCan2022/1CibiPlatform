@@ -167,4 +167,14 @@ public partial class ATSCacheRepository
 		return await _atsRepository.GetDownloadDocumentsAsync(
 			emailInvitationRequestIds, authorizedClientIds, requiredRequestorId, cancellationToken);
 	}
+
+	public async Task<ApplicationFormPreviewDTO?> GetApplicationFormPreviewAsync(
+		Guid emailInvitationRequestId,
+		IReadOnlyCollection<int>? authorizedClientIds,
+		Guid? requiredRequestorId,
+		CancellationToken cancellationToken)
+	{
+		return await _atsRepository.GetApplicationFormPreviewAsync(
+			emailInvitationRequestId, authorizedClientIds, requiredRequestorId, cancellationToken);
+	}
 }

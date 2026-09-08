@@ -128,6 +128,37 @@ public class ReportService : IReportService
 		}
 	}
 
+	public async Task<ServiceResponse<ApplicationFormPreviewDTO>> GetApplicationFormPreviewAsync(
+		Guid emailInvitationRequestId,
+		CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			var response = await _httpClient.GetAsync(
+				$"ats/getapplicationformpreview?emailInvitationRequestId={emailInvitationRequestId}",
+				cancellationToken);
+
+			if (!response.IsSuccessStatusCode)
+			{
+				return ServiceResponse<ApplicationFormPreviewDTO>.Failure(await response.ReadErrorDetailAsync());
+			}
+
+			var result = await response.Content.ReadFromJsonAsync<GetApplicationFormPreviewResponseDTO>(cancellationToken);
+
+			if (result?.Preview is null)
+			{
+				return ServiceResponse<ApplicationFormPreviewDTO>.Failure("The server returned an empty response.");
+			}
+
+			return ServiceResponse<ApplicationFormPreviewDTO>.Success(result.Preview);
+		}
+		catch (OperationCanceledException) { throw; }
+		catch (Exception ex) when (ex is HttpRequestException or JsonException or NotSupportedException)
+		{
+			return ServiceResponse<ApplicationFormPreviewDTO>.Failure($"Unable to reach the server. {ex.Message}");
+		}
+	}
+
 	public async Task<ServiceResponse<SubjectNameDTO>> EditSubjectNameAsync(
 		EditSubjectNameDTO editSubjectName,
 		CancellationToken cancellationToken = default)

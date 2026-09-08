@@ -45,4 +45,9 @@ public interface IReportRepository
 		IReadOnlyCollection<int>? authorizedClientIds,
 		Guid? requiredRequestorId,
 		CancellationToken cancellationToken);
+	Task<ApplicationFormPreviewDTO?> GetApplicationFormPreviewAsync(
+		Guid emailInvitationRequestId,
+		IReadOnlyCollection<int>? authorizedClientIds,
+		Guid? requiredRequestorId,
+		CancellationToken cancellationToken);
 }

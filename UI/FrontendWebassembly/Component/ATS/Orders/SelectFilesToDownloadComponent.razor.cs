@@ -135,4 +135,56 @@ public partial class SelectFilesToDownloadComponent
 	{
 		MudDialog.Cancel();
 	}
+
+	private bool isLoadingPreview;
+
+	// The form's personal details are the first thing an applicant saves, so a
+	// filled-form date - or any file from the form - means there are answers to
+	// show. An order whose invitation was never answered has nothing to preview.
+	private bool CanPreviewForm =>
+		!string.IsNullOrWhiteSpace(ReportResult?.FilledFormAt)
+		|| !string.IsNullOrWhiteSpace(ReportResult?.ResumeFileName)
+		|| !string.IsNullOrWhiteSpace(ReportResult?.ConsentFormFileName);
+
+	private async Task OpenFormPreviewAsync()
+	{
+		if (isLoadingPreview)
+			return;
+
+		isLoadingPreview = true;
+
+		try
+		{
+			var previewResponse = await ReportService.GetApplicationFormPreviewAsync(EmailInvitationId);
+
+			if (!previewResponse.IsSuccess || previewResponse.Data is null)
+			{
+				Snackbar.Add(previewResponse.ErrorDetail, Severity.Error);
+				return;
+			}
+
+			var parameters = new DialogParameters
+			{
+				{ nameof(ApplicationFormPreviewComponent.Preview), previewResponse.Data }
+			};
+
+			var options = new DialogOptions
+			{
+				NoHeader = true,
+				MaxWidth = MaxWidth.Medium,
+				FullWidth = true
+			};
+
+			var dialog = await DialogService.ShowAsync<ApplicationFormPreviewComponent>(
+				"Application form preview",
+				parameters,
+				options);
+
+			await dialog.Result;
+		}
+		finally
+		{
+			isLoadingPreview = false;
+		}
+	}
 }

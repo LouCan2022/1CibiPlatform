@@ -577,4 +577,27 @@ public class ReportService : IReportService
 		zipStream.Position = 0;
 		return zipStream;
 	}
+
+	public async Task<ApplicationFormPreviewDTO> GetApplicationFormPreviewAsync(Guid emailInvitationRequestId, CancellationToken cancellationToken)
+	{
+		// NotFound rather than Forbidden, matching the report result lookup: a caller
+		// must not be able to probe which order ids exist outside their scope.
+		if (await _accessScopeResolver.ResolveAsync(cancellationToken) is not { } scope)
+		{
+			throw new NotFoundException($"No application form found for email invitation ID {emailInvitationRequestId}.");
+		}
+
+		var preview = await _atsRepository.GetApplicationFormPreviewAsync(
+			emailInvitationRequestId,
+			scope.AuthorizedClientIds,
+			scope.RequiredOwnerId,
+			cancellationToken);
+
+		if (preview is null)
+		{
+			throw new NotFoundException($"No application form found for email invitation ID {emailInvitationRequestId}.");
+		}
+
+		return preview;
+	}
 }

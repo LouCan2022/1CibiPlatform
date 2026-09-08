@@ -1817,6 +1817,26 @@
     color: #102247 !important;
 }
 
+/* The tooltip wrapper carries the flex spacing, pushing Cancel/Download right. */
+.ats-download-actions > .mud-tooltip-root {
+    margin-right: auto;
+}
+
+.ats-download-preview {
+    min-width: 0;
+    padding: 10px 16px !important;
+    border-color: #d9e2ee !important;
+    border-radius: 12px !important;
+    color: #1d5fd1 !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+}
+
+.ats-download-preview.mud-button-disabled {
+    color: #9aa7bd !important;
+}
+
 .ats-download-submit.theme-button-inactive {
     color: #fff !important;
 }
