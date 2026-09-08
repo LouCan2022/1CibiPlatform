@@ -688,13 +688,13 @@
 
 .ats-assistant-mic.is-listening {
     border-color: var(--blue-600);
-    background: var(--blue-600);
+    background: var(--c-chip-solid-bg);
     color: var(--c-on-dark-fg);
     animation: ats-assistant-mic-pulse 1.6s ease-out infinite;
 }
 
 .ats-assistant-mic.is-listening:hover:not(:disabled) {
-    background: var(--blue-600);
+    background: var(--c-chip-solid-bg);
     color: var(--c-on-dark-fg);
 }
 

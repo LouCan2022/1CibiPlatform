@@ -182,7 +182,7 @@
     height: 22px;
     margin-top: 1px;
     border-radius: 7px;
-    background: var(--intro-navy-900);
+    background: var(--c-chip-solid-bg);
     color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 11.5px;
