@@ -17,6 +17,10 @@
          config (1-month/1-year max-age, no revalidation). Do not bump again;
          ETag revalidation handles freshness from here on. -->
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css?v=2" />
+    <!-- theme.css declares the --c-* design tokens every other sheet reads, and
+         redefines them under html.dark. It must load FIRST so later sheets can
+         reference the tokens. -->
+    <link rel="stylesheet" href="css/theme.css?v=2" />
     <link rel="stylesheet" href="css/app.css?v=2" />
     <link href="_content/MudBlazor/MudBlazor.min.css?v=2" rel="stylesheet" />
     <link rel="stylesheet" href="css/ats.css?v=2" />
@@ -26,19 +30,25 @@
     <script type="importmap"></script>
 
     <script>
+        // Applied before Blazor boots so a dark user never sees a flash of the light
+        // theme. `dark` is the selector css/theme.css keys off; `dark-startup` is kept
+        // in sync only because older cached copies of this file may still write it and
+        // theme.css still matches it.
         (function () {
             const isDark = localStorage.getItem('isDarkMode');
 
             if (isDark === 'true') {
-                document.documentElement.classList.add('dark-startup');
+                document.documentElement.classList.add('dark', 'dark-startup');
             }
         })();
 
         window.setStartupTheme = function (isDark) {
+            const root = document.documentElement;
+
             if (isDark) {
-                document.documentElement.classList.add('dark-startup');
+                root.classList.add('dark', 'dark-startup');
             } else {
-                document.documentElement.classList.remove('dark-startup');
+                root.classList.remove('dark', 'dark-startup');
             }
         };
 

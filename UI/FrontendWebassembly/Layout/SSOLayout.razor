@@ -2,9 +2,11 @@
 @inject ISSOService SSOService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject ThemeService Theme
 @inherits LayoutComponentBase
+@implements IDisposable
 
-<MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
+<MudThemeProvider Theme="@_myTheme" IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider BackdropClick="false" />
 <MudSnackbarProvider />

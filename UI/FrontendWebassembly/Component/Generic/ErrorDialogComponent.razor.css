@@ -6,16 +6,16 @@
 }
 
 .philsys-error-shell {
-    --philsys-navy-900: #0b1b3d;
-    --philsys-navy-800: #132a54;
-    --philsys-blue-500: #2e7ce0;
-    --philsys-border: #e4eaf6;
-    --philsys-border-strong: #c2d2f0;
-    --philsys-text-1: #16233f;
-    --philsys-text-2: #5b6b8c;
-    --philsys-red: #d64545;
-    --philsys-red-tint: #fdecec;
-    --philsys-red-border: #f1c7c7;
+    --philsys-navy-900: var(--c-navy-900);
+    --philsys-navy-800: var(--c-navy-800);
+    --philsys-blue-500: var(--c-blue-500);
+    --philsys-border: var(--c-border-soft);
+    --philsys-border-strong: var(--c-border-strong);
+    --philsys-text-1: var(--c-fg-strong);
+    --philsys-text-2: var(--c-fg-muted);
+    --philsys-red: var(--c-danger);
+    --philsys-red-tint: var(--c-danger-bg);
+    --philsys-red-border: var(--c-border-strong);
     display: flex;
     width: 100%;
     min-height: 100vh;
@@ -31,7 +31,7 @@
     padding: 38px 34px 34px !important;
     border: 1px solid var(--philsys-border) !important;
     border-radius: 20px !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: 0 0 0 6px rgba(46,124,224,.1), 0 18px 40px -16px rgba(11,27,61,.25) !important;
     text-align: center;
 }
@@ -75,7 +75,7 @@
     overflow: hidden;
     border: 1.5px solid var(--philsys-border-strong);
     border-radius: 12px;
-    background: #fcfdff;
+    background: var(--c-surface-sunken);
     text-align: left;
 }
 
@@ -127,9 +127,9 @@
     height: 48px;
     border: 0;
     border-radius: 12px !important;
-    background: linear-gradient(120deg, var(--philsys-navy-800), var(--philsys-blue-500)) !important;
+    background: var(--c-primary-gradient) !important;
     box-shadow: 0 10px 22px -6px rgba(29, 95, 209, .5) !important;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-family: Inter, sans-serif;
     font-size: 14.5px !important;
     font-weight: 700 !important;

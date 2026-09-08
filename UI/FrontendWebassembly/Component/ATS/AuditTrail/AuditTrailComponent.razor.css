@@ -24,7 +24,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     max-width: 260px;
-    color: #c0453e;
+    color: var(--c-danger-strong);
     font-size: 11px;
     font-weight: 600;
     line-height: 1.4;

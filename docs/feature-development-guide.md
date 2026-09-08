@@ -400,7 +400,47 @@ Also include:
 - accessible names, keyboard focus, validation messages, and responsive CSS;
 - no secrets, base URLs, or environment-specific values in components.
 
-### 12. Verify the complete feature
+### 11a. UI theming and responsiveness are not optional
+
+Every screen must work in both light and dark mode and at phone width. The rules,
+tokens and breakpoints are in `docs/ui-theming-and-responsiveness.md` — **read it before
+writing a `.razor.css`.** The short version:
+
+- Colours come from the shared `--c-*` tokens in `wwwroot/css/theme.css`. Do not add a
+  hex literal to a feature stylesheet; that file is the only place one belongs.
+- Breakpoints are 600 / 960 / 1280, matching MudBlazor's own ladder. `Breakpoint.Sm`
+  card mode fires at **960px**, not 600px.
+- `TableComponent` owns table width. Never put a `min-width` on a table root.
+- Pick the layout by audience: staff screens use `ConsoleLayout` (themed), external
+  token-link pages use `GenericLayout` (deliberately light-only).
+
+### 12. Document the change
+
+**Every feature or fix ships with a Markdown document under `docs/`.** This is part of
+the work, not a follow-up — a change is not complete until it is written down.
+
+- New feature or subsystem → add `docs/<area>-<feature>.md`.
+- Change to something already documented → update that file in the same commit rather
+  than adding a second, competing description.
+- Name the file after the thing it explains (`ats-audit-trail.md`,
+  `ui-theming-and-responsiveness.md`), not after the ticket.
+
+Write it for the next developer who has to change this code. Cover:
+
+1. **What it does** and the user/business problem it solves.
+2. **How it works** — the request path, the important files, the decisions a reader
+   could not infer from the code.
+3. **Why**, wherever the code looks surprising. Record the constraint or the failure
+   that forced the design; that is the part that is expensive to rediscover.
+4. **How to verify it** — the commands to run and what correct looks like.
+5. **What not to do** — the invariants a future change must not break, and the failure
+   mode if it does.
+
+Prefer prose and short tables over bullet soup, and link related documents rather than
+repeating them. If a document contradicts the code, the code is the source of truth and
+the document is a bug — fix it.
+
+### 13. Verify the complete feature
 
 Run the smallest relevant tests first, then the full build:
 
@@ -424,7 +464,7 @@ Also manually verify:
 9. API response and UI DTO compatibility;
 10. no unrelated files or user changes were overwritten.
 
-### 12a. Register a new unified-platform application and submenu
+### 13a. Register a new unified-platform application and submenu
 
 When a feature is a standalone platform application (rather than a submenu owned by ATS/Auth), register it in the frontend permission catalogs as part of the same vertical slice:
 
@@ -489,7 +529,10 @@ Register that initializer in `BackendAPI/API/APIs/Data/Extensions/DatabaseExtens
 - [ ] UI DTO and IHttpClientFactory-backed service are complete and registered.
 - [ ] `.razor`, `.razor.cs`, and `.razor.css` follow the modern ATS reference.
 - [ ] Shared CSS was reused or generalized rather than copied; scoped CSS covers only what is unique to the screen.
+- [ ] Colours use the shared `--c-*` tokens; no hex literals outside `wwwroot/css/theme.css`.
+- [ ] Screen was checked at 390px and in both light and dark mode.
 - [ ] UI covers loading, empty, validation, success, failure, and responsive states.
+- [ ] **A `docs/*.md` was added or updated for this change.**
 - [ ] Relevant tests and the solution build pass.
 - [ ] API/UI contracts and gateway route were verified end to end.
 - [ ] Every endpoint is registered in the module's typed `Path/<Module>Paths.cs` and appears in `GET /__routes`.
@@ -499,7 +542,7 @@ Register that initializer in `BackendAPI/API/APIs/Data/Extensions/DatabaseExtens
 Copy this into a new Codex/Claude discussion:
 
 ```markdown
-Read `docs/feature-development-guide.md` first and follow it. Implement this feature end to end. Use ATS components as the latest UI/theme reference. Inspect existing neighboring code before editing, preserve unrelated changes, and run relevant tests plus the solution build.
+Read `docs/feature-development-guide.md` first and follow it. If the change touches the UI, also read `docs/ui-theming-and-responsiveness.md`. Implement this feature end to end. Use ATS components as the latest UI/theme reference. Inspect existing neighboring code before editing, preserve unrelated changes, and run relevant tests plus the solution build. Finish by adding or updating a `docs/*.md` describing what you built and why.
 
 Feature name:
 Module and area:

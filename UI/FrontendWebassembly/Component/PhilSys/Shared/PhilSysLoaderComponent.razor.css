@@ -6,12 +6,12 @@
 }
 
 .philsys-loader-overlay {
-    --philsys-navy-900: #0b1b3d;
-    --philsys-blue-600: #1d5fd1;
-    --philsys-blue-500: #2e7ce0;
-    --philsys-border: #e4eaf6;
-    --philsys-text-1: #16233f;
-    --philsys-text-2: #5b6b8c;
+    --philsys-navy-900: var(--c-navy-900);
+    --philsys-blue-600: var(--c-blue-600);
+    --philsys-blue-500: var(--c-blue-500);
+    --philsys-border: var(--c-border-soft);
+    --philsys-text-1: var(--c-fg-strong);
+    --philsys-text-2: var(--c-fg-muted);
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -19,7 +19,7 @@
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    background: #eef2f9;
+    background: var(--c-surface-sunken);
     font-family: "Inter", sans-serif;
 }
 
@@ -33,7 +33,7 @@
     padding: 38px 34px 34px !important;
     border: 1px solid var(--philsys-border) !important;
     border-radius: 20px !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: 0 0 0 6px rgba(46, 124, 224, .10), 0 18px 40px -16px rgba(11, 27, 61, .25) !important;
     text-align: center;
     animation: philsys-loader-fade .35s ease-in-out;
@@ -47,8 +47,8 @@
     justify-content: center;
     margin-bottom: 26px;
     border-radius: 16px;
-    color: #fff;
-    background: linear-gradient(135deg, var(--philsys-navy-900), var(--philsys-blue-600));
+    color: var(--c-on-dark-fg);
+    background: var(--c-avatar-gradient);
     box-shadow: 0 10px 22px -8px rgba(29, 95, 209, .5);
 }
 
@@ -75,7 +75,7 @@
     width: 56px !important;
     height: 56px !important;
     border-width: 5px !important;
-    border-color: #e3ecfb !important;
+    border-color: var(--c-blue-tint-2) !important;
     border-top-color: var(--philsys-blue-600) !important;
     border-right-color: var(--philsys-blue-500) !important;
     animation-duration: .9s !important;

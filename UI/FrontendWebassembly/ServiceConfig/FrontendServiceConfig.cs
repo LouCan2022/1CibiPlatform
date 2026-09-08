@@ -62,6 +62,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<LocalStorageService>();
+		services.AddScoped<ThemeService>();
 		services.AddScoped<EmailValidationService>();
 		services.AddScoped<FileValidationService>();
 		services.AddScoped<MobileNumberValidationService>();

@@ -1,24 +1,24 @@
 .platform-logs {
-    --navy-950: #071230;
-    --navy-900: #0a1c3f;
-    --navy-800: #0f2a5c;
-    --blue-600: #2f6fed;
-    --blue-500: #4d8bff;
-    --bg: #f4f6fb;
-    --card: #fff;
-    --border: #e2e6f0;
-    --border-soft: #eef1f7;
-    --text-900: #101828;
-    --text-600: #4b5468;
-    --text-400: #8992a6;
-    --amber-700: #a15c07;
-    --amber-bg: #fdf1dd;
-    --red-700: #b42318;
-    --red-bg: #fdecec;
-    --blue-badge-bg: #eef3fe;
+    --navy-950: var(--c-slate-950);
+    --navy-900: var(--c-navy-900);
+    --navy-800: var(--c-navy-800);
+    --blue-600: var(--c-blue-500);
+    --blue-500: var(--c-blue-500);
+    --bg: var(--c-page-bg);
+    --card: var(--c-surface);
+    --border: var(--c-border-soft);
+    --border-soft: var(--c-border-soft);
+    --text-900: var(--c-slate-text-900);
+    --text-600: var(--c-fg-muted);
+    --text-400: var(--c-fg-subtle);
+    --amber-700: var(--c-warn);
+    --amber-bg: var(--c-warn-bg);
+    --red-700: var(--c-danger);
+    --red-bg: var(--c-danger-bg);
+    --blue-badge-bg: var(--c-blue-tint);
     --radius-md: 12px;
     --shadow-card: 0 1px 2px rgb(16 24 40 / 4%), 0 1px 1px rgb(16 24 40 / 3%);
-    --brand-gradient: linear-gradient(100deg, var(--navy-950) 0%, var(--navy-800) 45%, var(--blue-600) 100%);
+    --brand-gradient: var(--c-sidebar-gradient);
     width: 100%;
     max-width: 1320px;
     margin: 0 auto;
@@ -82,7 +82,7 @@
 
 .platform-logs .btn-refresh:hover,
 .platform-logs .btn-load-more:hover {
-    border-color: #c7cee0;
+    border-color: var(--c-border-strong);
     background: var(--bg);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .platform-logs .select-wrap select:hover {
-    border-color: #c7cee0;
+    border-color: var(--c-border-strong);
 }
 
 .platform-logs .select-wrap select:focus,
@@ -207,7 +207,7 @@
     border-radius: 9px;
     background: var(--brand-gradient);
     box-shadow: 0 6px 14px -4px rgb(15 42 92 / 35%);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
     font-family: Inter, sans-serif;
     font-size: 13px;
@@ -236,7 +236,7 @@
 .platform-logs thead th {
     padding: 12px 20px;
     border-bottom: 1px solid var(--border-soft);
-    background: #fbfcfe;
+    background: var(--c-surface-sunken);
     color: var(--text-400);
     font-size: 11px;
     font-weight: 700;
@@ -261,7 +261,7 @@
 .platform-logs tbody tr:hover,
 .platform-logs tbody tr:focus {
     outline: none;
-    background: #eef3fe;
+    background: var(--c-blue-tint);
 }
 
 .platform-logs tbody tr:hover td.message-col,
@@ -371,7 +371,7 @@
     justify-content: center;
     padding: 20px;
     border-top: 1px solid var(--border-soft);
-    background: #fbfcfe;
+    background: var(--c-surface-sunken);
 }
 
 .platform-logs .btn-load-more {
@@ -520,7 +520,7 @@
     border: 1px solid rgb(255 255 255 / 22%);
     border-radius: 100px;
     background: rgb(255 255 255 / 16%);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-size: 11px;
     font-weight: 700;
 }
@@ -529,16 +529,16 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: #fbbf24;
+    background: var(--c-warn);
     content: "";
 }
 
 .platform-logs .drawer-level-badge.error::before {
-    background: #f87171;
+    background: var(--c-danger-bg);
 }
 
 .platform-logs .drawer-level-badge.info::before {
-    background: #7dd3fc;
+    background: var(--c-logo-light);
 }
 
 .platform-logs .drawer-close {
@@ -551,7 +551,7 @@
     border: 1px solid rgb(255 255 255 / 18%);
     border-radius: 9px;
     background: rgb(255 255 255 / 12%);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
     transition: background .15s;
 }
@@ -569,7 +569,7 @@
     position: relative;
     z-index: 1;
     margin: 0 0 4px;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: Manrope, Inter, sans-serif;
     font-size: 21px;
     font-weight: 800;
@@ -643,8 +643,8 @@
 }
 
 .platform-logs .copy-btn.copied {
-    background: #eafaf0;
-    color: #16a34a;
+    background: var(--c-success-bg);
+    color: var(--c-success);
 }
 
 .platform-logs .copy-btn svg {
@@ -680,7 +680,7 @@
     margin-bottom: 0;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
     .platform-logs {
         padding: 20px 16px 40px;
     }
