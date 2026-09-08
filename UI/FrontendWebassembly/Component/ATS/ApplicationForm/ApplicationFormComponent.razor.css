@@ -198,17 +198,19 @@
     font-size: 16px;
 }
 
+/* Top-align the cell; the wrap's 44px min-height centers the checkbox against
+   the input's 44px band so it doesn't sink when the required error adds a
+   helper-text line under the middle name field. */
 .ats-step-three-scope.ats-step-three-scope ::deep .ats-step-three-fields-grid > .mud-grid-item:nth-child(4) {
     display: flex;
     align-self: stretch;
-    align-items: flex-end;
+    align-items: flex-start;
 }
 
 .ats-step-three-middle-check-wrap {
     display: flex;
     width: 100%;
     min-height: 44px;
-    padding-bottom: 5px;
     align-items: center;
     gap: 8px;
 }

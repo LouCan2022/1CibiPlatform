@@ -264,7 +264,7 @@ public partial class ApplicationFormComponent : IAsyncDisposable
 	{
 		personalDetails.PositionAppliedFor = state.PositionAppliedFor;
 		personalDetails.FirstName = state.FirstName;
-		personalDetails.MiddleName = state.MiddleName;
+		personalDetails.MiddleName = state.NoMiddleName ? string.Empty : state.MiddleName;
 		personalDetails.LastName = state.LastName;
 		personalDetails.Suffix = state.Suffix;
 		personalDetails.Sex = state.Sex;
