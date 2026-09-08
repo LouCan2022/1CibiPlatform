@@ -1,0 +1,171 @@
+@page "/s&i/ats/audittrail"
+@namespace FrontendWebassembly.Component.ATS
+@layout ATSLayout
+@attribute [RequirePermission(6, 7)]
+@attribute [RequireATSModule(15)]
+@inherits CrudPageBase
+@inject IAuditTrailService AuditTrailService
+
+<PageTitle>ATS - Audit Trail</PageTitle>
+
+@* Layout, chips and outcome pills come from the shared .ats-status-board-* rules in
+   wwwroot/css/ats.css, the same ones Ticketing Status and Bulk Uploads Status use. Only
+   the payload viewer is specific to this screen. *@
+<div class="ats-management-page">
+
+    <div class="ats-status-board-intro">
+        <MudIcon Icon="@Icons.Material.Outlined.History" Size="Size.Small" />
+        <div>
+            <p class="ats-status-board-intro-title">Every change made in ATS, and who made it</p>
+            <p class="ats-status-board-intro-text">
+                Each row is one action a user took - adding a client, editing a package,
+                uploading a report, retrying a ticket. Reads are not recorded, only changes
+                and report downloads. An action that failed is kept as
+                <strong>Failure</strong> with its reason, because an attempt is worth as
+                much as a success here. Entries are deleted automatically after
+                @RetentionDays days.
+            </p>
+        </div>
+    </div>
+
+    <div class="ats-segmented ats-status-board-segmented"
+         role="group"
+         aria-label="Filter actions by outcome">
+
+        @foreach (var segment in OutcomeSegments)
+        {
+            <button type="button"
+                    class="@GetSegmentClass(segment.Value)"
+                    aria-pressed="@(_activeOutcome == segment.Value)"
+                    disabled="@_isLoadingCounts"
+                    @onclick="@(() => SetOutcomeAsync(segment.Value))">
+
+                <span class="ats-status-dot @segment.Modifier" aria-hidden="true"></span>
+
+                @segment.Label
+
+                <span class="ats-segment-count ats-status-board-count">@CountFor(segment.Value)</span>
+            </button>
+        }
+    </div>
+
+    <TableComponent TItem="AuditTrailListDTO"
+                    @ref="_auditTable"
+                    Title="Audit trail"
+                    EnableReload="true"
+                    TitleId="ats-audit-heading"
+                    ContainerClass="ats-management-card ats-status-board-card"
+                    EnableSearch="true"
+                    SearchLabel=""
+                    SearchPlaceholder="Search user, email, site, action or area"
+                    TableAriaLabel="ATS user actions"
+                    ColumnCount="7"
+                    RowsPerPage="10"
+                    LoadServerData="LoadAuditEntriesAsync"
+                    CursorPagerState="_auditLoader"
+                    SearchString="@_searchString"
+                    SearchStringChanged="@((string value) => _searchString = value)">
+
+        <ToolBarLeft>
+            <div class="ats-status-board-date-field">
+                <label>Action date</label>
+                <MudDateRangePicker Class="ats-status-board-date-range"
+                                    Variant="Variant.Outlined"
+                                    ReadOnly="false"
+                                    Clearable="true"
+                                    SeparatorIcon="@Icons.Material.Filled.ArrowRightAlt"
+                                    AdornmentIcon="@Icons.Material.Outlined.CalendarToday"
+                                    AdornmentColor="Color.Primary"
+                                    DateFormat="MM/dd/yyyy"
+                                    DateRangeChanged="OnDateRangeChanged"
+                                    PlaceholderStart="Start Date"
+                                    PlaceholderEnd="End Date" />
+            </div>
+        </ToolBarLeft>
+
+        <HeaderTemplate>
+            <MudTh>When</MudTh>
+            <MudTh>User</MudTh>
+            <MudTh>Action</MudTh>
+            <MudTh>Area</MudTh>
+            <MudTh>Outcome</MudTh>
+            <MudTh>Duration</MudTh>
+            <MudTh>Details</MudTh>
+        </HeaderTemplate>
+
+        <RowTemplate Context="entry">
+            <MudTd DataLabel="When">
+                <div class="ats-cell-lead">
+                    <span class="ats-cell-lead-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Outlined.Schedule" Size="Size.Small" />
+                    </span>
+                    <span class="ats-cell-lead-copy">
+                        <span class="ats-cell-lead-title">@FormatRelative(entry.OccurredAt)</span>
+                        <span class="ats-cell-lead-sub" title="@FormatAbsolute(entry.OccurredAt)">
+                            @FormatAbsolute(entry.OccurredAt)
+                        </span>
+                    </span>
+                </div>
+            </MudTd>
+
+            <MudTd DataLabel="User">
+                <div class="ats-cell-lead">
+                    <span class="ats-cell-lead-copy">
+                        <span class="ats-cell-lead-title">@DisplayName(entry)</span>
+                        <span class="ats-cell-lead-sub">
+                            @(string.IsNullOrWhiteSpace(entry.UserEmail) ? "—" : entry.UserEmail)
+                        </span>
+                    </span>
+                </div>
+            </MudTd>
+
+            <MudTd DataLabel="Action">
+                <span class="ats-cell-tag">@entry.Action</span>
+            </MudTd>
+
+            <MudTd DataLabel="Area">
+                @(string.IsNullOrWhiteSpace(entry.Area) ? "—" : entry.Area)
+            </MudTd>
+
+            <MudTd DataLabel="Outcome">
+                <div class="audit-outcome-cell">
+                    <span class="ats-status-pill @GetOutcomeClass(entry.Outcome)">
+                        @(string.IsNullOrWhiteSpace(entry.Outcome) ? "Unknown" : entry.Outcome)
+                    </span>
+
+                    @* Why the action failed, shown inline so the table answers the
+                       question without opening every row. *@
+                    @if (IsFailure(entry) && !string.IsNullOrWhiteSpace(entry.FailureReason))
+                    {
+                        <span class="audit-failure-reason" title="@entry.FailureReason">
+                            @entry.FailureReason
+                        </span>
+                    }
+                </div>
+            </MudTd>
+
+            <MudTd DataLabel="Duration">
+                <span class="ats-cell-muted">@FormatDuration(entry.DurationMs)</span>
+            </MudTd>
+
+            <MudTd DataLabel="Details">
+                <button type="button"
+                        class="ats-cell-action"
+                        title="Show what this action carried"
+                        aria-label="@($"Show details of {entry.Action} by {DisplayName(entry)}")"
+                        @onclick="@(() => OpenDetailsAsync(entry))">
+                    <MudIcon Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" />
+                </button>
+            </MudTd>
+        </RowTemplate>
+
+        <NoRecordsTemplate>
+            <div class="ats-console-empty-state">
+                <div class="ats-console-empty-icon">🕓</div>
+                <div class="ats-console-empty-title">@EmptyTitle</div>
+                <div class="ats-console-empty-sub">@EmptySubtitle</div>
+            </div>
+        </NoRecordsTemplate>
+
+    </TableComponent>
+</div>

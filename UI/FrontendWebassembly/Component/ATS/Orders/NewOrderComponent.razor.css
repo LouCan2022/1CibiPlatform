@@ -1,4 +1,4 @@
-.ats-neworder-page {
+﻿.ats-neworder-page {
     --navy-900: #0b1b3d;
     --blue-600: #1d5fd1;
     --blue-500: #2e7ce0;
@@ -289,6 +289,40 @@
 .ats-upload-sub { margin-top: 5px; color: var(--text-3); font-size: 12.5px; }
 .ats-template-link { margin: 14px 0 6px; color: var(--text-2); font-size: 12.5px; text-align: center; }
 ::deep .ats-template-link a { color: var(--blue-600); font-weight: 700; }
+
+/* Same amber advisory treatment as .search-report-warning and .dispute-warning. */
+.ats-bulk-mobile-warning {
+    display: flex;
+    width: 100%;
+    margin: 14px 0 0;
+    padding: 14px 18px;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1.5px solid #f0dca8;
+    border-left: 4px solid #b5790f;
+    border-radius: 12px;
+    background: #fcf1dd;
+    color: #b5790f;
+}
+
+.ats-bulk-mobile-warning-title {
+    margin: 0;
+    color: #7a5209;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.ats-bulk-mobile-warning-text {
+    margin: 4px 0 0;
+    color: #8a6212;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.ats-bulk-mobile-warning-text b {
+    color: #7a5209;
+    font-weight: 700;
+}
 
 .ats-selected-file {
     display: flex;

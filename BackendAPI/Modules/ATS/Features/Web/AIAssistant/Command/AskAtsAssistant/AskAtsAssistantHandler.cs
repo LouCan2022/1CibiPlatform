@@ -1,5 +1,9 @@
 namespace ATS.Features.Web.AIAssistant.Command.AskAtsAssistant;
 
+// Not audited: this is a conversational turn, not a state change. The question text would
+// bury the trail in noise. The one assistant action that does change state -
+// ConfirmOrderDraftCommand, which creates a real order - is audited like any other write.
+[SkipAudit]
 public record AskAtsAssistantCommand(string Question) : ICommand<AskAtsAssistantResult>;
 
 public record AskAtsAssistantResult(AtsChatAnswerDTO Answer);
