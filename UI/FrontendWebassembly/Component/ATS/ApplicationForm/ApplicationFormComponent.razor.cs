@@ -652,6 +652,49 @@ public partial class ApplicationFormComponent
 		}
 	}
 
+	// While "same as permanent" is checked, the permanent fields are disabled, so the
+	// copy taken at toggle time is the only thing keeping them in sync. These handlers
+	// keep mirroring later edits to the current address into the permanent one.
+	private void OnCurrentAddressChanged(string value)
+	{
+		addressDetails.CurrentAddress = value;
+
+		if (SameAsPermanent)
+			addressDetails.PermanentAddress = value;
+	}
+
+	private void OnCurrentCityChanged(string value)
+	{
+		addressDetails.CurrentCity = value;
+
+		if (SameAsPermanent)
+			addressDetails.PermanentCity = value;
+	}
+
+	private void OnCurrentProvinceChanged(string value)
+	{
+		addressDetails.CurrentProvince = value;
+
+		if (SameAsPermanent)
+			addressDetails.PermanentProvince = value;
+	}
+
+	private void OnCurrentCountryChanged(string value)
+	{
+		addressDetails.CurrentCountry = value;
+
+		if (SameAsPermanent)
+			addressDetails.PermanentCountry = value;
+	}
+
+	private void OnCurrentPostalCodeChanged(string value)
+	{
+		addressDetails.CurrentPostalCode = value;
+
+		if (SameAsPermanent)
+			addressDetails.PermanentPostalCode = value;
+	}
+
 	private void NoMiddleNameChange(bool value)
 	{
 		NoMiddleName = value;

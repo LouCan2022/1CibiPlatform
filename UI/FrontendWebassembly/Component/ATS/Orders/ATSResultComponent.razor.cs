@@ -40,6 +40,13 @@ public partial class ATSResultComponent
 	[Parameter]
 	public ATSResultDetailsDTO? ReportResult { get; set; }
 
+	// Older orders carry a single un-numbered COE; show it in the COE 1 slot,
+	// same as the download dialog does.
+	private string? Coe1DisplayFileName =>
+		!string.IsNullOrWhiteSpace(ReportResult?.Coe1FileName)
+			? ReportResult?.Coe1FileName
+			: ReportResult?.CoeFileName;
+
 	[CascadingParameter]
 	private IMudDialogInstance MudDialog { get; set; } = default!;
 
