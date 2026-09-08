@@ -20,4 +20,5 @@ public static class AtsModuleIds
 	public const int AIAssistant = 12;
 	public const int BulkUploads = 13;
 	public const int TicketingStatus = 14;
+	public const int AuditTrail = 15;
 }

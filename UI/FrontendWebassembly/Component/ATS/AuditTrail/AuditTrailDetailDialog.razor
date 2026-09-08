@@ -1,0 +1,172 @@
+@namespace FrontendWebassembly.Component.ATS
+@inject IJSRuntime JS
+
+@* Same dialog shell as BulkUploadSubjectsDialog: the management-page wrapper lets the
+   shared ats.css treatment apply inside the dialog, and the ats-scroll-dialog/shell/
+   header/body classes keep the header fixed while only the body scrolls. *@
+<MudDialog Class="um-dialog ats-audit-dialog ats-scroll-dialog"
+           Gutters="false"
+           ContentClass="ats-audit-dialog-content">
+
+    <DialogContent>
+        <div class="ats-management-page ats-audit-shell ats-dialog-shell">
+
+            @* .ats-dialog-headline* are the shared gradient-header rules in ats.css,
+               generalized from PreviewComponent when this became their third user. *@
+            <header class="ats-dialog-headline ats-dialog-header">
+                <div class="ats-dialog-headline-content">
+                    <span class="ats-dialog-headline-icon" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Outlined.History" />
+                    </span>
+
+                    <div class="ats-dialog-headline-text">
+                        <h2>@Entry.Action</h2>
+                        <p>@HeaderSubtitle</p>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="ats-dialog-headline-close"
+                        aria-label="Close action details"
+                        @onclick="Cancel">
+                    <MudIcon Icon="@Icons.Material.Outlined.Close" Size="Size.Small" />
+                </button>
+            </header>
+
+            <div class="ats-audit-body ats-dialog-body">
+
+                <dl class="audit-detail-grid">
+                    <dt>User</dt>
+                    <dd>@DisplayName</dd>
+
+                    <dt>Email</dt>
+                    <dd>@Fallback(Entry.UserEmail)</dd>
+
+                    <dt>Outcome</dt>
+                    <dd>
+                        <span class="ats-status-pill @OutcomeClass">
+                            @Fallback(Entry.Outcome)
+                        </span>
+                    </dd>
+
+                    <dt>Area</dt>
+                    <dd>@Fallback(Entry.Area)</dd>
+
+                    <dt>When</dt>
+                    <dd>@AbsoluteTime</dd>
+
+                    <dt>Duration</dt>
+                    <dd>@Duration</dd>
+
+                    <dt>Role / Client</dt>
+                    <dd>@RoleAndClient</dd>
+
+                    <dt>Site</dt>
+                    <dd>@Fallback(Entry.Site)</dd>
+
+                    <dt>IP address</dt>
+                    <dd class="audit-mono">@Fallback(Entry.IpAddress)</dd>
+
+                    <dt>User ID</dt>
+                    <dd class="audit-mono">@Fallback(Entry.UserId?.ToString())</dd>
+
+                    @* The trace id is what ties this action to its platform log entries,
+                       so it is the one value worth copying out of this dialog. *@
+                    <dt>Trace ID</dt>
+                    <dd class="audit-mono audit-copy-row">
+                        @Fallback(Entry.TraceId)
+
+                        @if (!string.IsNullOrWhiteSpace(Entry.TraceId))
+                        {
+                            <button type="button"
+                                    class="audit-copy-btn @(IsCopied(Entry.TraceId) ? "copied" : string.Empty)"
+                                    title="Copy trace ID"
+                                    aria-label="Copy trace ID"
+                                    @onclick="@(() => CopyValueAsync(Entry.TraceId))">
+                                <MudIcon Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" />
+                            </button>
+                        }
+                    </dd>
+                </dl>
+
+                @if (!string.IsNullOrWhiteSpace(Entry.FailureReason))
+                {
+                    <h3 class="audit-section-title">Why it failed</h3>
+                    <div class="audit-code-block audit-code-block-error">
+                        <pre>@Entry.FailureReason</pre>
+                    </div>
+                }
+
+                <h3 class="audit-section-title">What changed</h3>
+
+                @if (EntityChanges.Count > 0)
+                {
+                    @foreach (var entity in EntityChanges)
+                    {
+                        <div class="audit-change-group">
+                            <div class="audit-change-head">
+                                <span class="ats-cell-tag">@entity.Entity</span>
+
+                                @if (!string.IsNullOrWhiteSpace(entity.Key))
+                                {
+                                    <span class="audit-change-key audit-mono">@entity.Key</span>
+                                }
+
+                                <span class="audit-change-state">@StateLabel(entity.State)</span>
+                            </div>
+
+                            <table class="audit-change-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Field</th>
+                                        <th scope="col">Before</th>
+                                        <th scope="col">After</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var field in entity.Changes)
+                                    {
+                                        <tr>
+                                            <td class="audit-change-field">@field.Key</td>
+                                            <td class="audit-change-from">@Fallback(field.Value.From)</td>
+                                            <td class="audit-change-to">@Fallback(field.Value.To)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+                else
+                {
+                    @* Not the same as "nothing changed": the ticketing and email paths
+                       write straight to SQL, so there is no tracked diff to show. *@
+                    <p class="audit-section-note audit-change-empty">
+                        @NoChangesReason
+                    </p>
+                }
+
+                <h3 class="audit-section-title">
+                    What the action carried
+
+                    <button type="button"
+                            class="audit-copy-btn @(IsCopied(Entry.Payload) ? "copied" : string.Empty)"
+                            title="Copy payload"
+                            aria-label="Copy payload"
+                            @onclick="@(() => CopyValueAsync(Entry.Payload))">
+                        <MudIcon Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" />
+                    </button>
+                </h3>
+
+                @* Sensitive values were masked before the entry was stored, so nothing
+                   shown here can be un-masked from this screen. *@
+                <p class="audit-section-note">
+                    Government IDs, birthdates and tokens are stored as
+                    <code>@Mask</code> and were never written to this table.
+                </p>
+
+                <div class="audit-code-block"><pre>@FormattedPayload</pre></div>
+            </div>
+        </div>
+    </DialogContent>
+</MudDialog>

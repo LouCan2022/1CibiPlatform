@@ -1679,6 +1679,110 @@
     overflow: hidden;
 }
 
+/* ---------- Gradient dialog header ---------- */
+
+/* The navy gradient header PreviewComponent introduced and BulkUploadSubjectsDialog
+   copied. Generalized here when the audit trail dialog needed a third instance, rather
+   than letting three copies drift apart. A dialog opts in with
+   .ats-dialog-headline on the <header>, and uses the -icon/-text/-close children.
+   The existing feature-specific copies still carry their own selectors; they can be
+   folded onto these classes in a later behaviour-preserving pass. */
+.ats-dialog-headline {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 30px 20px;
+    color: #fff;
+    background: linear-gradient(120deg, #0b1b3d, #1c3a70 55%, #1d5fd1 130%);
+}
+
+    /* The faint dot texture that gives the header its depth. */
+    .ats-dialog-headline::before {
+        position: absolute;
+        inset: 0;
+        content: "";
+        opacity: .35;
+        background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1.5px);
+        background-size: 16px 16px;
+        -webkit-mask-image: linear-gradient(to bottom right, #000, transparent 70%);
+        mask-image: linear-gradient(to bottom right, #000, transparent 70%);
+    }
+
+.ats-dialog-headline-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.ats-dialog-headline-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 12px;
+    background: rgba(255,255,255,.14);
+    color: #fff;
+}
+
+    .ats-dialog-headline-icon .mud-icon-root {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+    }
+
+.ats-dialog-headline-text {
+    min-width: 0;
+}
+
+    .ats-dialog-headline-text h2 {
+        margin: 0;
+        overflow: hidden;
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: .2px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ats-dialog-headline-text p {
+        margin: 4px 0 0;
+        overflow: hidden;
+        color: #c6d5f5;
+        font-size: 12.5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+.ats-dialog-headline-close {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 9px;
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    cursor: pointer;
+}
+
+    .ats-dialog-headline-close:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+    .ats-dialog-headline-close:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, .35);
+        outline-offset: 2px;
+    }
+
 .mud-dialog.ats-chart-detail-dialog {
     animation-name: ats-chart-zoom-in;
     animation-duration: 0.28s;
