@@ -376,7 +376,7 @@
                                                           Class="oneplatform-rounded-input"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Outlined.PhoneIphone"
-                                                          Placeholder="+63 9XX XXX XXXX"
+                                                          Placeholder="09XXXXXXXXX"
                                                           Label="Phone number"
                                                           Mask="@(new PatternMask("00000000000"))" />
                                         </MudItem>
@@ -543,7 +543,10 @@
                                               Placeholder="No., Street, Village"
                                               Adornment="Adornment.Start"
                                               AdornmentIcon="@Icons.Material.Outlined.LocationOn"
-                                              @bind-Value="addressDetails.CurrentAddress"
+                                              T="string"
+                                              Immediate="true"
+                                              Value="addressDetails.CurrentAddress"
+                                              ValueChanged="OnCurrentAddressChanged"
                                               Required="true"
                                               RequiredError="Current address is required" />
                             </MudItem>
@@ -557,7 +560,10 @@
                                               Margin="Margin.Dense"
                                               Class="oneplatform-rounded-input ats-step-four-control"
                                               Placeholder="City"
-                                              @bind-Value="addressDetails.CurrentCity"
+                                              T="string"
+                                              Immediate="true"
+                                              Value="addressDetails.CurrentCity"
+                                              ValueChanged="OnCurrentCityChanged"
                                               Required="true"
                                               RequiredError="City is required" />
                             </MudItem>
@@ -571,7 +577,10 @@
                                               Margin="Margin.Dense"
                                               Class="oneplatform-rounded-input ats-step-four-control"
                                               Placeholder="State / Province"
-                                              @bind-Value="addressDetails.CurrentProvince"
+                                              T="string"
+                                              Immediate="true"
+                                              Value="addressDetails.CurrentProvince"
+                                              ValueChanged="OnCurrentProvinceChanged"
                                               Required="true"
                                               RequiredError="State / Province is required" />
                             </MudItem>
@@ -585,7 +594,10 @@
                                               Margin="Margin.Dense"
                                               Class="name-filter oneplatform-rounded-input ats-step-four-control"
                                               Placeholder="Country"
-                                              @bind-Value="addressDetails.CurrentCountry"
+                                              T="string"
+                                              Immediate="true"
+                                              Value="addressDetails.CurrentCountry"
+                                              ValueChanged="OnCurrentCountryChanged"
                                               Required="true"
                                               RequiredError="Country is required" />
                             </MudItem>
@@ -599,7 +611,10 @@
                                               Margin="Margin.Dense"
                                               Class="oneplatform-rounded-input ats-step-four-control"
                                               Placeholder="Zip / Postal code"
-                                              @bind-Value="addressDetails.CurrentPostalCode"
+                                              T="string"
+                                              Immediate="true"
+                                              Value="addressDetails.CurrentPostalCode"
+                                              ValueChanged="OnCurrentPostalCodeChanged"
                                               Required="true"
                                               Mask="@(new PatternMask("00000000000"))"
                                               RequiredError="Zip / Postal code is required" />
@@ -609,7 +624,6 @@
                                 <MudCheckBox T="bool"
                                              Class="small-checkbox-label"
                                              Value="SameAsPermanent"
-                                             Disabled="@(string.IsNullOrEmpty(addressDetails.CurrentAddress))"
                                              ValueChanged="OnSameAsPermanentChanged"
                                              Label="Check if current address is the same as permanent address" />
                             </MudItem>
@@ -1123,7 +1137,7 @@
                                               RequiredError="Supervisor Contact Number is required"
                                               @bind-Value="professionalExperiences.Emp1SupervisorContactNumber"
                                               Validation="@((string value) => MobileNumberValidationService.ValidateMobileNumber(value))"
-                                              Placeholder="Contact information"
+                                              Placeholder="09XXXXXXXXX"
                                               Label="Contact information #1" />
 
                             </MudItem>
@@ -1321,7 +1335,7 @@
 
                                                                     return MobileNumberValidationService.ValidateMobileNumber(value);
                                                                 })"
-                                                              Placeholder="Contact information"
+                                                              Placeholder="09XXXXXXXXX"
                                                               Label="Contact information #2" />
                                             </MudItem>
                                         </MudGrid>
@@ -1522,7 +1536,7 @@
 
                                                                     return MobileNumberValidationService.ValidateMobileNumber(value);
                                                                 })"
-                                                              Placeholder="Contact information"
+                                                              Placeholder="09XXXXXXXXX"
                                                               Label="Contact information #3" />
                                             </MudItem>
                                         </MudGrid>
@@ -1611,6 +1625,7 @@
                                                       RequiredError="Mobile Contact Information is required"
                                                       Class="oneplatform-rounded-input"
                                                       @bind-Value="referenceDetails.Ref1ContactNumber"
+                                                      Placeholder="09XXXXXXXXX"
                                                       Mask="@(new PatternMask("00000000000"))"
                                                       Validation="@((string value) => MobileNumberValidationService.ValidateMobileNumber(value))"
                                                       Label="Mobile Contact" />
@@ -1724,6 +1739,7 @@
                                                       Margin="Margin.Dense"
                                                       Class="oneplatform-rounded-input"
                                                       @bind-Value="referenceDetails.Ref2ContactNumber"
+                                                      Placeholder="09XXXXXXXXX"
                                                       Required="true"
                                                       Mask="@(new PatternMask("00000000000"))"
                                                       Validation="@((string value) => MobileNumberValidationService.ValidateMobileNumber(value))"
@@ -1843,6 +1859,7 @@
                                                               Margin="Margin.Dense"
                                                               Class="oneplatform-rounded-input"
                                                               @bind-Value="referenceDetails.Ref3ContactNumber"
+                                                              Placeholder="09XXXXXXXXX"
                                                               Required="@AddAnotherReference"
                                                               Mask="@(new PatternMask("00000000000"))"
                                                               Validation="@((string? value) =>
