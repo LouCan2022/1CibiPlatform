@@ -3,22 +3,22 @@
     display: grid;
     place-items: center;
     padding: 2rem 1rem;
-    background: linear-gradient(135deg, #fff2fa 0%, #f8e6f7 48%, #ffe2ed 100%);
+    background: linear-gradient(135deg, var(--c-ev-tint-2) 0%, var(--c-ev-border) 48%, var(--c-ev-border) 100%);
 }
 
 .ev-confirm-card {
     width: min(620px, 100%);
     overflow: hidden;
     border-radius: 24px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow: 0 22px 60px rgba(125, 41, 113, .18);
 }
 
 .ev-confirm-header {
     padding: 2.4rem 2.5rem 2.2rem;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     text-align: center;
-    background: linear-gradient(120deg, #8d2f91, #d945a0 54%, #ff8fb8);
+    background: linear-gradient(120deg, var(--c-ev-accent-strong), var(--c-ev-accent) 54%, var(--c-ev-accent-soft));
 }
 
 .ev-confirm-brand {
@@ -45,11 +45,11 @@
     }
 
 .ev-confirm-header-expired {
-    background: linear-gradient(120deg, #8a6410, #c98a1d 54%, #f0b850);
+    background: linear-gradient(120deg, var(--c-warn), var(--c-warn) 54%, var(--c-warn));
 }
 
 .ev-confirm-header-used {
-    background: linear-gradient(120deg, #1f5d54, #2f8b78 54%, #6fc4ab);
+    background: linear-gradient(120deg, var(--c-success), var(--c-success) 54%, var(--c-success));
 }
 
 .ev-confirm-body {
@@ -58,7 +58,7 @@
 
 .ev-confirm-lead {
     margin: 0 0 1.25rem;
-    color: #4a3a48;
+    color: var(--c-ev-fg);
     font-size: 1rem;
     line-height: 1.65;
 }
@@ -68,18 +68,18 @@
     gap: .4rem;
     padding: 1.1rem 1.2rem;
     border-radius: 14px;
-    background: #fff8fc;
-    border: 1px solid #f3d8e8;
+    background: var(--c-ev-tint-2);
+    border: 1px solid var(--c-ev-border);
     line-height: 1.6;
 }
 
     .ev-confirm-callout strong {
-        color: #321b35;
+        color: var(--c-ev-fg);
         font-size: .95rem;
     }
 
     .ev-confirm-callout span {
-        color: #76566f;
+        color: var(--c-ev-fg-muted);
         font-size: .9rem;
     }
 
@@ -87,19 +87,19 @@
 .ev-confirm-header p { margin: .75rem 0 0; opacity: .9; }
 
 .ev-confirm-details { margin: 0; padding: 2rem 2.5rem 1rem; }
-.ev-confirm-details div { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 0; border-bottom: 1px solid #f0dce9; }
-.ev-confirm-details dt { color: #96728e; font-size: .85rem; }
-.ev-confirm-details dd { margin: 0; color: #321b35; font-weight: 700; text-align: right; }
-.ev-confirm-expiry { margin: 0; padding: 0 2.5rem 1.75rem; color: #a1849b; font-size: .78rem; text-align: center; }
-.ev-confirm-note, .ev-confirm-message { padding: 0 2.5rem 1.25rem; color: #76566f; line-height: 1.6; }
+.ev-confirm-details div { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 0; border-bottom: 1px solid var(--c-ev-border); }
+.ev-confirm-details dt { color: var(--c-ev-fg-muted); font-size: .85rem; }
+.ev-confirm-details dd { margin: 0; color: var(--c-ev-fg); font-weight: 700; text-align: right; }
+.ev-confirm-expiry { margin: 0; padding: 0 2.5rem 1.75rem; color: var(--c-ev-fg-muted); font-size: .78rem; text-align: center; }
+.ev-confirm-note, .ev-confirm-message { padding: 0 2.5rem 1.25rem; color: var(--c-ev-fg-muted); line-height: 1.6; }
 .ev-confirm-actions { display: flex; gap: .75rem; padding: 0 2.5rem 2rem; }
 .ev-confirm-actions button { flex: 1; padding: .85rem 1rem; border: 0; border-radius: 999px; font-weight: 700; cursor: pointer; }
-.ev-confirm-approve { color: #fff; background: linear-gradient(120deg, #a52d91, #e3489f); }
-.ev-confirm-reject { color: #9b376f; background: #fff0f8; }
+.ev-confirm-approve { color: var(--c-on-dark-fg); background: linear-gradient(120deg, var(--c-ev-accent-strong), var(--c-ev-accent)); }
+.ev-confirm-reject { color: var(--c-ev-accent-strong); background: var(--c-ev-tint-2); }
 .ev-confirm-success, .ev-confirm-error { margin: 2rem 2.5rem; padding: 1rem 1.1rem; display: grid; gap: .35rem; border-radius: 14px; line-height: 1.5; }
-.ev-confirm-success { color: #24643f; background: #ebfaf0; }
-.ev-confirm-error { color: #8c2e4c; background: #fff0f3; }
-.ev-confirm-footer { padding: 1rem 2.5rem; color: #a1849b; background: #fff8fc; font-size: .75rem; line-height: 1.5; text-align: center; }
+.ev-confirm-success { color: var(--c-success); background: var(--c-success-bg); }
+.ev-confirm-error { color: var(--c-danger-strong); background: var(--c-danger-bg); }
+.ev-confirm-footer { padding: 1rem 2.5rem; color: var(--c-ev-fg-muted); background: var(--c-ev-tint-2); font-size: .75rem; line-height: 1.5; text-align: center; }
 
 @media (max-width: 560px) {
     .ev-confirm-header, .ev-confirm-details, .ev-confirm-body { padding-left: 1.35rem; padding-right: 1.35rem; }

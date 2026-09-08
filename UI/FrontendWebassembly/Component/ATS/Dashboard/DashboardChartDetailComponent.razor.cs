@@ -10,7 +10,10 @@ public partial class DashboardChartDetailComponent
 	private const double DetailChartTop = 20;
 	private const double DetailChartBottom = 48;
 
-	private static readonly string[] AreaChartColors =
+	// Must stay identical to the arrays in ATSDashboardComponent.razor.cs: this dialog
+	// is the zoomed view of those same charts, so a series has to keep its colour when
+	// the user opens it. See the note there on why these cannot come from CSS tokens.
+	private static readonly string[] AreaChartColorsLight =
 	[
 		"#4D8DE8",
 		"#9B7ADB",
@@ -20,13 +23,40 @@ public partial class DashboardChartDetailComponent
 		"#E06C75"
 	];
 
-	private static readonly string[] CategoryChartColors =
+	private static readonly string[] AreaChartColorsDark =
+	[
+		"#7FB2F5",
+		"#B99DEB",
+		"#F5CC8A",
+		"#4FC7D9",
+		"#5B8FD6",
+		"#F0908F"
+	];
+
+	private static readonly string[] CategoryChartColorsLight =
 	[
 		"#16A9BE",
 		"#4D7FEA",
 		"#1055A6",
 		"#9C79DF"
 	];
+
+	private static readonly string[] CategoryChartColorsDark =
+	[
+		"#4FC7D9",
+		"#7FA6F5",
+		"#5B8FD6",
+		"#BB9DEB"
+	];
+
+	[Inject]
+	public ThemeService Theme { get; set; } = default!;
+
+	private string[] AreaChartColors =>
+		Theme.IsDarkMode ? AreaChartColorsDark : AreaChartColorsLight;
+
+	private string[] CategoryChartColors =>
+		Theme.IsDarkMode ? CategoryChartColorsDark : CategoryChartColorsLight;
 
 	[Parameter]
 	public string? ChartKey { get; set; }
@@ -59,7 +89,9 @@ public partial class DashboardChartDetailComponent
 
 	// Matches the dashboard card ring so the zoomed view reads as the same chart.
 	// The wider hole is also what makes room for the centred KPI overlay.
-	private readonly DonutChartOptions _donutChartOptions = new()
+	// Properties, not readonly fields: the palette is theme-dependent, so a
+	// once-initialised instance would keep the light colours after a toggle.
+	private DonutChartOptions _donutChartOptions => new()
 	{
 		ChartPalette = CategoryChartColors,
 		DonutRingRatio = 0.3,
@@ -67,7 +99,7 @@ public partial class DashboardChartDetailComponent
 		ShowValues = false
 	};
 
-	private readonly LineChartOptions _lineChartOptions = new()
+	private LineChartOptions _lineChartOptions => new()
 	{
 		ChartPalette = AreaChartColors,
 		LineStrokeWidth = 4,
@@ -326,10 +358,11 @@ public partial class DashboardChartDetailComponent
 		return FormattableString.Invariant($"width: {width:0.###}%; background-color: {color};");
 	}
 
-	private static string GetAreaLegendColor(int index) =>
+	// Not static: the palettes are theme-dependent instance properties.
+	private string GetAreaLegendColor(int index) =>
 		GetPaletteColor(AreaChartColors, index);
 
-	private static string GetCategoryLegendColor(int index) =>
+	private string GetCategoryLegendColor(int index) =>
 		GetPaletteColor(CategoryChartColors, index);
 
 	private static string GetPaletteColor(IReadOnlyList<string> palette, int index) =>

@@ -2,7 +2,10 @@ namespace FrontendWebassembly.ShareData.ATS;
 
 public static class ModuleList
 {
-	private static readonly int[] RestrictedAdministrationModuleIds = [6, 7, 8, 9, 11];
+	// 15 (Audit Trail) is restricted for a different reason than the rest: a trail the
+	// audited user can read is a weaker control, so only a platform super admin sees it.
+	// The backend enforces the same rule independently.
+	private static readonly int[] RestrictedAdministrationModuleIds = [6, 7, 8, 9, 11, 15];
 
 	public static Dictionary<int, (string path, string Name, string Icon)> List =>
 		new()
@@ -20,7 +23,8 @@ public static class ModuleList
 			{ 11, ("clientassigning", "Client Assigning", Icons.Material.Filled.AssignmentInd) },
 			{ 12, ("aiassistant", "AI Assistant", Icons.Material.Filled.SmartToy) },
 			{ 13, ("bulkuploads", "Bulk Uploads Status", Icons.Material.Filled.CloudUpload) },
-			{ 14, ("ticketingstatus", "Ticketing Status", Icons.Material.Filled.ConfirmationNumber) }
+			{ 14, ("ticketingstatus", "Ticketing Status", Icons.Material.Filled.ConfirmationNumber) },
+			{ 15, ("audittrail", "Audit Trail", Icons.Material.Filled.History) }
 		};
 
 	// Modules that belong in the primary sidebar navigation rather than under Manage.

@@ -5,12 +5,13 @@
 @inject NavigationManager NavigationManager
 
 @inject IJSRuntime JS
+@inject ThemeService Theme
 @inject IUserProfileService UserProfileService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @implements IDisposable
 
-<MudThemeProvider Theme="@_myTheme" @bind-IsDarkMode="@_isDarkMode" />
+<MudThemeProvider Theme="@ThemeService.Theme" IsDarkMode="@Theme.IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -76,11 +77,13 @@
                         </MudButton>
 
                         <span class="main-topbar-divider" aria-hidden="true"></span>
-                        @* <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+
+                        <MudIconButton Icon="@(Theme.IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                                        Color="Color.Inherit"
                                        OnClick="@ToggleDarkMode"
                                        Class="main-topbar-theme-toggle"
-                                       aria-label="Toggle dark mode" /> *@
+                                       title="@(Theme.IsDarkMode ? "Switch to light mode" : "Switch to dark mode")"
+                                       aria-label="@(Theme.IsDarkMode ? "Switch to light mode" : "Switch to dark mode")" />
 
                         <MudButton OnClick="HandleLogout"
                                    StartIcon="@Icons.Material.Filled.Logout"

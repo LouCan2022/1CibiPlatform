@@ -368,7 +368,7 @@ public partial class ApplicationFormComponent
 				nameof(YesNoDialogComponent.InfoColor),Color.Warning
 			},
 			{
-				nameof(YesNoDialogComponent.InfoBGColor),"#FFF8E1"
+				nameof(YesNoDialogComponent.InfoBGColor),"var(--c-warn-bg)"
 			},
 			{
 				nameof(YesNoDialogComponent.ThemeButtonColor),"theme-button-warning"

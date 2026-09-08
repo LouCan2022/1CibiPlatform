@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+
+@* Themed shell for authenticated staff surfaces: the ATS console, staff-facing
+   Employment Verification, the auth screens and /access-denied.
+
+   This is deliberately a sibling of GenericLayout rather than a change to it.
+   GenericLayout is the unauthenticated opt-out (see the comment in Pages/Docs/
+   ApiDocs.razor) and hosts candidate- and client-facing pages reached by token
+   link: the application form, employment-verification verify/reject, and PhilSys
+   liveness. Those must stay light regardless of what a staff member picked on
+   the same browser, so they keep GenericLayout's unbound MudThemeProvider and
+   this layout carries the theme binding instead. *@
+
+<MudThemeProvider Theme="@ThemeService.Theme" IsDarkMode="@Theme.IsDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider BackdropClick="false" />
+<MudSnackbarProvider />
+
+<ErrorBoundary>
+    <ChildContent>
+        @Body
+    </ChildContent>
+
+    <ErrorContent Context="exception">
+        <ErrorDialogComponent Message="@exception.Message" />
+    </ErrorContent>
+</ErrorBoundary>

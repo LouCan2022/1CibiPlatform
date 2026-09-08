@@ -3,15 +3,15 @@
 .ats-bulk-subjects-header,
 .ats-bulk-subjects-segmented,
 ::deep .ats-bulk-subjects-table-card {
-    --navy-900: #0b1b3d;
-    --blue-600: #1d5fd1;
-    --blue-500: #2e7ce0;
-    --blue-tint: #edf3fc;
-    --blue-tint-2: #e3ecfb;
-    --border: #e4eaf6;
-    --text-1: #16233f;
-    --text-2: #5b6b8c;
-    --text-3: #8a97b5;
+    --navy-900: var(--c-navy-900);
+    --blue-600: var(--c-blue-600);
+    --blue-500: var(--c-blue-500);
+    --blue-tint: var(--c-blue-tint);
+    --blue-tint-2: var(--c-blue-tint-2);
+    --border: var(--c-border-soft);
+    --text-1: var(--c-fg-strong);
+    --text-2: var(--c-fg-muted);
+    --text-3: var(--c-fg-subtle);
 }
 
 /* ---------- Header (PreviewComponent's gradient dialog header) ---------- */
@@ -24,8 +24,8 @@
     gap: 16px;
     overflow: hidden;
     padding: 24px 30px 20px;
-    color: #fff;
-    background: linear-gradient(120deg, var(--navy-900), #1c3a70 55%, var(--blue-600) 130%);
+    color: var(--c-on-dark-fg);
+    background: var(--c-dialog-header-gradient);
 }
 
     .ats-bulk-subjects-header::before {
@@ -56,7 +56,7 @@
     border: 1px solid rgba(255,255,255,.22);
     border-radius: 12px;
     background: rgba(255,255,255,.14);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-bulk-subjects-header-icon ::deep .mud-icon-root {
@@ -81,7 +81,7 @@
 
     .ats-bulk-subjects-header-text p {
         margin: 4px 0 0;
-        color: #c6d5f5;
+        color: var(--c-on-dark-fg-muted);
         font-size: 12.5px;
     }
 
@@ -95,7 +95,7 @@
     border: 1px solid rgba(255,255,255,.2);
     border-radius: 9px;
     background: rgba(255,255,255,.1);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
 }
 
@@ -139,7 +139,7 @@
     padding: 4px;
     border: 1px solid var(--border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 ::deep .ats-bulk-subjects-segment {
@@ -176,15 +176,15 @@
 ::deep .ats-bulk-subjects-count {
     padding: 2px 8px;
     border-radius: 999px;
-    background: #f1f4fa;
+    background: var(--c-surface-sunken);
     color: var(--text-2);
     font-size: 11px;
     font-weight: 800;
 }
 
 ::deep .ats-bulk-subjects-segment.active .ats-bulk-subjects-count {
-    background: linear-gradient(120deg, var(--navy-900), var(--blue-500));
-    color: #fff;
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
 }
 
 /* The dot classes the parent page defines are page-scoped, so the dialog restates
@@ -201,15 +201,15 @@
     }
 
     .ats-bulk-subjects-segmented .bulk-status-dot.is-pending {
-        background: #7d8aa8;
+        background: var(--c-fg-subtle);
     }
 
     .ats-bulk-subjects-segmented .bulk-status-dot.is-done {
-        background: #1e9e64;
+        background: var(--c-success);
     }
 
     .ats-bulk-subjects-segmented .bulk-status-dot.is-failed {
-        background: #c8382f;
+        background: var(--c-danger-strong);
     }
 
 /* ---------- Table ---------- */
@@ -289,7 +289,7 @@
 }
 
 .ats-bulk-subject-attempts {
-    color: #b5790f;
+    color: var(--c-warn);
     font-size: 11.5px;
     font-weight: 700;
 }
@@ -315,22 +315,22 @@
 }
 
     .ats-bulk-badge.is-done {
-        background: #e6f6ee;
-        color: #12724a;
+        background: var(--c-success-bg);
+        color: var(--c-success);
     }
 
     .ats-bulk-badge.is-pending {
-        background: #eef1f7;
-        color: #55627e;
+        background: var(--c-border-soft);
+        color: var(--c-fg-muted);
     }
 
     .ats-bulk-badge.is-failed {
-        background: #fdeceb;
-        color: #a52b23;
+        background: var(--c-danger-bg);
+        color: var(--c-danger-strong);
     }
 
     .ats-bulk-badge.is-unknown {
-        background: #f4f5f8;
+        background: var(--c-surface-sunken);
         color: var(--text-3);
     }
 
@@ -398,7 +398,7 @@
 
     ::deep .ats-bulk-subjects-table .mud-table-cell::before {
         padding: 0;
-        color: var(--text-3, #8a97b5);
+        color: var(--text-3, var(--c-fg-subtle));
         font-size: 11px;
         font-weight: 700;
         letter-spacing: .4px;

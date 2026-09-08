@@ -1,17 +1,19 @@
-﻿.ats-management-page {
-    --management-navy-900: #0b1b3d;
-    --management-navy-800: #132a54;
-    --management-blue-600: #1d5fd1;
-    --management-blue-500: #2e7ce0;
-    --management-blue-tint: #edf3fc;
-    --management-blue-tint-2: #e3ecfb;
-    --management-border: #e4eaf6;
-    --management-border-strong: #c2d2f0;
-    --management-text-1: #16233f;
-    --management-text-2: #5b6b8c;
-    --management-text-3: #8a97b5;
-    --management-green: #1e9e64;
-    --management-green-tint: #e4f7ed;
+﻿/* Re-pointed at the shared tokens in css/theme.css. The --management-* names stay so
+   the ~200 var() call sites through this sheet keep working unchanged. */
+.ats-management-page {
+    --management-navy-900: var(--c-navy-900);
+    --management-navy-800: var(--c-navy-800);
+    --management-blue-600: var(--c-blue-600);
+    --management-blue-500: var(--c-blue-500);
+    --management-blue-tint: var(--c-blue-tint);
+    --management-blue-tint-2: var(--c-blue-tint-2);
+    --management-border: var(--c-border-soft);
+    --management-border-strong: var(--c-border-strong);
+    --management-text-1: var(--c-fg-strong);
+    --management-text-2: var(--c-fg-muted);
+    --management-text-3: var(--c-fg-subtle);
+    --management-green: var(--c-success);
+    --management-green-tint: var(--c-success-bg);
     width: 100%;
     max-width: none;
     margin: 0;
@@ -21,6 +23,7 @@
 
 .ats-management-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 10px;
     margin-bottom: 18px;
@@ -34,9 +37,9 @@
     padding: 0 18px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(120deg, var(--management-navy-800), var(--management-blue-600));
+    background: var(--c-primary-gradient);
     box-shadow: 0 8px 20px -6px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Inter", sans-serif;
     font-size: 13px;
     font-weight: 700;
@@ -71,7 +74,7 @@
     overflow: hidden;
     border: 1px solid var(--management-border);
     border-radius: 16px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow: 0 12px 32px -12px rgba(11, 27, 61, 0.12);
 }
 
@@ -109,7 +112,7 @@
 .ats-management-card .table-component-search .mud-input {
     min-height: 40px;
     border-radius: 10px;
-    background: #fcfdff;
+    background: var(--c-surface-sunken);
     color: var(--management-text-1);
     font-family: "Inter", sans-serif;
     font-size: 13.5px;
@@ -156,9 +159,10 @@
     border: 0;
 }
 
+/* min-width intentionally absent: TableComponent owns it and applies it only above
+   the 960px card-mode breakpoint. See Component/Generic/TableComponent.razor.css. */
 .ats-management-card table {
     width: 100%;
-    min-width: 880px;
     border-collapse: collapse;
 }
 
@@ -193,7 +197,7 @@
 }
 
 .ats-management-card tbody .mud-table-row:hover {
-    background: #fafbff;
+    background: var(--c-surface-sunken);
 }
 
 .ats-management-card tbody .mud-table-row:last-child .mud-table-cell {
@@ -404,9 +408,7 @@
     height: 17px;
 }
 
-.ats-package-card table {
-    min-width: 920px;
-}
+/* Width owned by TableComponent; see .ats-management-card table above. */
 
 .ats-package-card thead .mud-table-cell:nth-child(1),
 .ats-package-card thead .mud-table-cell:nth-child(2) {
@@ -484,7 +486,7 @@
     padding: 4px 10px;
     border: 1px solid var(--management-border);
     border-radius: 20px;
-    background: #f3f5fa;
+    background: var(--c-surface-sunken);
     color: var(--management-text-2);
     font-size: 12px;
     font-weight: 600;
@@ -502,11 +504,14 @@
     white-space: nowrap !important;
 }
 
+/* max-width, not width: on a 360px phone the cell has roughly 300px of usable space
+   after card and cell padding, so a hard 320px box overflowed and was then clipped. */
 .ats-management-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    max-width: 320px;
+    max-width: min(320px, 100%);
+    min-width: 0;
 }
 
 .ats-management-chip {
@@ -523,10 +528,12 @@
     white-space: nowrap;
 }
 
+/* A filled navy pill with white text. Uses the fixed on-dark tokens rather than the
+   ramp, which lightens in dark mode and would leave white text on a pale chip. */
 .ats-management-chip-more {
-    border-color: var(--management-navy-900);
-    background: var(--management-navy-900);
-    color: #fff;
+    border-color: var(--c-chip-solid-bg);
+    background: var(--c-chip-solid-bg);
+    color: var(--c-on-dark-fg);
 }
 
 .ats-management-status {
@@ -551,7 +558,7 @@
 }
 
 .ats-management-status.is-disabled {
-    background: #eef0f5;
+    background: var(--c-neutral-bg);
     color: var(--management-text-2);
 }
 
@@ -637,7 +644,7 @@
     min-height: 28px;
     border: 1px solid var(--management-border-strong);
     border-radius: 8px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--management-text-1);
 }
 
@@ -675,7 +682,7 @@
        caption, select, and nav buttons scatter vertically unless restated here. */
     align-items: center;
     overflow-x: auto;
-    color: #5b6b8c;
+    color: var(--c-fg-muted);
     font-family: "Inter", sans-serif;
     font-size: 13px;
 }
@@ -711,19 +718,19 @@
 
 .um-dialog.ats-bulk-subjects-dialog .mud-table-pagination-select .mud-input {
     min-height: 28px;
-    border: 1px solid #c2d2f0;
+    border: 1px solid var(--c-border-strong);
     border-radius: 8px;
-    background: #fff;
-    color: #16233f;
+    background: var(--c-surface);
+    color: var(--c-fg-strong);
 }
 
 .um-dialog.ats-bulk-subjects-dialog .mud-table-pagination-actions .mud-icon-button {
     width: 28px;
     height: 28px;
     padding: 5px;
-    border: 1.5px solid #c2d2f0;
+    border: 1.5px solid var(--c-border-strong);
     border-radius: 7px;
-    color: #5b6b8c;
+    color: var(--c-fg-muted);
 }
 
 .um-dialog.ats-bulk-subjects-dialog .mud-table-pagination-actions .mud-icon-button + .mud-icon-button {
@@ -749,10 +756,13 @@
 }
 
 .ats-management-page .ats-status-board-card .table-component-toolbar-left {
-    flex: 0 0 auto;
-    /* Same 400px as .search-report-date-field, so the two pickers lay out their
-       inputs and end adornment identically. */
-    width: 400px;
+    /* Was `flex: 0 0 auto; width: 400px`, i.e. a slot that could grow to 400px but
+       never shrink below it. With the reload button and the search box on the same
+       row that overflowed the card on narrow screens. `1 1 20rem` keeps 400px as the
+       preferred width while letting it compress, so the three controls share the row
+       until they genuinely need to wrap. */
+    flex: 1 1 20rem;
+    width: auto;
     max-width: 100%;
     min-width: 0;
 
@@ -854,6 +864,53 @@
     }
 }
 
+/* Phone: the shared toolbar stacks into a column at 600px, so every control goes
+   full width and sits in the source order date -> search -> reload.
+
+   The 56px pinning and the reload button's 9px baseline nudge above exist only to
+   align the three controls when they share a row. They carry !important and no upper
+   bound, so they have to be explicitly undone here - otherwise the stacked search and
+   reload keep a side-by-side geometry and get squeezed out of the card entirely. */
+@media (max-width: 600px) {
+    .ats-management-page .ats-status-board-card .table-component-toolbar-row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .ats-management-page .ats-status-board-card .table-component-toolbar-left,
+    .ats-management-page .ats-status-board-card .table-component-search {
+        width: 100%;
+        max-width: none;
+        flex: 0 0 auto;
+        margin: 0;
+    }
+
+    .ats-management-page .ats-status-board-date-field .mud-picker,
+    .ats-management-page .ats-status-board-date-field .mud-picker-inline {
+        width: 100% !important;
+    }
+
+    /* Release the 56px pin: stacked, the search box can take its natural height. */
+    .ats-management-page .ats-status-board-card .table-component-search .mud-input-control,
+    .ats-management-page .ats-status-board-card .table-component-search .table-component-search-input,
+    .ats-management-page .ats-status-board-card .table-component-search .mud-input-control-input-container,
+    .ats-management-page .ats-status-board-card .table-component-search .mud-input,
+    .ats-management-page .ats-status-board-card .table-component-search .mud-input-slot,
+    .ats-management-page .ats-status-board-card .table-component-search input.mud-input-root {
+        height: auto !important;
+        min-height: 44px !important;
+    }
+
+    /* Full width and the "Reload" label come from the shared TableComponent phone
+       rules; only the 9px baseline nudge (which exists for the side-by-side layout)
+       needs undoing here. */
+    .ats-management-page .ats-status-board-card .table-component-reload-button {
+        margin-bottom: 0;
+    }
+}
+
 /* ---------- Status board: shared intro banner, filter chips and status pills ----------
 
    The bulk uploads and OMS ticketing screens are the same shape: an intro banner, a
@@ -904,7 +961,7 @@
     margin: 0 0 16px;
     border: 1px solid var(--management-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .ats-management-page .ats-status-board-btn {
@@ -943,15 +1000,15 @@
 .ats-management-page .ats-status-board-count {
     padding: 2px 8px;
     border-radius: 999px;
-    background: #f1f4fa;
+    background: var(--c-surface-sunken);
     color: var(--management-text-2);
     font-size: 11px;
     font-weight: 800;
 }
 
 .ats-management-page .ats-status-board-btn.active .ats-status-board-count {
-    background: linear-gradient(120deg, var(--management-navy-900), var(--management-blue-500));
-    color: #fff;
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
 }
 
 .ats-management-page .ats-status-dot {
@@ -966,11 +1023,11 @@
 }
 
 .ats-management-page .ats-status-dot.is-pending {
-    background: #7d8aa8;
+    background: var(--c-fg-subtle);
 }
 
 .ats-management-page .ats-status-dot.is-processing {
-    background: #b5790f;
+    background: var(--c-warn);
 }
 
 .ats-management-page .ats-status-dot.is-done {
@@ -978,7 +1035,7 @@
 }
 
 .ats-management-page .ats-status-dot.is-error {
-    background: #c0453e;
+    background: var(--c-danger-strong);
 }
 
 /* ---------- Shared table-cell primitives ---------- */
@@ -1028,7 +1085,7 @@
     display: inline-flex;
     padding: 3px 10px;
     border-radius: 8px;
-    background: #f1f4fa;
+    background: var(--c-surface-sunken);
     color: var(--management-text-2);
     font-size: 11.5px;
     font-weight: 600;
@@ -1050,14 +1107,14 @@
 
 .ats-code-block {
     padding: 14px 16px;
-    border: 1px solid #eef1f7;
+    border: 1px solid var(--c-blue-tint);
     border-radius: 10px;
-    background: #f8fafc;
+    background: var(--c-surface-sunken);
 }
 
 .ats-code-block pre {
     margin: 0;
-    color: #4b5468;
+    color: var(--c-fg-muted);
     font-family: "JetBrains Mono", Consolas, monospace;
     font-size: 11.5px;
     line-height: 1.7;
@@ -1066,27 +1123,27 @@
 }
 
 .ats-code-block pre a {
-    color: #2f6fed;
+    color: var(--c-blue-500);
 }
 
 .ats-code-block pre code {
     padding: 1px 4px;
     border-radius: 4px;
-    background: #eef1f7;
-    color: #0a1c3f;
+    background: var(--c-blue-tint);
+    color: var(--c-navy-900);
 }
 
 .ats-json-key {
-    color: #2f6fed;
+    color: var(--c-blue-500);
     font-weight: 600;
 }
 
 .ats-json-string {
-    color: #0f7b3e;
+    color: var(--c-success);
 }
 
 .ats-json-number {
-    color: #a15c07;
+    color: var(--c-warn);
 }
 
 .ats-management-page .ats-cell-action {
@@ -1141,14 +1198,14 @@
 }
 
 .ats-management-page .ats-status-pill.pending {
-    background: #f8f9fc;
-    color: #7d8aa8;
+    background: var(--c-surface-sunken);
+    color: var(--c-fg-subtle);
     border: 1px dashed var(--management-border-strong);
 }
 
 .ats-management-page .ats-status-pill.processing {
-    background: #fcf1dd;
-    color: #b5790f;
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
 }
 
 /* The only row state that is actively changing, so the dot breathes to say so. */
@@ -1162,13 +1219,13 @@
 }
 
 .ats-management-page .ats-status-pill.error {
-    background: #fdeceb;
-    color: #c0453e;
+    background: var(--c-danger-bg);
+    color: var(--c-danger-strong);
 }
 
 .ats-management-page .ats-status-pill.unknown {
-    background: #eef0f5;
-    color: #6b7690;
+    background: var(--c-neutral-bg);
+    color: var(--c-fg-muted);
 }
 
 @keyframes ats-status-pulse {
@@ -1200,7 +1257,7 @@
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
     .ats-management-card.responsive-table-container {
         padding: 22px 20px 8px;
     }
@@ -1304,7 +1361,7 @@
 .ats-component-boxshadow {
     padding: 4px;
     border-radius: 4px;
-    background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
+    background: var(--c-brand-bar-gradient);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
@@ -1313,23 +1370,23 @@
 }
 
 .gradient-text {
-    background: linear-gradient(90deg, #102247 0%, #2a77ae 50%, #68c0d6 100%);
+    background: var(--c-brand-bar-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .custom-stepper .mud-step-label-icon.mud-default, .custom-stepper .mud-step-completed .mud-step-label-icon, .custom-stepper .mud-step.active .mud-step-label-icon {
-    background: linear-gradient( 90deg, #102247 0%, #2a77ae 50%, #68c0d6 100% ) border-box !important;
+    background: var(--c-brand-bar-gradient) border-box !important;
     color: white !important;
 }
 
 .ats-signature {
     height: 120px;
     width: min(520px, 100%);
-    border: 1px dashed #D5E2F2;
+    border: 1px dashed var(--c-border-strong);
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     display: flex;
     margin: 0 auto;
     flex-direction: column;
@@ -1344,23 +1401,23 @@
 }
 
 .ats-step-final .ats-consent-document {
-    border: 1px solid #DCE7F4;
+    border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: #F9FCFF;
+    background: var(--c-surface-sunken);
     padding: 16px 18px;
     max-height: 260px;
     overflow-y: auto;
-    color: #43556F;
+    color: var(--c-fg-muted);
 }
 
     .ats-step-final .ats-consent-document .mud-typography {
-        color: #43556F;
+        color: var(--c-fg-muted);
         line-height: 1.6;
     }
 
 .ats-step-final .ats-consent-subheading {
     margin-top: 14px;
-    color: #0F294B !important;
+    color: var(--c-navy-800) !important;
     font-weight: 700;
 }
 
@@ -1395,7 +1452,7 @@
 }
 
 .ats-custom-tabs {
-    border: 1px solid #BDBDBD !important;
+    border: 1px solid var(--c-fg-muted) !important;
     border-radius: 12px !important;
     gap: 12px;
     padding: 4px;
@@ -1421,17 +1478,17 @@
 }
 
 .ats-tab-active {
-    background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%) !important;
-    color: #fff !important;
+    background: var(--c-brand-bar-gradient) !important;
+    color: var(--c-on-dark-fg) !important;
     border-radius: 8px !important;
 }
 
     .ats-tab-active * {
-        color: #fff !important;
+        color: var(--c-on-dark-fg) !important;
     }
 
     .ats-tab-active svg {
-        fill: #fff !important;
+        fill: var(--c-on-dark-fg) !important;
     }
 
 .ats-tab-inactive {
@@ -1451,10 +1508,13 @@
     border-radius: 8px;
 }
 
+/* 100vw includes the classic scrollbar gutter, so it is wider than the layout
+   viewport and guaranteed a horizontal scrollbar; 100% is the correct full-width.
+   100dvh rather than 100vh so the mobile URL bar collapsing does not jump the page. */
 .ats-application-form {
     position: relative;
-    min-height: 100vh;
-    min-width: 100vw;
+    min-height: 100dvh;
+    min-width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1465,7 +1525,7 @@
 }
 
 .ats-result-dialog {
-    background: #fff;
+    background: var(--c-surface);
 }
 
     .ats-result-dialog .mud-dialog-content {
@@ -1475,26 +1535,26 @@
     }
 
 .ats-result-shell {
-    color: #1e2a3c;
+    color: var(--c-fg-strong);
     margin: 20px;
 }
 
 .ats-result-title {
     margin: 0;
-    color: #102247;
+    color: var(--c-navy-900);
     font-weight: 700;
 }
 
 .ats-result-subtitle {
     margin-top: 2px;
-    color: #6b7b92;
+    color: var(--c-fg-muted);
 }
 
 .ats-result-hero {
     border-radius: 16px;
     padding: 20px 24px;
-    background: linear-gradient(90deg,#102247 0%,#2a77ae 50%,#68c0d6 100%);
-    color: #fff;
+    background: var(--c-brand-bar-gradient);
+    color: var(--c-on-dark-fg);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1504,7 +1564,7 @@
 .ats-result-hero-name {
     margin: 0;
     font-weight: 700;
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-result-hero-subtitle {
@@ -1513,7 +1573,7 @@
 
 .ats-result-hero-status {
     background: rgba(255,255,255,.2);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     border-radius: 999px;
     padding: 6px 14px;
     font-size: 13px;
@@ -1529,7 +1589,7 @@
 
 .ats-result-section-title {
     margin: 0 0 16px;
-    color: #102247;
+    color: var(--c-navy-900);
     font-weight: 700;
 }
 
@@ -1538,18 +1598,18 @@
 }
 
 .ats-result-label {
-    color: #6b7b92;
+    color: var(--c-fg-muted);
 }
 
 .ats-result-value {
-    color: #1e2a3c;
+    color: var(--c-fg-strong);
     font-weight: 600;
 }
 
 .ats-result-upload-button {
     border-radius: 10px !important;
-    border-color: #d9e2ee !important;
-    color: #102247 !important;
+    border-color: var(--c-border-strong) !important;
+    color: var(--c-navy-900) !important;
     text-transform: none !important;
     font-size: 16px !important;
 }
@@ -1564,7 +1624,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    border-top: 1px solid #e8edf4;
+    border-top: 1px solid var(--c-border-strong);
 }
 
     .ats-result-doc-row:first-child {
@@ -1583,13 +1643,13 @@
 }
 
     .ats-result-doc-icon.uploaded {
-        background: #e7f5ec;
-        color: #1e8e5a;
+        background: var(--c-success-bg);
+        color: var(--c-success);
     }
 
     .ats-result-doc-icon.missing {
-        background: #f1f4f8;
-        color: #9aa8ba;
+        background: var(--c-surface-sunken);
+        color: var(--c-fg-muted);
     }
 
 .ats-result-doc-details {
@@ -1599,18 +1659,18 @@
 
 .ats-result-doc-title {
     font-weight: 700;
-    color: #1e2a3c;
+    color: var(--c-fg-strong);
 }
 
 .ats-result-doc-sub {
-    color: #6b7b92;
+    color: var(--c-fg-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .ats-result-doc-request {
-    color: #2a77ae;
+    color: var(--c-blue-500);
     font-weight: 700;
     margin-left: auto;
     cursor: pointer;
@@ -1679,6 +1739,7 @@
     overflow: hidden;
 }
 
+
 /* Application form preview: keep a single scroller. The generic .ats-scroll-dialog
    rules only catch .mud-dialog-content as a direct child; when MudBlazor nests the
    content one level deeper that div falls back to its default overflow:auto and a
@@ -1699,6 +1760,112 @@
     flex-direction: column;
     overflow: hidden !important;
 }
+
+/* ---------- Gradient dialog header ---------- */
+
+/* The navy gradient header PreviewComponent introduced and BulkUploadSubjectsDialog
+   copied. Generalized here when the audit trail dialog needed a third instance, rather
+   than letting three copies drift apart. A dialog opts in with
+   .ats-dialog-headline on the <header>, and uses the -icon/-text/-close children.
+   The existing feature-specific copies still carry their own selectors; they can be
+   folded onto these classes in a later behaviour-preserving pass. */
+.ats-dialog-headline {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 30px 20px;
+    color: var(--c-on-dark-fg);
+    background: var(--c-dialog-header-gradient);
+}
+
+    /* The faint dot texture that gives the header its depth. */
+    .ats-dialog-headline::before {
+        position: absolute;
+        inset: 0;
+        content: "";
+        opacity: .35;
+        background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1.5px);
+        background-size: 16px 16px;
+        -webkit-mask-image: linear-gradient(to bottom right, #000, transparent 70%);
+        mask-image: linear-gradient(to bottom right, #000, transparent 70%);
+    }
+
+.ats-dialog-headline-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.ats-dialog-headline-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 12px;
+    background: rgba(255,255,255,.14);
+    color: var(--c-on-dark-fg);
+}
+
+    .ats-dialog-headline-icon .mud-icon-root {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+    }
+
+.ats-dialog-headline-text {
+    min-width: 0;
+}
+
+    .ats-dialog-headline-text h2 {
+        margin: 0;
+        overflow: hidden;
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: .2px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Subtitle on the always-dark dialog header, so it takes the on-dark muted token.
+       A border/tint token here goes near-black in dark mode and disappears. */
+    .ats-dialog-headline-text p {
+        margin: 4px 0 0;
+        overflow: hidden;
+        color: var(--c-on-dark-fg-muted);
+        font-size: 12.5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+.ats-dialog-headline-close {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 9px;
+    background: rgba(255,255,255,.1);
+    color: var(--c-on-dark-fg);
+    cursor: pointer;
+}
+
+    .ats-dialog-headline-close:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+    .ats-dialog-headline-close:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, .35);
+        outline-offset: 2px;
+    }
 
 .mud-dialog.ats-chart-detail-dialog {
     animation-name: ats-chart-zoom-in;
@@ -1733,18 +1900,18 @@
 
 .ats-download-header {
     padding: 24px 28px 14px;
-    border-bottom: 1px solid #e6edf5;
+    border-bottom: 1px solid var(--c-blue-tint);
 }
 
 .ats-download-title {
-    color: #102247;
+    color: var(--c-navy-900);
     margin: 0;
     font-weight: 700;
 }
 
 .ats-download-subtitle {
     margin-top: 2px;
-    color: #6b7b92;
+    color: var(--c-fg-muted);
 }
 
 .ats-download-list {
@@ -1756,7 +1923,7 @@
     align-items: center;
     gap: 14px;
     padding: 14px 0;
-    border-bottom: 1px solid #e6edf5;
+    border-bottom: 1px solid var(--c-blue-tint);
 }
 
 .ats-download-item-last {
@@ -1781,19 +1948,19 @@
 }
 
     .ats-download-doc-icon.available {
-        background: #e4f3ed;
-        color: #8e80ac;
+        background: var(--c-success-bg);
+        color: var(--c-fg-subtle);
     }
 
     .ats-download-doc-icon.missing {
-        background: #eff3f8;
-        color: #c9d3df;
+        background: var(--c-surface-sunken);
+        color: var(--c-border-strong);
     }
 
 .ats-download-doc-name {
     flex: 1;
     min-width: 0;
-    color: #1e2a3c;
+    color: var(--c-fg-strong);
     font-size: 16px;
     font-weight: 600;
 }
@@ -1807,17 +1974,18 @@
 }
 
     .ats-download-pill.available {
-        background: #e7f5ec;
-        color: #1e8e5a;
+        background: var(--c-success-bg);
+        color: var(--c-success);
     }
 
     .ats-download-pill.missing {
-        background: #eef2f7;
-        color: #97a8bc;
+        background: var(--c-border-strong);
+        color: var(--c-fg-muted);
     }
 
 .ats-download-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 12px;
     padding: 18px 28px 24px;
@@ -1831,6 +1999,7 @@
     font-weight: 700 !important;
     padding: 10px 18px !important;
 }
+
 
 /* The tooltip wrapper carries the flex spacing, pushing Download right. */
 .ats-download-actions > .mud-tooltip-root {
@@ -1850,10 +2019,9 @@
 
 .ats-download-preview.mud-button-disabled {
     color: #9aa7bd !important;
-}
 
 .ats-download-submit.theme-button-inactive {
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
 }
 
 .ats-upload-report-shell {
@@ -1871,22 +2039,22 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    background: #fff;
+    background: var(--c-surface);
     border-radius: 20px 20px 0 0;
-    border: 1px solid #e3e9f1;
+    border: 1px solid var(--c-border-soft);
     border-bottom: 0;
     box-shadow: 0 8px 24px -18px rgba(11,31,58,.25);
 }
 
 .ats-upload-report-shell-title {
     margin: 0;
-    color: #102247;
+    color: var(--c-navy-900);
     font-weight: 700;
 }
 
 .ats-upload-report-shell-subtitle {
     margin-top: 2px;
-    color: #6b7b92;
+    color: var(--c-fg-muted);
 }
 
 .ats-upload-report-card {
@@ -1906,23 +2074,23 @@
 
 .ats-upload-report-title {
     margin: 0;
-    color: #102247;
+    color: var(--c-navy-900);
     font-weight: 700;
 }
 
 .ats-upload-report-subtitle {
     margin-top: 2px;
-    color: #6b7b92;
+    color: var(--c-fg-muted);
 }
 
 .ats-upload-report-close {
-    background: #eef3f9 !important;
+    background: var(--c-surface-sunken) !important;
     border-radius: 12px !important;
-    color: #7d91ab !important;
+    color: var(--c-fg-subtle) !important;
 }
 
 .ats-upload-dropzone {
-    border: 1.5px dashed #d8e4f2;
+    border: 1.5px dashed var(--c-border-strong);
     border-radius: 12px;
     padding: 24px 18px;
     text-align: center;
@@ -1930,22 +2098,22 @@
 }
 
 .ats-upload-dropzone-icon {
-    color: #2a77ae;
+    color: var(--c-blue-500);
 }
 
 .ats-upload-dropzone-title {
     margin-top: 4px;
-    color: #1e2a3c;
+    color: var(--c-fg-strong);
     font-size: 18px;
     font-weight: 700;
 }
 
 .ats-upload-dropzone-subtitle {
-    color: #6b7b92;
+    color: var(--c-fg-muted);
 }
 
 .ats-upload-selected-file {
-    border: 1px solid #dce6f2;
+    border: 1px solid var(--c-border-strong);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -1954,24 +2122,25 @@
 }
 
 .ats-upload-selected-file-icon {
-    color: #b4a6ce;
+    color: var(--c-fg-subtle);
 }
 
 .ats-upload-selected-file-name {
     flex: 1;
     min-width: 0;
-    color: #1e2a3c;
+    color: var(--c-fg-strong);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .ats-upload-selected-file-remove {
-    color: #7d91ab !important;
+    color: var(--c-fg-subtle) !important;
 }
 
 .ats-upload-report-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 12px;
 }
@@ -1984,8 +2153,8 @@
 }
 
 .ats-upload-report-back {
-    border-color: #d9e2ee !important;
-    color: #102247 !important;
+    border-color: var(--c-border-strong) !important;
+    color: var(--c-navy-900) !important;
 }
 
 @media (max-width: 960px) {
@@ -2026,24 +2195,31 @@
 }
 
 
+/* These --ats-* names are kept and re-pointed at the shared tokens rather than
+   renamed, because hundreds of var(--ats-*) call sites read them across this sheet
+   and the sidebar logo SVG in Layout/ATSLayout.razor. Re-pointing the values is what
+   makes the whole console follow the theme without touching those call sites.
+   NOTE: .ats-appform-modern (further down this file) declares --ats-navy-900,
+   --ats-blue-500 and --ats-border again with different values and shadows these
+   inside the application form. That was true before this change too. */
 .ats-console {
-    --ats-navy-900: #0B1F3A;
-    --ats-navy-700: #123A63;
-    --ats-blue-500: #2C7FB8;
-    --ats-sky-300: #7FC4E8;
-    --ats-bg: #F4F7FB;
-    --ats-card: #FFFFFF;
-    --ats-text-main: #1E2A3C;
-    --ats-text-sub: #6B7B92;
-    --ats-border: #E3E9F1;
-    --ats-error: #D8503A;
-    --ats-error-bg: #FCECE7;
-    --ats-success: #1E8E5A;
-    --ats-success-bg: #E7F5EC;
-    --ats-warn: #B7791B;
-    --ats-warn-bg: #FCF3DE;
+    --ats-navy-900: var(--c-navy-900);
+    --ats-navy-700: var(--c-navy-700);
+    --ats-blue-500: var(--c-blue-500);
+    --ats-sky-300: var(--c-logo-light);
+    --ats-bg: var(--c-page-bg);
+    --ats-card: var(--c-surface);
+    --ats-text-main: var(--c-fg-strong);
+    --ats-text-sub: var(--c-fg-muted);
+    --ats-border: var(--c-border-soft);
+    --ats-error: var(--c-danger);
+    --ats-error-bg: var(--c-danger-bg);
+    --ats-success: var(--c-success);
+    --ats-success-bg: var(--c-success-bg);
+    --ats-warn: var(--c-warn);
+    --ats-warn-bg: var(--c-warn-bg);
     display: flex;
-    min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
     margin: 0;
     background: var(--ats-bg);
@@ -2055,12 +2231,14 @@
     top: 0;
     align-self: flex-start;
     width: 232px;
-    height: 100vh;
-    max-height: 100vh;
+    /* dvh, not vh: on mobile browsers vh includes the collapsing URL bar, which made
+       the sidebar taller than the visible viewport. */
+    height: 100dvh;
+    max-height: 100dvh;
     flex-shrink: 0;
-    background: linear-gradient(100deg, #071230 0%, #0f2a5c 45%, #2f6fed 100%);
+    background: var(--c-sidebar-gradient);
     padding: 22px 14px;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -2102,7 +2280,7 @@
     padding: 0 0 15px;
     font-weight: 700;
     font-size: 15px;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     width: 100%;
 }
 
@@ -2148,7 +2326,7 @@
     font-weight: 700;
     font-size: 20px;
     letter-spacing: 0.1em;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     text-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
 
@@ -2189,12 +2367,12 @@ button.ats-console-brand-text {
 
     .ats-console-nav-item:hover {
         background: rgba(255,255,255,.08);
-        color: #fff;
+        color: var(--c-on-dark-fg);
     }
 
     .ats-console-nav-item.active {
         background: rgba(255,255,255,.14);
-        color: #fff;
+        color: var(--c-on-dark-fg);
     }
 
 .ats-console-nav-ic {
@@ -2282,7 +2460,7 @@ button.ats-console-brand-text {
     height: 34px;
     border-radius: 9px;
     border: 1px solid var(--ats-border);
-    background: #fff;
+    background: var(--c-surface);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2295,8 +2473,8 @@ button.ats-console-brand-text {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg,var(--ats-navy-900),var(--ats-sky-300));
-    color: #fff;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2351,18 +2529,18 @@ button.ats-console-brand-text {
 
 .ats-console-notice {
     background: var(--ats-warn-bg);
-    border: 1px solid #EFD9A0;
+    border: 1px solid var(--c-warn-bg);
     border-radius: 10px;
     padding: 14px 18px;
     font-size: 12.5px;
-    color: #8A6A1D;
+    color: var(--c-warn);
     line-height: 1.6;
 }
 
     .ats-console-notice strong {
         display: block;
         margin-bottom: 4px;
-        color: #7A5A0D;
+        color: var(--c-warn);
     }
 
 .ats-console .mud-paper {
@@ -2379,7 +2557,7 @@ button.ats-console-brand-text {
     border-radius: 14px;
     border: 1px solid var(--ats-border);
     box-shadow: 0 8px 24px -18px rgba(11,31,58,.15);
-    background: #fff;
+    background: var(--c-surface);
 }
 
     .ats-console .responsive-table-container > .mud-table > .mud-table-pagination {
@@ -2387,7 +2565,7 @@ button.ats-console-brand-text {
         z-index: 1;
         margin: 0 !important;
         padding: 0 4px !important;
-        background: #fff;
+        background: var(--c-surface);
     }
 
         .ats-console .responsive-table-container > .mud-table > .mud-table-pagination .mud-table-pagination-toolbar {
@@ -2398,7 +2576,7 @@ button.ats-console-brand-text {
         }
 
 .ats-console .mud-table {
-    background: #fff;
+    background: var(--c-surface);
 }
 
     .ats-console .mud-table th {
@@ -2449,7 +2627,7 @@ button.ats-console-brand-text {
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        background: #F0F5FB;
+        background: var(--c-surface-sunken);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -2477,7 +2655,7 @@ button.ats-console-brand-text {
 
 .ats-segmented {
     display: inline-flex;
-    background: #EEF3F9;
+    background: var(--c-surface-sunken);
     border-radius: 10px;
     padding: 4px;
     margin-bottom: 20px;
@@ -2495,7 +2673,7 @@ button.ats-console-brand-text {
 }
 
     .ats-segment-btn.active {
-        background: #fff;
+        background: var(--c-surface);
         color: var(--ats-navy-900);
         box-shadow: 0 2px 6px rgba(11,31,58,.08);
     }
@@ -2516,7 +2694,7 @@ button.ats-console-brand-text {
 
     .ats-speed-card.selected {
         border-color: var(--ats-blue-500);
-        background: #F3F9FD;
+        background: var(--c-surface-sunken);
     }
 
 .ats-speed-top {
@@ -2540,7 +2718,7 @@ button.ats-console-brand-text {
 }
 
 .ats-speed-tag-standard {
-    background: #EAF1F8;
+    background: var(--c-surface-sunken);
     color: var(--ats-blue-500);
 }
 
@@ -2572,7 +2750,7 @@ button.ats-console-brand-text {
 
     .ats-upload-box:hover {
         border-color: var(--ats-blue-500);
-        background: #F7FAFD;
+        background: var(--c-surface-sunken);
     }
 
 .ats-upload-icon {
@@ -2629,34 +2807,34 @@ button.ats-console-brand-text {
 }
 
 .ats-status-success {
-    background: #E7F5EC;
-    color: #1E8E5A;
+    background: var(--c-success-bg);
+    color: var(--c-success);
 }
 
 .ats-status-warning {
-    background: #FCF3DE;
-    color: #B7791B;
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
 }
 
 .ats-status-pending {
-    background: #EAF1F8;
-    color: #2C7FB8;
+    background: var(--c-surface-sunken);
+    color: var(--c-blue-500);
 }
 
 .ats-status-error {
-    background: #FCECE7;
-    color: #D8503A;
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
 }
 
 .ats-status-neutral {
-    background: #EFF3F8;
-    color: #6B7B92;
+    background: var(--c-surface-sunken);
+    color: var(--c-fg-muted);
 }
 
 .ats-no-records-center {
     width: 100%;
     text-align: center;
-    color: #6B7B92;
+    color: var(--c-fg-muted);
     padding: 10px 0;
 }
 
@@ -2682,7 +2860,7 @@ button.ats-console-brand-text {
 
 .ats-appform-modern {
     background: var(--modern-bg);
-    min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -2704,7 +2882,7 @@ button.ats-console-brand-text {
 }
 
     .ats-appform-stepper .mud-step-label {
-        color: #6B7B92;
+        color: var(--c-fg-muted);
         font-weight: 600;
         display: inline-flex !important;
         flex-direction: column !important;
@@ -2726,23 +2904,23 @@ button.ats-console-brand-text {
         width: 34px !important;
         height: 34px !important;
         font-size: 13px !important;
-        border: 1px solid #DCE7F4;
-        background: #EAF1F8 !important;
-        color: #51627D !important;
+        border: 1px solid var(--c-border);
+        background: var(--c-surface-sunken) !important;
+        color: var(--c-fg-muted) !important;
         margin: 0 auto;
     }
 
         .ats-appform-stepper .mud-step.active .mud-step-label-icon,
         .ats-appform-stepper .mud-step-label-icon.mud-default {
-            background: linear-gradient(135deg, #102247 0%, #2A77AE 55%, #68C0D6 100%) border-box !important;
+            background: var(--c-brand-bar-gradient) border-box !important;
             border-color: transparent !important;
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
         .ats-appform-stepper :is(.mud-step-completed, .mud-completed) .mud-step-label-icon,
         .ats-appform-stepper .mud-step-label-icon.mud-completed {
-            background: #1F9D57 !important;
-            border-color: #1F9D57 !important;
+            background: var(--c-success) !important;
+            border-color: var(--c-success) !important;
             color: transparent !important;
             font-size: 0 !important;
             position: relative;
@@ -2756,18 +2934,18 @@ button.ats-console-brand-text {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #fff;
+                color: var(--c-on-dark-fg);
                 font-size: 22px;
                 font-weight: 700;
                 line-height: 1;
             }
 
     .ats-appform-stepper :is(.mud-step-completed, .mud-completed) :is(.mud-step-label, .mud-step-label-text, .mud-step-title, .mud-step-label-name) {
-        color: #1F9D57 !important;
+        color: var(--c-success) !important;
     }
 
     .ats-appform-stepper .mud-stepper-content {
-        background: #fff;
+        background: var(--c-surface);
         margin-top: 12px;
         box-sizing: border-box;
     }
@@ -2790,7 +2968,7 @@ button.ats-console-brand-text {
         }
 
 .ats-appform-form .mud-input-outlined .mud-input-outlined-border {
-    border-color: #DCE7F4 !important;
+    border-color: var(--c-border) !important;
 }
 
 .ats-appform-form .oneplatform-rounded-input .mud-input-outlined,
@@ -2811,18 +2989,18 @@ button.ats-console-brand-text {
 }
 
 .ats-appform-section-title {
-    color: #0B1F3A;
+    color: var(--c-navy-900);
 }
 
 .ats-idv-hero-title {
-    color: #0B1F3A;
+    color: var(--c-navy-900);
     font-size: 46px;
     line-height: 1.1;
 }
 
 .ats-consent-card {
-    background: #EDF5FD !important;
-    border: 1px solid #CFE0F4;
+    background: var(--c-blue-tint) !important;
+    border: 1px solid var(--c-border-strong);
     border-radius: 16px !important;
 }
 
@@ -2859,7 +3037,7 @@ button.ats-console-brand-text {
 }
 
 .ats-step-one .ats-step-one-title {
-    color: #04224D;
+    color: var(--c-navy-800);
     font-weight: 700;
     font-size: 36px;
     line-height: 1.28;
@@ -2876,21 +3054,21 @@ button.ats-console-brand-text {
 .ats-step-one .ats-step-one-notice {
     width: 100%;
     max-width: 560px;
-    background: #E8F2FF;
-    border: 1px solid #C4DCF9;
+    background: var(--c-blue-tint);
+    border: 1px solid var(--c-border-strong);
     border-radius: 18px;
     padding: 22px 20px;
 }
 
 .ats-step-one .ats-step-one-notice-title {
-    color: #04224D;
+    color: var(--c-navy-800);
     font-weight: 700;
     font-size: 18px;
     margin-bottom: 10px;
 }
 
 .ats-step-one .ats-step-one-notice-text {
-    color: #2C3F57;
+    color: var(--c-fg-muted);
     font-size: 16px;
     line-height: 1.55;
     margin-bottom: 22px;
@@ -2915,9 +3093,9 @@ button.ats-console-brand-text {
     position: relative;
     margin: 0 !important;
     width: 100%;
-    border: 1px solid #C9D9EC;
+    border: 1px solid var(--c-border-strong);
     border-radius: 14px;
-    background: #fff;
+    background: var(--c-surface);
     padding: 16px 18px;
     min-height: 74px;
     display: flex;
@@ -2942,8 +3120,8 @@ button.ats-console-brand-text {
     .ats-step-one .ats-step-one-choice-card.selected,
     .ats-step-one .ats-step-one-choice-card.mud-checked,
     .ats-step-one .ats-step-one-choice-card.mud-radio-checked {
-        border-color: #7FB2E6;
-        background: #F1F7FF;
+        border-color: var(--c-blue-500);
+        background: var(--c-surface-sunken);
     }
 
     .ats-step-one .ats-step-one-choice-card .mud-radio {
@@ -2960,18 +3138,18 @@ button.ats-console-brand-text {
     }
 
     .ats-step-one .ats-step-one-choice-card .mud-radio-icon {
-        color: #6E86A6;
+        color: var(--c-fg-subtle);
         margin-right: 12px;
     }
 
     .ats-step-one .ats-step-one-choice-card.selected .mud-radio-icon,
     .ats-step-one .ats-step-one-choice-card.mud-checked .mud-radio-icon,
     .ats-step-one .ats-step-one-choice-card.mud-radio-checked .mud-radio-icon {
-        color: #2C7FB8;
+        color: var(--c-blue-500);
     }
 
     .ats-step-one .ats-step-one-choice-card .mud-typography {
-        color: #1E2A3C;
+        color: var(--c-fg-strong);
         font-size: 17px;
         line-height: 1.4;
     }
@@ -2999,9 +3177,9 @@ button.ats-console-brand-text {
     border-radius: 14px !important;
     min-height: 42px;
     text-transform: none;
-    border: 1px solid #C9D9EC !important;
-    background: #fff !important;
-    color: #355273 !important;
+    border: 1px solid var(--c-border-strong) !important;
+    background: var(--c-surface) !important;
+    color: var(--c-fg-muted) !important;
     box-shadow: none !important;
 }
 
@@ -3048,8 +3226,8 @@ button.ats-console-brand-text {
 
 .ats-step-two-upload-card {
     height: 100%;
-    background: #EEF7FF !important;
-    border: 1px solid #D5E5F4;
+    background: var(--c-blue-tint) !important;
+    border: 1px solid var(--c-border-strong);
     border-radius: 28px !important;
     padding: 36px 28px 28px;
     box-shadow: none !important;
@@ -3066,9 +3244,9 @@ button.ats-console-brand-text {
     width: 208px;
     height: 208px;
     border-radius: 50%;
-    background: #D4E0ED;
-    border: 4px solid #fff;
-    box-shadow: 0 0 0 1px #D3E2F2;
+    background: var(--c-border-strong);
+    border: 4px solid var(--c-surface);
+    box-shadow: 0 0 0 1px var(--c-border-strong);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3098,13 +3276,13 @@ button.ats-console-brand-text {
 }
 
     .ats-step-two-status.verified {
-        background: #E8F5E9;
-        color: #2E7D32;
+        background: var(--c-success);
+        color: var(--c-success);
     }
 
     .ats-step-two-status.not-verified {
-        background: #FDECEA;
-        color: #E75A3C;
+        background: var(--c-danger-bg);
+        color: var(--c-danger);
     }
 
 .ats-step-two-upload-list {
@@ -3121,10 +3299,10 @@ button.ats-console-brand-text {
 .ats-step-two-upload-btn {
     width: 100%;
     min-height: 62px;
-    border: 1px solid #D6E2EF !important;
+    border: 1px solid var(--c-border-strong) !important;
     border-radius: 16px !important;
     background: transparent !important;
-    color: #3B4A61 !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
     box-shadow: none !important;
     padding: 12px 20px !important;
@@ -3171,12 +3349,12 @@ button.ats-console-brand-text {
 }
 
 .ats-step-three .ats-appform-section-title {
-    color: #2C7FB8;
+    color: var(--c-blue-500);
 }
 
 .ats-step-three .small-checkbox-label .mud-typography,
 .ats-step-three .mud-typography-subtitle1 {
-    color: #1E2A3C;
+    color: var(--c-fg-strong);
 }
 
 .ats-ownership-pills {
@@ -3187,8 +3365,8 @@ button.ats-console-brand-text {
 
 .ats-step-three .ats-ownership-pill {
     margin: 0 !important;
-    border: 1px solid #DCE7F4;
-    background: #fff;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
     border-radius: 999px;
     min-height: 36px;
     padding: 0 14px;
@@ -3215,7 +3393,7 @@ button.ats-console-brand-text {
         margin: 0 !important;
         font-size: 12px;
         font-weight: 600;
-        color: #41536E;
+        color: var(--c-fg-muted);
         line-height: 1;
         text-align: center;
         width: 100%;
@@ -3224,8 +3402,8 @@ button.ats-console-brand-text {
     .ats-step-three .ats-ownership-pill.selected,
     .ats-step-three .ats-ownership-pill.mud-checked,
     .ats-step-three .ats-ownership-pill.mud-radio-checked {
-        background: linear-gradient(100deg,#102247,#2C7FB8);
-        border-color: #234C80;
+        background: var(--c-primary-gradient);
+        border-color: var(--c-navy-800);
     }
 
         .ats-step-three .ats-ownership-pill.selected .mud-radio-label,
@@ -3237,25 +3415,25 @@ button.ats-console-brand-text {
         .ats-step-three .ats-ownership-pill.mud-radio-checked .mud-radio-label,
         .ats-step-three .ats-ownership-pill.mud-radio-checked .mud-radio-content,
         .ats-step-three .ats-ownership-pill.mud-radio-checked .mud-typography {
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
 .ats-upload-outline-btn {
-    border: 1px solid #DCE7F4 !important;
-    background: #fff !important;
-    color: #233A5A !important;
+    border: 1px solid var(--c-border) !important;
+    background: var(--c-surface) !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
 }
 
     .ats-upload-outline-btn:hover {
-        background: #F7FAFE !important;
+        background: var(--c-surface-sunken) !important;
     }
 
 .ats-step-four .ats-license-segment {
     display: inline-flex;
-    border: 1px solid #D7E3F3;
+    border: 1px solid var(--c-border-strong);
     border-radius: 12px;
-    background: #EEF3F9;
+    background: var(--c-surface-sunken);
     padding: 4px;
     gap: 4px;
 }
@@ -3265,14 +3443,14 @@ button.ats-console-brand-text {
     border-radius: 9px;
     text-transform: none !important;
     background: transparent;
-    color: #51627D;
+    color: var(--c-fg-muted);
     font-weight: 600;
     box-shadow: none !important;
 }
 
     .ats-step-four .ats-license-segment-btn.active {
-        background: #fff;
-        color: #0B1F3A;
+        background: var(--c-surface);
+        color: var(--c-navy-900);
         box-shadow: 0 2px 8px rgba(11,31,58,.12) !important;
     }
 
@@ -3285,14 +3463,14 @@ button.ats-console-brand-text {
 .ats-step-four .ats-add-employer-card {
     width: 100%;
     margin: 0;
-    border: 1px dashed #C9DAEF;
+    border: 1px dashed var(--c-border-strong);
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     min-height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #2C7FB8;
+    color: var(--c-blue-500);
     font-weight: 600;
 }
 
@@ -3309,44 +3487,44 @@ button.ats-console-brand-text {
     }
 
     .ats-step-four .ats-add-employer-card .mud-typography {
-        color: #2C7FB8;
+        color: var(--c-blue-500);
         font-weight: 600;
     }
 
     .ats-step-four .ats-add-employer-card:hover {
-        background: #F7FAFE;
+        background: var(--c-surface-sunken);
     }
 
 .ats-step-four .ats-remove-employer-btn {
-    color: #6F819B !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
     font-weight: 600;
     min-height: 28px;
 }
 
 .ats-step-four .ats-employer-card {
-    border: 1px solid #DCE7F4;
+    border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--c-surface);
     padding: 14px;
 }
 
 .ats-step-four .ats-employer-card-title {
-    color: #0F294B;
+    color: var(--c-navy-800);
     font-weight: 700;
 }
 
 
 .ats-step-five .ats-reference-block {
-    border: 1px solid #DCE7F4;
+    border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--c-surface);
     padding: 14px;
     margin-bottom: 12px;
 }
 
 .ats-step-five .ats-reference-title {
-    color: #0F294B;
+    color: var(--c-navy-800);
     font-weight: 700;
 }
 
@@ -3359,7 +3537,7 @@ button.ats-console-brand-text {
 .ats-step-five .ats-reference-option-label {
     font-size: 13px;
     font-weight: 700;
-    color: #0F294B;
+    color: var(--c-navy-800);
     margin-top: 4px;
 }
 
@@ -3371,8 +3549,8 @@ button.ats-console-brand-text {
 
 .ats-step-five .ats-reference-pill {
     margin: 0 !important;
-    border: 1px solid #DCE7F4;
-    background: #fff;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
     border-radius: 999px;
     min-height: 36px;
     padding: 0 14px;
@@ -3399,7 +3577,7 @@ button.ats-console-brand-text {
         margin: 0 !important;
         font-size: 12px;
         font-weight: 600;
-        color: #41536E;
+        color: var(--c-fg-muted);
         line-height: 1;
         text-align: center;
         width: 100%;
@@ -3408,8 +3586,8 @@ button.ats-console-brand-text {
     .ats-step-five .ats-reference-pill.selected,
     .ats-step-five .ats-reference-pill.mud-checked,
     .ats-step-five .ats-reference-pill.mud-radio-checked {
-        background: linear-gradient(100deg,#102247,#2C7FB8);
-        border-color: #234C80;
+        background: var(--c-primary-gradient);
+        border-color: var(--c-navy-800);
     }
 
         .ats-step-five .ats-reference-pill.selected .mud-radio-label,
@@ -3421,7 +3599,7 @@ button.ats-console-brand-text {
         .ats-step-five .ats-reference-pill.mud-radio-checked .mud-radio-label,
         .ats-step-five .ats-reference-pill.mud-radio-checked .mud-radio-content,
         .ats-step-five .ats-reference-pill.mud-radio-checked .mud-typography {
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
 .ats-dispute-dialog-content {
@@ -3446,8 +3624,8 @@ button.ats-console-brand-text {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    border: 1px solid #DCE7F4;
-    background: #F8FBFF;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface-sunken);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3462,13 +3640,13 @@ button.ats-console-brand-text {
 }
 
 .ats-dispute-title {
-    color: #0B1F3A;
+    color: var(--c-navy-900);
     font-weight: 700;
     text-align: center;
 }
 
 .ats-dispute-category-label {
-    color: #51627D;
+    color: var(--c-fg-muted);
     font-weight: 600;
     margin-bottom: 8px;
 }
@@ -3481,8 +3659,8 @@ button.ats-console-brand-text {
 
 .ats-dispute-dialog .ats-reference-pill {
     margin: 0 !important;
-    border: 1px solid #DCE7F4;
-    background: #fff;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
     border-radius: 999px;
     min-height: 36px;
     padding: 0 14px;
@@ -3509,7 +3687,7 @@ button.ats-console-brand-text {
         margin: 0 !important;
         font-size: 12px;
         font-weight: 600;
-        color: #41536E;
+        color: var(--c-fg-muted);
         line-height: 1;
         text-align: center;
         width: 100%;
@@ -3518,8 +3696,8 @@ button.ats-console-brand-text {
     .ats-dispute-dialog .ats-reference-pill.selected,
     .ats-dispute-dialog .ats-reference-pill.mud-checked,
     .ats-dispute-dialog .ats-reference-pill.mud-radio-checked {
-        background: #123A63;
-        border-color: #123A63;
+        background: var(--c-navy-800);
+        border-color: var(--c-navy-800);
     }
 
         .ats-dispute-dialog .ats-reference-pill.selected .mud-radio-label,
@@ -3531,13 +3709,13 @@ button.ats-console-brand-text {
         .ats-dispute-dialog .ats-reference-pill.mud-radio-checked .mud-radio-label,
         .ats-dispute-dialog .ats-reference-pill.mud-radio-checked .mud-radio-content,
         .ats-dispute-dialog .ats-reference-pill.mud-radio-checked .mud-typography {
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
 .ats-dispute-cancel-btn {
-    background: #fff !important;
-    color: #41536E !important;
-    border: 1px solid #DCE7F4 !important;
+    background: var(--c-surface) !important;
+    color: var(--c-fg-muted) !important;
+    border: 1px solid var(--c-border) !important;
     box-shadow: none !important;
 }
 
@@ -3568,14 +3746,14 @@ button.ats-console-brand-text {
 .ats-step-five .ats-add-reference-card {
     width: 100%;
     margin: 0;
-    border: 1px dashed #C9DAEF;
+    border: 1px dashed var(--c-border-strong);
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     min-height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #2C7FB8;
+    color: var(--c-blue-500);
     font-weight: 600;
 }
 
@@ -3592,16 +3770,16 @@ button.ats-console-brand-text {
     }
 
     .ats-step-five .ats-add-reference-card .mud-typography {
-        color: #2C7FB8;
+        color: var(--c-blue-500);
         font-weight: 600;
     }
 
     .ats-step-five .ats-add-reference-card:hover {
-        background: #F7FAFE;
+        background: var(--c-surface-sunken);
     }
 
 .ats-step-five .ats-remove-reference-btn {
-    color: #6F819B !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
     font-weight: 600;
     min-height: 28px;
@@ -3621,7 +3799,7 @@ button.ats-console-brand-text {
 }
 
 .ats-speed-tag-standard {
-    background: #EAF1F8;
+    background: var(--c-surface-sunken);
     color: var(--ats-blue-500);
 }
 
@@ -3653,7 +3831,7 @@ button.ats-console-brand-text {
 
     .ats-upload-box:hover {
         border-color: var(--ats-blue-500);
-        background: #F7FAFD;
+        background: var(--c-surface-sunken);
     }
 
 .ats-upload-icon {
@@ -3710,34 +3888,34 @@ button.ats-console-brand-text {
 }
 
 .ats-status-success {
-    background: #E7F5EC;
-    color: #1E8E5A;
+    background: var(--c-success-bg);
+    color: var(--c-success);
 }
 
 .ats-status-warning {
-    background: #FCF3DE;
-    color: #B7791B;
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
 }
 
 .ats-status-pending {
-    background: #EAF1F8;
-    color: #2C7FB8;
+    background: var(--c-surface-sunken);
+    color: var(--c-blue-500);
 }
 
 .ats-status-error {
-    background: #FCECE7;
-    color: #D8503A;
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
 }
 
 .ats-status-neutral {
-    background: #EFF3F8;
-    color: #6B7B92;
+    background: var(--c-surface-sunken);
+    color: var(--c-fg-muted);
 }
 
 .ats-no-records-center {
     width: 100%;
     text-align: center;
-    color: #6B7B92;
+    color: var(--c-fg-muted);
     padding: 10px 0;
 }
 
@@ -3761,19 +3939,21 @@ button.ats-console-brand-text {
         background: rgba(255, 255, 255, 0.08);
     }
 
+/* Re-pointed at the shared tokens; the same six names are declared identically in
+   philsys.css for the same selector list. */
 .ats-appform-modern,
 .philsys-modern {
-    --modern-bg: #F4F7FB;
-    --modern-card: #FFFFFF;
-    --modern-border: #E3E9F1;
-    --modern-title: #0B1F3A;
-    --modern-sub: #6B7B92;
-    --modern-blue: #2C7FB8;
+    --modern-bg: var(--c-page-bg);
+    --modern-card: var(--c-surface);
+    --modern-border: var(--c-border-soft);
+    --modern-title: var(--c-fg-strong);
+    --modern-sub: var(--c-fg-muted);
+    --modern-blue: var(--c-blue-500);
 }
 
 .ats-appform-modern {
     background: var(--modern-bg);
-    min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -3795,7 +3975,7 @@ button.ats-console-brand-text {
 }
 
     .ats-appform-stepper .mud-step-label {
-        color: #6B7B92;
+        color: var(--c-fg-muted);
         font-weight: 600;
         display: inline-flex !important;
         flex-direction: column !important;
@@ -3817,23 +3997,23 @@ button.ats-console-brand-text {
         width: 34px !important;
         height: 34px !important;
         font-size: 13px !important;
-        border: 1px solid #DCE7F4;
-        background: #EAF1F8 !important;
-        color: #51627D !important;
+        border: 1px solid var(--c-border);
+        background: var(--c-surface-sunken) !important;
+        color: var(--c-fg-muted) !important;
         margin: 0 auto;
     }
 
         .ats-appform-stepper .mud-step.active .mud-step-label-icon,
         .ats-appform-stepper .mud-step-label-icon.mud-default {
-            background: linear-gradient(135deg, #102247 0%, #2A77AE 55%, #68C0D6 100%) border-box !important;
+            background: var(--c-brand-bar-gradient) border-box !important;
             border-color: transparent !important;
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
         .ats-appform-stepper :is(.mud-step-completed, .mud-completed) .mud-step-label-icon,
         .ats-appform-stepper .mud-step-label-icon.mud-completed {
-            background: #1F9D57 !important;
-            border-color: #1F9D57 !important;
+            background: var(--c-success) !important;
+            border-color: var(--c-success) !important;
             color: transparent !important;
             font-size: 0 !important;
             position: relative;
@@ -3847,18 +4027,18 @@ button.ats-console-brand-text {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #fff;
+                color: var(--c-on-dark-fg);
                 font-size: 22px;
                 font-weight: 700;
                 line-height: 1;
             }
 
     .ats-appform-stepper :is(.mud-step-completed, .mud-completed) :is(.mud-step-label, .mud-step-label-text, .mud-step-title, .mud-step-label-name) {
-        color: #1F9D57 !important;
+        color: var(--c-success) !important;
     }
 
     .ats-appform-stepper .mud-stepper-content {
-        background: #fff;
+        background: var(--c-surface);
         margin-top: 12px;
         box-sizing: border-box;
     }
@@ -3881,7 +4061,7 @@ button.ats-console-brand-text {
         }
 
 .ats-appform-form .mud-input-outlined .mud-input-outlined-border {
-    border-color: #DCE7F4 !important;
+    border-color: var(--c-border) !important;
 }
 
 .ats-appform-form .oneplatform-rounded-input .mud-input-outlined,
@@ -3902,18 +4082,18 @@ button.ats-console-brand-text {
 }
 
 .ats-appform-section-title {
-    color: #0B1F3A;
+    color: var(--c-navy-900);
 }
 
 .ats-idv-hero-title {
-    color: #0B1F3A;
+    color: var(--c-navy-900);
     font-size: 46px;
     line-height: 1.1;
 }
 
 .ats-consent-card {
-    background: #EDF5FD !important;
-    border: 1px solid #CFE0F4;
+    background: var(--c-blue-tint) !important;
+    border: 1px solid var(--c-border-strong);
     border-radius: 16px !important;
 }
 
@@ -3950,7 +4130,7 @@ button.ats-console-brand-text {
 }
 
 .ats-step-one .ats-step-one-title {
-    color: #04224D;
+    color: var(--c-navy-800);
     font-weight: 700;
     font-size: 36px;
     line-height: 1.28;
@@ -3967,21 +4147,21 @@ button.ats-console-brand-text {
 .ats-step-one .ats-step-one-notice {
     width: 100%;
     max-width: 560px;
-    background: #E8F2FF;
-    border: 1px solid #C4DCF9;
+    background: var(--c-blue-tint);
+    border: 1px solid var(--c-border-strong);
     border-radius: 18px;
     padding: 22px 20px;
 }
 
 .ats-step-one .ats-step-one-notice-title {
-    color: #04224D;
+    color: var(--c-navy-800);
     font-weight: 700;
     font-size: 18px;
     margin-bottom: 10px;
 }
 
 .ats-step-one .ats-step-one-notice-text {
-    color: #2C3F57;
+    color: var(--c-fg-muted);
     font-size: 16px;
     line-height: 1.55;
     margin-bottom: 22px;
@@ -4006,9 +4186,9 @@ button.ats-console-brand-text {
     position: relative;
     margin: 0 !important;
     width: 100%;
-    border: 1px solid #C9D9EC;
+    border: 1px solid var(--c-border-strong);
     border-radius: 14px;
-    background: #fff;
+    background: var(--c-surface);
     padding: 16px 18px;
     min-height: 74px;
     display: flex;
@@ -4033,8 +4213,8 @@ button.ats-console-brand-text {
     .ats-step-one .ats-step-one-choice-card.selected,
     .ats-step-one .ats-step-one-choice-card.mud-checked,
     .ats-step-one .ats-step-one-choice-card.mud-radio-checked {
-        border-color: #7FB2E6;
-        background: #F1F7FF;
+        border-color: var(--c-blue-500);
+        background: var(--c-surface-sunken);
     }
 
     .ats-step-one .ats-step-one-choice-card .mud-radio {
@@ -4051,18 +4231,18 @@ button.ats-console-brand-text {
     }
 
     .ats-step-one .ats-step-one-choice-card .mud-radio-icon {
-        color: #6E86A6;
+        color: var(--c-fg-subtle);
         margin-right: 12px;
     }
 
     .ats-step-one .ats-step-one-choice-card.selected .mud-radio-icon,
     .ats-step-one .ats-step-one-choice-card.mud-checked .mud-radio-icon,
     .ats-step-one .ats-step-one-choice-card.mud-radio-checked .mud-radio-icon {
-        color: #2C7FB8;
+        color: var(--c-blue-500);
     }
 
     .ats-step-one .ats-step-one-choice-card .mud-typography {
-        color: #1E2A3C;
+        color: var(--c-fg-strong);
         font-size: 17px;
         line-height: 1.4;
     }
@@ -4090,9 +4270,9 @@ button.ats-console-brand-text {
     border-radius: 14px !important;
     min-height: 42px;
     text-transform: none;
-    border: 1px solid #C9D9EC !important;
-    background: #fff !important;
-    color: #355273 !important;
+    border: 1px solid var(--c-border-strong) !important;
+    background: var(--c-surface) !important;
+    color: var(--c-fg-muted) !important;
     box-shadow: none !important;
 }
 
@@ -4139,8 +4319,8 @@ button.ats-console-brand-text {
 
 .ats-step-two-upload-card {
     height: 100%;
-    background: #EEF7FF !important;
-    border: 1px solid #D5E5F4;
+    background: var(--c-blue-tint) !important;
+    border: 1px solid var(--c-border-strong);
     border-radius: 28px !important;
     padding: 36px 28px 28px;
     box-shadow: none !important;
@@ -4157,9 +4337,9 @@ button.ats-console-brand-text {
     width: 208px;
     height: 208px;
     border-radius: 50%;
-    background: #D4E0ED;
-    border: 4px solid #fff;
-    box-shadow: 0 0 0 1px #D3E2F2;
+    background: var(--c-border-strong);
+    border: 4px solid var(--c-surface);
+    box-shadow: 0 0 0 1px var(--c-border-strong);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4189,13 +4369,13 @@ button.ats-console-brand-text {
 }
 
     .ats-step-two-status.verified {
-        background: #E8F5E9;
-        color: #2E7D32;
+        background: var(--c-success);
+        color: var(--c-success);
     }
 
     .ats-step-two-status.not-verified {
-        background: #FDECEA;
-        color: #E75A3C;
+        background: var(--c-danger-bg);
+        color: var(--c-danger);
     }
 
 .ats-step-two-upload-list {
@@ -4212,10 +4392,10 @@ button.ats-console-brand-text {
 .ats-step-two-upload-btn {
     width: 100%;
     min-height: 62px;
-    border: 1px solid #D6E2EF !important;
+    border: 1px solid var(--c-border-strong) !important;
     border-radius: 16px !important;
     background: transparent !important;
-    color: #3B4A61 !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
     box-shadow: none !important;
     padding: 12px 20px !important;
@@ -4262,12 +4442,12 @@ button.ats-console-brand-text {
 }
 
 .ats-step-three .ats-appform-section-title {
-    color: #2C7FB8;
+    color: var(--c-blue-500);
 }
 
 .ats-step-three .small-checkbox-label .mud-typography,
 .ats-step-three .mud-typography-subtitle1 {
-    color: #1E2A3C;
+    color: var(--c-fg-strong);
 }
 
 .ats-ownership-pills {
@@ -4278,8 +4458,8 @@ button.ats-console-brand-text {
 
 .ats-step-three .ats-ownership-pill {
     margin: 0 !important;
-    border: 1px solid #DCE7F4;
-    background: #fff;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
     border-radius: 999px;
     min-height: 36px;
     padding: 0 14px;
@@ -4306,7 +4486,7 @@ button.ats-console-brand-text {
         margin: 0 !important;
         font-size: 12px;
         font-weight: 600;
-        color: #41536E;
+        color: var(--c-fg-muted);
         line-height: 1;
         text-align: center;
         width: 100%;
@@ -4315,8 +4495,8 @@ button.ats-console-brand-text {
     .ats-step-three .ats-ownership-pill.selected,
     .ats-step-three .ats-ownership-pill.mud-checked,
     .ats-step-three .ats-ownership-pill.mud-radio-checked {
-        background: linear-gradient(100deg,#102247,#2C7FB8);
-        border-color: #234C80;
+        background: var(--c-primary-gradient);
+        border-color: var(--c-navy-800);
     }
 
         .ats-step-three .ats-ownership-pill.selected .mud-radio-label,
@@ -4328,25 +4508,25 @@ button.ats-console-brand-text {
         .ats-step-three .ats-ownership-pill.mud-radio-checked .mud-radio-label,
         .ats-step-three .ats-ownership-pill.mud-radio-checked .mud-radio-content,
         .ats-step-three .ats-ownership-pill.mud-radio-checked .mud-typography {
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
 .ats-upload-outline-btn {
-    border: 1px solid #DCE7F4 !important;
-    background: #fff !important;
-    color: #233A5A !important;
+    border: 1px solid var(--c-border) !important;
+    background: var(--c-surface) !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
 }
 
     .ats-upload-outline-btn:hover {
-        background: #F7FAFE !important;
+        background: var(--c-surface-sunken) !important;
     }
 
 .ats-step-four .ats-license-segment {
     display: inline-flex;
-    border: 1px solid #D7E3F3;
+    border: 1px solid var(--c-border-strong);
     border-radius: 12px;
-    background: #EEF3F9;
+    background: var(--c-surface-sunken);
     padding: 4px;
     gap: 4px;
 }
@@ -4356,14 +4536,14 @@ button.ats-console-brand-text {
     border-radius: 9px;
     text-transform: none !important;
     background: transparent;
-    color: #51627D;
+    color: var(--c-fg-muted);
     font-weight: 600;
     box-shadow: none !important;
 }
 
     .ats-step-four .ats-license-segment-btn.active {
-        background: #fff;
-        color: #0B1F3A;
+        background: var(--c-surface);
+        color: var(--c-navy-900);
         box-shadow: 0 2px 8px rgba(11,31,58,.12) !important;
     }
 
@@ -4376,14 +4556,14 @@ button.ats-console-brand-text {
 .ats-step-four .ats-add-employer-card {
     width: 100%;
     margin: 0;
-    border: 1px dashed #C9DAEF;
+    border: 1px dashed var(--c-border-strong);
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     min-height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #2C7FB8;
+    color: var(--c-blue-500);
     font-weight: 600;
 }
 
@@ -4400,44 +4580,44 @@ button.ats-console-brand-text {
     }
 
     .ats-step-four .ats-add-employer-card .mud-typography {
-        color: #2C7FB8;
+        color: var(--c-blue-500);
         font-weight: 600;
     }
 
     .ats-step-four .ats-add-employer-card:hover {
-        background: #F7FAFE;
+        background: var(--c-surface-sunken);
     }
 
 .ats-step-four .ats-remove-employer-btn {
-    color: #6F819B !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
     font-weight: 600;
     min-height: 28px;
 }
 
 .ats-step-four .ats-employer-card {
-    border: 1px solid #DCE7F4;
+    border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--c-surface);
     padding: 14px;
 }
 
 .ats-step-four .ats-employer-card-title {
-    color: #0F294B;
+    color: var(--c-navy-800);
     font-weight: 700;
 }
 
 
 .ats-step-five .ats-reference-block {
-    border: 1px solid #DCE7F4;
+    border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--c-surface);
     padding: 14px;
     margin-bottom: 12px;
 }
 
 .ats-step-five .ats-reference-title {
-    color: #0F294B;
+    color: var(--c-navy-800);
     font-weight: 700;
 }
 
@@ -4450,7 +4630,7 @@ button.ats-console-brand-text {
 .ats-step-five .ats-reference-option-label {
     font-size: 13px;
     font-weight: 700;
-    color: #0F294B;
+    color: var(--c-navy-800);
     margin-top: 4px;
 }
 
@@ -4462,8 +4642,8 @@ button.ats-console-brand-text {
 
 .ats-step-five .ats-reference-pill {
     margin: 0 !important;
-    border: 1px solid #DCE7F4;
-    background: #fff;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
     border-radius: 999px;
     min-height: 36px;
     padding: 0 14px;
@@ -4490,7 +4670,7 @@ button.ats-console-brand-text {
         margin: 0 !important;
         font-size: 12px;
         font-weight: 600;
-        color: #41536E;
+        color: var(--c-fg-muted);
         line-height: 1;
         text-align: center;
         width: 100%;
@@ -4499,8 +4679,8 @@ button.ats-console-brand-text {
     .ats-step-five .ats-reference-pill.selected,
     .ats-step-five .ats-reference-pill.mud-checked,
     .ats-step-five .ats-reference-pill.mud-radio-checked {
-        background: linear-gradient(100deg,#102247,#2C7FB8);
-        border-color: #234C80;
+        background: var(--c-primary-gradient);
+        border-color: var(--c-navy-800);
     }
 
         .ats-step-five .ats-reference-pill.selected .mud-radio-label,
@@ -4512,7 +4692,7 @@ button.ats-console-brand-text {
         .ats-step-five .ats-reference-pill.mud-radio-checked .mud-radio-label,
         .ats-step-five .ats-reference-pill.mud-radio-checked .mud-radio-content,
         .ats-step-five .ats-reference-pill.mud-radio-checked .mud-typography {
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
 .ats-dispute-dialog-content {
@@ -4537,8 +4717,8 @@ button.ats-console-brand-text {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    border: 1px solid #DCE7F4;
-    background: #F8FBFF;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface-sunken);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4553,13 +4733,13 @@ button.ats-console-brand-text {
 }
 
 .ats-dispute-title {
-    color: #0B1F3A;
+    color: var(--c-navy-900);
     font-weight: 700;
     text-align: center;
 }
 
 .ats-dispute-category-label {
-    color: #51627D;
+    color: var(--c-fg-muted);
     font-weight: 600;
     margin-bottom: 8px;
 }
@@ -4572,8 +4752,8 @@ button.ats-console-brand-text {
 
 .ats-dispute-dialog .ats-reference-pill {
     margin: 0 !important;
-    border: 1px solid #DCE7F4;
-    background: #fff;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
     border-radius: 999px;
     min-height: 36px;
     padding: 0 14px;
@@ -4600,7 +4780,7 @@ button.ats-console-brand-text {
         margin: 0 !important;
         font-size: 12px;
         font-weight: 600;
-        color: #41536E;
+        color: var(--c-fg-muted);
         line-height: 1;
         text-align: center;
         width: 100%;
@@ -4609,8 +4789,8 @@ button.ats-console-brand-text {
     .ats-dispute-dialog .ats-reference-pill.selected,
     .ats-dispute-dialog .ats-reference-pill.mud-checked,
     .ats-dispute-dialog .ats-reference-pill.mud-radio-checked {
-        background: #123A63;
-        border-color: #123A63;
+        background: var(--c-navy-800);
+        border-color: var(--c-navy-800);
     }
 
         .ats-dispute-dialog .ats-reference-pill.selected .mud-radio-label,
@@ -4622,13 +4802,13 @@ button.ats-console-brand-text {
         .ats-dispute-dialog .ats-reference-pill.mud-radio-checked .mud-radio-label,
         .ats-dispute-dialog .ats-reference-pill.mud-radio-checked .mud-radio-content,
         .ats-dispute-dialog .ats-reference-pill.mud-radio-checked .mud-typography {
-            color: #fff !important;
+            color: var(--c-on-dark-fg) !important;
         }
 
 .ats-dispute-cancel-btn {
-    background: #fff !important;
-    color: #41536E !important;
-    border: 1px solid #DCE7F4 !important;
+    background: var(--c-surface) !important;
+    color: var(--c-fg-muted) !important;
+    border: 1px solid var(--c-border) !important;
     box-shadow: none !important;
 }
 
@@ -4659,14 +4839,14 @@ button.ats-console-brand-text {
 .ats-step-five .ats-add-reference-card {
     width: 100%;
     margin: 0;
-    border: 1px dashed #C9DAEF;
+    border: 1px dashed var(--c-border-strong);
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     min-height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #2C7FB8;
+    color: var(--c-blue-500);
     font-weight: 600;
 }
 
@@ -4683,16 +4863,16 @@ button.ats-console-brand-text {
     }
 
     .ats-step-five .ats-add-reference-card .mud-typography {
-        color: #2C7FB8;
+        color: var(--c-blue-500);
         font-weight: 600;
     }
 
     .ats-step-five .ats-add-reference-card:hover {
-        background: #F7FAFE;
+        background: var(--c-surface-sunken);
     }
 
 .ats-step-five .ats-remove-reference-btn {
-    color: #6F819B !important;
+    color: var(--c-fg-muted) !important;
     text-transform: none !important;
     font-weight: 600;
     min-height: 28px;
@@ -4742,12 +4922,12 @@ button.ats-console-brand-text {
 
 .ats-selected-row,
 .ats-selected-row td {
-    background: #e8f0fe !important;
-    border-top: 1px solid #d2e3fc;
-    border-bottom: 1px solid #d2e3fc;
+    background: var(--c-blue-tint) !important;
+    border-top: 1px solid var(--c-border-strong);
+    border-bottom: 1px solid var(--c-border-strong);
 }
 
-@media (max-width: 920px) {
+@media (max-width: 960px) {
     .ats-console-sidebar {
         position: fixed;
         top: 0;
@@ -4900,12 +5080,12 @@ button.ats-console-brand-text {
 
     .ats-console-nav-subitem:hover {
         background-color: rgba(255, 255, 255, 0.08);
-        color: #fff;
+        color: var(--c-on-dark-fg);
     }
 
     .ats-console-nav-subitem.active {
         background-color: rgba(255, 255, 255, 0.14);
-        color: #fff;
+        color: var(--c-on-dark-fg);
     }
 
     .ats-console-nav-subitem .ats-console-nav-ic {
@@ -4931,9 +5111,9 @@ button.ats-console-brand-text {
     width: min(680px, 100%);
     margin: 0 auto;
     padding: 20px;
-    border: 1px solid #e1e9f4;
+    border: 1px solid var(--c-border-strong);
     border-radius: 18px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow: 0 12px 32px rgba(16, 34, 71, 0.08);
 }
 
@@ -4946,12 +5126,12 @@ button.ats-console-brand-text {
 }
 
 .ats-signature-modern-title {
-    color: #102247;
+    color: var(--c-navy-900);
     font-weight: 700 !important;
 }
 
 .ats-signature-modern-subtitle {
-    color: #6f7d91;
+    color: var(--c-fg-muted);
 }
 
 .ats-signature-tabs {
@@ -4960,9 +5140,9 @@ button.ats-console-brand-text {
     gap: 4px;
     padding: 4px;
     margin-bottom: 16px;
-    border: 1px solid #e3eaf3;
+    border: 1px solid var(--c-border-strong);
     border-radius: 12px;
-    background: #f7f9fc;
+    background: var(--c-surface-sunken);
 }
 
 .ats-signature-tab {
@@ -4974,7 +5154,7 @@ button.ats-console-brand-text {
     padding: 8px 12px;
     border: 0;
     border-radius: 9px;
-    color: #6d7889;
+    color: var(--c-fg-muted);
     background: transparent;
     font: inherit;
     font-size: 13px;
@@ -4984,8 +5164,8 @@ button.ats-console-brand-text {
 }
 
     .ats-signature-tab.active {
-        color: #1769d2;
-        background: #fff;
+        color: var(--c-blue-600);
+        background: var(--c-surface);
         box-shadow: 0 3px 10px rgba(16, 34, 71, 0.09);
     }
 
@@ -5006,9 +5186,9 @@ button.ats-console-brand-text {
     position: relative;
     height: 230px;
     overflow: hidden;
-    border: 2px dashed #62a8ff;
+    border: 2px dashed var(--c-blue-500);
     border-radius: 14px;
-    background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%);
+    background: linear-gradient(180deg, var(--c-surface-sunken) 0%, var(--c-surface-sunken) 100%);
 }
 
     .ats-signature-draw-surface .ats-signature-canvas {
@@ -5024,7 +5204,7 @@ button.ats-console-brand-text {
     z-index: 1;
     top: 50%;
     left: 50%;
-    color: #8794a8;
+    color: var(--c-fg-muted);
     font-size: 13px;
     pointer-events: none;
     transform: translate(-50%, -50%);
@@ -5036,14 +5216,14 @@ button.ats-console-brand-text {
     justify-content: space-between;
     gap: 12px;
     margin-top: 10px;
-    color: #7d899a;
+    color: var(--c-fg-subtle);
     font-size: 12px;
 }
 
 .ats-signature-clear-link {
     padding: 4px 0;
     border: 0;
-    color: #1769d2;
+    color: var(--c-blue-600);
     background: transparent;
     font: inherit;
     font-weight: 600;
@@ -5059,11 +5239,11 @@ button.ats-console-brand-text {
     justify-content: center;
     flex-direction: column;
     overflow: hidden;
-    border: 2px dashed #62a8ff;
+    border: 2px dashed var(--c-blue-500);
     border-radius: 14px;
-    color: #7d899a;
+    color: var(--c-fg-subtle);
     text-align: center;
-    background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%);
+    background: linear-gradient(180deg, var(--c-surface-sunken) 0%, var(--c-surface-sunken) 100%);
     cursor: pointer;
 }
 
@@ -5089,31 +5269,38 @@ button.ats-console-brand-text {
     margin-bottom: 14px;
     place-items: center;
     border-radius: 18px;
-    color: #1769d2;
-    background: #eaf4ff;
+    color: var(--c-blue-600);
+    background: var(--c-blue-tint);
     box-shadow: 0 8px 20px rgba(23, 105, 210, .13);
 }
 
 .ats-signature-upload-prompt {
-    color: #4f5d70;
+    color: var(--c-fg-muted);
 }
 
     .ats-signature-upload-prompt span {
-        color: #1769d2;
+        color: var(--c-blue-600);
         font-weight: 700;
     }
 
+/* User-supplied signature PNGs are dark ink on a transparent background, so they
+   need a permanently light plate rather than the themed surface - on a dark card the
+   ink would be invisible. The application form is light-only today, but the plate
+   makes the component safe wherever it is reused. */
 .ats-signature-upload-preview {
     max-width: 85%;
     max-height: 130px;
     margin-bottom: 10px;
+    padding: 4px;
+    border-radius: 6px;
+    background: #ffffff;
     object-fit: contain;
 }
 
 .ats-signature-upload-name {
     max-width: 100%;
     overflow: hidden;
-    color: #263852;
+    color: var(--c-navy-900);
     font-weight: 600 !important;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -5124,7 +5311,7 @@ button.ats-console-brand-text {
     align-items: center;
     gap: 7px;
     margin-top: 14px;
-    color: #8793a5;
+    color: var(--c-fg-muted);
     font-size: 11px;
     line-height: 1.45;
 }
@@ -5152,7 +5339,7 @@ button.ats-console-brand-text {
     overflow: visible;
     border: 0;
     border-radius: 0 !important;
-    background: #FFFFFF;
+    background: var(--c-surface);
 }
 
 .ats-application-card .ats-step-one .ats-step-one-grid {
@@ -5252,20 +5439,20 @@ button.ats-console-brand-text {
     padding: 13px 16px;
     border: 2px solid var(--ats-border-strong);
     border-radius: 11px;
-    background: #FFFFFF;
+    background: var(--c-surface);
     cursor: pointer;
     transition: border-color .12s ease, box-shadow .12s ease, background .12s ease;
 }
 
     .ats-application-card .ats-step-one .ats-step-one-choice-card:hover {
-        border-color: #4F93EA;
+        border-color: var(--c-blue-500);
     }
 
     .ats-application-card .ats-step-one .ats-step-one-choice-card.selected,
     .ats-application-card .ats-step-one .ats-step-one-choice-card.mud-checked,
     .ats-application-card .ats-step-one .ats-step-one-choice-card.mud-radio-checked {
         border-color: var(--ats-blue-500);
-        background: #FFFFFF;
+        background: var(--c-surface);
         box-shadow: 0 4px 14px -6px rgba(29, 95, 209, .25);
     }
 
@@ -5302,9 +5489,9 @@ button.ats-console-brand-text {
 
     .ats-application-card .ats-step-one .ats-step-one-proceed.theme-button-active {
         border: 0 !important;
-        background: linear-gradient(120deg, var(--ats-navy-800), var(--ats-blue-500)) !important;
+        background: var(--c-primary-gradient) !important;
         box-shadow: 0 8px 18px -6px rgba(29, 95, 209, .5) !important;
-        color: #FFFFFF !important;
+        color: var(--c-on-dark-fg) !important;
     }
 
         .ats-application-card .ats-step-one .ats-step-one-proceed.theme-button-active:hover {
@@ -5313,17 +5500,17 @@ button.ats-console-brand-text {
 
 .ats-application-card .ats-step-one .ats-step-one-secondary-btn {
     border: 1.5px solid var(--ats-border-strong) !important;
-    background: #FFFFFF !important;
+    background: var(--c-surface) !important;
     box-shadow: none !important;
     color: var(--ats-blue-600) !important;
 }
 
     .ats-application-card .ats-step-one .ats-step-one-secondary-btn:hover:not(:disabled) {
-        background: #F4F7FC !important;
+        background: var(--c-surface-sunken) !important;
         color: var(--ats-blue-600) !important;
     }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .ats-application-card .ats-step-one .ats-step-one-grid {
         grid-template-columns: 1fr;
         gap: 28px;
@@ -5339,21 +5526,24 @@ button.ats-console-brand-text {
     }
 }
 
+/* Second declaration of the --ats-* names (the first is on .ats-console above), with
+   different values. This block shadows that one inside the application form; both are
+   now re-pointed at the shared tokens, which is what removes the discrepancy. */
 .ats-appform-modern {
-    --ats-navy-900: #0B1B3D;
-    --ats-navy-800: #132A54;
-    --ats-blue-600: #1D5FD1;
-    --ats-blue-500: #2E7CE0;
-    --ats-blue-tint: #EDF3FC;
-    --ats-blue-tint-2: #E3ECFB;
-    --ats-border: #DCE6F7;
-    --ats-border-strong: #C2D2F0;
-    --ats-text-1: #16233F;
-    --ats-text-2: #5B6B8C;
-    --ats-text-3: #8A97B5;
+    --ats-navy-900: var(--c-navy-900);
+    --ats-navy-800: var(--c-navy-800);
+    --ats-blue-600: var(--c-blue-600);
+    --ats-blue-500: var(--c-blue-500);
+    --ats-blue-tint: var(--c-blue-tint);
+    --ats-blue-tint-2: var(--c-blue-tint-2);
+    --ats-border: var(--c-border);
+    --ats-border-strong: var(--c-border-strong);
+    --ats-text-1: var(--c-fg-strong);
+    --ats-text-2: var(--c-fg-muted);
+    --ats-text-3: var(--c-fg-subtle);
     align-items: flex-start;
     padding: 40px 20px;
-    background: #EEF2F9;
+    background: var(--c-page-bg);
     color: var(--ats-text-1);
     font-family: "Inter", sans-serif;
 }
@@ -5370,7 +5560,7 @@ button.ats-console-brand-text {
             overflow: hidden;
             border: 1px solid var(--ats-border);
             border-radius: 18px;
-            background: #FFFFFF;
+            background: var(--c-surface);
             box-shadow: 0 0 0 6px rgba(46, 124, 224, 0.10), 0 18px 40px -16px rgba(11, 27, 61, 0.25) !important;
         }
 
@@ -5382,7 +5572,7 @@ button.ats-console-brand-text {
             overflow: hidden;
             border: 1px solid var(--ats-border);
             border-radius: 20px;
-            background: #FFFFFF;
+            background: var(--c-surface);
             box-shadow: 0 0 0 6px rgba(46, 124, 224, 0.10), 0 18px 40px -16px rgba(11, 27, 61, 0.25) !important;
             color: var(--ats-text-1);
             font-family: "Inter", sans-serif;
@@ -5447,7 +5637,7 @@ button.ats-console-brand-text {
 .ats-application-card .ats-appform-stepper {
     padding: 30px 34px 34px;
     border-radius: 18px;
-    background: #FFFFFF;
+    background: var(--c-surface);
     box-shadow: none !important;
     color: var(--ats-text-1);
 }
@@ -5490,15 +5680,15 @@ button.ats-console-brand-text {
 
     .ats-application-card .ats-appform-stepper .mud-step.active .mud-step-label-icon {
         border-color: transparent !important;
-        background: linear-gradient(135deg, var(--ats-blue-500), var(--ats-navy-800)) border-box !important;
-        color: #FFFFFF !important;
+        background: var(--c-avatar-gradient) border-box !important;
+        color: var(--c-on-dark-fg) !important;
     }
 
     .ats-application-card .ats-appform-stepper :is(.mud-step-completed, .mud-completed) .mud-step-label-icon,
     .ats-application-card .ats-appform-stepper .mud-step-label-icon.mud-completed {
         border-color: transparent !important;
-        background: linear-gradient(135deg, #34C77E, #0E7A4C) border-box !important;
-        color: #FFFFFF !important;
+        background: linear-gradient(135deg, var(--c-success), var(--c-success)) border-box !important;
+        color: var(--c-on-dark-fg) !important;
         font-size: 13px !important;
     }
 
@@ -5552,13 +5742,13 @@ button.ats-console-brand-text {
     .mud-step:is(.mud-step-completed, .mud-completed) + .mud-stepper-nav-connector .mud-stepper-nav-connector-line,
     .ats-application-card .ats-appform-stepper > .mud-stepper-nav >
     .mud-step:has(.mud-step-label-icon.mud-completed) + .mud-stepper-nav-connector .mud-stepper-nav-connector-line {
-        background: linear-gradient(90deg, #34C77E, #0E7A4C);
+        background: linear-gradient(90deg, var(--c-success), var(--c-success));
     }
 
     .ats-application-card .ats-appform-stepper > .mud-stepper-content {
         margin-top: 0;
         padding: 0;
-        background: #FFFFFF;
+        background: var(--c-surface);
     }
 
 .ats-consent-step .ats-consent-step-grid {
@@ -5594,7 +5784,7 @@ button.ats-console-brand-text {
     border: 1.5px solid var(--ats-border-strong);
     border-radius: 12px;
     background: var(--ats-blue-tint);
-    scrollbar-color: #939393 #F0F4FA;
+    scrollbar-color: var(--c-fg-muted) var(--c-surface-sunken);
     scrollbar-width: auto;
 }
 
@@ -5644,7 +5834,7 @@ button.ats-console-brand-text {
     padding: 22px 24px 26px;
     border: 1px solid var(--ats-border);
     border-radius: 16px;
-    background: #FFFFFF;
+    background: var(--c-surface);
     box-shadow: 0 8px 24px -14px rgba(11, 27, 61, 0.20);
 }
 
@@ -5690,7 +5880,7 @@ button.ats-console-brand-text {
 
     .ats-consent-step .ats-signature-tab.active {
         color: var(--ats-blue-600);
-        background: #FFFFFF;
+        background: var(--c-surface);
         box-shadow: 0 2px 8px rgba(11, 27, 61, 0.10);
     }
 
@@ -5706,13 +5896,13 @@ button.ats-console-brand-text {
     min-height: 170px;
     border: 2px dashed var(--ats-border-strong);
     border-radius: 12px;
-    background: #FBFCFF;
+    background: var(--c-surface-sunken);
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 
     .ats-consent-step .ats-signature-draw-surface:hover,
     .ats-consent-step .ats-signature-upload-zone:hover {
-        border-color: #4F93EA;
+        border-color: var(--c-blue-500);
         background: var(--ats-blue-tint);
     }
 
@@ -5776,7 +5966,7 @@ button.ats-console-brand-text {
 
     .ats-consent-step .ats-consent-field-label span {
         margin-left: 2px;
-        color: #D64545;
+        color: var(--c-danger);
     }
 
 .ats-consent-step .ats-consent-field {
@@ -5801,7 +5991,7 @@ button.ats-console-brand-text {
     min-height: 44px !important;
     border-radius: 10px !important;
     color: var(--ats-text-1);
-    background: #FFFFFF;
+    background: var(--c-surface);
 }
 
 .ats-consent-step .ats-consent-input .mud-input-outlined-border {
@@ -5886,9 +6076,9 @@ button.ats-console-brand-text {
     padding: 0 26px;
     border: 0;
     border-radius: 11px;
-    background: linear-gradient(120deg, var(--ats-navy-800), var(--ats-blue-500));
+    background: var(--c-primary-gradient);
     box-shadow: 0 10px 22px -6px rgba(29, 95, 209, 0.50);
-    color: #FFFFFF;
+    color: var(--c-on-dark-fg);
     font-family: "Inter", sans-serif;
     font-size: 14.5px;
     font-weight: 700;
@@ -5962,7 +6152,7 @@ button.ats-console-brand-text {
     }
 }
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
     .ats-consent-step .ats-consent-fields {
         width: 100%;
         margin: 0;

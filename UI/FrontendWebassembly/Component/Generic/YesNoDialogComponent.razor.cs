@@ -24,7 +24,7 @@ public partial class YesNoDialogComponent
 	public Color AvatarColor { get; set; } = Color.Primary;
 
 	[Parameter]
-	public string? InfoBGColor { get; set; } = "#EEF4FF";
+	public string? InfoBGColor { get; set; } = "var(--c-info-bg)";
 
 	[Parameter]
 	public Color InfoColor { get; set; } = Color.Primary;

@@ -1,20 +1,20 @@
 .ats-assistant-page {
-    --navy-900: #0b1b3d;
-    --navy-800: #132a54;
-    --blue-600: #1d5fd1;
-    --blue-500: #2e7ce0;
-    --blue-tint: #edf3fc;
-    --blue-tint-2: #e3ecfb;
-    --border: #e4eaf6;
-    --border-strong: #c2d2f0;
-    --text-1: #16233f;
-    --text-2: #5b6b8c;
-    --text-3: #8a97b5;
-    --green: #1e9e64;
-    --green-tint: #e4f7ed;
-    --amber: #b7791b;
-    --amber-tint: #fcf3de;
-    --slate-tint: #eef0f5;
+    --navy-900: var(--c-navy-900);
+    --navy-800: var(--c-navy-800);
+    --blue-600: var(--c-blue-600);
+    --blue-500: var(--c-blue-500);
+    --blue-tint: var(--c-blue-tint);
+    --blue-tint-2: var(--c-blue-tint-2);
+    --border: var(--c-border-soft);
+    --border-strong: var(--c-border-strong);
+    --text-1: var(--c-fg-strong);
+    --text-2: var(--c-fg-muted);
+    --text-3: var(--c-fg-subtle);
+    --green: var(--c-success);
+    --green-tint: var(--c-success-bg);
+    --amber: var(--c-warn);
+    --amber-tint: var(--c-warn-bg);
+    --slate-tint: var(--c-neutral-bg);
     max-width: 1120px;
     margin: 0 auto;
     color: var(--text-1);
@@ -31,7 +31,7 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: 16px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow: 0 12px 32px -12px rgba(11, 27, 61, .12);
 }
 
@@ -61,8 +61,8 @@
     justify-content: center;
     flex: 0 0 auto;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--blue-500), var(--navy-800));
-    color: #fff;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
 }
 
 .ats-assistant-brand-mark ::deep .mud-icon-root {
@@ -91,7 +91,7 @@
     padding: 0 14px;
     border: 1.5px solid var(--border-strong);
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--text-2);
     font-family: "Inter", sans-serif;
     font-size: 12.5px;
@@ -127,7 +127,7 @@
     padding: 22px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    background: #fbfcfe;
+    background: var(--c-surface-sunken);
 }
 
 .ats-assistant-row {
@@ -156,8 +156,8 @@
 }
 
 .ats-assistant-avatar-bot {
-    background: linear-gradient(135deg, var(--blue-500), var(--navy-800));
-    color: #fff;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
 }
 
 .ats-assistant-avatar-user {
@@ -189,15 +189,15 @@
 .ats-assistant-bubble-bot {
     border: 1px solid var(--border);
     border-bottom-left-radius: 5px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--text-1);
     box-shadow: 0 4px 14px -8px rgba(11, 27, 61, .12);
 }
 
 .ats-assistant-bubble-user {
     border-bottom-right-radius: 5px;
-    background: linear-gradient(120deg, var(--navy-800), var(--blue-500));
-    color: #fff;
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
     box-shadow: 0 8px 20px -8px rgba(29, 95, 209, .5);
 }
 
@@ -225,7 +225,7 @@
 
 .ats-assistant-bubble-user ::deep code {
     background: rgba(255, 255, 255, .18);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-assistant-time {
@@ -315,7 +315,7 @@
     padding: 8px 14px;
     border: 1px solid var(--border-strong);
     border-radius: 20px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--blue-600);
     font-family: "Inter", sans-serif;
     font-size: 12.5px;
@@ -339,14 +339,23 @@
     overflow-x: auto;
     border: 1px solid var(--border);
     border-radius: 14px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow: 0 4px 14px -8px rgba(11, 27, 61, .12);
 }
 
+/* min-width only above the card-mode breakpoint. This is a hand-rolled table, not a
+   MudTable, so it gets no automatic stacked mode - a flat 640px floor meant a
+   horizontal scroller inside a chat bubble on every phone. The stacked treatment is
+   built by hand below, using the data-label attributes already on each cell. */
 .ats-assistant-table {
     width: 100%;
-    min-width: 640px;
     border-collapse: collapse;
+}
+
+@media (min-width: 961px) {
+    .ats-assistant-table {
+        min-width: 640px;
+    }
 }
 
 .ats-assistant-table th {
@@ -374,7 +383,7 @@
 }
 
 .ats-assistant-table tbody tr:hover {
-    background: #fafbff;
+    background: var(--c-surface-sunken);
 }
 
 .ats-assistant-subject {
@@ -444,7 +453,7 @@
     justify-content: center;
     flex: 0 0 auto;
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--blue-600);
 }
 
@@ -525,17 +534,17 @@
 
 .ats-assistant-btn-ghost {
     border: 1.5px solid var(--border-strong);
-    background: #fff;
+    background: var(--c-surface);
     color: var(--text-2);
 }
 
 .ats-assistant-btn-ghost:hover:not(:disabled) {
-    background: #f4f7fc;
+    background: var(--c-surface-sunken);
 }
 
 .ats-assistant-btn-primary {
-    background: linear-gradient(120deg, var(--navy-800), var(--blue-600));
-    color: #fff;
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
     box-shadow: 0 8px 20px -6px rgba(29, 95, 209, .5);
 }
 
@@ -568,7 +577,7 @@
     flex: 0 0 auto;
     padding: 16px 22px 18px;
     border-top: 1px solid var(--border);
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .ats-assistant-input-wrap {
@@ -578,7 +587,7 @@
     padding: 5px 5px 5px 16px;
     border: 1.5px solid var(--border-strong);
     border-radius: 14px;
-    background: #fff;
+    background: var(--c-surface);
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 
@@ -612,8 +621,8 @@
     flex: 0 0 auto;
     border: 0;
     border-radius: 11px;
-    background: linear-gradient(120deg, var(--navy-800), var(--blue-500));
-    color: #fff;
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
     cursor: pointer;
     box-shadow: 0 8px 20px -8px rgba(29, 95, 209, .5);
     transition: box-shadow .15s ease, transform .1s ease, opacity .15s ease;
@@ -651,7 +660,7 @@
     flex: 0 0 auto;
     border: 1.5px solid var(--border-strong);
     border-radius: 11px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--text-2);
     cursor: pointer;
     transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .1s ease, opacity .15s ease;
@@ -679,14 +688,14 @@
 
 .ats-assistant-mic.is-listening {
     border-color: var(--blue-600);
-    background: var(--blue-600);
-    color: #fff;
+    background: var(--c-chip-solid-bg);
+    color: var(--c-on-dark-fg);
     animation: ats-assistant-mic-pulse 1.6s ease-out infinite;
 }
 
 .ats-assistant-mic.is-listening:hover:not(:disabled) {
-    background: var(--blue-600);
-    color: #fff;
+    background: var(--c-chip-solid-bg);
+    color: var(--c-on-dark-fg);
 }
 
 @keyframes ats-assistant-mic-pulse {
@@ -731,7 +740,7 @@
 
 /* Responsive ------------------------------------------------------------- */
 
-@media (max-width: 920px) {
+@media (max-width: 960px) {
     .ats-assistant-shell {
         height: calc(100dvh - 124px);
     }
@@ -770,5 +779,57 @@
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
+    }
+}
+
+/* Stacked card mode for the hand-rolled orders table.
+
+   MudTable gets this for free from .mud-sm-table; this table is plain markup inside
+   a chat bubble, so the same treatment is built here. Every <td> already carries a
+   data-label, which becomes the row label on the left. Matches the 960px step
+   MudTable uses so both kinds of table reflow at the same width. */
+@media (max-width: 960px) {
+    .ats-assistant-orders {
+        overflow-x: visible;
+    }
+
+    .ats-assistant-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .ats-assistant-table tr {
+        display: block;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ats-assistant-table tr:last-child {
+        border-bottom: 0;
+    }
+
+    .ats-assistant-table td {
+        display: flex;
+        min-width: 0;
+        align-items: baseline;
+        gap: 1rem;
+        border: 0;
+        overflow-wrap: anywhere;
+        text-align: right;
+    }
+
+    .ats-assistant-table td::before {
+        flex: 0 0 min(42%, 9rem);
+        color: var(--text-2);
+        content: attr(data-label);
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        text-align: left;
+        text-transform: uppercase;
     }
 }

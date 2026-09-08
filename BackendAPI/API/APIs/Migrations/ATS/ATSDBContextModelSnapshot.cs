@@ -352,6 +352,85 @@ namespace APIs.Migrations.ATS
                     b.ToTable("ArchiveReport", "ats");
                 });
 
+            modelBuilder.Entity("ATS.Data.Entities.AtsAuditEntry", b =>
+                {
+                    b.Property<Guid>("AuditEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int?>("AtsClientId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("AtsRoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Changes")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("DurationMs")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsPlatformSuperAdmin")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Site")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TraceId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("UserEmail")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("UserFullName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AuditEntryId");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.HasIndex("OccurredAt", "AuditEntryId")
+                        .IsDescending();
+
+                    b.ToTable("AuditTrail", "ats");
+                });
+
             modelBuilder.Entity("ATS.Data.Entities.BulkUploadFileDetails", b =>
                 {
                     b.Property<Guid>("FileID")

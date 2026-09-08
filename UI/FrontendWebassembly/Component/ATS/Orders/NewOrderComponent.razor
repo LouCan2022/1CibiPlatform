@@ -262,6 +262,27 @@
                             <MudLink OnClick="DownloadTemplate" Class="ml-1">Download template</MudLink>
                         </div>
 
+                        @* Excel treats a CSV mobile number as a number and strips the
+                           leading zero, so 09194224524 is saved as 9194224524 and the
+                           invitation goes to a malformed number. The column has to be
+                           formatted as Text before the numbers are typed or pasted. *@
+                        <div class="ats-bulk-mobile-warning">
+                            <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" Size="Size.Small" />
+                            <div>
+                                <p class="ats-bulk-mobile-warning-title">Format the MobileNumber column as Text first</p>
+                                <p class="ats-bulk-mobile-warning-text">
+                                    In Excel, select the <b>MobileNumber</b> column, then choose
+                                    <b>Home &rsaquo; Number &rsaquo; Text</b> <em>before</em> you type or paste the numbers.
+                                    Otherwise Excel drops the leading zero and saves
+                                    <b>09194224524</b> as <b>9194224524</b>, and the invitation cannot be delivered.
+                                </p>
+                                <p class="ats-bulk-mobile-warning-text">
+                                    Each number must be <b>11 digits starting with 0</b> &mdash; for example
+                                    <b>09194224524</b>.
+                                </p>
+                            </div>
+                        </div>
+
                     @if (bulkUploadFileDetailsDTO.BulkFile is not null)
                     {
                         <div class="ats-selected-file">

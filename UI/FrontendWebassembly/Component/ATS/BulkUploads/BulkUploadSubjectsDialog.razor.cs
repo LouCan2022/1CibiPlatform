@@ -1,4 +1,4 @@
-namespace FrontendWebassembly.Component.ATS;
+﻿namespace FrontendWebassembly.Component.ATS;
 
 public partial class BulkUploadSubjectsDialog
 {
@@ -74,6 +74,14 @@ public partial class BulkUploadSubjectsDialog
 		// The chips track the same search filter as the table, so they refresh with it
 		// rather than drifting out of step.
 		await RefreshCountsAsync();
+
+		// This method runs as MudTable's ServerData callback, so the re-render MudTable
+		// does when it lands only covers the table itself. The chips and the header read
+		// _counts and _file from this dialog's own render tree, which nothing has
+		// invalidated - so without this they stay blank until some later event happens to
+		// re-render the dialog. Clicking a segment was that event, which is why the counts
+		// appeared one fetch behind.
+		await InvokeAsync(StateHasChanged);
 
 		return tableData;
 	}
@@ -218,7 +226,7 @@ public partial class BulkUploadSubjectsDialog
 			},
 			{
 				nameof(YesNoDialogComponent.InfoBGColor),
-				"#FCF1DD"
+				"var(--c-warn-bg)"
 			},
 			{
 				nameof(YesNoDialogComponent.ThemeButtonColor),

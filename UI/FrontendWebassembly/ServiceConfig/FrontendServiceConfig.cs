@@ -62,6 +62,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<LocalStorageService>();
+		services.AddScoped<ThemeService>();
 		services.AddScoped<EmailValidationService>();
 		services.AddScoped<FileValidationService>();
 		services.AddScoped<MobileNumberValidationService>();
@@ -81,6 +82,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<IBulkUploadService, BulkUploadService>();
 		services.AddScoped<CheckBulkFileName>();
 		services.AddScoped<IOMSTicketingService, OMSTicketingService>();
+		services.AddScoped<IAuditTrailService, AuditTrailService>();
 		services.AddScoped<IDashboardService, DashboardService>();
 		services.AddScoped<IPackageManagementService, PackageManagementService>();
 		services.AddScoped<IClientManagementService, ClientManagementService>();

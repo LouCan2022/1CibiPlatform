@@ -1,16 +1,16 @@
 .preview-upload-shell {
-    --preview-navy-900: #0b1b3d;
-    --preview-navy-800: #132a54;
-    --preview-navy-700: #1c3a70;
-    --preview-blue-600: #1d5fd1;
-    --preview-blue-500: #2e7ce0;
-    --preview-blue-tint: #edf3fc;
-    --preview-border: #d9e3f5;
-    --preview-border-strong: #c2d2f0;
-    --preview-text: #16233f;
-    --preview-muted: #5b6b8c;
+    --preview-navy-900: var(--c-navy-900);
+    --preview-navy-800: var(--c-navy-800);
+    --preview-navy-700: var(--c-navy-700);
+    --preview-blue-600: var(--c-blue-600);
+    --preview-blue-500: var(--c-blue-500);
+    --preview-blue-tint: var(--c-blue-tint);
+    --preview-border: var(--c-border);
+    --preview-border-strong: var(--c-border-strong);
+    --preview-text: var(--c-fg-strong);
+    --preview-muted: var(--c-fg-muted);
     width: 100%;
-    background: #fff;
+    background: var(--c-surface);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 24px 60px -12px rgba(11,27,61,.35), 0 4px 12px rgba(11,27,61,.08);
@@ -20,8 +20,8 @@
     position: relative;
     overflow: hidden;
     padding: 24px 30px 20px;
-    color: #fff;
-    background: linear-gradient(120deg, var(--preview-navy-900), var(--preview-navy-700) 55%, var(--preview-blue-600) 130%);
+    color: var(--c-on-dark-fg);
+    background: var(--c-dialog-header-gradient);
 }
 
 .preview-upload-header::before {
@@ -58,14 +58,14 @@
 
 .preview-upload-icon svg { width: 20px; height: 20px; }
 .preview-upload-header h2 { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: .2px; }
-.preview-upload-header p { margin: 4px 0 0; color: #c6d5f5; font-size: 12.5px; }
+.preview-upload-header p { margin: 4px 0 0; color: var(--c-on-dark-fg-muted); font-size: 12.5px; }
 
 .preview-upload-close {
     display: grid;
     width: 32px;
     height: 32px;
     padding: 0;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
     place-items: center;
     border: 1px solid rgba(255,255,255,.2);
@@ -86,7 +86,7 @@
     padding: 26px 28px 10px;
     border: 1px solid var(--preview-border);
     border-radius: 16px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow: 0 12px 32px -12px rgba(11, 27, 61, 0.12);
 }
 
@@ -100,10 +100,10 @@
     font-weight: 700;
     place-items: center;
     border-radius: 7px;
-    background: #e3ecfb;
+    background: var(--c-blue-tint-2);
 }
 
-.preview-upload-invalid-cell { color: #c62828 !important; font-weight: 700 !important; }
+.preview-upload-invalid-cell { color: var(--c-danger-strong) !important; font-weight: 700 !important; }
 
 .preview-upload-name-cell {
     display: inline-flex;
@@ -117,12 +117,12 @@
     width: 28px;
     height: 28px;
     flex: 0 0 28px;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-size: 11px;
     font-weight: 600;
     place-items: center;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--preview-blue-500), var(--preview-navy-800));
+    background: var(--c-avatar-gradient);
 }
 
 .preview-upload-name { color: var(--preview-text); font-weight: 600; }
@@ -137,9 +137,9 @@
 
 .preview-upload-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 22px; border-radius: 10px; font-family: "Inter", sans-serif; font-size: 14px; font-weight: 700; line-height: 1; cursor: pointer; text-transform: none; transition: transform .1s ease, box-shadow .15s ease, background .15s ease; }
 .preview-upload-button:active { transform: scale(.97); }
-.preview-upload-cancel { color: var(--preview-muted); border: 1.5px solid var(--preview-border-strong); background: #fff; }
-.preview-upload-cancel:hover { background: #f4f7fc; }
-.preview-upload-confirm { border: 0; color: #fff; background: linear-gradient(120deg, var(--preview-navy-800), var(--preview-blue-600)); box-shadow: 0 8px 20px -6px rgba(29,95,209,.55); }
+.preview-upload-cancel { color: var(--preview-muted); border: 1.5px solid var(--preview-border-strong); background: var(--c-surface); }
+.preview-upload-cancel:hover { background: var(--c-surface-sunken); }
+.preview-upload-confirm { border: 0; color: var(--c-on-dark-fg); background: var(--c-primary-gradient); box-shadow: 0 8px 20px -6px rgba(29,95,209,.55); }
 .preview-upload-confirm:hover { box-shadow: 0 10px 24px -6px rgba(29,95,209,.7); }
 .preview-upload-confirm svg { width: 15px; height: 15px; }
 .preview-upload-confirm:disabled { opacity: .55; cursor: default; box-shadow: none; }
@@ -157,9 +157,11 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* Width owned by TableComponent. This one was the worst case: the component also
+   passed Breakpoint.None, so card mode never engaged and the 920px floor applied at
+   every width - a 920px table inside a phone-width dialog. */
 ::deep .preview-upload-table table {
     width: 100%;
-    min-width: 920px;
     table-layout: auto;
     border-collapse: collapse;
 }

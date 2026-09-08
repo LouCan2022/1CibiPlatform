@@ -8,25 +8,25 @@
 }
 
 .ats-application-form.ats-application-intro-host {
-    --intro-navy-900: #0b1b3d;
-    --intro-navy-800: #132a54;
-    --intro-blue-600: #1d5fd1;
-    --intro-blue-500: #2e7ce0;
-    --intro-blue-tint: #edf3fc;
-    --intro-blue-tint-2: #e3ecfb;
-    --intro-border: #dce6f7;
-    --intro-border-strong: #c2d2f0;
-    --intro-text-1: #16233f;
-    --intro-text-2: #5b6b8c;
-    --intro-text-3: #8a97b5;
-    --intro-amber: #b5790f;
-    --intro-amber-tint: #fcf1dd;
+    --intro-navy-900: var(--c-navy-900);
+    --intro-navy-800: var(--c-navy-800);
+    --intro-blue-600: var(--c-blue-600);
+    --intro-blue-500: var(--c-blue-500);
+    --intro-blue-tint: var(--c-blue-tint);
+    --intro-blue-tint-2: var(--c-blue-tint-2);
+    --intro-border: var(--c-border);
+    --intro-border-strong: var(--c-border-strong);
+    --intro-text-1: var(--c-fg-strong);
+    --intro-text-2: var(--c-fg-muted);
+    --intro-text-3: var(--c-fg-subtle);
+    --intro-amber: var(--c-warn);
+    --intro-amber-tint: var(--c-warn-bg);
     min-height: 100vh;
     min-height: 100dvh;
     padding: 40px 20px;
     align-items: safe center;
     justify-content: center;
-    background: #eef2f9;
+    background: var(--c-surface-sunken);
     color: var(--intro-text-1);
     font-family: "Inter", sans-serif;
 }
@@ -46,7 +46,7 @@
     overflow: hidden;
     border: 1px solid var(--intro-border);
     border-radius: 18px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow:
         0 0 0 6px rgba(46, 124, 224, 0.1),
         0 18px 40px -16px rgba(11, 27, 61, 0.25);
@@ -69,13 +69,13 @@
     width: 40px;
     height: 40px;
     border-radius: 11px;
-    background: linear-gradient(135deg, var(--intro-blue-500), var(--intro-navy-800));
+    background: var(--c-avatar-gradient);
 }
 
 .ats-application-logo-badge svg {
     width: 20px;
     height: 20px;
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-application-intro-header h1 {
@@ -89,7 +89,7 @@
 
 .ats-application-intro-body {
     padding: 30px 32px 34px;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .ats-application-intro-lead {
@@ -167,7 +167,7 @@
     padding: 10px 14px;
     border: 1px solid var(--intro-border);
     border-radius: 10px;
-    background: #fcfdff;
+    background: var(--c-surface-sunken);
     color: var(--intro-text-1);
     font-size: 13.5px;
     line-height: 1.5;
@@ -182,8 +182,8 @@
     height: 22px;
     margin-top: 1px;
     border-radius: 7px;
-    background: var(--intro-navy-900);
-    color: #fff;
+    background: var(--c-chip-solid-bg);
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 11.5px;
     font-weight: 700;
@@ -191,7 +191,7 @@
 }
 
 .ats-application-document-list li.is-optional {
-    background: #f8fafd;
+    background: var(--c-surface-sunken);
 }
 
 .ats-application-document-list li.is-optional .ats-application-document-index {
@@ -261,7 +261,7 @@
     gap: 12px;
     margin: 26px 0 30px;
     padding: 14px 16px;
-    border: 1.5px solid #f0dca8;
+    border: 1.5px solid var(--c-warn-bg);
     border-left: 4px solid var(--intro-amber);
     border-radius: 12px;
     background: var(--intro-amber-tint);
@@ -277,7 +277,7 @@
 
 .ats-application-notice p {
     margin: 0;
-    color: #7a5209;
+    color: var(--c-warn);
     font-size: 12.5px;
     line-height: 1.6;
 }
@@ -310,9 +310,9 @@
     gap: 9px;
     border: 0;
     border-radius: 11px;
-    background: linear-gradient(120deg, var(--intro-navy-800), var(--intro-blue-500));
+    background: var(--c-primary-gradient);
     box-shadow: 0 10px 22px -6px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Inter", sans-serif;
     font-size: 15px;
     font-weight: 700;
