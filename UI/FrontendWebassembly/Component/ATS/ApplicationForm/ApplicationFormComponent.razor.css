@@ -1533,6 +1533,14 @@
     letter-spacing: 0.2px;
 }
 
+/* ats.css's .ats-appform-form rule adds margin-top: 3px to every input label,
+   which pushes the resting (placeholder-style) label below the vertical center
+   of the 42px outlined box; MudBlazor's own translate(14px, 12px) already
+   centers it, so zero the margin inside this scope. */
+.ats-final-step-scope.ats-final-step-scope ::deep .mud-input-label-inputcontrol {
+    margin-top: 0;
+}
+
 .ats-final-step-scope.ats-final-step-scope ::deep .mud-input-label-asterisk {
     color: var(--final-danger) !important;
 }
