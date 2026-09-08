@@ -220,7 +220,9 @@ public partial class ATSRepository
 					eir.PersonalDetails.BiometricFileName,
 					eir.PersonalDetails.BiometricFileKey,
 					eir.PersonalDetails.AdditionalGovtIDFileName,
-					eir.PersonalDetails.AdditionalGovtIDFileKey
+					eir.PersonalDetails.AdditionalGovtIDFileKey,
+					eir.PersonalDetails.NBIClearanceFileName,
+					eir.PersonalDetails.NBIClearanceFileKey
 				},
 				Educational = new
 				{
@@ -312,8 +314,16 @@ public partial class ATSRepository
 			ResumeFileKey = result.Personal?.ResumeFileKey,
 			IdUploadedFileName = result.Personal?.AdditionalGovtIDFileName,
 			IdUploadedFileKey = result.Personal?.AdditionalGovtIDFileKey,
+			NbiClearanceFileName = result.Personal?.NBIClearanceFileName,
+			NbiClearanceFileKey = result.Personal?.NBIClearanceFileKey,
 			CoeFileName = coeFileName,
 			CoeFileKey = coeFileKey,
+			Coe1FileName = result.Professional?.Emp1COEUploadFileName,
+			Coe1FileKey = result.Professional?.Emp1COEUploadFileKey,
+			Coe2FileName = result.Professional?.Emp2COEUploadFileName,
+			Coe2FileKey = result.Professional?.Emp2COEUploadFileKey,
+			Coe3FileName = result.Professional?.Emp3COEUploadFileName,
+			Coe3FileKey = result.Professional?.Emp3COEUploadFileKey,
 			DiplomaFileName = diplomaFileName,
 			DiplomaFileKey = diplomaFileKey,
 			BiometricPhotoFileName = result.Personal?.BiometricFileName,
@@ -358,7 +368,10 @@ public partial class ATSRepository
 					eir.PersonalDetails.BiometricFileKey,
 
 					eir.PersonalDetails.AdditionalGovtIDFileName,
-					eir.PersonalDetails.AdditionalGovtIDFileKey
+					eir.PersonalDetails.AdditionalGovtIDFileKey,
+
+					eir.PersonalDetails.NBIClearanceFileName,
+					eir.PersonalDetails.NBIClearanceFileKey
 				},
 
 				Educational = new
@@ -392,6 +405,12 @@ public partial class ATSRepository
 
 					eir.ProfessionalExperiences.COEUploadFileName,
 					eir.ProfessionalExperiences.COEUploadFileKey
+				},
+
+				License = new
+				{
+					eir.LicensesDetails!.LicenseUploadFileName,
+					eir.LicensesDetails.LicenseUploadFileKey
 				},
 
 				Signature = new
@@ -445,6 +464,9 @@ public partial class ATSRepository
 
 			Add(result.Personal?.AdditionalGovtIDFileName, result.Personal?.AdditionalGovtIDFileKey);
 
+			Add(result.Personal?.NBIClearanceFileName, result.Personal?.NBIClearanceFileKey);
+
+			// Only the highest diploma on record goes into the compiled file.
 			Add(
 				result.Educational?.DoctorateDiplomaFileName
 					?? result.Educational?.MastersDiplomaFileName
@@ -457,15 +479,14 @@ public partial class ATSRepository
 					?? result.Educational?.SeniorHighSchoolDiplomaFileKey
 					?? result.Educational?.HighSchoolDiplomaFileKey);
 
-			Add(
-				result.Professional?.Emp1COEUploadFileName
-					?? result.Professional?.Emp2COEUploadFileName
-					?? result.Professional?.Emp3COEUploadFileName
-					?? result.Professional?.COEUploadFileName,
-				result.Professional?.Emp1COEUploadFileKey
-					?? result.Professional?.Emp2COEUploadFileKey
-					?? result.Professional?.Emp3COEUploadFileKey
-					?? result.Professional?.COEUploadFileKey);
+			// The COEs used to share that coalesce shape, which silently dropped
+			// employers 2 and 3 whenever employer 1 had a COE; every COE is included.
+			Add(result.Professional?.Emp1COEUploadFileName, result.Professional?.Emp1COEUploadFileKey);
+			Add(result.Professional?.Emp2COEUploadFileName, result.Professional?.Emp2COEUploadFileKey);
+			Add(result.Professional?.Emp3COEUploadFileName, result.Professional?.Emp3COEUploadFileKey);
+			Add(result.Professional?.COEUploadFileName, result.Professional?.COEUploadFileKey);
+
+			Add(result.License?.LicenseUploadFileName, result.License?.LicenseUploadFileKey);
 
 			Add(result.Signature?.ConsentFormFileName, result.Signature?.ConsentFormFileKey);
 

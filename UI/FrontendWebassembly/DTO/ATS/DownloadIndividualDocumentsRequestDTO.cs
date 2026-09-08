@@ -17,8 +17,12 @@ public static class AtsDocumentTypes
 	public const string BiometricPhoto = "BiometricPhoto";
 	public const string Resume = "Resume";
 	public const string GovernmentId = "GovernmentId";
+	public const string NbiClearance = "NbiClearance";
 	public const string Diploma = "Diploma";
 	public const string Coe = "Coe";
+	public const string Coe1 = "Coe1";
+	public const string Coe2 = "Coe2";
+	public const string Coe3 = "Coe3";
 	public const string ConsentForm = "ConsentForm";
 	public const string Report = "Report";
 }
