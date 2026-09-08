@@ -103,16 +103,61 @@
                     </div>
 
                     <div class="ats-result-doc-row">
-                        <div class="ats-result-doc-icon @(string.IsNullOrWhiteSpace(ReportResult.CoeFileName) ? "missing" : "uploaded")">
-                            <MudIcon Icon="@(string.IsNullOrWhiteSpace(ReportResult.CoeFileName) ? Icons.Material.Filled.Remove : Icons.Material.Filled.Check)" Size="Size.Small" />
+                        <div class="ats-result-doc-icon @(string.IsNullOrWhiteSpace(ReportResult.NbiClearanceFileName) ? "missing" : "uploaded")">
+                            <MudIcon Icon="@(string.IsNullOrWhiteSpace(ReportResult.NbiClearanceFileName) ? Icons.Material.Filled.Remove : Icons.Material.Filled.Check)" Size="Size.Small" />
                         </div>
                         <div class="ats-result-doc-details">
-                            <MudText Class="ats-result-doc-title">Certificate of employment</MudText>
-                            <div class="@GetDocumentMetaClass(ReportResult.CoeFileName)"
-                                 data-tooltip="@GetDocumentTooltip(ReportResult.CoeFileName, ReportResult.FilledFormAt)"
-                                 tabindex="@GetDocumentTabIndex(ReportResult.CoeFileName)"
-                                 aria-label="@GetDocumentTooltip(ReportResult.CoeFileName, ReportResult.FilledFormAt)">
-                                <MudText Class="ats-result-doc-sub">@GetDocumentMeta(ReportResult.CoeFileName, ReportResult.FilledFormAt)</MudText>
+                            <MudText Class="ats-result-doc-title">NBI clearance</MudText>
+                            <div class="@GetDocumentMetaClass(ReportResult.NbiClearanceFileName)"
+                                 data-tooltip="@GetDocumentTooltip(ReportResult.NbiClearanceFileName, ReportResult.FilledFormAt)"
+                                 tabindex="@GetDocumentTabIndex(ReportResult.NbiClearanceFileName)"
+                                 aria-label="@GetDocumentTooltip(ReportResult.NbiClearanceFileName, ReportResult.FilledFormAt)">
+                                <MudText Class="ats-result-doc-sub">@GetDocumentMeta(ReportResult.NbiClearanceFileName, ReportResult.FilledFormAt)</MudText>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ats-result-doc-row">
+                        <div class="ats-result-doc-icon @(string.IsNullOrWhiteSpace(Coe1DisplayFileName) ? "missing" : "uploaded")">
+                            <MudIcon Icon="@(string.IsNullOrWhiteSpace(Coe1DisplayFileName) ? Icons.Material.Filled.Remove : Icons.Material.Filled.Check)" Size="Size.Small" />
+                        </div>
+                        <div class="ats-result-doc-details">
+                            <MudText Class="ats-result-doc-title">Certificate of employment 1</MudText>
+                            <div class="@GetDocumentMetaClass(Coe1DisplayFileName)"
+                                 data-tooltip="@GetDocumentTooltip(Coe1DisplayFileName, ReportResult.FilledFormAt)"
+                                 tabindex="@GetDocumentTabIndex(Coe1DisplayFileName)"
+                                 aria-label="@GetDocumentTooltip(Coe1DisplayFileName, ReportResult.FilledFormAt)">
+                                <MudText Class="ats-result-doc-sub">@GetDocumentMeta(Coe1DisplayFileName, ReportResult.FilledFormAt)</MudText>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ats-result-doc-row">
+                        <div class="ats-result-doc-icon @(string.IsNullOrWhiteSpace(ReportResult.Coe2FileName) ? "missing" : "uploaded")">
+                            <MudIcon Icon="@(string.IsNullOrWhiteSpace(ReportResult.Coe2FileName) ? Icons.Material.Filled.Remove : Icons.Material.Filled.Check)" Size="Size.Small" />
+                        </div>
+                        <div class="ats-result-doc-details">
+                            <MudText Class="ats-result-doc-title">Certificate of employment 2</MudText>
+                            <div class="@GetDocumentMetaClass(ReportResult.Coe2FileName)"
+                                 data-tooltip="@GetDocumentTooltip(ReportResult.Coe2FileName, ReportResult.FilledFormAt)"
+                                 tabindex="@GetDocumentTabIndex(ReportResult.Coe2FileName)"
+                                 aria-label="@GetDocumentTooltip(ReportResult.Coe2FileName, ReportResult.FilledFormAt)">
+                                <MudText Class="ats-result-doc-sub">@GetDocumentMeta(ReportResult.Coe2FileName, ReportResult.FilledFormAt)</MudText>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ats-result-doc-row">
+                        <div class="ats-result-doc-icon @(string.IsNullOrWhiteSpace(ReportResult.Coe3FileName) ? "missing" : "uploaded")">
+                            <MudIcon Icon="@(string.IsNullOrWhiteSpace(ReportResult.Coe3FileName) ? Icons.Material.Filled.Remove : Icons.Material.Filled.Check)" Size="Size.Small" />
+                        </div>
+                        <div class="ats-result-doc-details">
+                            <MudText Class="ats-result-doc-title">Certificate of employment 3</MudText>
+                            <div class="@GetDocumentMetaClass(ReportResult.Coe3FileName)"
+                                 data-tooltip="@GetDocumentTooltip(ReportResult.Coe3FileName, ReportResult.FilledFormAt)"
+                                 tabindex="@GetDocumentTabIndex(ReportResult.Coe3FileName)"
+                                 aria-label="@GetDocumentTooltip(ReportResult.Coe3FileName, ReportResult.FilledFormAt)">
+                                <MudText Class="ats-result-doc-sub">@GetDocumentMeta(ReportResult.Coe3FileName, ReportResult.FilledFormAt)</MudText>
                             </div>
                         </div>
                     </div>

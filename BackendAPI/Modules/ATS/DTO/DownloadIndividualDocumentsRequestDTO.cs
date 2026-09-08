@@ -26,13 +26,20 @@ public static class AtsDocumentTypes
 	public const string BiometricPhoto = "BiometricPhoto";
 	public const string Resume = "Resume";
 	public const string GovernmentId = "GovernmentId";
+	public const string NbiClearance = "NbiClearance";
 	public const string Diploma = "Diploma";
+
+	// "Coe" is kept for older callers and resolves to the first COE on record;
+	// the numbered types address each employer's COE individually.
 	public const string Coe = "Coe";
+	public const string Coe1 = "Coe1";
+	public const string Coe2 = "Coe2";
+	public const string Coe3 = "Coe3";
 	public const string ConsentForm = "ConsentForm";
 	public const string Report = "Report";
 
 	public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 	{
-		BiometricPhoto, Resume, GovernmentId, Diploma, Coe, ConsentForm, Report
+		BiometricPhoto, Resume, GovernmentId, NbiClearance, Diploma, Coe, Coe1, Coe2, Coe3, ConsentForm, Report
 	};
 }

@@ -16,32 +16,49 @@ public partial class SelectFilesToDownloadComponent
 
 	private bool ResumeSelected;
 	private bool GovernmentIdSelected;
+	private bool NbiSelected;
 	private bool DiplomaSelected;
-	private bool CoeSelected;
+	private bool Coe1Selected;
+	private bool Coe2Selected;
+	private bool Coe3Selected;
 	private bool ConsentSelected;
 	private bool ReportSelected;
 	private bool BiometricPhotoSelected;
 
-	private int TotalDocuments => 6;
+	// Older orders carry a single un-numbered COE; it shows in the COE 1 slot so
+	// they stay downloadable from this dialog.
+	private string? Coe1DisplayFileName =>
+		!string.IsNullOrWhiteSpace(ReportResult?.Coe1FileName)
+			? ReportResult?.Coe1FileName
+			: ReportResult?.CoeFileName;
+
+	private int TotalDocuments => 10;
 
 	private int AvailableDocumentCount =>
 		(!string.IsNullOrWhiteSpace(ReportResult?.BiometricPhotoFileName) ? 1 : 0)
 		+ (!string.IsNullOrWhiteSpace(ReportResult?.ResumeFileName) ? 1 : 0)
 		+ (!string.IsNullOrWhiteSpace(ReportResult?.IdUploadedFileName) ? 1 : 0)
+		+ (!string.IsNullOrWhiteSpace(ReportResult?.NbiClearanceFileName) ? 1 : 0)
 		+ (!string.IsNullOrWhiteSpace(ReportResult?.DiplomaFileName) ? 1 : 0)
-		+ (!string.IsNullOrWhiteSpace(ReportResult?.CoeFileName) ? 1 : 0)
+		+ (!string.IsNullOrWhiteSpace(Coe1DisplayFileName) ? 1 : 0)
+		+ (!string.IsNullOrWhiteSpace(ReportResult?.Coe2FileName) ? 1 : 0)
+		+ (!string.IsNullOrWhiteSpace(ReportResult?.Coe3FileName) ? 1 : 0)
 		+ (!string.IsNullOrWhiteSpace(ReportResult?.ConsentFormFileName) ? 1 : 0)
 		+ (!string.IsNullOrWhiteSpace(ReportResult?.UploadedReportFileName) ? 1 : 0);
 
 	private bool HasSelectedFile =>
-		BiometricPhotoSelected || ResumeSelected || GovernmentIdSelected || DiplomaSelected || CoeSelected || ConsentSelected || ReportSelected;
+		BiometricPhotoSelected || ResumeSelected || GovernmentIdSelected || NbiSelected || DiplomaSelected
+		|| Coe1Selected || Coe2Selected || Coe3Selected || ConsentSelected || ReportSelected;
 
 	private int SelectedFileCount =>
 		(BiometricPhotoSelected ? 1 : 0)
 		+ (ResumeSelected ? 1 : 0)
 		+ (GovernmentIdSelected ? 1 : 0)
+		+ (NbiSelected ? 1 : 0)
 		+ (DiplomaSelected ? 1 : 0)
-		+ (CoeSelected ? 1 : 0)
+		+ (Coe1Selected ? 1 : 0)
+		+ (Coe2Selected ? 1 : 0)
+		+ (Coe3Selected ? 1 : 0)
 		+ (ConsentSelected ? 1 : 0)
 		+ (ReportSelected ? 1 : 0);
 
@@ -68,11 +85,27 @@ public partial class SelectFilesToDownloadComponent
 		if (GovernmentIdSelected)
 			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.GovernmentId);
 
+		if (NbiSelected)
+			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.NbiClearance);
+
 		if (DiplomaSelected)
 			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.Diploma);
 
-		if (CoeSelected)
-			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.Coe);
+		if (Coe1Selected)
+		{
+			// The COE 1 slot shows the legacy un-numbered COE when no Emp1 file
+			// exists; ask the server for whichever one is actually on record.
+			DownloadRequest.DocumentTypes.Add(
+				!string.IsNullOrWhiteSpace(ReportResult?.Coe1FileName)
+					? AtsDocumentTypes.Coe1
+					: AtsDocumentTypes.Coe);
+		}
+
+		if (Coe2Selected)
+			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.Coe2);
+
+		if (Coe3Selected)
+			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.Coe3);
 
 		if (ConsentSelected)
 			DownloadRequest.DocumentTypes.Add(AtsDocumentTypes.ConsentForm);

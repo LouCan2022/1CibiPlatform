@@ -470,8 +470,12 @@ public class ReportService : IReportService
 			(AtsDocumentTypes.BiometricPhoto, result.BiometricPhotoFileName, result.BiometricPhotoFileKey),
 			(AtsDocumentTypes.Resume, result.ResumeFileName, result.ResumeFileKey),
 			(AtsDocumentTypes.GovernmentId, result.IdUploadedFileName, result.IdUploadedFileKey),
+			(AtsDocumentTypes.NbiClearance, result.NbiClearanceFileName, result.NbiClearanceFileKey),
 			(AtsDocumentTypes.Diploma, result.DiplomaFileName, result.DiplomaFileKey),
 			(AtsDocumentTypes.Coe, result.CoeFileName, result.CoeFileKey),
+			(AtsDocumentTypes.Coe1, result.Coe1FileName, result.Coe1FileKey),
+			(AtsDocumentTypes.Coe2, result.Coe2FileName, result.Coe2FileKey),
+			(AtsDocumentTypes.Coe3, result.Coe3FileName, result.Coe3FileKey),
 			(AtsDocumentTypes.ConsentForm, result.ConsentFormFileName, result.ConsentFormFileKey),
 			(AtsDocumentTypes.Report, result.UploadedReportFileName, result.UploadedReportFileKey),
 		};
