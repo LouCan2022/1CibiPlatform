@@ -15,17 +15,17 @@
 }
 
 ::deep .bulk-order-type.is-rush {
-    background: #fcf1dd;
-    color: #b5790f;
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
 }
 
 ::deep .bulk-order-type.is-normal {
-    background: #f1f4fa;
-    color: #5b6b8c;
+    background: var(--c-surface-sunken);
+    color: var(--c-fg-muted);
 }
 
 ::deep .bulk-subject-count {
-    color: #16233f;
+    color: var(--c-fg-strong);
     font-size: 13px;
     font-weight: 700;
 }
@@ -40,13 +40,13 @@
 }
 
 ::deep .bulk-email-figures {
-    color: #16233f;
+    color: var(--c-fg-strong);
     font-size: 12.5px;
     font-weight: 700;
 }
 
 ::deep .bulk-email-total {
-    color: #8a97b5;
+    color: var(--c-fg-subtle);
     font-weight: 600;
 }
 
@@ -56,26 +56,26 @@
     height: 4px;
     overflow: hidden;
     border-radius: 999px;
-    background: #e9eef7;
+    background: var(--c-surface-sunken);
 }
 
 ::deep .bulk-email-bar-fill {
     display: block;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #2e7ce0, #1e9e64);
+    background: linear-gradient(90deg, var(--c-blue-500), var(--c-success));
     transition: width .3s ease;
 }
 
 ::deep .bulk-email-failed {
-    color: #c0453e;
+    color: var(--c-danger-strong);
     font-size: 11px;
     font-weight: 700;
 }
 
 /* Deliberately quieter than the failure note: pending resolves on its own. */
 ::deep .bulk-email-pending {
-    color: #8a97b5;
+    color: var(--c-fg-subtle);
     font-size: 11px;
     font-weight: 600;
 }

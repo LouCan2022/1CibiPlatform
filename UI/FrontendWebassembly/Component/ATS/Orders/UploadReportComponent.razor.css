@@ -1,19 +1,19 @@
 .ats-upload-report-shell {
-    --navy-900: #0b1b3d;
-    --blue-600: #1d5fd1;
-    --blue-500: #2e7ce0;
-    --blue-tint: #edf3fc;
-    --blue-tint-2: #e3ecfb;
-    --border: #d9e3f5;
-    --border-strong: #c2d2f0;
-    --text-1: #16233f;
-    --text-2: #5b6b8c;
-    --text-3: #8a97b5;
+    --navy-900: var(--c-navy-900);
+    --blue-600: var(--c-blue-600);
+    --blue-500: var(--c-blue-500);
+    --blue-tint: var(--c-blue-tint);
+    --blue-tint-2: var(--c-blue-tint-2);
+    --border: var(--c-border);
+    --border-strong: var(--c-border-strong);
+    --text-1: var(--c-fg-strong);
+    --text-2: var(--c-fg-muted);
+    --text-3: var(--c-fg-subtle);
     width: 100%;
     max-width: none;
     margin: 0;
     overflow: hidden;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 ::deep .ats-upload-report-dialog > .mud-dialog-content {
@@ -34,7 +34,7 @@
     padding: 28px 32px 24px;
     border: 0;
     border-radius: 0;
-    background: linear-gradient(120deg, var(--navy-900) 0%, #1c3a70 55%, var(--blue-600) 130%);
+    background: var(--c-dialog-header-gradient);
     box-shadow: none;
     display: flex;
     align-items: flex-start;
@@ -76,7 +76,7 @@
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 13px;
     background: rgba(255, 255, 255, 0.14);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-upload-report-header-icon svg {
@@ -86,7 +86,7 @@
 
 ::deep .ats-upload-report-shell-title {
     margin: 0;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 20px;
     font-weight: 600;
@@ -95,7 +95,7 @@
 
 ::deep .ats-upload-report-shell-subtitle {
     margin: 4px 0 0;
-    color: #c6d5f5;
+    color: var(--c-on-dark-fg-muted);
     font-size: 13px;
     font-weight: 400;
 }
@@ -111,7 +111,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 9px;
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
     transition: background 0.15s ease;
 }
@@ -131,14 +131,14 @@
     outline-offset: 2px;
 }
 .ats-upload-report-body { padding: 26px 30px 6px; }
-.ats-upload-report-section { margin-bottom: 16px; border: 1px solid var(--border); border-radius: 14px; background: #fcfdff; overflow: hidden; }
+.ats-upload-report-section { margin-bottom: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--c-surface-sunken); overflow: hidden; }
 .ats-upload-report-section-head { display: flex; padding: 12px 16px; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: var(--blue-tint); }
-.ats-upload-report-section-head span { display: flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 7px; background: var(--navy-900); color: #fff; font-size: 11.5px; font-weight: 600; }
+.ats-upload-report-section-head span { display: flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 7px; background: var(--navy-900); color: var(--c-on-dark-fg); font-size: 11.5px; font-weight: 600; }
 .ats-upload-report-section-head h2 { margin: 0; color: var(--text-1); font-family: Poppins, Inter, sans-serif; font-size: 14px; font-weight: 600; }
 .ats-upload-report-section-body { padding: 16px; }
 .ats-upload-report-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .ats-upload-report-field label { display: block; margin-bottom: 6px; color: var(--text-2); font-size: 12px; font-weight: 600; letter-spacing: .2px; }
-.ats-upload-report-field label b { color: #d64545; }
+.ats-upload-report-field label b { color: var(--c-danger); }
 ::deep .ats-upload-report-select .mud-input-outlined-border { border-width: 1.5px; border-color: var(--border-strong); border-radius: 10px; }
 ::deep .ats-upload-report-select.mud-input-control { margin: 0; }
 ::deep .ats-upload-report-select .mud-input-control-input-container { margin: 0; }
@@ -174,26 +174,37 @@
     height: 16px;
     font-size: 16px;
 }
-::deep .ats-upload-dropzone { padding: 28px 16px; border: 2px dashed var(--border-strong); border-radius: 12px; background: #fbfcff; text-align: center; cursor: pointer; }
+::deep .ats-upload-dropzone { padding: 28px 16px; border: 2px dashed var(--border-strong); border-radius: 12px; background: var(--c-surface-sunken); text-align: center; cursor: pointer; }
 ::deep .ats-upload-dropzone:hover { border-color: var(--blue-500); background: var(--blue-tint); }
 .ats-upload-dropzone-icon { display: flex; width: 40px; height: 40px; margin: 0 auto 10px; align-items: center; justify-content: center; border: 1px solid var(--border-strong); border-radius: 50%; background: var(--blue-tint-2); color: var(--blue-600); }
 ::deep .ats-upload-dropzone-title { color: var(--text-1); font-size: 13.5px; font-weight: 700; }
 ::deep .ats-upload-dropzone-subtitle { margin-top: 5px; color: var(--text-3); font-size: 12px; }
-::deep .ats-upload-selected-file { display: flex; padding: 10px 12px; align-items: center; gap: 10px; border: 1.5px solid var(--border-strong); border-radius: 10px; background: #fff; }
+::deep .ats-upload-selected-file { display: flex; padding: 10px 12px; align-items: center; gap: 10px; border: 1.5px solid var(--border-strong); border-radius: 10px; background: var(--c-surface); }
 ::deep .ats-upload-selected-file-icon { color: var(--blue-600); }
 ::deep .ats-upload-selected-file-name { min-width: 0; flex: 1; color: var(--text-1); font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ats-upload-report-actions { display: flex; padding: 20px 30px 26px; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); }
 ::deep .ats-upload-report-cancel,
 ::deep .ats-upload-report-submit { height: 42px; padding: 0 22px; border-radius: 10px; font-size: 14px; font-weight: 700; }
-::deep .ats-upload-report-cancel { border: 1.5px solid var(--border-strong); background: #fff; color: var(--text-2); }
-::deep .ats-upload-report-submit { background: linear-gradient(120deg, #132a54, var(--blue-600)); color: #fff; box-shadow: 0 8px 20px -6px rgba(29,95,209,.55); }
+::deep .ats-upload-report-cancel { border: 1.5px solid var(--border-strong); background: var(--c-surface); color: var(--text-2); }
+::deep .ats-upload-report-submit { background: var(--c-primary-gradient); color: var(--c-on-dark-fg); box-shadow: 0 8px 20px -6px rgba(29,95,209,.55); }
 ::deep .ats-upload-report-dialog.mud-paper { border-radius: 20px; box-shadow: none; }
 
-@media (max-width: 560px) {
+/* 600px, not the previous private 560px: every other Add/Edit dialog collapses its
+   two-column field grid at 600, so 561-600px used to show two ~230px fields here
+   while the rest of the app had already stacked. */
+@media (max-width: 600px) {
     .ats-upload-report-shell-header,
     .ats-upload-report-body,
     .ats-upload-report-actions { padding-left: 20px; padding-right: 20px; }
     .ats-upload-report-fields { grid-template-columns: 1fr; }
+
+    /* The action row is flex-end with two buttons, one of which has a 150px floor
+       (ats.css); let them share the row instead of overflowing it. */
+    ::deep .ats-upload-report-cancel,
+    ::deep .ats-upload-report-submit {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
 }
 
 @media (max-width: 390px) {

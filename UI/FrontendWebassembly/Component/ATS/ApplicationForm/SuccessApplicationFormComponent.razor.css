@@ -6,19 +6,19 @@
 }
 
 .ats-success-card {
-    --success-navy-900: #0b1b3d;
-    --success-border: #e4eaf6;
-    --success-text-1: #16233f;
-    --success-text-2: #5b6b8c;
-    --success-green: #1e9e64;
-    --success-green-tint: #e4f7ed;
-    --success-green-border: #b9e6ce;
+    --success-navy-900: var(--c-navy-900);
+    --success-border: var(--c-border-soft);
+    --success-text-1: var(--c-fg-strong);
+    --success-text-2: var(--c-fg-muted);
+    --success-green: var(--c-success);
+    --success-green-tint: var(--c-success-bg);
+    --success-green-border: var(--c-success-bg);
     width: min(460px, calc(100vw - 40px));
     max-width: 100%;
     padding: 38px 34px 34px;
     border: 1px solid var(--success-border);
     border-radius: 20px;
-    background: #fff;
+    background: var(--c-surface);
     box-shadow:
         0 0 0 6px rgba(46, 124, 224, 0.1),
         0 18px 40px -16px rgba(11, 27, 61, 0.25);

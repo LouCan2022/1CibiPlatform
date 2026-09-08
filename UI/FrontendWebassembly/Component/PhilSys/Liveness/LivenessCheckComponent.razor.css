@@ -6,17 +6,17 @@
 }
 
 .philsys-liveness-shell {
-    --philsys-navy-900: #0b1b3d;
-    --philsys-navy-800: #132a54;
-    --philsys-blue-500: #2e7ce0;
-    --philsys-blue-tint: #edf3fc;
-    --philsys-border: #e4eaf6;
-    --philsys-border-strong: #c2d2f0;
-    --philsys-text-1: #16233f;
-    --philsys-text-2: #5b6b8c;
-    --philsys-text-3: #8a97b5;
-    --philsys-green: #1e9e64;
-    --philsys-green-tint: #e4f7ed;
+    --philsys-navy-900: var(--c-navy-900);
+    --philsys-navy-800: var(--c-navy-800);
+    --philsys-blue-500: var(--c-blue-500);
+    --philsys-blue-tint: var(--c-blue-tint);
+    --philsys-border: var(--c-border-soft);
+    --philsys-border-strong: var(--c-border-strong);
+    --philsys-text-1: var(--c-fg-strong);
+    --philsys-text-2: var(--c-fg-muted);
+    --philsys-text-3: var(--c-fg-subtle);
+    --philsys-green: var(--c-success);
+    --philsys-green-tint: var(--c-success-bg);
     display: flex;
     width: 100%;
     justify-content: center;
@@ -29,7 +29,7 @@
     padding: 34px 30px 30px !important;
     border: 1px solid var(--philsys-border) !important;
     border-radius: 20px !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow:
         0 0 0 6px rgba(46, 124, 224, 0.10),
         0 18px 40px -16px rgba(11, 27, 61, 0.25) !important;
@@ -44,15 +44,15 @@
     align-items: center;
     justify-content: center;
     border-radius: 19px;
-    background: linear-gradient(135deg, var(--philsys-blue-500), var(--philsys-navy-900));
+    background: var(--c-avatar-gradient);
     box-shadow: 0 12px 24px -10px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .philsys-liveness-badge ::deep .mud-icon-root {
     width: 28px;
     height: 28px;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-size: 28px;
 }
 
@@ -121,9 +121,9 @@
     height: 50px;
     border: 0 !important;
     border-radius: 13px !important;
-    background: linear-gradient(120deg, var(--philsys-navy-800), var(--philsys-blue-500)) !important;
+    background: var(--c-primary-gradient) !important;
     box-shadow: 0 12px 26px -8px rgba(29, 95, 209, 0.55) !important;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-family: "Inter", sans-serif;
     font-size: 15px !important;
     font-weight: 700 !important;

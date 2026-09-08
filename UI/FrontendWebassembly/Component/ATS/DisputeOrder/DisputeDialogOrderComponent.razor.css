@@ -6,25 +6,25 @@
 }
 
 .dd-shell {
-    --dd-navy-900: #0b1b3d;
-    --dd-navy-800: #132a54;
-    --dd-navy-700: #1c3a70;
-    --dd-blue-600: #1d5fd1;
-    --dd-blue-500: #2e7ce0;
-    --dd-blue-tint: #edf3fc;
-    --dd-border: #d9e3f5;
-    --dd-border-strong: #c2d2f0;
-    --dd-text-1: #16233f;
-    --dd-text-2: #5b6b8c;
-    --dd-text-3: #8a97b5;
-    --dd-amber: #b5790f;
-    --dd-amber-tint: #fcf1dd;
-    --dd-amber-border: #f0dca8;
-    --dd-orange-600: #d3540e;
-    --dd-orange-500: #ea7317;
+    --dd-navy-900: var(--c-navy-900);
+    --dd-navy-800: var(--c-navy-800);
+    --dd-navy-700: var(--c-navy-700);
+    --dd-blue-600: var(--c-blue-600);
+    --dd-blue-500: var(--c-blue-500);
+    --dd-blue-tint: var(--c-blue-tint);
+    --dd-border: var(--c-border);
+    --dd-border-strong: var(--c-border-strong);
+    --dd-text-1: var(--c-fg-strong);
+    --dd-text-2: var(--c-fg-muted);
+    --dd-text-3: var(--c-fg-subtle);
+    --dd-amber: var(--c-warn);
+    --dd-amber-tint: var(--c-warn-bg);
+    --dd-amber-border: var(--c-warn-bg);
+    --dd-orange-600: var(--c-accent-orange);
+    --dd-orange-500: var(--c-accent-orange-500);
     width: 100%;
     overflow: hidden;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--dd-text-1);
     font-family: "Inter", sans-serif;
 }
@@ -33,7 +33,7 @@
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 20px !important;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 ::deep .dd-dialog > .mud-dialog-content {
@@ -47,7 +47,7 @@
     position: relative;
     overflow: hidden;
     padding: 26px 30px 22px;
-    background: linear-gradient(120deg, var(--dd-navy-900) 0%, var(--dd-navy-700) 55%, var(--dd-blue-600) 130%);
+    background: var(--c-dialog-header-gradient);
 }
 
 .dd-header::before {
@@ -88,7 +88,7 @@
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 13px;
     background: rgba(255, 255, 255, 0.14);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .dd-icon-badge svg {
@@ -98,7 +98,7 @@
 
 .dd-header-text h1 {
     margin: 0;
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 20px;
     font-weight: 600;
@@ -107,7 +107,7 @@
 
 .dd-header-text p {
     margin: 4px 0 0;
-    color: #c6d5f5;
+    color: var(--c-on-dark-fg-muted);
     font-size: 13px;
     font-weight: 400;
 }
@@ -123,7 +123,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 9px;
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
     transition: background 0.15s ease;
 }
@@ -146,7 +146,7 @@
 
 .dd-body {
     padding: 26px 30px 6px;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .dd-section {
@@ -154,7 +154,7 @@
     overflow: hidden;
     border: 1px solid var(--dd-border);
     border-radius: 14px;
-    background: #fcfdff;
+    background: var(--c-surface-sunken);
 }
 
 .dd-section-head {
@@ -175,7 +175,7 @@
     height: 22px;
     border-radius: 7px;
     background: var(--dd-navy-900);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 11.5px;
     font-weight: 600;
@@ -211,7 +211,7 @@
 
 .dd-required {
     margin-left: 2px;
-    color: #d64545;
+    color: var(--c-danger);
 }
 
 .dd-input-wrap ::deep .mud-input-control {
@@ -221,7 +221,7 @@
 .dd-input-wrap ::deep .mud-input {
     min-height: 42px;
     border-radius: 10px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--dd-text-1);
     font-family: "Inter", sans-serif;
     font-size: 14px;
@@ -271,7 +271,7 @@
 }
 
 .dd-input-wrap ::deep .mud-input-error .mud-input-outlined-border {
-    border-color: #d64545;
+    border-color: var(--c-danger);
 }
 
 .dd-input-wrap ::deep .mud-input-helper-text {
@@ -296,7 +296,7 @@
     padding: 0 16px;
     border: 1.5px solid var(--dd-border-strong);
     border-radius: 20px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--dd-text-1);
     cursor: pointer;
     transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
@@ -352,9 +352,9 @@
 
 .dd-pills-wrap ::deep .dd-pill.is-selected {
     border-color: transparent;
-    background: linear-gradient(120deg, var(--dd-navy-800), var(--dd-blue-600));
+    background: var(--c-primary-gradient);
     box-shadow: 0 6px 14px -6px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .dd-warning {
@@ -379,7 +379,7 @@
 
 .dd-warning p {
     margin: 0;
-    color: #7a5209;
+    color: var(--c-warn);
     font-size: 12.5px;
     line-height: 1.5;
 }
@@ -389,7 +389,7 @@
     justify-content: flex-end;
     gap: 10px;
     padding: 0 30px 26px;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .dd-button {
@@ -413,19 +413,19 @@
 
 .dd-button-cancel {
     border: 1.5px solid var(--dd-border-strong);
-    background: #eef1f7;
+    background: var(--c-border-soft);
     color: var(--dd-text-2);
 }
 
 .dd-button-cancel:hover {
-    background: #e4e9f2;
+    background: var(--c-surface-sunken);
 }
 
 .dd-button-send {
     border: 0;
     background: linear-gradient(120deg, var(--dd-orange-600), var(--dd-orange-500));
     box-shadow: 0 8px 20px -6px rgba(211, 84, 14, 0.55);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .dd-button-send:hover:not(:disabled) {

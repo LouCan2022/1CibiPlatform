@@ -1,11 +1,11 @@
 .eca-shell {
-    --eca-navy: #132a54;
-    --eca-blue: #1d5fd1;
-    --eca-border: #c2d2f0;
-    --eca-muted: #5b6b8c;
+    --eca-navy: var(--c-navy-800);
+    --eca-blue: var(--c-blue-600);
+    --eca-border: var(--c-border-strong);
+    --eca-muted: var(--c-fg-muted);
     overflow: hidden;
-    background: #fff;
-    color: #16233f;
+    background: var(--c-surface);
+    color: var(--c-fg-strong);
     font-family: "Inter", sans-serif;
 }
 
@@ -15,8 +15,8 @@
     justify-content: space-between;
     gap: 16px;
     padding: 26px 30px 22px;
-    background: linear-gradient(120deg, #0b1b3d, var(--eca-navy) 60%, var(--eca-blue) 140%);
-    color: #fff;
+    background: var(--c-dialog-header-gradient);
+    color: var(--c-on-dark-fg);
 }
 
 .eca-header h1 {
@@ -28,7 +28,7 @@
 
 .eca-header p {
     margin: 4px 0 0;
-    color: #c6d5f5;
+    color: var(--c-on-dark-fg-muted);
     font-size: 13px;
 }
 
@@ -42,7 +42,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 9px;
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--c-on-dark-fg);
     cursor: pointer;
 }
 
@@ -57,9 +57,9 @@
     align-items: center;
     gap: 12px;
     padding: 14px;
-    border: 1px solid #d9e3f5;
+    border: 1px solid var(--c-border);
     border-radius: 12px;
-    background: #edf3fc;
+    background: var(--c-blue-tint);
 }
 
 .eca-user-card div {
@@ -85,8 +85,8 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2e7ce0, var(--eca-navy));
-    color: #fff;
+    background: linear-gradient(135deg, var(--c-blue-500), var(--eca-navy));
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-weight: 600;
 }
@@ -100,12 +100,12 @@
 }
 
 .eca-field > label span {
-    color: #d64545;
+    color: var(--c-danger);
 }
 
 .eca-field > p {
     margin: 6px 0 0;
-    color: #8a97b5;
+    color: var(--c-fg-subtle);
     font-size: 11px;
 }
 
@@ -116,10 +116,11 @@
 
 .eca-footer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 10px;
     padding: 20px 30px 24px;
-    border-top: 1px solid #d9e3f5;
+    border-top: 1px solid var(--c-border);
 }
 
 .eca-button {
@@ -145,21 +146,30 @@
 
 .eca-button-cancel {
     border: 1px solid var(--eca-border);
-    background: #fff;
+    background: var(--c-surface);
     color: var(--eca-muted);
 }
 
 .eca-button-save {
     border: 0;
     background: linear-gradient(120deg, var(--eca-navy), var(--eca-blue));
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
-@media (max-width: 560px) {
+/* 600px to match every other ATS dialog; this file used a private 560px. */
+@media (max-width: 600px) {
     .eca-header,
     .eca-body,
     .eca-footer {
         padding-left: 18px;
         padding-right: 18px;
+    }
+
+    /* The footer previously never stacked or stretched at any width - its only media
+       query changed padding - so two 106px buttons stayed side by side down to 320px. */
+    .eca-button {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-width: 0;
     }
 }

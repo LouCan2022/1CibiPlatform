@@ -1,14 +1,14 @@
 .ats-step-three-scope {
-    --step3-navy-800: #132a54;
-    --step3-blue-600: #1d5fd1;
-    --step3-blue-500: #2e7ce0;
-    --step3-blue-tint: #edf3fc;
-    --step3-blue-tint-2: #e3ecfb;
-    --step3-border-strong: #c2d2f0;
-    --step3-text-1: #16233f;
-    --step3-text-2: #5b6b8c;
-    --step3-text-3: #8a97b5;
-    --step3-red: #d64545;
+    --step3-navy-800: var(--c-navy-800);
+    --step3-blue-600: var(--c-blue-600);
+    --step3-blue-500: var(--c-blue-500);
+    --step3-blue-tint: var(--c-blue-tint);
+    --step3-blue-tint-2: var(--c-blue-tint-2);
+    --step3-border-strong: var(--c-border-strong);
+    --step3-text-1: var(--c-fg-strong);
+    --step3-text-2: var(--c-fg-muted);
+    --step3-text-3: var(--c-fg-subtle);
+    --step3-red: var(--c-danger);
     width: 100%;
 }
 
@@ -48,7 +48,7 @@
     padding: 0 !important;
     border: 0;
     border-radius: 0 !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: none !important;
 }
 
@@ -142,7 +142,7 @@
     height: 44px !important;
     min-height: 44px !important;
     border-radius: 10px !important;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .ats-step-three-scope.ats-step-three-scope ::deep .oneplatform-rounded-input .mud-input-outlined-border {
@@ -280,9 +280,9 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border: 3px solid #fff;
+    border: 3px solid var(--c-surface);
     border-radius: 50%;
-    background: #dce3ef;
+    background: var(--c-border-strong);
     box-shadow: 0 4px 14px -6px rgba(11, 27, 61, 0.25);
 }
 
@@ -290,7 +290,7 @@
     width: 94px;
     height: 94px;
     margin-bottom: -8px;
-    color: #a6b0c6 !important;
+    color: var(--c-fg-subtle) !important;
     font-size: 94px;
 }
 
@@ -320,15 +320,15 @@
 }
 
 .ats-step-three-scope.ats-step-three-scope ::deep .ats-step-two-status.not-verified {
-    border-color: #f1c7c7;
-    background: #fbe9e9;
+    border-color: var(--c-danger-bg);
+    background: var(--c-danger-bg);
     color: var(--step3-red);
 }
 
 .ats-step-three-scope.ats-step-three-scope ::deep .ats-step-two-status.verified {
-    border-color: #b9dec2;
-    background: #e8f5e9;
-    color: #2e7d32;
+    border-color: var(--c-success-bg);
+    background: var(--c-success-bg);
+    color: var(--c-success);
 }
 
 .ats-step-three-scope.ats-step-three-scope ::deep .ats-step-two-status .mud-icon-root {
@@ -359,7 +359,7 @@
     gap: 12px;
     border: 1.5px solid var(--step3-border-strong) !important;
     border-radius: 11px !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: none !important;
     color: var(--step3-blue-600) !important;
     text-transform: none !important;
@@ -451,7 +451,7 @@
     align-items: center;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .ats-step-three-scope.ats-step-three-scope ::deep .ats-step-two-grid {
         grid-template-columns: 1fr;
     }
@@ -483,15 +483,15 @@
 }
 
 .ats-step-four-scope {
-    --step4-navy-800: #132a54;
-    --step4-blue-600: #1d5fd1;
-    --step4-blue-500: #2e7ce0;
-    --step4-blue-tint: #edf3fc;
-    --step4-border-strong: #c2d2f0;
-    --step4-text-1: #16233f;
-    --step4-text-2: #5b6b8c;
-    --step4-text-3: #8a97b5;
-    --step4-red: #d64545;
+    --step4-navy-800: var(--c-navy-800);
+    --step4-blue-600: var(--c-blue-600);
+    --step4-blue-500: var(--c-blue-500);
+    --step4-blue-tint: var(--c-blue-tint);
+    --step4-border-strong: var(--c-border-strong);
+    --step4-text-1: var(--c-fg-strong);
+    --step4-text-2: var(--c-fg-muted);
+    --step4-text-3: var(--c-fg-subtle);
+    --step4-red: var(--c-danger);
     width: 100%;
 }
 
@@ -596,7 +596,7 @@
     height: 44px !important;
     min-height: 44px !important;
     border-radius: 10px !important;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .ats-step-four-scope.ats-step-four-scope ::deep .ats-step-four-permanent-detail .ats-step-four-control .mud-input-outlined,
@@ -651,7 +651,7 @@
 
 .ats-step-four-scope.ats-step-four-scope ::deep .ats-step-four-control.mud-disabled .mud-input-outlined,
 .ats-step-four-scope.ats-step-four-scope ::deep .ats-step-four-control .mud-input-outlined.mud-disabled {
-    background: #f7f9fc;
+    background: var(--c-surface-sunken);
 }
 
 .ats-step-four-scope.ats-step-four-scope ::deep .ats-step-four-same-address {
@@ -714,7 +714,7 @@
     justify-content: center;
     border: 1.5px solid var(--step4-border-strong);
     border-radius: 20px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--step4-text-1);
     cursor: pointer;
     transition: border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
@@ -771,9 +771,9 @@
 
 .ats-step-four-scope.ats-step-four-scope ::deep .ats-ownership-pill:is(.selected, .mud-checked, .mud-radio-checked) {
     border-color: transparent;
-    background: linear-gradient(120deg, var(--step4-navy-800), var(--step4-blue-600));
+    background: var(--c-primary-gradient);
     box-shadow: 0 6px 14px -6px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-step-four-scope.ats-step-four-scope ::deep .ats-step-four-education-heading {
@@ -802,7 +802,7 @@
     gap: 9px;
     border: 1.5px dashed var(--step4-border-strong) !important;
     border-radius: 10px !important;
-    background: #fbfcff !important;
+    background: var(--c-surface-sunken) !important;
     box-shadow: none !important;
     color: var(--step4-text-3) !important;
     font-size: 12.5px;
@@ -874,7 +874,7 @@
     align-items: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
     .ats-step-four-scope.ats-step-four-scope ::deep :is(.ats-step-four-address-main, .ats-step-four-address-detail) {
         grid-column: span 14;
     }
@@ -898,17 +898,17 @@
 }
 
 .ats-step-five-scope {
-    --step5-navy-900: #0b1b3d;
-    --step5-navy-800: #132a54;
-    --step5-blue-600: #1d5fd1;
-    --step5-blue-500: #2e7ce0;
-    --step5-blue-tint: #edf3fc;
-    --step5-blue-tint-2: #e3ecfb;
-    --step5-border-strong: #c2d2f0;
-    --step5-text-1: #16233f;
-    --step5-text-2: #5b6b8c;
-    --step5-text-3: #8a97b5;
-    --step5-red: #d64545;
+    --step5-navy-900: var(--c-navy-900);
+    --step5-navy-800: var(--c-navy-800);
+    --step5-blue-600: var(--c-blue-600);
+    --step5-blue-500: var(--c-blue-500);
+    --step5-blue-tint: var(--c-blue-tint);
+    --step5-blue-tint-2: var(--c-blue-tint-2);
+    --step5-border-strong: var(--c-border-strong);
+    --step5-text-1: var(--c-fg-strong);
+    --step5-text-2: var(--c-fg-muted);
+    --step5-text-3: var(--c-fg-subtle);
+    --step5-red: var(--c-danger);
     width: 100%;
 }
 
@@ -1007,14 +1007,14 @@
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-license-segment-btn.active {
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: 0 2px 8px rgba(11, 27, 61, 0.1) !important;
     color: var(--step5-blue-600) !important;
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-license-segment-btn.active.no {
     background: var(--step5-navy-900) !important;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-step-five-control {
@@ -1037,7 +1037,7 @@
     height: 44px !important;
     min-height: 44px !important;
     border-radius: 10px !important;
-    background: #fff;
+    background: var(--c-surface);
 }
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-step-five-control .mud-input-outlined-border {
@@ -1095,7 +1095,7 @@
 
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-step-five-control.mud-disabled .mud-input-outlined,
 .ats-step-five-scope.ats-step-five-scope ::deep .ats-step-five-control .mud-input-outlined.mud-disabled {
-    background: #f3f5fa;
+    background: var(--c-surface-sunken);
     color: var(--step5-text-3) !important;
 }
 
@@ -1129,7 +1129,7 @@
     overflow: hidden;
     border: 1.5px dashed var(--step5-border-strong) !important;
     border-radius: 10px !important;
-    background: #fbfcff !important;
+    background: var(--c-surface-sunken) !important;
     box-shadow: none !important;
     color: var(--step5-text-3) !important;
     font-size: 12px;
@@ -1212,7 +1212,7 @@
     padding: 20px 20px 22px !important;
     border: 1.5px solid var(--step5-border-strong) !important;
     border-radius: 14px !important;
-    background: #fcfdff !important;
+    background: var(--c-surface-sunken) !important;
     box-shadow: none !important;
 }
 
@@ -1330,7 +1330,7 @@
     justify-content: center;
     border: 1.5px dashed var(--step5-border-strong);
     border-radius: 12px;
-    background: #fbfcff;
+    background: var(--c-surface-sunken);
     color: var(--step5-blue-600);
     cursor: pointer;
     transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -1407,15 +1407,15 @@
 }
 
 .ats-final-step-scope {
-    --final-navy: #132a54;
-    --final-blue: #1d5fd1;
-    --final-blue-hover: #2e7ce0;
-    --final-tint: #edf3fc;
-    --final-border: #c2d2f0;
-    --final-text: #16233f;
-    --final-muted: #5b6b8c;
-    --final-subtle: #8a97b5;
-    --final-danger: #d64545;
+    --final-navy: var(--c-navy-800);
+    --final-blue: var(--c-blue-600);
+    --final-blue-hover: var(--c-blue-500);
+    --final-tint: var(--c-blue-tint);
+    --final-border: var(--c-border-strong);
+    --final-text: var(--c-fg-strong);
+    --final-muted: var(--c-fg-muted);
+    --final-subtle: var(--c-fg-subtle);
+    --final-danger: var(--c-danger);
     width: 100%;
 }
 
@@ -1449,7 +1449,7 @@
     overflow: visible;
     border: 1.5px solid var(--final-border) !important;
     border-radius: 14px !important;
-    background: #fcfdff !important;
+    background: var(--c-surface-sunken) !important;
     box-shadow: none !important;
 }
 
@@ -1610,7 +1610,7 @@
     justify-content: center;
     border: 1.5px solid var(--final-border);
     border-radius: 20px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--final-text);
     cursor: pointer;
     transition: border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
@@ -1669,7 +1669,7 @@
     border-color: transparent;
     background: linear-gradient(120deg, var(--final-navy), var(--final-blue));
     box-shadow: 0 6px 14px -6px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .ats-final-step-scope.ats-final-step-scope ::deep .ats-reference-datetime-wrap {
@@ -1694,7 +1694,7 @@
     justify-content: center;
     border: 1.5px dashed var(--final-border);
     border-radius: 12px;
-    background: #fbfcff;
+    background: var(--c-surface-sunken);
     color: var(--final-blue);
     cursor: pointer;
     transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -1757,11 +1757,11 @@
     height: 42px !important;
     margin: 0 !important;
     padding: 0 22px !important;
-    border: 1.5px solid #c2d2f0 !important;
+    border: 1.5px solid var(--c-border-strong) !important;
     border-radius: 10px !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: none !important;
-    color: #1d5fd1 !important;
+    color: var(--c-blue-600) !important;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.4px;
@@ -1769,13 +1769,13 @@
 }
 
 .ats-step-action-bar.ats-step-action-bar ::deep .ats-previous-button:hover {
-    background: #f4f7fc !important;
+    background: var(--c-surface-sunken) !important;
 }
 
 .ats-step-action-bar.ats-step-action-bar ::deep .ats-previous-button .mud-icon-root {
     width: 14px;
     height: 14px;
-    color: #1d5fd1 !important;
+    color: var(--c-blue-600) !important;
     font-size: 14px;
 }
 
@@ -1787,9 +1787,9 @@
     padding: 0 26px !important;
     border: 0 !important;
     border-radius: 11px !important;
-    background: linear-gradient(120deg, #132a54, #2e7ce0) !important;
+    background: var(--c-primary-gradient) !important;
     box-shadow: 0 10px 22px -6px rgba(29, 95, 209, 0.5) !important;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-size: 14.5px;
     font-weight: 700;
     text-transform: none;
@@ -1817,9 +1817,9 @@
     padding: 0 30px !important;
     border: 0 !important;
     border-radius: 11px !important;
-    background: linear-gradient(120deg, #132a54, #2e7ce0) !important;
+    background: var(--c-primary-gradient) !important;
     box-shadow: 0 10px 22px -6px rgba(29, 95, 209, 0.5) !important;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-size: 14.5px;
     font-weight: 700;
     text-transform: none;
@@ -1842,7 +1842,7 @@
     box-shadow: 0 12px 26px -6px rgba(29, 95, 209, 0.65) !important;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .ats-final-step-scope.ats-final-step-scope ::deep .ats-reference-grid > .mud-grid-item {
         grid-column: 1 / -1 !important;
     }

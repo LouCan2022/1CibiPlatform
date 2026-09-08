@@ -6,10 +6,10 @@
    re-declare any of those here. */
 
 .ats-audit-shell {
-    --border: #e4eaf6;
-    --text-1: #16233f;
-    --text-2: #5b6b8c;
-    --text-3: #8a97b5;
+    --border: var(--c-border-soft);
+    --text-1: var(--c-fg-strong);
+    --text-2: var(--c-fg-muted);
+    --text-3: var(--c-fg-subtle);
 }
 
 .ats-audit-body {
@@ -79,7 +79,7 @@
     .audit-section-note code {
         padding: 1px 5px;
         border-radius: 5px;
-        background: #eef2fa;
+        background: var(--c-surface-sunken);
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 11px;
     }
@@ -100,7 +100,7 @@
     gap: 8px;
     padding: 9px 12px;
     border-bottom: 1px solid var(--border);
-    background: #f7f9fd;
+    background: var(--c-surface-sunken);
 }
 
 .audit-change-key {
@@ -134,7 +134,7 @@
 
     .audit-change-table td {
         padding: 7px 12px;
-        border-top: 1px solid #eef2fa;
+        border-top: 1px solid var(--c-surface-sunken);
         overflow-wrap: anywhere;
         vertical-align: top;
     }
@@ -148,14 +148,14 @@
 /* The old value reads as struck-through history, the new one as current. */
 .audit-change-from {
     width: 35%;
-    color: #a5352f;
+    color: var(--c-danger-strong);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 11.5px;
 }
 
 .audit-change-to {
     width: 35%;
-    color: #1c7a48;
+    color: var(--c-success);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 11.5px;
 }
@@ -173,7 +173,7 @@
     padding: 12px 14px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: #f7f9fd;
+    background: var(--c-surface-sunken);
     overflow: auto;
 }
 
@@ -190,12 +190,12 @@
 /* The failure reason reads as an error, matching the board's failure text. */
 .audit-code-block-error {
     margin-bottom: 22px;
-    border-color: #f0d4d2;
-    background: #fdf4f3;
+    border-color: var(--c-danger-bg);
+    background: var(--c-danger-bg);
 }
 
     .audit-code-block-error pre {
-        color: #a5352f;
+        color: var(--c-danger-strong);
     }
 
 /* ---------- Copy button ---------- */
@@ -209,14 +209,14 @@
     padding: 0;
     border: 1px solid var(--border);
     border-radius: 7px;
-    background: #fff;
+    background: var(--c-surface);
     color: var(--text-2);
     cursor: pointer;
 }
 
     .audit-copy-btn:hover {
-        border-color: #cbd8ee;
-        color: #1d5fd1;
+        border-color: var(--c-border-strong);
+        color: var(--c-blue-600);
     }
 
     .audit-copy-btn:focus-visible {
@@ -226,9 +226,9 @@
 
     /* Confirms the copy happened; cleared after a moment by the component. */
     .audit-copy-btn.copied {
-        border-color: #bfe3cd;
-        background: #eefaf2;
-        color: #1c7a48;
+        border-color: var(--c-border-strong);
+        background: var(--c-success-bg);
+        color: var(--c-success);
     }
 
     .audit-copy-btn ::deep .mud-icon-root {

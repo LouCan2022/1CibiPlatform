@@ -6,11 +6,11 @@
 }
 
 .philsys-complete-overlay {
-    --philsys-navy-900: #0b1b3d;
-    --philsys-border: #e4eaf6;
-    --philsys-text-2: #5b6b8c;
-    --philsys-green: #1e8e5a;
-    --philsys-green-tint: #e7f5ec;
+    --philsys-navy-900: var(--c-navy-900);
+    --philsys-border: var(--c-border-soft);
+    --philsys-text-2: var(--c-fg-muted);
+    --philsys-green: var(--c-success);
+    --philsys-green-tint: var(--c-success-bg);
     display: flex;
     width: 100%;
     align-items: center;
@@ -24,7 +24,7 @@
     padding: 32px 30px !important;
     border: 1px solid var(--philsys-border) !important;
     border-radius: 16px !important;
-    background: #fff !important;
+    background: var(--c-surface) !important;
     box-shadow: 0 12px 32px -12px rgba(11, 27, 61, .12) !important;
     text-align: center;
 }

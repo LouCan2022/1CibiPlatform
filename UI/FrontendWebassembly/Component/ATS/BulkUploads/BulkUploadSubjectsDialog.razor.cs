@@ -226,7 +226,7 @@ public partial class BulkUploadSubjectsDialog
 			},
 			{
 				nameof(YesNoDialogComponent.InfoBGColor),
-				"#FCF1DD"
+				"var(--c-warn-bg)"
 			},
 			{
 				nameof(YesNoDialogComponent.ThemeButtonColor),

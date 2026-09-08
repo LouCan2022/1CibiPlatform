@@ -3,8 +3,13 @@
 public partial class SSOLayout
 {
 	private bool _drawerOpen = true;
-	private bool _isDarkMode = false;
 	private bool _isLoading = true;
+
+	// Mirrors ThemeService so the existing _isDarkMode-based style helpers below keep
+	// working. Previously this layout owned the flag privately and never called
+	// setStartupTheme, so toggling here left the <html> class and the Mud palette
+	// disagreeing until the next full page load.
+	private bool _isDarkMode => Theme.IsDarkMode;
 
 	private const string _appIdKey = "AppId";
 	private const string _subMenuKey = "SubMenuId";
@@ -15,43 +20,21 @@ public partial class SSOLayout
 	private List<int> Roles = new List<int>();
 
 
-	private MudTheme _myTheme = new MudTheme()
+	private static MudTheme _myTheme => ThemeService.Theme;
+
+	protected override async Task OnInitializedAsync()
 	{
-		PaletteLight = new PaletteLight()
-		{
-			Primary = "#667eea",
-			Secondary = "#764ba2",
-			Background = Colors.Gray.Lighten5,
-			Surface = Colors.Shades.White,
-			AppbarBackground = "#667eea",
-			AppbarText = Colors.Shades.White,
-			TextPrimary = Colors.Gray.Darken3
-		},
-		PaletteDark = new PaletteDark()
-		{
-			Primary = "#8b9dff",
-			Secondary = "#9d6bc7",
-			Background = Colors.Gray.Darken4,
-			Surface = Colors.Gray.Darken3,
-			AppbarBackground = "#5568d3",
-			AppbarText = Colors.Shades.White,
-			TextPrimary = Colors.Shades.White
-		},
-		LayoutProperties = new LayoutProperties()
-		{
-			DefaultBorderRadius = "10px",
-			DrawerWidthLeft = "260px",
-			DrawerWidthRight = "260px",
-			AppbarHeight = "64px"
-		}
-	};
+		await Theme.InitializeAsync();
+		Theme.OnChanged += HandleThemeChanged;
+	}
+
+	private void HandleThemeChanged() => InvokeAsync(StateHasChanged);
+
+	public void Dispose() => Theme.OnChanged -= HandleThemeChanged;
 
 	private void DrawerToggle() => _drawerOpen = !_drawerOpen;
-	private async Task ToggleDarkMode()
-	{
-		_isDarkMode = !_isDarkMode;
-		await LocalStorageService.SetItemAsync("isDarkMode", _isDarkMode);
-	}
+
+	private async Task ToggleDarkMode() => await Theme.ToggleAsync();
 
 	private string GetAppBarStyle()
 	{

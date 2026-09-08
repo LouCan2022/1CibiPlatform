@@ -4,7 +4,6 @@ namespace FrontendWebassembly.Layout;
 
 public partial class MainLayout
 {
-	private bool _isDarkMode = false;
 	private bool _isLoading = true;
 	private bool _isOpeningProfile = false;
 	private string name = "";
@@ -46,42 +45,12 @@ public partial class MainLayout
 		}
 	}
 
-	private MudTheme _myTheme = new MudTheme()
-	{
-		PaletteLight = new PaletteLight()
-		{
-			Primary = "#667eea",
-			Secondary = "#764ba2",
-			Background = Colors.Gray.Lighten5,
-			Surface = Colors.Shades.White,
-			AppbarBackground = "#667eea",
-			AppbarText = Colors.Shades.White,
-			TextPrimary = Colors.Gray.Darken3
-		},
-		PaletteDark = new PaletteDark()
-		{
-			Primary = "#8b9dff",
-			Secondary = "#9d6bc7",
-			Background = Colors.Gray.Darken4,
-			Surface = Colors.Gray.Darken3,
-			AppbarBackground = "#5568d3",
-			AppbarText = Colors.Shades.White,
-			TextPrimary = Colors.Shades.White
-		},
-		LayoutProperties = new LayoutProperties()
-		{
-			DefaultBorderRadius = "4px",
-			AppbarHeight = "64px"
-		}
-	};
+	// The palette now lives on ThemeService so MainLayout, ConsoleLayout and
+	// SSOLayout cannot drift apart, and so it stays in step with the CSS tokens in
+	// wwwroot/css/theme.css.
+	private async Task ToggleDarkMode() => await Theme.ToggleAsync();
 
-	private async Task ToggleDarkMode()
-	{
-		_isDarkMode = !_isDarkMode;
-		await LocalStorageService.SetItemAsync("isDarkMode", _isDarkMode);
-		await JS.InvokeVoidAsync("setStartupTheme", _isDarkMode);
-
-	}
+	private void HandleThemeChanged() => InvokeAsync(StateHasChanged);
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -105,11 +74,8 @@ public partial class MainLayout
 
 			name = await LocalStorageService.GetItemAsync<string>(_userNameKey) ?? string.Empty;
 
-			var stored = await LocalStorageService.GetItemAsync<bool?>("isDarkMode");
-
-			_isDarkMode = stored ?? false;
-
-			await JS.InvokeVoidAsync("setStartupTheme", _isDarkMode);
+			await Theme.InitializeAsync();
+			Theme.OnChanged += HandleThemeChanged;
 
 			NavigationManager.LocationChanged += HandleLocationChanged;
 			_isLoading = false;
@@ -222,6 +188,7 @@ public partial class MainLayout
 	public void Dispose()
 	{
 		NavigationManager.LocationChanged -= HandleLocationChanged;
+		Theme.OnChanged -= HandleThemeChanged;
 	}
 
 }
