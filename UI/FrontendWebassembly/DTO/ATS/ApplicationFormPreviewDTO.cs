@@ -9,12 +9,16 @@ public record ApplicationFormPreviewDTO
 	public string? SubjectName { get; set; }
 	public string? FilledFormAt { get; set; }
 
+	// True when the applicant went through the PhilSys liveness flow.
+	public bool PhilSysVerified { get; set; }
+
 	public PersonalPreviewDTO? Personal { get; set; }
 	public AddressPreviewDTO? Address { get; set; }
 	public EducationPreviewDTO? Education { get; set; }
 	public LicensePreviewDTO? License { get; set; }
 	public List<EmployerPreviewDTO> Employers { get; set; } = [];
 	public List<ReferencePreviewDTO> References { get; set; } = [];
+	public SignaturePreviewDTO? Signature { get; set; }
 }
 
 public record PersonalPreviewDTO
@@ -34,6 +38,18 @@ public record PersonalPreviewDTO
 	public string? EmailAlternative { get; set; }
 	public string? SSS { get; set; }
 	public string? TIN { get; set; }
+
+	// Supporting documents uploaded on the verification step (names only).
+	public string? GovtIdFileName { get; set; }
+	public string? NbiClearanceFileName { get; set; }
+	public string? ResumeFileName { get; set; }
+}
+
+public record SignaturePreviewDTO
+{
+	public string? SignerName { get; set; }
+	public string? SignatureDate { get; set; }
+	public string? ConsentFormFileName { get; set; }
 }
 
 public record AddressPreviewDTO
@@ -57,6 +73,7 @@ public record EducationPreviewDTO
 	public string? SchoolName { get; set; }
 	public string? Degree { get; set; }
 	public string? GraduationDate { get; set; }
+	public string? DiplomaFileName { get; set; }
 }
 
 public record LicensePreviewDTO
@@ -64,6 +81,7 @@ public record LicensePreviewDTO
 	public string? LicenseName { get; set; }
 	public string? LicenseNumber { get; set; }
 	public string? LicenseExpiryDate { get; set; }
+	public string? LicenseFileName { get; set; }
 }
 
 public record EmployerPreviewDTO
@@ -74,10 +92,12 @@ public record EmployerPreviewDTO
 	public string? StartDate { get; set; }
 	public string? EndDate { get; set; }
 	public string? CurrentlyEmployed { get; set; }
+	public string? PermissionToContact { get; set; }
 	public string? ReasonForLeaving { get; set; }
 	public string? SupervisorName { get; set; }
 	public string? SupervisorContactNumber { get; set; }
 	public string? SupervisorEmail { get; set; }
+	public string? CoeFileName { get; set; }
 }
 
 public record ReferencePreviewDTO

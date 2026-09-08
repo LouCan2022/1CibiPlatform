@@ -1679,6 +1679,27 @@
     overflow: hidden;
 }
 
+/* Application form preview: keep a single scroller. The generic .ats-scroll-dialog
+   rules only catch .mud-dialog-content as a direct child; when MudBlazor nests the
+   content one level deeper that div falls back to its default overflow:auto and a
+   second, outer scrollbar appears. Restated at any depth for this dialog so only
+   .ats-dialog-body scrolls and the header stays pinned. */
+.ats-appform-preview-dialog.mud-dialog {
+    padding: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+.ats-appform-preview-dialog .mud-dialog-content {
+    display: flex !important;
+    min-height: 0;
+    margin: 0;
+    padding: 0 !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
 .mud-dialog.ats-chart-detail-dialog {
     animation-name: ats-chart-zoom-in;
     animation-duration: 0.28s;
@@ -1802,7 +1823,6 @@
     padding: 18px 28px 24px;
 }
 
-.ats-download-cancel,
 .ats-download-submit {
     min-width: 140px;
     border-radius: 12px !important;
@@ -1812,12 +1832,7 @@
     padding: 10px 18px !important;
 }
 
-.ats-download-cancel {
-    border-color: #d9e2ee !important;
-    color: #102247 !important;
-}
-
-/* The tooltip wrapper carries the flex spacing, pushing Cancel/Download right. */
+/* The tooltip wrapper carries the flex spacing, pushing Download right. */
 .ats-download-actions > .mud-tooltip-root {
     margin-right: auto;
 }
@@ -1998,7 +2013,6 @@
         font-size: 12px;
     }
 
-    .ats-download-cancel,
     .ats-download-submit {
         min-width: 120px;
         font-size: 14px !important;

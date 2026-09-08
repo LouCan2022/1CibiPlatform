@@ -3,134 +3,245 @@
 <MudDialog Class="ats-appform-preview-dialog ats-scroll-dialog" Style="padding: 0;">
     <DialogContent>
         <div class="ats-appform-preview-shell ats-dialog-shell">
-            <div class="ats-appform-preview-header ats-dialog-header">
+            <header class="ats-appform-preview-header ats-dialog-header">
                 <div class="ats-appform-preview-header-row">
                     <div class="ats-appform-preview-header-left">
                         <span class="ats-appform-preview-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6.5A1.5 1.5 0 005 3.5v17A1.5 1.5 0 006.5 22h11a1.5 1.5 0 001.5-1.5V8l-5-6z" /><path d="M14 2v5.5A1.5 1.5 0 0015.5 9H21M8.5 13h7M8.5 16.5h4" /></svg>
                         </span>
-                        <div>
-                            <MudText Typo="Typo.h5" Class="ats-appform-preview-title">Application form preview</MudText>
-                            <MudText Typo="Typo.body1" Class="ats-appform-preview-subtitle">
-                                @Preview?.SubjectName@(string.IsNullOrWhiteSpace(Preview?.FilledFormAt) ? "" : $" · submitted {Preview!.FilledFormAt}")
-                            </MudText>
+                        <div class="ats-appform-preview-header-text">
+                            <h1>Application form preview</h1>
+                            <p>@Preview?.SubjectName@(string.IsNullOrWhiteSpace(Preview?.FilledFormAt) ? "" : $" · submitted {Preview!.FilledFormAt}")</p>
                         </div>
                     </div>
                     <button type="button" class="ats-appform-preview-close" aria-label="Close preview" @onclick="Close">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
                     </button>
                 </div>
-            </div>
+            </header>
 
-            <div class="ats-appform-preview-body ats-dialog-body">
+            <main class="ats-appform-preview-body ats-dialog-body">
+                <!-- Hero band -->
+                <div class="ats-appform-preview-hero">
+                    <div class="ats-appform-preview-hero-text">
+                        <MudText Typo="Typo.h4" Class="ats-appform-preview-hero-name">@(Preview?.SubjectName ?? "Applicant")</MudText>
+                        <MudText Typo="Typo.body2" Class="ats-appform-preview-hero-role">
+                            @(string.IsNullOrWhiteSpace(Preview?.Personal?.PositionAppliedFor)
+                                ? "Background Screening Candidate"
+                                : $"{Preview!.Personal!.PositionAppliedFor}  |  Background Screening Candidate")
+                        </MudText>
+                        <div class="ats-appform-preview-hero-pills">
+                            @if (Preview?.PhilSysVerified == true)
+                            {
+                                <span class="ats-appform-preview-hero-pill">PHILSYS VERIFIED</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Preview?.FilledFormAt))
+                            {
+                                <span class="ats-appform-preview-hero-pill">SUBMITTED @Preview!.FilledFormAt.ToUpperInvariant()</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="ats-appform-preview-hero-avatar" aria-hidden="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" Class="ats-appform-preview-hero-avatar-icon" />
+                    </div>
+                </div>
+
+                @{ var sectionNumber = 0; }
+
                 @if (Preview?.Personal is { } p)
                 {
+                    sectionNumber++;
                     <section class="ats-appform-preview-section">
-                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Personal details</MudText>
+                        @SectionHeading(sectionNumber, "Identity & Candidate Overview", "Personal information provided by the applicant")
+
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Candidate Information</MudText>
                         <dl class="ats-appform-preview-grid">
-                            @PreviewField("Position applied for", p.PositionAppliedFor)
                             @PreviewField("First name", p.FirstName)
                             @PreviewField("Middle name", p.MiddleName)
                             @PreviewField("Last name", p.LastName)
                             @PreviewField("Suffix", p.Suffix)
+                            @PreviewField("Birth date", p.DateOfBirth)
                             @PreviewField("Sex", p.Sex)
-                            @PreviewField("Date of birth", p.DateOfBirth)
                             @PreviewField("Marital status", p.MaritalStatus)
                             @PreviewField("Nationality", p.Nationality)
-                            @PreviewField("Mobile number", p.MobileNumber)
-                            @PreviewField("Telephone number", p.TelephoneNumber)
                             @PreviewField("Email address", p.EmailAddress)
                             @PreviewField("Alternate email", p.EmailAlternative)
+                            @PreviewField("Mobile number", p.MobileNumber)
+                            @PreviewField("Telephone number", p.TelephoneNumber)
                             @PreviewField("SSS", p.SSS)
                             @PreviewField("TIN", p.TIN)
                         </dl>
+
+                        @if (!string.IsNullOrWhiteSpace(p.GovtIdFileName)
+                            || !string.IsNullOrWhiteSpace(p.NbiClearanceFileName)
+                            || !string.IsNullOrWhiteSpace(p.ResumeFileName))
+                        {
+                            <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Supporting Documents</MudText>
+                            <div class="ats-appform-preview-attachments">
+                                @AttachmentRow("Government-issued ID", p.GovtIdFileName)
+                                @AttachmentRow("NBI clearance", p.NbiClearanceFileName)
+                                @AttachmentRow("Curriculum vitae (CV)", p.ResumeFileName)
+                            </div>
+                        }
                     </section>
                 }
 
-                @if (Preview?.Address is { } a)
+                @if (Preview?.Address is not null || Preview?.Education is not null)
                 {
+                    sectionNumber++;
                     <section class="ats-appform-preview-section">
-                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Address</MudText>
-                        <dl class="ats-appform-preview-grid">
-                            @PreviewField("Current address", a.CurrentAddress)
-                            @PreviewField("Current city", a.CurrentCity)
-                            @PreviewField("Current province", a.CurrentProvince)
-                            @PreviewField("Current country", a.CurrentCountry)
-                            @PreviewField("Current postal code", a.CurrentPostalCode)
-                            @PreviewField("Type of ownership", a.CurrentTypeOfOwnership)
-                            @PreviewField("Permanent address", a.PermanentAddress)
-                            @PreviewField("Permanent city", a.PermanentCity)
-                            @PreviewField("Permanent province", a.PermanentProvince)
-                            @PreviewField("Permanent country", a.PermanentCountry)
-                            @PreviewField("Permanent postal code", a.PermanentPostalCode)
-                        </dl>
+                        @SectionHeading(sectionNumber, "Residence & Education", "Residential information and academic profile")
+
+                        @if (Preview?.Address is { } addr)
+                        {
+                            <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Residence Summary</MudText>
+
+                            @AddressCard("CURRENT ADDRESS", addr.CurrentAddress, addr.CurrentCity, addr.CurrentProvince,
+                                addr.CurrentPostalCode, addr.CurrentCountry, addr.CurrentTypeOfOwnership)
+                            @AddressCard("PERMANENT ADDRESS", addr.PermanentAddress, addr.PermanentCity, addr.PermanentProvince,
+                                addr.PermanentPostalCode, addr.PermanentCountry, null)
+                        }
+
+                        @if (Preview?.Education is { } e)
+                        {
+                            <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Educational Background</MudText>
+                            <dl class="ats-appform-preview-grid ats-appform-preview-grid-two">
+                                @PreviewField("Highest educational attainment", e.HighestEducationalAttainment)
+                                @PreviewField("Graduation date", e.GraduationDate)
+                                @PreviewField("Degree / major", e.Degree)
+                                @PreviewField("Academic institution", e.SchoolName)
+                            </dl>
+                            @if (!string.IsNullOrWhiteSpace(e.DiplomaFileName))
+                            {
+                                <div class="ats-appform-preview-attachments">
+                                    @AttachmentRow("Diploma / Transcript of Records (TOR)", e.DiplomaFileName)
+                                </div>
+                            }
+                        }
                     </section>
                 }
 
-                @if (Preview?.Education is { } e)
+                @if (Preview?.License is not null || Preview?.Employers is { Count: > 0 })
                 {
+                    sectionNumber++;
                     <section class="ats-appform-preview-section">
-                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Education</MudText>
-                        <dl class="ats-appform-preview-grid">
-                            @PreviewField("Highest attainment", e.HighestEducationalAttainment)
-                            @PreviewField("School", e.SchoolName)
-                            @PreviewField("Degree", e.Degree)
-                            @PreviewField("Graduation date", e.GraduationDate)
-                        </dl>
+                        @SectionHeading(sectionNumber, "Professional Background", "Credentials, licenses and employment history")
+
+                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Credentials & Licenses</MudText>
+                        <div class="ats-appform-preview-license-card">
+                            <span class="ats-appform-preview-license-label">Professional / Relevant License</span>
+                            @if (Preview?.License is { } l)
+                            {
+                                <dl class="ats-appform-preview-grid ats-appform-preview-license-grid">
+                                    @PreviewField("License", l.LicenseName)
+                                    @PreviewField("License no.", l.LicenseNumber)
+                                    @PreviewField("Expiry date", l.LicenseExpiryDate)
+                                </dl>
+                                @if (!string.IsNullOrWhiteSpace(l.LicenseFileName))
+                                {
+                                    <div class="ats-appform-preview-attachments ats-appform-preview-license-attachments">
+                                        @AttachmentRow("License copy", l.LicenseFileName)
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <span class="ats-appform-preview-pill ats-appform-preview-pill-warn">NONE DECLARED</span>
+                            }
+                        </div>
+
+                        @if (Preview?.Employers is { Count: > 0 } employers)
+                        {
+                            <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Employment Timeline</MudText>
+                            <div class="ats-appform-preview-timeline">
+                                @foreach (var employer in employers)
+                                {
+                                    <div class="ats-appform-preview-timeline-entry">
+                                        <div class="ats-appform-preview-timeline-marker">
+                                            <span class="ats-appform-preview-timeline-dot"></span>
+                                        </div>
+                                        <div class="ats-appform-preview-timeline-content">
+                                            <span class="ats-appform-preview-timeline-dates">@EmploymentDates(employer)</span>
+                                            <MudText Typo="Typo.subtitle1" Class="ats-appform-preview-timeline-company">@employer.CompanyName</MudText>
+                                            @if (!string.IsNullOrWhiteSpace(employer.JobTitle))
+                                            {
+                                                <MudText Typo="Typo.body2" Class="ats-appform-preview-timeline-jobtitle">@employer.JobTitle</MudText>
+                                            }
+                                            @if (EmploymentStatusLine(employer) is { Length: > 0 } statusLine)
+                                            {
+                                                <MudText Typo="Typo.body2" Class="ats-appform-preview-timeline-status">@statusLine</MudText>
+                                            }
+                                            <dl class="ats-appform-preview-grid ats-appform-preview-grid-two ats-appform-preview-timeline-grid">
+                                                @PreviewField("Company address", employer.CompanyAddress)
+                                                @PreviewField("Reason for leaving", employer.ReasonForLeaving)
+                                                @PreviewField("Supervisor", employer.SupervisorName)
+                                                @PreviewField("Supervisor contact", employer.SupervisorContactNumber)
+                                                @PreviewField("Supervisor email", employer.SupervisorEmail)
+                                            </dl>
+                                            @if (!string.IsNullOrWhiteSpace(employer.CoeFileName))
+                                            {
+                                                <div class="ats-appform-preview-attachments">
+                                                    @AttachmentRow("Certificate of employment (COE)", employer.CoeFileName)
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </section>
                 }
 
-                @if (Preview?.License is { } l)
+                @if (Preview?.References is { Count: > 0 } references)
                 {
+                    sectionNumber++;
                     <section class="ats-appform-preview-section">
-                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Professional license</MudText>
-                        <dl class="ats-appform-preview-grid">
-                            @PreviewField("License", l.LicenseName)
-                            @PreviewField("License no.", l.LicenseNumber)
-                            @PreviewField("Expiry date", l.LicenseExpiryDate)
-                        </dl>
+                        @SectionHeading(sectionNumber, "Professional References", "Professional contacts provided by the applicant")
+
+                        @foreach (var reference in references)
+                        {
+                            <div class="ats-appform-preview-reference-card">
+                                <MudText Typo="Typo.subtitle1" Class="ats-appform-preview-reference-name">@reference.FullName</MudText>
+                                @if (!string.IsNullOrWhiteSpace(reference.ProfessionalRelationship) || !string.IsNullOrWhiteSpace(reference.AffiliatedCompany))
+                                {
+                                    <MudText Typo="Typo.body2" Class="ats-appform-preview-reference-role">
+                                        @string.Join("  |  ", new[] { reference.ProfessionalRelationship, reference.AffiliatedCompany }
+                                            .Where(v => !string.IsNullOrWhiteSpace(v)))
+                                    </MudText>
+                                }
+                                <dl class="ats-appform-preview-grid ats-appform-preview-grid-two ats-appform-preview-reference-grid">
+                                    @PreviewField("Email", reference.Email)
+                                    @PreviewField("Mobile", reference.ContactNumber)
+                                    @PreviewField("Best time to contact", reference.BestTimeToContact)
+                                </dl>
+                                @if (!string.IsNullOrWhiteSpace(reference.ModeOfContact))
+                                {
+                                    <span class="ats-appform-preview-pill ats-appform-preview-pill-blue">PREFERRED: @reference.ModeOfContact.ToUpperInvariant()</span>
+                                }
+                            </div>
+                        }
                     </section>
                 }
 
-                @foreach (var (employer, index) in (Preview?.Employers ?? []).Select((e, i) => (e, i)))
+                @if (Preview?.Signature is { } signature)
                 {
+                    sectionNumber++;
                     <section class="ats-appform-preview-section">
-                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Employer @(index + 1)</MudText>
-                        <dl class="ats-appform-preview-grid">
-                            @PreviewField("Company", employer.CompanyName)
-                            @PreviewField("Job title", employer.JobTitle)
-                            @PreviewField("Company address", employer.CompanyAddress)
-                            @PreviewField("Start date", employer.StartDate)
-                            @PreviewField("End date", employer.EndDate)
-                            @PreviewField("Currently employed", employer.CurrentlyEmployed)
-                            @PreviewField("Reason for leaving", employer.ReasonForLeaving)
-                            @PreviewField("Supervisor", employer.SupervisorName)
-                            @PreviewField("Supervisor contact", employer.SupervisorContactNumber)
-                            @PreviewField("Supervisor email", employer.SupervisorEmail)
+                        @SectionHeading(sectionNumber, "Consent & Signature", "Data privacy consent signed by the applicant")
+
+                        <dl class="ats-appform-preview-grid ats-appform-preview-grid-two">
+                            @PreviewField("Signed by", signature.SignerName)
+                            @PreviewField("Signature date", signature.SignatureDate)
                         </dl>
+                        @if (!string.IsNullOrWhiteSpace(signature.ConsentFormFileName))
+                        {
+                            <div class="ats-appform-preview-attachments">
+                                @AttachmentRow("Signed consent form", signature.ConsentFormFileName)
+                            </div>
+                        }
                     </section>
                 }
-
-                @foreach (var (reference, index) in (Preview?.References ?? []).Select((r, i) => (r, i)))
-                {
-                    <section class="ats-appform-preview-section">
-                        <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-section-title">Reference @(index + 1)</MudText>
-                        <dl class="ats-appform-preview-grid">
-                            @PreviewField("Full name", reference.FullName)
-                            @PreviewField("Relationship", reference.ProfessionalRelationship)
-                            @PreviewField("Affiliated company", reference.AffiliatedCompany)
-                            @PreviewField("Email", reference.Email)
-                            @PreviewField("Contact number", reference.ContactNumber)
-                            @PreviewField("Mode of contact", reference.ModeOfContact)
-                            @PreviewField("Best time to contact", reference.BestTimeToContact)
-                        </dl>
-                    </section>
-                }
-            </div>
-
-            <div class="ats-appform-preview-footer ats-dialog-footer">
-                <MudButton Variant="Variant.Outlined" Class="ats-appform-preview-close-btn" OnClick="Close">Close</MudButton>
-            </div>
+            </main>
         </div>
     </DialogContent>
 </MudDialog>
@@ -152,4 +263,88 @@
         builder.CloseElement();
         builder.CloseElement();
     };
+
+    // The one standard look for every uploaded document across all sections:
+    // icon + document label + filename + green "Attached" pill (names only, no
+    // content). Rendered inside an .ats-appform-preview-attachments list.
+    private static RenderFragment AttachmentRow(string label, string? fileName) => builder =>
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return;
+
+        builder.AddContent(0,
+            @<div class="ats-appform-preview-attachment">
+                <span class="ats-appform-preview-attachment-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6.5A1.5 1.5 0 005 3.5v17A1.5 1.5 0 006.5 22h11a1.5 1.5 0 001.5-1.5V8l-5-6z" /><path d="M14 2v5.5A1.5 1.5 0 0015.5 9H21" /></svg>
+                </span>
+                <div class="ats-appform-preview-attachment-text">
+                    <span class="ats-appform-preview-attachment-label">@label</span>
+                    <span class="ats-appform-preview-attachment-file" title="@fileName">@fileName</span>
+                </div>
+                <span class="ats-appform-preview-pill ats-appform-preview-pill-green">ATTACHED</span>
+            </div>);
+    };
+
+    private static RenderFragment SectionHeading(int number, string title, string subtitle) =>
+        @<div class="ats-appform-preview-section-head">
+            <span class="ats-appform-preview-section-number">@number</span>
+            <h2>@title</h2>
+            <span class="ats-appform-preview-section-helper">@subtitle</span>
+        </div>;
+
+    private static RenderFragment AddressCard(string eyebrow, string? address, string? city, string? province,
+        string? postalCode, string? country, string? ownership) => builder =>
+    {
+        if (string.IsNullOrWhiteSpace(address))
+            return;
+
+        var locality = string.Join(", ", new[] { city, province, postalCode, country }
+            .Where(v => !string.IsNullOrWhiteSpace(v)));
+
+        builder.AddContent(0,
+            @<div class="ats-appform-preview-address-card">
+                <span class="ats-appform-preview-address-eyebrow">@eyebrow</span>
+                <MudText Typo="Typo.subtitle1" Class="ats-appform-preview-address-line">@address</MudText>
+                @if (!string.IsNullOrWhiteSpace(locality))
+                {
+                    <MudText Typo="Typo.body2" Class="ats-appform-preview-address-locality">@locality</MudText>
+                }
+                @if (!string.IsNullOrWhiteSpace(ownership))
+                {
+                    <span class="ats-appform-preview-pill ats-appform-preview-pill-blue">@ownership.ToUpperInvariant()</span>
+                }
+            </div>);
+    };
+
+    private static bool IsAffirmative(string? value) =>
+        string.Equals(value?.Trim(), "yes", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(value?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+
+    private static string EmploymentDates(EmployerPreviewDTO employer)
+    {
+        var isCurrent = IsAffirmative(employer.CurrentlyEmployed)
+            || (string.IsNullOrWhiteSpace(employer.EndDate) && !string.IsNullOrWhiteSpace(employer.StartDate));
+        var end = isCurrent ? "PRESENT" : employer.EndDate?.ToUpperInvariant();
+        var start = employer.StartDate?.ToUpperInvariant();
+
+        if (string.IsNullOrWhiteSpace(start) && string.IsNullOrWhiteSpace(end))
+            return string.Empty;
+
+        return string.Join(" – ", new[] { start, end }.Where(v => !string.IsNullOrWhiteSpace(v)));
+    }
+
+    // "Currently employed | Employer contact permitted", mirroring the consent-form
+    // status line. Only what the applicant actually answered is shown.
+    private static string EmploymentStatusLine(EmployerPreviewDTO employer)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(employer.CurrentlyEmployed))
+            parts.Add(IsAffirmative(employer.CurrentlyEmployed) ? "Currently employed" : "Previous employment");
+
+        if (!string.IsNullOrWhiteSpace(employer.PermissionToContact))
+            parts.Add(IsAffirmative(employer.PermissionToContact) ? "Employer contact permitted" : "Employer contact not permitted");
+
+        return string.Join(" | ", parts);
+    }
 }

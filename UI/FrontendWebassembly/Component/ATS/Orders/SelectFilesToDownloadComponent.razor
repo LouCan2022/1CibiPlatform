@@ -145,10 +145,6 @@
                            OnClick="OpenFormPreviewAsync">@(isLoadingPreview ? "Loading..." : "Preview form")</MudButton>
             </MudTooltip>
 
-            <MudButton Variant="Variant.Outlined"
-                       Class="ats-download-cancel"
-                       OnClick="Cancel">Cancel</MudButton>
-
             <MudButton Variant="Variant.Filled"
                        Disabled="@(!HasSelectedFile)"
                        Class="@($"ats-download-submit {(HasSelectedFile ? "theme-button theme-button-active" : "theme-button-inactive")}")"

@@ -510,6 +510,7 @@ public partial class ATSRepository
 			.Include(x => x.LicensesDetails)
 			.Include(x => x.ProfessionalExperiences)
 			.Include(x => x.ReferenceDetails)
+			.Include(x => x.SignatureDetails)
 			.Where(x => x.EmailInvitationID == emailInvitationRequestId)
 			.Where(x => (authorizedClientIds == null
 					|| (x.ClientId.HasValue && authorizedClientIds.Contains(x.ClientId.Value)))
@@ -528,6 +529,9 @@ public partial class ATSRepository
 
 		if (eir.PersonalDetails is { } p)
 		{
+			// A stored biometric capture only comes from the PhilSys liveness flow.
+			preview.PhilSysVerified = !string.IsNullOrWhiteSpace(p.BiometricFileKey);
+
 			preview.Personal = new PersonalPreviewDTO
 			{
 				PositionAppliedFor = p.PositionAppliedFor,
@@ -544,7 +548,10 @@ public partial class ATSRepository
 				EmailAddress = p.EmailAddress,
 				EmailAlternative = p.EmailAlternative,
 				SSS = p.SSS,
-				TIN = p.TIN
+				TIN = p.TIN,
+				GovtIdFileName = p.AdditionalGovtIDFileName,
+				NbiClearanceFileName = p.NBIClearanceFileName,
+				ResumeFileName = p.ResumeFileName
 			};
 		}
 
@@ -588,7 +595,13 @@ public partial class ATSRepository
 					?? e.BachelorsGraduationDate
 					?? e.CollegeGraduationDate
 					?? e.SeniorHighSchoolGraduationDate
-					?? e.HighSchoolGraduationDate)?.ToString("MMMM dd, yyyy")
+					?? e.HighSchoolGraduationDate)?.ToString("MMMM dd, yyyy"),
+				DiplomaFileName = e.DoctorateDiplomaFileName
+					?? e.MastersDiplomaFileName
+					?? e.BachelorsDiplomaFileName
+					?? e.CollegeDiplomaFileName
+					?? e.SeniorHighSchoolDiplomaFileName
+					?? e.HighSchoolDiplomaFileName
 			};
 		}
 
@@ -598,14 +611,16 @@ public partial class ATSRepository
 			{
 				LicenseName = l.LicenseName,
 				LicenseNumber = l.LicenseNumber,
-				LicenseExpiryDate = l.LicenseExpiryDate?.ToString("MMMM dd, yyyy")
+				LicenseExpiryDate = l.LicenseExpiryDate?.ToString("MMMM dd, yyyy"),
+				LicenseFileName = l.LicenseUploadFileName
 			};
 		}
 
 		if (eir.ProfessionalExperiences is { } pe)
 		{
 			void AddEmployer(string? company, string? jobTitle, string? address, DateOnly? start, DateOnly? end,
-				string? currentlyEmployed, string? reason, string? supName, string? supContact, string? supEmail)
+				string? currentlyEmployed, string? permissionToContact, string? reason, string? supName,
+				string? supContact, string? supEmail, string? coeFileName)
 			{
 				if (string.IsNullOrWhiteSpace(company))
 					return;
@@ -618,19 +633,24 @@ public partial class ATSRepository
 					StartDate = start?.ToString("MMMM dd, yyyy"),
 					EndDate = end?.ToString("MMMM dd, yyyy"),
 					CurrentlyEmployed = currentlyEmployed,
+					PermissionToContact = permissionToContact,
 					ReasonForLeaving = reason,
 					SupervisorName = supName,
 					SupervisorContactNumber = supContact,
-					SupervisorEmail = supEmail
+					SupervisorEmail = supEmail,
+					CoeFileName = coeFileName
 				});
 			}
 
 			AddEmployer(pe.Emp1CompanyName, pe.Emp1JobTitle, pe.Emp1CompanyAddress, pe.Emp1StartDate, pe.Emp1EndDate,
-				pe.Emp1CurrentlyEmployed, pe.Emp1ReasonForLeaving, pe.Emp1SupervisorName, pe.Emp1SupervisorContactNumber, pe.Emp1SupervisorEmail);
+				pe.Emp1CurrentlyEmployed, pe.Emp1PermissionToContact, pe.Emp1ReasonForLeaving, pe.Emp1SupervisorName,
+				pe.Emp1SupervisorContactNumber, pe.Emp1SupervisorEmail, pe.Emp1COEUploadFileName ?? pe.COEUploadFileName);
 			AddEmployer(pe.Emp2CompanyName, pe.Emp2JobTitle, pe.Emp2CompanyAddress, pe.Emp2StartDate, pe.Emp2EndDate,
-				pe.Emp2CurrentlyEmployed, pe.Emp2ReasonForLeaving, pe.Emp2SupervisorName, pe.Emp2SupervisorContactNumber, pe.Emp2SupervisorEmail);
+				pe.Emp2CurrentlyEmployed, pe.Emp2PermissionToContact, pe.Emp2ReasonForLeaving, pe.Emp2SupervisorName,
+				pe.Emp2SupervisorContactNumber, pe.Emp2SupervisorEmail, pe.Emp2COEUploadFileName);
 			AddEmployer(pe.Emp3CompanyName, pe.Emp3JobTitle, pe.Emp3CompanyAddress, pe.Emp3StartDate, pe.Emp3EndDate,
-				pe.Emp3CurrentlyEmployed, pe.Emp3ReasonForLeaving, pe.Emp3SupervisorName, pe.Emp3SupervisorContactNumber, pe.Emp3SupervisorEmail);
+				pe.Emp3CurrentlyEmployed, pe.Emp3PermissionToContact, pe.Emp3ReasonForLeaving, pe.Emp3SupervisorName,
+				pe.Emp3SupervisorContactNumber, pe.Emp3SupervisorEmail, pe.Emp3COEUploadFileName);
 		}
 
 		if (eir.ReferenceDetails is { } r)
@@ -659,6 +679,16 @@ public partial class ATSRepository
 				r.Ref2ContactNumber, r.Ref2ModeOfContact, r.Ref2BestTimeToContact);
 			AddReference(r.Ref3FullName, r.Ref3ProfessionalRelationship, r.Ref3AffiliatedCompany, r.Ref3Email,
 				r.Ref3ContactNumber, r.Ref3ModeOfContact, r.Ref3BestTimeToContact);
+		}
+
+		if (eir.SignatureDetails is { } s)
+		{
+			preview.Signature = new SignaturePreviewDTO
+			{
+				SignerName = s.SignerName,
+				SignatureDate = s.SignatureDate?.ToString("MMMM dd, yyyy"),
+				ConsentFormFileName = s.ConsentFormFileName
+			};
 		}
 
 		return preview;
