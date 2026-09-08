@@ -7,6 +7,7 @@ using Auth.DTO;
 using Auth.Shared.Contracts;
 using BuildingBlocks.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Moq;
 using OMS.Shared.Contracts;
@@ -18,6 +19,7 @@ public class OMSTicketingProcessorServiceTests
 	private readonly Mock<IOMSTicketingRepository> _repository = new();
 	private readonly Mock<IOMSTicketCreator> _ticketCreator = new();
 	private readonly Mock<IAuthQueries> _authQueries = new();
+	private readonly Mock<HybridCache> _hybridCache = new();
 	private readonly OMSTicketingProcessorService _service;
 
 	private static readonly Guid RequestorId = Guid.CreateVersion7();
@@ -48,7 +50,16 @@ public class OMSTicketingProcessorServiceTests
 		_service = new OMSTicketingProcessorService(
 			new Mock<ILogger<OMSTicketingProcessorService>>().Object,
 			_repository.Object,
-			scopeFactory.Object);
+			scopeFactory.Object,
+			_hybridCache.Object);
+
+		_repository
+			.Setup(x => x.MarkTicketedAsync(
+				It.IsAny<Guid>(),
+				It.IsAny<string>(),
+				It.IsAny<DateTime>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(true);
 	}
 
 	private static EmailInvitationRequest ClaimedOrder(Guid id) => new()
@@ -65,6 +76,7 @@ public class OMSTicketingProcessorServiceTests
 		EmailAddress = "juan@example.com",
 		MobileNumber = "09171234567",
 		SelectPackage = "CRIMINAL RECORDS CHECK",
+		RushNormal = "Normal",
 		PackageDescription = "182",
 		Site = "24 - 7 INTOUCH- CEBU",
 		RequestorId = RequestorId,
@@ -130,6 +142,43 @@ public class OMSTicketingProcessorServiceTests
 		_repository.Verify(
 			x => x.MarkTicketedAsync(id, "202608260001", deliveryDate, It.IsAny<CancellationToken>()),
 			Times.Once);
+		_hybridCache.Verify(
+			x => x.RemoveByTagAsync(CacheTags.Report, It.IsAny<CancellationToken>()),
+			Times.Once);
+		_hybridCache.Verify(
+			x => x.RemoveByTagAsync(CacheTags.DisputeOrder, It.IsAny<CancellationToken>()),
+			Times.Once);
+		_hybridCache.Verify(
+			x => x.RemoveByTagAsync(CacheTags.WithdrawnApplication, It.IsAny<CancellationToken>()),
+			Times.Once);
+	}
+
+	[Fact]
+	public async Task ProcessAsync_ShouldNotRevokeListCaches_WhenTicketWriteIsNotPersisted()
+	{
+		var id = Guid.CreateVersion7();
+		GivenClaimed(TicketablePayload(id));
+
+		_ticketCreator
+			.Setup(x => x.CreateTicketAsync(
+				It.IsAny<CreateOMSTicketRequest>(),
+				It.IsAny<CancellationToken>(),
+				It.IsAny<string>()))
+			.ReturnsAsync(new OMSTicketCreated("202608260001", DateTime.UtcNow));
+
+		_repository
+			.Setup(x => x.MarkTicketedAsync(
+				id,
+				It.IsAny<string>(),
+				It.IsAny<DateTime>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(false);
+
+		await _service.ProcessAsync(CancellationToken.None);
+
+		_hybridCache.Verify(
+			x => x.RemoveByTagAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+			Times.Never);
 	}
 
 	[Fact]

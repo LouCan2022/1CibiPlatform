@@ -1,6 +1,6 @@
 ﻿using ATS.Data.Entities;
 using ATS.DTO;
-using ATS.Features.AddApplicationFormData;
+using ATS.Features.Web.AddApplicationFormData;
 using BuildingBlocks.Exceptions;
 using FluentAssertions;
 using FluentValidation;
@@ -19,7 +19,6 @@ public class AddApplicationFormDataIntegrationTests : BaseIntegrationTest
 	/// </summary>
 	private const string SeededHashToken = "Hashtoken";
 
-	private readonly string _atsTestFolder;
 	private readonly Guid EmailId;
 	private readonly byte[] _sampleFileContent;
 	private readonly DateOnly _sampleDate;
@@ -35,14 +34,9 @@ public class AddApplicationFormDataIntegrationTests : BaseIntegrationTest
 	private readonly string _emp1COEFileName;
 	private readonly string _emp2COEFileName;
 	private readonly string _emp3COEFileName;
-	private readonly string _signatureFileName;
 
 	public AddApplicationFormDataIntegrationTests(IntegrationTestWebAppFactory factory) : base(factory)
 	{
-		_atsTestFolder = _configuration
-								.GetSection("AlibabaOss")
-								.GetValue<string>("ATSTestFolder", "");
-
 		// Initialize file content using the assembly location to find TestFiles
 		// Assembly is at: D:\GitHub\1CibiPlatform\Test\Test\bin\Debug\net10.0\Test.dll
 		// TestFiles is at: D:\GitHub\1CibiPlatform\Test\Test\BackendAPI\Modules\ATS.IntegrationTests\TestFiles
@@ -67,7 +61,6 @@ public class AddApplicationFormDataIntegrationTests : BaseIntegrationTest
 		_emp1COEFileName = $"{Guid.CreateVersion7()}-emp1COE.pdf";
 		_emp2COEFileName = $"{Guid.CreateVersion7()}-emp2COE.pdf";
 		_emp3COEFileName = $"{Guid.CreateVersion7()}-emp3COE.pdf";
-		_signatureFileName = $"{Guid.CreateVersion7()}-signature.txt";
 	}
 
 	private byte[] CreatePdfBytes()
@@ -103,6 +96,7 @@ public class AddApplicationFormDataIntegrationTests : BaseIntegrationTest
 			MiddleInitial = "S",
 			EmailAddress = "jsdelacruz@cibi.com.ph",
 			MobileNumber = "09171234567",
+			PackageId = DefaultPackageId,
 			SelectPackage = "Air BnB",
 			RushNormal = "Rush",
 			HashToken = hashToken,
@@ -414,24 +408,50 @@ public class AddApplicationFormDataIntegrationTests : BaseIntegrationTest
 		result.Should().NotBeNull();
 		result.IsAdded.Should().BeTrue();
 
-		var consentFile = _dbContext.SignatureDetails.FirstOrDefault(e => e.EmailInvitationID == EmailId);
-
 		if (result.IsAdded == true)
 		{
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_govermentIdFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_nbiFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_resumeFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_highSchoolDiplomaFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_seniorHighSchoolDiplomaFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_bachelorDiplomaFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_masterDiplomaFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_doctorateDiplomaFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_licenseFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_emp1COEFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_emp2COEFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_emp3COEFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{_signatureFileName}");
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{consentFile!.ConsentFormFileName}");
+			await DeleteUploadedObjectsAsync();
+		}
+	}
+
+	// Cleanup deletes by the keys the entities actually persisted rather than
+	// reconstructing them, so it stays correct however UploadAsync builds keys.
+	private async Task DeleteUploadedObjectsAsync()
+	{
+		var personal = _dbContext.PersonalDetails.FirstOrDefault(e => e.EmailInvitationID == EmailId);
+		var education = _dbContext.EducationalBackgrounds.FirstOrDefault(e => e.EmailInvitationID == EmailId);
+		var licenses = _dbContext.LicensesDetails.FirstOrDefault(e => e.EmailInvitationID == EmailId);
+		var experiences = _dbContext.ProfessionalExperiences.FirstOrDefault(e => e.EmailInvitationID == EmailId);
+		var signature = _dbContext.SignatureDetails.FirstOrDefault(e => e.EmailInvitationID == EmailId);
+
+		string?[] fileKeys =
+		[
+			personal?.AdditionalGovtIDFileKey,
+			personal?.NBIClearanceFileKey,
+			personal?.ResumeFileKey,
+			personal?.BiometricFileKey,
+			education?.HighSchoolDiplomaFileKey,
+			education?.SeniorHighSchoolDiplomaFileKey,
+			education?.BachelorsDiplomaFileKey,
+			education?.MastersDiplomaFileKey,
+			education?.DoctorateDiplomaFileKey,
+			licenses?.LicenseUploadFileKey,
+			experiences?.Emp1COEUploadFileKey,
+			experiences?.Emp2COEUploadFileKey,
+			experiences?.Emp3COEUploadFileKey,
+			signature?.ConsentFormFileKey
+		];
+
+		foreach (var fileKey in fileKeys.Where(key => !string.IsNullOrWhiteSpace(key)))
+		{
+			try
+			{
+				await _objectStorageService.DeleteAsync(fileKey!);
+			}
+			catch
+			{
+				// Best effort - a leftover test object must not fail the test.
+			}
 		}
 	}
 	#endregion
@@ -688,29 +708,7 @@ public class AddApplicationFormDataIntegrationTests : BaseIntegrationTest
 			.Any(p => p.EmailInvitationID == victimEmailId)
 			.Should().BeFalse();
 
-		await CleanUpUploadedTestFilesAsync();
-	}
-
-	private async Task CleanUpUploadedTestFilesAsync()
-	{
-		foreach (var fileName in new[]
-		{
-			_govermentIdFileName,
-			_nbiFileName,
-			_resumeFileName,
-			_bachelorDiplomaFileName,
-			_emp1COEFileName
-		})
-		{
-			try
-			{
-				await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{fileName}");
-			}
-			catch
-			{
-				// Best effort - a leftover test object must not fail the assertion above.
-			}
-		}
+		await DeleteUploadedObjectsAsync();
 	}
 	#endregion
 

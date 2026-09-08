@@ -64,7 +64,7 @@ public sealed class OMSRepository(
 		{
 			logger.LogError(ex, "PO number validation failed against the OMS database.");
 
-			throw new InternalServerException("An error occurred while contacting the OMS database.");
+			throw new InternalServerException("Check the provided PO number in OMS Side");
 		}
 	}
 
@@ -119,7 +119,7 @@ public sealed class OMSRepository(
 		{
 			logger.LogError(ex, "Ticket creation failed against the OMS database.");
 
-			throw new InternalServerException("An error occurred while contacting the OMS database.");
+			throw new InternalServerException("Please verify the Package ID details, TurnAroundTime option, available PO credits, and contract validity date, then resubmit the order once confirmed.");
 		}
 	}
 

@@ -44,6 +44,17 @@ public partial class AddUserComponent
 		.Where(module => ModuleList.IsVisibleForAdministration(module.ModuleId, _canViewAllModules));
 	private IEnumerable<ModuleDetailsDTO> SelectedModules => VisibleModules
 		.Where(module => SelectedModuleIds.Contains(module.ModuleId));
+	private IReadOnlyCollection<int> ActiveVisibleModuleIds => VisibleModules
+		.Where(module => module.IsActive)
+		.Select(module => module.ModuleId)
+		.ToArray();
+	private bool AllModulesSelected => ActiveVisibleModuleIds.Count > 0
+		&& ActiveVisibleModuleIds.All(SelectedModuleIds.Contains);
+	private string SelectAllModulesIcon => AllModulesSelected
+		? Icons.Material.Filled.CheckBox
+		: SelectedModuleIds.Count > 0
+			? Icons.Material.Filled.IndeterminateCheckBox
+			: Icons.Material.Outlined.CheckBoxOutlineBlank;
 	private IEnumerable<RoleDetailsDTO> AssignableRoles
 	{
 		get
@@ -175,6 +186,9 @@ public partial class AddUserComponent
 
 		OnSelectedModuleIdsChanged(moduleIds);
 	}
+
+	private void ToggleAllModules() =>
+		OnSelectedModuleIdsChanged(AllModulesSelected ? [] : ActiveVisibleModuleIds);
 
 	private void RemoveModule(int moduleId) =>
 		OnSelectedModuleIdsChanged(SelectedModuleIds.Where(id => id != moduleId));

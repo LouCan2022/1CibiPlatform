@@ -37,6 +37,19 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 		_applicationFormExpiryInHours = _configuration.GetSection("ATS").GetValue<int>("ATSApplicationFormExpiryInHours");
 	}
 
+	// The uploader is told what actually happened. Silently reporting "received" when
+	// rows were dropped is how a bad column goes unnoticed until the orders never arrive.
+	private static string BuildUploadReceivedMessage(string? fileName, int acceptedCount, int rejectedCount)
+	{
+		if (rejectedCount == 0)
+		{
+			return $"Your bulk upload \"{fileName}\" has been received and is now being processed.";
+		}
+
+		return $"Your bulk upload \"{fileName}\" created {acceptedCount} order(s). "
+			+ $"{rejectedCount} row(s) were skipped because they were incomplete or invalid.";
+	}
+
 	public async Task ProcessAsync(CancellationToken cancellationToken)
 	{
 		// A crash mid-parse leaves files claimed as Processing with no live worker, so
@@ -77,6 +90,7 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 				var scopedRepository = scope.ServiceProvider.GetRequiredService<IATSRepository>();
 
 				List<EmailInvitationRequest> subjects = new();
+				List<BulkUploadRejectedRowDTO> rejectedRows = new();
 
 				await using var stream = await _objectStorageService.DownloadAsync(file.FileKey!, cancellationToken);
 
@@ -92,7 +106,7 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 					throw new InternalServerException("Invalid CSV format. Missing header row.");
 				}
 
-				var expectedHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+				var expectedHeaders = new List<string>
 				{
 					nameof(BulkUploadCsvRecord.LastName),
 					nameof(BulkUploadCsvRecord.FirstName),
@@ -102,13 +116,23 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 				};
 
 				var actualHeaders = csv.HeaderRecord?
-					.Select(header => header?.Trim())
-					.Where(header => !string.IsNullOrWhiteSpace(header))
-					.Select(header => header!)
-					.ToHashSet(StringComparer.OrdinalIgnoreCase)
-					?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+					.Select(header => header?.Trim() ?? string.Empty)
+					.ToList()
+					?? [];
 
-				if (!expectedHeaders.SetEquals(actualHeaders))
+				// The template's sequence is the standard: the file must LEAD with the
+				// expected columns in exactly this order. Columns AFTER them are
+				// spreadsheet debris (notes, helper formulas) - CsvHelper maps by header
+				// name and never reads them, so they are harmless, and the preview
+				// dialog drops them for the same reason.
+				var headersMatchTemplate =
+					actualHeaders.Count >= expectedHeaders.Count
+					&& expectedHeaders
+						.Select((expected, index) =>
+							string.Equals(actualHeaders[index], expected, StringComparison.OrdinalIgnoreCase))
+						.All(matches => matches);
+
+				if (!headersMatchTemplate)
 				{
 					_logger.LogError("Failed Transaction: Invalid CSV columns for identity: {@Context}. Expected: {ExpectedHeaders}. Actual: {ActualHeaders}", logContext, string.Join(",", expectedHeaders), string.Join(",", actualHeaders));
 					throw new InternalServerException("Invalid CSV format. Please use the required column headers.");
@@ -116,8 +140,30 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 
 				var records = csv.GetRecords<BulkUploadCsvRecord>();
 
+				// Row numbers are 1-based over the data rows, matching what the uploader
+				// sees in their spreadsheet once the header is discounted.
+				var rowNumber = 0;
+
 				foreach (var row in records)
 				{
+					rowNumber++;
+
+					// One unusable row must not reject the file: the good rows are still
+					// worth creating, and the bad ones are reported back instead of being
+					// inserted to fail later at email send or OMS ticketing.
+					var (rejectionReason, mobileNumber) = BulkSubjectRowValidator.Validate(row);
+
+					if (rejectionReason is not null)
+					{
+						rejectedRows.Add(new BulkUploadRejectedRowDTO
+						{
+							RowNumber = rowNumber,
+							Reason = rejectionReason
+						});
+
+						continue;
+					}
+
 					var token = _secureToken.GenerateSecureToken();
 
 					if (string.IsNullOrEmpty(token))
@@ -143,9 +189,19 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 						HashTokenExpiration = DateTime.UtcNow.AddHours(_applicationFormExpiryInHours),
 						LastName = row.LastName,
 						FirstName = row.FirstName,
-						MiddleInitial = row.MiddleInitial,
+						// Optional column: a candidate may have no middle initial. Blank is
+						// stored as null, matching how EditSubjectName persists it.
+						MiddleInitial = string.IsNullOrWhiteSpace(row.MiddleInitial)
+							? null
+							: row.MiddleInitial.Trim(),
 						EmailAddress = row.EmailAddress,
-						MobileNumber = row.MobileNumber,
+
+						// The normalised local form, so every stored number reads the
+						// same regardless of how the CSV wrote it.
+						MobileNumber = mobileNumber,
+						// Both carried from the file: the id is the relationship, the
+						// name the label, exactly as on a single order.
+						PackageId = file.PackageId,
 						SelectPackage = file.PackageType,
 						EmailSentStatus = EmailStatus.Pending,
 						ApplicationFormStatus = ApplicationFormStatus.Pending,
@@ -165,10 +221,46 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 
 				await scopedRepository.AddBulkEmailInvitationRequestAsync(subjects);
 
+				// Bulk orders previously recorded no history at all, so their timelines
+				// started blank while single orders showed OrderCreated. The source is
+				// taken from the file because this job has no HTTP context to resolve
+				// the caller from.
+				if (subjects.Count > 0)
+				{
+					await scope.ServiceProvider
+						.GetRequiredService<IOrderHistoryService>()
+						.RecordManyAsync(
+							subjects.Select(subject => subject.EmailInvitationID).ToList(),
+							OrderHistoryEventType.OrderCreated,
+							null,
+							OrderStatus.PendingCandidateInfo,
+							cancellationToken,
+							file.Source ?? OrderHistorySource.Web,
+							file.UploadedByUserId);
+				}
+
+				// Recorded on the file so the uploader can read back which rows were
+				// refused and why; the upload response returned long before this ran.
+				await scopedRepository.RecordBulkFileRowOutcomeAsync(
+					file.FileID,
+					subjects.Count,
+					rejectedRows,
+					cancellationToken);
+
+				if (rejectedRows.Count > 0)
+				{
+					_logger.LogWarning(
+						"Bulk file {FileID} had {RejectedCount} unusable row(s) of {TotalCount}: {@Context}",
+						file.FileID,
+						rejectedRows.Count,
+						subjects.Count + rejectedRows.Count,
+						logContext);
+				}
+
 				await _hubContext
 						.Clients
 						.Group(file.UploadedByUserId.ToString()!)
-						.ReceiveATSResponse($"Your bulk upload \"{file.FileName}\" has been received and is now being processed.");
+						.ReceiveATSResponse(BuildUploadReceivedMessage(file.FileName, subjects.Count, rejectedRows.Count));
 
 				return (file, succeeded: true);
 			}

@@ -10,8 +10,11 @@ public record ReportListDTO
 	public string? MiddleInitial { get; set; }
 	public string? LastName { get; set; }
 	public string? Requestor { get; set; }
+	public string? TicketNumber { get; set; }
 	public string? OrderStatus { get; set; }
+	public DateTime? OrderCreatedAt { get; set; }
 	public DateTime? OrderCompletedAt { get; set; }
 	public string? SelectedPackage { get; set; }
+	public string? RushNormal { get; set; }
 	public string? HitStatus { get; set; }
 }

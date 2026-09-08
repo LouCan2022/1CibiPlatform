@@ -6,7 +6,8 @@ public record DisputeOrderListDTO
 	public string? FirstName { get; set; }
 	public string? LastName { get; set; }
 	public string? Requestor { get; set; }
+	public string? TicketNumber { get; set; }
 	public string? DisputeCategory { get; set; }
-	public DateTime? OrderCreatedAt { get; set; }
+	public DateTime? DisputedAt { get; set; }
 	public DateTime? OrderCompletedAt { get; set; }
 }

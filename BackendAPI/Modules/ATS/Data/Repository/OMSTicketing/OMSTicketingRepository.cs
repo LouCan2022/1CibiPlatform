@@ -106,8 +106,11 @@ public sealed class OMSTicketingRepository : IOMSTicketingRepository
 				.Where(p => p.EmailInvitationID == invitation.EmailInvitationID)
 				.DefaultIfEmpty()
 
+			// Joined on the id, not the name. Matching by name meant renaming a package
+			// silently orphaned every order that referenced it - they kept the old
+			// string and parked here as an error nobody could explain.
 			from package in _dbContext.PackageDetails
-				.Where(p => p.PackageName == invitation.SelectPackage)
+				.Where(p => p.PackageId == invitation.PackageId)
 				.DefaultIfEmpty()
 
 				// UserDetails is keyed (UserId, ModuleId): one row per module grant, each
@@ -127,6 +130,7 @@ public sealed class OMSTicketingRepository : IOMSTicketingRepository
 				MobileNumber = invitation.MobileNumber,
 				SelectPackage = invitation.SelectPackage,
 				RequestorId = invitation.RequestorId,
+				RushNormal = invitation.RushNormal,
 				DOB = personal != null ? personal.DOB : null,
 				PersonalMobileNumber = personal != null ? personal.MobileNumber : null,
 				SSS = personal != null ? personal.SSS : null,

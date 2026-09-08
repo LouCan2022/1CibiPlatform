@@ -5,6 +5,7 @@ using ATS.DTO;
 using ATS.Services.AccessScope;
 using ATS.Services.EndorsementSubmission;
 using ATS.Services.OrderHistory;
+using ATS.Services.OrderValidation;
 using Auth.Shared.Contracts;
 using BuildingBlocks.Pagination;
 using BuildingBlocks.SharedServices.Interfaces;
@@ -44,6 +45,10 @@ public class WithdrawnApplicationFilteringTests
 			// remove the thing under test - and Mock.Of<> returns null, which the
 			// service reads as "no access".
 			new AtsAccessScopeResolver(_currentUser.Object, _userClientRepository.Object),
+
+			// Not exercised here: these tests only read withdrawn applications, and the
+			// validator is only consulted on the create paths.
+			Mock.Of<IOrderInputValidator>(),
 			Mock.Of<IUnitOfWork>());
 	}
 
@@ -64,6 +69,7 @@ public class WithdrawnApplicationFilteringTests
 			]);
 		_repository.Setup(repository => repository.GetWithdrawnPageAsync(
 			"withdrawn",
+			null,
 			null,
 			11,
 			It.Is<IReadOnlyCollection<int>>(clientIds => clientIds.SequenceEqual(new[] { 1, 3 })),
@@ -95,6 +101,7 @@ public class WithdrawnApplicationFilteringTests
 		_repository.Setup(repository => repository.GetWithdrawnPageAsync(
 			null,
 			null,
+			null,
 			11,
 			It.Is<IReadOnlyCollection<int>>(clientIds => clientIds.SequenceEqual(new[] { 7 })),
 			userId,
@@ -121,6 +128,7 @@ public class WithdrawnApplicationFilteringTests
 		_currentUser.SetupGet(user => user.IsPlatformSuperAdmin).Returns(true);
 		var request = new KeysetPaginationRequest(null, 10);
 		_repository.Setup(repository => repository.GetWithdrawnPageAsync(
+			null,
 			null,
 			null,
 			11,

@@ -105,6 +105,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "valid-hash-token-1",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",
@@ -125,6 +126,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "valid-hash-token-2",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Premium",
 			RushNormal = "Rush",
 			EmailSentStatus = "Done",
@@ -145,6 +147,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "valid-hash-token-3",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",
@@ -153,6 +156,27 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 		};
 
 		await _dbContext.EmailInvitationRequests.AddRangeAsync(withdrawn1, withdrawn2, active);
+		var olderWithdrawnAt = DateTime.UtcNow.AddHours(-2);
+		var latestWithdrawnAt = DateTime.UtcNow.AddHours(-1);
+		await _dbContext.OrderStatusHistories.AddRangeAsync(
+			new OrderStatusHistory
+			{
+				OrderStatusHistoryId = Guid.CreateVersion7(),
+				EmailInvitationRequestId = withdrawn1.EmailInvitationID,
+				EventType = OrderHistoryEventType.ApplicationFormWithdrawn,
+				NewStatus = "Application Withdrawn",
+				Source = "IntegrationTest",
+				OccurredAt = olderWithdrawnAt
+			},
+			new OrderStatusHistory
+			{
+				OrderStatusHistoryId = Guid.CreateVersion7(),
+				EmailInvitationRequestId = withdrawn1.EmailInvitationID,
+				EventType = OrderHistoryEventType.ApplicationFormWithdrawn,
+				NewStatus = "Application Withdrawn",
+				Source = "IntegrationTest",
+				OccurredAt = latestWithdrawnAt
+			});
 		await _dbContext.SaveChangesAsync();
 
       // Act
@@ -161,8 +185,11 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 		// Assert
 		result.Should().NotBeNull();
 		result!.Items.Should().HaveCount(2);
-		result.Items.Should().AllSatisfy(x => x.OrderStatus.Should().Be("Application Withdrawn"));
 		result.Items.Select(x => x.EmailAddress).Should().Contain(new[] { "withdrawn1@example.com", "withdrawn2@example.com" });
+		result.Items.Single(x => x.EmailAddress == withdrawn1.EmailAddress).WithdrawnAt.Should().BeCloseTo(
+			latestWithdrawnAt,
+			TimeSpan.FromMilliseconds(1));
+		result.Items.Single(x => x.EmailAddress == withdrawn2.EmailAddress).WithdrawnAt.Should().BeNull();
 	}
 
 	[Fact]
@@ -172,6 +199,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 		var userId = Guid.CreateVersion7();
 		SetAuthenticatedUser(userId, AtsRoleIds.User, clientId: 7);
 		var withdrawnRecords = new List<EmailInvitationRequest>();
+		var newestOrderCreatedAt = new DateTime(2026, 8, 20, 12, 0, 0, DateTimeKind.Utc);
 		for (int i = 0; i < 15; i++)
 		{
 			withdrawnRecords.Add(new EmailInvitationRequest
@@ -185,11 +213,13 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 				HashToken = $"hash-token-{i}",
 				HashTokenCreatedAt = DateTime.UtcNow,
 				HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+				PackageId = DefaultPackageId,
 				SelectPackage = "Standard",
 				RushNormal = "Normal",
 				EmailSentStatus = "Done",
 				ApplicationFormStatus = "Pending",
 				OrderStatus = "Application Withdrawn",
+				OrderCreatedAt = newestOrderCreatedAt.AddMinutes(-i),
 				ClientId = 7,
 				RequestorId = userId
 			});
@@ -206,6 +236,9 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 		page1!.Items.Should().HaveCount(10);
 		page1.TotalCount.Should().Be(15);
 		page1.NextCursor.Should().NotBeNull();
+		page1.Items.Select(x => x.EmailInvitationID)
+			.Should().Equal(withdrawnRecords.Take(10).Select(x => x.EmailInvitationID));
+		page1.Items[0].OrderCreatedAt.Should().Be(withdrawnRecords[0].OrderCreatedAt);
 
 		// Act - Get second page via the returned cursor
 		var page2 = await _endorsementSubmissionService.GetWithdrawnEmailInvitationRequestsAsync(new BuildingBlocks.Pagination.KeysetPaginationRequest(page1.NextCursor, 10), CancellationToken.None);
@@ -215,7 +248,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 		page2!.Items.Should().HaveCount(5);
 		page2.TotalCount.Should().BeNull();
 		page2.Items.Select(x => x.EmailInvitationID)
-			.Should().NotIntersectWith(page1.Items.Select(x => x.EmailInvitationID));
+			.Should().Equal(withdrawnRecords.Skip(10).Select(x => x.EmailInvitationID));
 		page2.NextCursor.Should().BeNull();
 	}
 
@@ -235,6 +268,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "valid-hash-token-3",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",
@@ -273,6 +307,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "hash-1",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",
@@ -293,6 +328,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "hash-2",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Premium",
 			RushNormal = "Rush",
 			EmailSentStatus = "Done",
@@ -332,6 +368,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "hash-1",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",
@@ -352,6 +389,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "hash-2",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Premium",
 			RushNormal = "Rush",
 			EmailSentStatus = "Done",
@@ -390,6 +428,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = "hash-1",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",
@@ -463,6 +502,7 @@ public class GetWithdrawnEmailInvitationRequestsIntegrationTests : BaseIntegrati
 			HashToken = $"hash-{id:N}",
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddDays(1),
+			PackageId = DefaultPackageId,
 			SelectPackage = "Standard",
 			RushNormal = "Normal",
 			EmailSentStatus = "Done",

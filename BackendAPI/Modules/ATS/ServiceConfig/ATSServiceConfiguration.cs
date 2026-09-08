@@ -70,6 +70,7 @@ public static class ATSServiceConfiguration
 		// query must never be served from a cache.
 		services.AddScoped<IOMSTicketingRepository, OMSTicketingRepository>();
 
+
 		// Also uncached: the audit trail is append-only and the screen exists to show what
 		// just happened, so a cached first page would hide the newest action.
 		services.AddScoped<IAtsAuditRepository, AtsAuditRepository>();
@@ -83,6 +84,9 @@ public static class ATSServiceConfiguration
 		services.AddHostedService<AtsAuditDrainService>();
 		services.AddHostedService<AtsAuditRetentionService>();
 
+		// An integrating client polls these to watch an order move, so a cached read
+		// would report exactly the staleness they are polling to avoid.
+		services.AddScoped<IPublicApiRepository, PublicApiRepository>();
 		services.AddScoped<IOrderHistoryFactory, OrderHistoryFactory>();
 		services.AddScoped<IOrderHistoryService, OrderHistoryService>();
 
@@ -101,6 +105,10 @@ public static class ATSServiceConfiguration
 		services.AddScoped<IClientAssignmentService, ClientAssignmentService>();
 		services.AddScoped<IATSVerificationDataProvider, ATSVerificationDataProvider>();
 		services.AddScoped<IAtsAccessScopeResolver, AtsAccessScopeResolver>();
+
+		// Shared by the web console, the public API and the bulk parser so all three
+		// agree on what a valid package and order type are.
+		services.AddScoped<IOrderInputValidator, OrderInputValidator>();
 		services.AddScoped<IBulkUploadMonitoringService, BulkUploadMonitoringService>();
 
 		services.AddKeyedScoped<IEmailService, ATSEmailService>("ats");
@@ -108,6 +116,7 @@ public static class ATSServiceConfiguration
 		services.AddScoped<IEmailNotificationProcessorService, EmailNotificationProcessorService>();
 		services.AddScoped<IOMSTicketingProcessorService, OMSTicketingProcessorService>();
 		services.AddScoped<IOMSTicketingMonitoringService, OMSTicketingMonitoringService>();
+		services.AddScoped<IPublicApiService, PublicApiService>();
 		services.AddScoped<IATSQueries, ATSQueries>();
 		services.AddScoped<IAtsAccessClaimsProvider, AtsAccessClaimsProvider>();
 		services.AddScoped<IAtsAssistantService, AtsAssistantService>();

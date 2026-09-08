@@ -20,6 +20,17 @@ public partial class EditClientComponent
 	private IEnumerable<PackageDetailsDTO> SelectedPackages => Packages
 		.Where(package => SelectedPackageIds.Contains(package.PackageId))
 		.OrderBy(package => package.PackageName);
+	private IReadOnlyCollection<int> ActivePackageIds => Packages
+		.Where(package => package.IsActive)
+		.Select(package => package.PackageId)
+		.ToArray();
+	private bool AllPackagesSelected => ActivePackageIds.Count > 0
+		&& ActivePackageIds.All(SelectedPackageIds.Contains);
+	private string SelectAllPackagesIcon => AllPackagesSelected
+		? Icons.Material.Filled.CheckBox
+		: SelectedPackageIds.Count > 0
+			? Icons.Material.Filled.IndeterminateCheckBox
+			: Icons.Material.Outlined.CheckBoxOutlineBlank;
 
 	protected override void OnParametersSet()
 	{
@@ -64,6 +75,13 @@ public partial class EditClientComponent
 
 		OnSelectedPackageIdsChanged(selectedIds);
 	}
+
+	// Selecting all only adds active packages; inactive ones already on the client
+	// stay selected either way and are only removable through their chip.
+	private void ToggleAllPackages() =>
+		OnSelectedPackageIdsChanged(AllPackagesSelected
+			? SelectedPackageIds.Except(ActivePackageIds)
+			: SelectedPackageIds.Concat(ActivePackageIds));
 
 	private void RemovePackage(int packageId)
 	{

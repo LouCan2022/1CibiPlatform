@@ -20,7 +20,8 @@ public class OMSTicketingRepositoryIntegrationTests : BaseIntegrationTest
 	private async Task<EmailInvitationRequest> SeedQueuedOrderAsync(
 		string ticketStatus = TicketStatus.Pending,
 		int ticketAttempts = 0,
-		bool isTicketed = false)
+		bool isTicketed = false,
+		string rushNormal = OrderType.Normal)
 	{
 		var order = new EmailInvitationRequest
 		{
@@ -29,8 +30,9 @@ public class OMSTicketingRepositoryIntegrationTests : BaseIntegrationTest
 			LastName = "Dela Cruz",
 			EmailAddress = "juan@example.com",
 			MobileNumber = "09171234567",
+			PackageId = DefaultPackageId,
 			SelectPackage = "CRIMINAL RECORDS CHECK",
-			RushNormal = "Normal",
+			RushNormal = rushNormal,
 			HashToken = Guid.NewGuid().ToString("N"),
 			HashTokenCreatedAt = DateTime.UtcNow,
 			HashTokenExpiration = DateTime.UtcNow.AddHours(24),
@@ -47,6 +49,68 @@ public class OMSTicketingRepositoryIntegrationTests : BaseIntegrationTest
 		await _dbContext.SaveChangesAsync();
 
 		return order;
+	}
+
+	// The reason orders reference their package by id. Before that change the ticketing
+	// join matched on the package *name*, so renaming a package silently orphaned every
+	// order that referenced it: the order kept the old string, stopped matching, and
+	// parked as an error nobody could explain.
+	[Fact]
+	public async Task GetTicketPayloadsAsync_ShouldStillResolveThePackage_AfterItHasBeenRenamed()
+	{
+		var order = await SeedQueuedOrderAsync();
+
+		var package = await _dbContext.PackageDetails
+			.FirstAsync(x => x.PackageId == DefaultPackageId);
+
+		package.PackageName = "Renamed After The Order Was Placed";
+		await _dbContext.SaveChangesAsync();
+
+		var payloads = await _repository.GetTicketPayloadsAsync(
+			[order.EmailInvitationID],
+			CancellationToken.None);
+
+		var payload = payloads.Should().ContainSingle().Subject;
+
+		// Resolved through the foreign key, so the report type is still found.
+		payload.PackageDescription.Should().Be("182");
+	}
+
+	// The turnaround the client ordered decides the OMS TurnAroundTimeID, so it has to
+	// survive the projection rather than the mapper falling back to a fixed value.
+	[Theory]
+	[InlineData(OrderType.Rush)]
+	[InlineData(OrderType.Normal)]
+	public async Task GetTicketPayloadsAsync_ShouldCarryTheOrderType(string rushNormal)
+	{
+		var order = await SeedQueuedOrderAsync(rushNormal: rushNormal);
+
+		var payloads = await _repository.GetTicketPayloadsAsync(
+			[order.EmailInvitationID],
+			CancellationToken.None);
+
+		payloads.Should().ContainSingle()
+			.Which.RushNormal.Should().Be(rushNormal);
+	}
+
+	[Fact]
+	public async Task GetTicketPayloadsAsync_ShouldReturnTheOrder_EvenWhenItsPackageIsInactive()
+	{
+		var order = await SeedQueuedOrderAsync();
+
+		var package = await _dbContext.PackageDetails
+			.FirstAsync(x => x.PackageId == DefaultPackageId);
+
+		package.IsActive = false;
+		await _dbContext.SaveChangesAsync();
+
+		var payloads = await _repository.GetTicketPayloadsAsync(
+			[order.EmailInvitationID],
+			CancellationToken.None);
+
+		// An order already placed is still ticketed; deactivating a package stops new
+		// orders being created against it, not existing ones from completing.
+		payloads.Should().ContainSingle();
 	}
 
 	// Regression: the OMS delivery date arrives from SQL Server with

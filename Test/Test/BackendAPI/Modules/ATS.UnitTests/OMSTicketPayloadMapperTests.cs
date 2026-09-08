@@ -19,6 +19,7 @@ public class OMSTicketPayloadMapperTests
 		EmailAddress = "juan.delacruz@example.com",
 		MobileNumber = "09171234567",
 		SelectPackage = "CRIMINAL RECORDS CHECK",
+		RushNormal = "Rush",
 		PackageDescription = "182",
 		Site = "24 - 7 INTOUCH- CEBU",
 		RequestorEmail = "john.doe@example.com"
@@ -48,9 +49,11 @@ public class OMSTicketPayloadMapperTests
 		Assert.Equal("24 - 7 INTOUCH- CEBU", request.Site);
 		Assert.Equal(182, request.ReportTypeID);
 
+		// Rush, so the OMS rush turnaround rather than a fixed one.
+		Assert.Equal(2, request.TurnAroundTimeID);
+
 		// The agreed constants for auto-ticketing.
 		Assert.Equal("Remarks", request.Remarks);
-		Assert.Equal(2, request.TurnAroundTimeID);
 		Assert.Equal(0, request.CountryID);
 		Assert.Equal(0, request.ProvinceID);
 		Assert.Equal(0, request.CityID);
@@ -139,6 +142,47 @@ public class OMSTicketPayloadMapperTests
 		// changes on its own.
 		Assert.Null(request);
 		Assert.NotNull(failure);
+	}
+
+	[Theory]
+	[InlineData("Rush", 2)]
+	[InlineData("Normal", 1)]
+	[InlineData("rush", 2)]
+	[InlineData("  normal  ", 1)]
+	public void TryMap_ShouldTakeTheTurnAroundTimeFromTheOrderType(
+		string rushNormal,
+		int expectedTurnAroundTimeId)
+	{
+		var payload = NewlyEnrolledOrder();
+		payload.RushNormal = rushNormal;
+
+		var (request, failure) = OMSTicketPayloadMapper.TryMap(
+			payload,
+			RequestorFirstName,
+			RequestorLastName);
+
+		Assert.Null(failure);
+		Assert.Equal(expectedTurnAroundTimeId, request!.TurnAroundTimeID);
+	}
+
+	[Theory]
+	[InlineData(null)]
+	[InlineData("")]
+	[InlineData("Express")]
+	public void TryMap_ShouldFail_WhenTheOrderTypeIsNotAKnownTurnAround(string? rushNormal)
+	{
+		var payload = NewlyEnrolledOrder();
+		payload.RushNormal = rushNormal;
+
+		var (request, failure) = OMSTicketPayloadMapper.TryMap(
+			payload,
+			RequestorFirstName,
+			RequestorLastName);
+
+		// No fallback: guessing the turnaround would bill the client for one they did
+		// not order, so the order is parked for a human instead.
+		Assert.Null(request);
+		Assert.Contains("turnaround", failure!, StringComparison.OrdinalIgnoreCase);
 	}
 
 	[Fact]

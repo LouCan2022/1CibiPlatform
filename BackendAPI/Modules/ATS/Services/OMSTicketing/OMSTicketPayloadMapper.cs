@@ -9,10 +9,15 @@ public static class OMSTicketPayloadMapper
 	// OMS defaults agreed for auto-ticketing. Address is not collected at enrolment,
 	// so the location ids stay 0 and the free-text fields stay empty.
 	internal const string DefaultRemarks = "Remarks";
-	internal const int DefaultTurnAroundTimeId = 2;
 	internal const int DefaultCountryId = 0;
 	internal const int DefaultProvinceId = 0;
 	internal const int DefaultCityId = 0;
+
+	// The OMS turnaround ids behind the two order types. Deliberately no default: the
+	// order carries its own turnaround, and a value outside the vocabulary means the
+	// wrong TAT would be billed, so the order is parked instead of guessed at.
+	internal const int NormalTurnAroundTimeId = 1;
+	internal const int RushTurnAroundTimeId = 2;
 
 	/// <summary>
 	/// Returns the OMS request, or a reason why the order cannot be ticketed at all.
@@ -33,8 +38,10 @@ public static class OMSTicketPayloadMapper
 			return (null, "The order has no subject email address.");
 		}
 
-		// The package is matched by name because SelectPackage is free text with no
-		// foreign key, so a renamed or deleted package silently stops matching.
+		// The order references its package by id, so this should not happen - a
+		// foreign key guarantees the package exists. Kept as a guard because the
+		// report type still comes from free-text PackageDescription, which can be
+		// blanked independently.
 		if (string.IsNullOrWhiteSpace(payload.PackageDescription))
 		{
 			return (null, $"No active package matches \"{payload.SelectPackage}\", so the OMS report type is unknown.");
@@ -44,6 +51,15 @@ public static class OMSTicketPayloadMapper
 		{
 			return (null,
 				$"The package description for \"{payload.SelectPackage}\" is not a valid OMS report type id.");
+		}
+
+		// The column is required and only ever holds Rush or Normal, so anything else is
+		// data the mapper cannot price: parked rather than sent at a turnaround the
+		// client did not order.
+		if (!TryResolveTurnAroundTimeId(payload.RushNormal, out var turnAroundTimeId))
+		{
+			return (null,
+				$"The order type \"{payload.RushNormal}\" is not a known OMS turnaround.");
 		}
 
 		if (string.IsNullOrWhiteSpace(payload.Site))
@@ -91,7 +107,7 @@ public static class OMSTicketPayloadMapper
 			RequestorLastName: requestorLastName.Trim(),
 			RequestorEmailAddress: payload.RequestorEmail.Trim(),
 			Site: payload.Site.Trim(),
-			TurnAroundTimeID: DefaultTurnAroundTimeId,
+			TurnAroundTimeID: turnAroundTimeId,
 			ReportTypeID: reportTypeId,
 			CountryID: DefaultCountryId,
 			ProvinceID: DefaultProvinceId,
@@ -100,6 +116,23 @@ public static class OMSTicketPayloadMapper
 			PostalCode: string.Empty);
 
 		return (request, null);
+	}
+
+	/// <summary>
+	/// Maps the stored order type onto its OMS turnaround id. OrderType.Normalize does
+	/// the case and whitespace tolerance, so "rush" written by an integrator resolves the
+	/// same as the canonical spelling; anything outside the two returns false.
+	/// </summary>
+	public static bool TryResolveTurnAroundTimeId(string? rushNormal, out int turnAroundTimeId)
+	{
+		turnAroundTimeId = OrderType.Normalize(rushNormal) switch
+		{
+			OrderType.Rush => RushTurnAroundTimeId,
+			OrderType.Normal => NormalTurnAroundTimeId,
+			_ => 0
+		};
+
+		return turnAroundTimeId > 0;
 	}
 
 	// The report type id is stored in the package description, which is a free-text

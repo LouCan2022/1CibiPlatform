@@ -15,6 +15,7 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 	private readonly IOrderHistoryService _orderHistoryService;
 	private readonly IUserClientRepository _userClientRepository;
 	private readonly IAtsAccessScopeResolver _accessScopeResolver;
+	private readonly IOrderInputValidator _orderInputValidator;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly string _templateFileName;
 	private readonly string _applicationformBaseUrl;
@@ -35,6 +36,7 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		IOrderHistoryService orderHistoryService,
 		IUserClientRepository userClientRepository,
 		IAtsAccessScopeResolver accessScopeResolver,
+		IOrderInputValidator orderInputValidator,
 		IUnitOfWork unitOfWork)
 	{
 		_logger = logger;
@@ -50,6 +52,7 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		_orderHistoryService = orderHistoryService;
 		_userClientRepository = userClientRepository;
 		_accessScopeResolver = accessScopeResolver;
+		_orderInputValidator = orderInputValidator;
 		_unitOfWork = unitOfWork;
 		_applicationformBaseUrl = _configuration.GetSection("ATS").GetValue<string>("ApplicationFormBaseUrl") ?? string.Empty;
 		_templateFileName = _configuration.GetSection("ATS").GetValue<string>("ATSBulkTemplatePath") ?? string.Empty;
@@ -73,7 +76,7 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 			});
 	}
 
-	public async Task<bool> InsertEmailInvitationRequestAsync(EmailInvitationRequestDTO emailInvitationRequestDTO, CancellationToken ct = default)
+	public async Task<bool> InsertEmailInvitationRequestAsync(EmailInvitationRequestDTO emailInvitationRequestDTO, CancellationToken ct = default, string source = OrderHistorySource.Web)
 	{
 		var subjectName = $"{emailInvitationRequestDTO.FirstName} {emailInvitationRequestDTO.LastName}";
 
@@ -86,6 +89,22 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		};
 
 		_logger.LogInformation("Inserting Email invitaion request {@Context}", logContext);
+
+		// Before anything is created: the package must be one this client is assigned
+		// and the order type must be Rush or Normal. Both used to be length-checked
+		// only, so any text was accepted and the mistake surfaced much later at OMS
+		// ticketing. Throws BadRequestException naming the acceptable values.
+		var validated = await _orderInputValidator.ValidateAsync(
+			emailInvitationRequestDTO.SelectPackage,
+			emailInvitationRequestDTO.RushNormal,
+			ct);
+
+		// Written back so the caller is echoed what was actually stored - a request
+		// sending "rush" gets "Rush" - and so the Adapt below carries the resolved id
+		// and canonical spelling onto the entity.
+		emailInvitationRequestDTO.PackageId = validated.PackageId;
+		emailInvitationRequestDTO.SelectPackage = validated.Package;
+		emailInvitationRequestDTO.RushNormal = validated.OrderType;
 
 		var token = _secureToken.GenerateSecureToken();
 
@@ -105,6 +124,9 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 
 		EmailInvitationRequest emailInvitationRequest = emailInvitationRequestDTO.Adapt<EmailInvitationRequest>();
 		emailInvitationRequest.EmailInvitationID = Guid.CreateVersion7();
+
+		// Handed back on the DTO so an API caller can poll the order they just created.
+		emailInvitationRequestDTO.OrderId = emailInvitationRequest.EmailInvitationID;
 		emailInvitationRequest.HashToken = HashToken;
 		emailInvitationRequest.HashTokenCreatedAt = DateTime.UtcNow;
 		emailInvitationRequest.OrderCreatedAt = DateTime.UtcNow;
@@ -143,7 +165,9 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 			await SendApplicationFormToUserEmailAsync(
 				emailInvitationRequestDTO.EmailAddress!,
 				subjectName,
-				applicationFormLink);
+				applicationFormLink,
+				emailInvitationRequest.Requestor,
+				emailInvitationRequest.ClientId);
 		}
 		catch (Exception ex)
 		{
@@ -170,7 +194,7 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 				emailInvitationRequest.EmailInvitationID,
 				OrderHistoryEventType.OrderCreated,
 				null,
-				OrderStatus.PendingCandidateInfo, ct);
+				OrderStatus.PendingCandidateInfo, ct, source);
 
 			await _unitOfWork.SaveChangesAsync(ct);
 
@@ -209,7 +233,7 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		}
 	}
 
-	public async Task<bool> InsertBulkSubjectAsync(BulkUploadFileDetailsDTO bulkUploadFileDetailsDTO, CancellationToken ct = default)
+	public async Task<bool> InsertBulkSubjectAsync(BulkUploadFileDetailsDTO bulkUploadFileDetailsDTO, CancellationToken ct = default, string source = OrderHistorySource.Web)
 	{
 		string bulkFileKey = "";
 		bulkUploadFileDetailsDTO.UploadedByUserId = Guid.Parse(_httpContextAccessor!.HttpContext!
@@ -228,6 +252,23 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 
 		_logger.LogInformation("Starting uploading process for file {FileName}", bulkUploadFileDetailsDTO.FileName);
 
+		if (await BulkUploadFileNameExistsAsync(bulkUploadFileDetailsDTO.FileName!, ct))
+		{
+			throw new BadRequestException("A file with this name has already been uploaded.");
+		}
+
+		// Validated before the file is stored: the package and order type apply to every
+		// row, so an unassigned package would fail the whole upload once parsed. Better
+		// to reject it here than to accept a file that cannot produce a single order.
+		var validated = await _orderInputValidator.ValidateAsync(
+			bulkUploadFileDetailsDTO.PackageType,
+			bulkUploadFileDetailsDTO.OrderType,
+			ct);
+
+		bulkUploadFileDetailsDTO.PackageId = validated.PackageId;
+		bulkUploadFileDetailsDTO.PackageType = validated.Package;
+		bulkUploadFileDetailsDTO.OrderType = validated.OrderType;
+
 
 		if (bulkUploadFileDetailsDTO.BulkFile != null)
 		{
@@ -241,6 +282,9 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		}
 		BulkUploadFileDetails bulkUploadFileDetails = bulkUploadFileDetailsDTO.Adapt<BulkUploadFileDetails>();
 		bulkUploadFileDetails.FileID = Guid.CreateVersion7();
+
+		// Handed back on the DTO so an API caller can poll this file's parse outcome.
+		bulkUploadFileDetailsDTO.FileId = bulkUploadFileDetails.FileID;
 		bulkUploadFileDetails.Status = BulkFileStatus.Pending;
 		bulkUploadFileDetails.DateCreated = DateTime.UtcNow;
 		// Captured here, not in the parsing job: that job runs on a Quartz thread with no
@@ -249,6 +293,9 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		bulkUploadFileDetails.UploadedByUserId = _currentUser.UserId;
 		bulkUploadFileDetails.Requestor = _currentUser.FullName;
 		bulkUploadFileDetails.FileKey = bulkFileKey;
+
+		// Carried on the file so the parsing job can stamp it on every order it creates.
+		bulkUploadFileDetails.Source = source;
 
 		try
 		{
@@ -265,7 +312,19 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		return true;
 	}
 
-	public async Task<bool> SendApplicationFormToUserEmailAsync(string gmail, string name, string applicationFormLink)
+	public Task<bool> BulkUploadFileNameExistsAsync(string fileName, CancellationToken ct = default) =>
+		_atsRepository.BulkUploadFileNameExistsAsync(
+			fileName,
+			_currentUser.AtsClientId,
+			_currentUser.UserId,
+			ct);
+
+	public async Task<IReadOnlyList<int>> GetInvalidBulkMobileNumberRowsAsync(IFormFile file, CancellationToken ct = default)
+	{
+		return await ATS.Features.Web.InsertBulkSubject.BulkMobileNumberValidation.ValidateMobileNumbersAsync(file, ct);
+	}
+
+	public async Task<bool> SendApplicationFormToUserEmailAsync(string gmail, string name, string applicationFormLink, string? requestor, int? clientId)
 	{
 		var logContext = new
 		{
@@ -277,7 +336,9 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 
 		_logger.LogInformation("Sending notification for email: {@Context}", logContext);
 
-		var otpBody = _emailService.SendAppplicationFormNotification(gmail, name, applicationFormLink);
+		var clientName = await ResolveClientNameAsync(clientId);
+
+		var otpBody = _emailService.SendAppplicationFormNotification(gmail, name, applicationFormLink, requestor, clientName);
 
 		var isSent = await _emailService.SendATSEmailAsync(
 			toEmail: gmail!,
@@ -292,6 +353,27 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		}
 
 		return isSent;
+	}
+
+	// A missing or unknown client id degrades to null - the email body falls back to
+	// a generic phrasing instead of blocking the send.
+	private async Task<string?> ResolveClientNameAsync(int? clientId)
+	{
+		if (!clientId.HasValue)
+			return null;
+
+		try
+		{
+			var clients = await _atsRepository.GetClientsByIdsAsync(
+				[clientId.Value], searchTerm: null, CancellationToken.None);
+
+			return clients.FirstOrDefault()?.ClientName;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogWarning(ex, "Failed to resolve client name for client {ClientId}; the email falls back to generic phrasing.", clientId);
+			return null;
+		}
 	}
 
 	public async Task<KeysetPaginatedResult<EmailInvitationRequestListDTO>> GetWithdrawnEmailInvitationRequestsAsync(KeysetPaginationRequest paginationRequest, CancellationToken cancellationToken)
@@ -316,17 +398,24 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		var clientIds = scope.AuthorizedClientIds;
 		var requiredRequestorId = scope.RequiredOwnerId;
 
-		// An undecodable cursor (malformed, stale) means "first page".
-		var fields = CursorCodec.Decode(paginationRequest.Cursor, 1);
-		Guid? afterId = Guid.TryParse(fields?[0], out var invitationId) ? invitationId : null;
+		// Cursor over the fixed (createdAt?, id) ordering. An empty createdAt keeps
+		// legacy rows with a null timestamp pageable.
+		var fields = CursorCodec.Decode(paginationRequest.Cursor, 2);
+		Guid? afterId = Guid.TryParse(fields?[1], out var invitationId) ? invitationId : null;
+		DateTime? afterCreatedAt = afterId.HasValue
+			&& DateTime.TryParse(fields![0], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var createdAt)
+			? createdAt : null;
 		var pageSize = KeysetPage.Clamp(paginationRequest.PageSize);
 
 		var rows = await _atsRepository.GetWithdrawnPageAsync(
-			paginationRequest.SearchTerm, afterId, pageSize + 1, clientIds, requiredRequestorId, cancellationToken);
+			paginationRequest.SearchTerm, afterCreatedAt, afterId, pageSize + 1,
+			clientIds, requiredRequestorId, cancellationToken);
 		var (items, hasMore) = KeysetPage.Trim(rows, pageSize);
 
 		var nextCursor = hasMore
-			? CursorCodec.Encode(items[^1].EmailInvitationID.ToString("D"))
+			? CursorCodec.Encode(
+				items[^1].OrderCreatedAt?.ToString("O"),
+				items[^1].EmailInvitationID.ToString("D"))
 			: null;
 		long? totalCount = afterId.HasValue
 			? null
@@ -407,7 +496,9 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 			await SendApplicationFormToUserEmailAsync(
 				invitation.EmailAddress!,
 				fullName,
-				applicationFormLink);
+				applicationFormLink,
+				invitation.Requestor,
+				invitation.ClientId);
 
 			await _orderHistoryService.RecordAsync(
 				emailInvitationId,

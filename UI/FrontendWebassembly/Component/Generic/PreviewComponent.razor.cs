@@ -72,10 +72,47 @@ public partial class PreviewComponent
 		return $"{lastNameInitial}{firstNameInitial}".ToUpperInvariant();
 	}
 
+	// A candidate legitimately may have no middle initial, so that column is the one
+	// blank the upload must not block on. The backend stores it as null.
+	private static bool IsOptionalHeader(string header) =>
+		header.Replace(" ", string.Empty)
+			.Equals("MiddleInitial", StringComparison.OrdinalIgnoreCase);
+
+	private bool IsMobileNumberColumn(int columnIndex) =>
+		columnIndex < Headers.Count
+		&& Headers[columnIndex].Replace(" ", string.Empty)
+			.Equals("MobileNumber", StringComparison.OrdinalIgnoreCase);
+
+	private bool IsInvalidMobileNumber(int columnIndex, string cell) =>
+		IsMobileNumberColumn(columnIndex)
+		&& !string.IsNullOrWhiteSpace(cell)
+		&& cell.Trim().Length != 11;
+
+	private bool IsRequiredCellBlank(int columnIndex, string cell) =>
+		string.IsNullOrWhiteSpace(cell)
+		&& (columnIndex >= Headers.Count || !IsOptionalHeader(Headers[columnIndex]));
+
+	private bool IsInvalidCell(int columnIndex, string cell) =>
+		IsRequiredCellBlank(columnIndex, cell) || IsInvalidMobileNumber(columnIndex, cell);
+
 	private List<int> InvalidRows =>
 	Rows
 		.Select((row, index) => new { row, index })
-		.Where(x => x.row.Any(string.IsNullOrWhiteSpace))
+		.Where(x => x.row.Where((cell, cellIndex) => IsInvalidCell(cellIndex, cell)).Any())
+		.Select(x => x.index + 2)
+		.ToList();
+
+	private List<int> BlankRows =>
+	Rows
+		.Select((row, index) => new { row, index })
+		.Where(x => x.row.Where((cell, cellIndex) => IsRequiredCellBlank(cellIndex, cell)).Any())
+		.Select(x => x.index + 2)
+		.ToList();
+
+	private List<int> InvalidMobileRows =>
+	Rows
+		.Select((row, index) => new { row, index })
+		.Where(x => x.row.Where((cell, cellIndex) => IsInvalidMobileNumber(cellIndex, cell)).Any())
 		.Select(x => x.index + 2)
 		.ToList();
 }
