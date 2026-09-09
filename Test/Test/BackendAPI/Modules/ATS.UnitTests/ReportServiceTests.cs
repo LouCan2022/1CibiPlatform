@@ -19,6 +19,7 @@ using Moq;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using ATS.Services.Report;
+using ATS.Services.Notifications;
 
 namespace Test.BackendAPI.Modules.ATS.UnitTests;
 
@@ -33,6 +34,11 @@ public class ReportServiceTests
 	private readonly Mock<IOrderHistoryService> _orderHistoryService = new();
 	private readonly Mock<IAtsAccessScopeResolver> _accessScopeResolver = new();
 	private readonly Mock<IUnitOfWork> _unitOfWork = new();
+
+	// Raising the "report ready" notification is a best-effort follow-up to the upload,
+	// so these tests only need it to exist. Its own behaviour is covered separately.
+	private readonly Mock<IAtsNotificationService> _notificationService = new();
+
 	private readonly ReportService _service;
 
 	public ReportServiceTests()
@@ -57,7 +63,8 @@ public class ReportServiceTests
 			_objectStorage.Object,
 			_orderHistoryService.Object,
 			_accessScopeResolver.Object,
-			_unitOfWork.Object);
+			_unitOfWork.Object,
+			_notificationService.Object);
 	}
 
 	#region Happy Path

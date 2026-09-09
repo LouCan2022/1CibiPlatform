@@ -25,6 +25,13 @@ public static class ModuleList
 			{ 13, ("bulkuploads", "Bulk Uploads Status", Icons.Material.Filled.CloudUpload) },
 			{ 14, ("ticketingstatus", "Ticketing Status", Icons.Material.Filled.ConfirmationNumber) },
 			{ 15, ("audittrail", "Audit Trail", Icons.Material.Filled.History) }
+
+			// Notifications (/s&i/ats/notifications) is deliberately NOT here. This list
+			// drives both the sidebar and ATSLayout.CanAccessRoute, and every id in it must
+			// exist in the backend module seed data and be grantable. Notifications is not a
+			// permissioned module - anyone with ATS access has an inbox - so adding it would
+			// show a link only super admins could follow and bounce everyone else to
+			// /access-denied. The page is reached from the bell instead.
 		};
 
 	// Modules that belong in the primary sidebar navigation rather than under Manage.

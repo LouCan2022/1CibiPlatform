@@ -10,6 +10,7 @@ public class ReportService : IReportService
 	private readonly IOrderHistoryService _orderHistoryService;
 	private readonly IAtsAccessScopeResolver _accessScopeResolver;
 	private readonly IUnitOfWork _unitOfWork;
+	private readonly IAtsNotificationService _notificationService;
 
 	public ReportService(
 		ILogger<ReportService> logger,
@@ -18,7 +19,8 @@ public class ReportService : IReportService
 		IObjectStorageService objectStorageService,
 		IOrderHistoryService orderHistoryService,
 		IAtsAccessScopeResolver accessScopeResolver,
-		IUnitOfWork unitOfWork)
+		IUnitOfWork unitOfWork,
+		IAtsNotificationService notificationService)
 	{
 		_logger = logger;
 		_atsRepository = atsRepository;
@@ -27,6 +29,7 @@ public class ReportService : IReportService
 		_orderHistoryService = orderHistoryService;
 		_accessScopeResolver = accessScopeResolver;
 		_unitOfWork = unitOfWork;
+		_notificationService = notificationService;
 		_folderName = _configuration.GetSection("ATS").GetValue<string>("ATSReportFileFolderName", "");
 	}
 
@@ -112,6 +115,12 @@ public class ReportService : IReportService
 
 				await _unitOfWork.CommitAsync(cancellationToken);
 
+				// After the commit: the report is the deliverable and it is now durable.
+				await _notificationService.RaiseForOrderAsync(
+					invitation.EmailInvitationID,
+					AtsNotificationType.ReportReady,
+					cancellationToken);
+
 				return updated;
 			}
 
@@ -139,6 +148,18 @@ public class ReportService : IReportService
 			await _unitOfWork.SaveChangesAsync(cancellationToken);
 
 			await _unitOfWork.CommitAsync(cancellationToken);
+
+			if (added)
+			{
+				// Completed is the terminal state the requestor is waiting for, so it gets
+				// the stronger wording; anything else is "a report is ready to read".
+				await _notificationService.RaiseForOrderAsync(
+					invitation.EmailInvitationID,
+					orderStatus == OrderStatus.Completed
+						? AtsNotificationType.OrderCompleted
+						: AtsNotificationType.ReportReady,
+					cancellationToken);
+			}
 
 			return added;
 		}

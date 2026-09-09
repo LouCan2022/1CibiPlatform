@@ -84,6 +84,12 @@ public static class ATSServiceConfiguration
 		services.AddHostedService<AtsAuditDrainService>();
 		services.AddHostedService<AtsAuditRetentionService>();
 
+		// Uncached for the same reason as the two above: the bell exists to show what just
+		// happened, so a cached unread count would hide the notification raised a second ago.
+		services.AddScoped<IAtsNotificationRepository, AtsNotificationRepository>();
+		services.AddScoped<IAtsNotificationService, AtsNotificationService>();
+		services.AddHostedService<AtsNotificationRetentionService>();
+
 		// An integrating client polls these to watch an order move, so a cached read
 		// would report exactly the staleness they are polling to avoid.
 		services.AddScoped<IPublicApiRepository, PublicApiRepository>();
@@ -174,6 +180,10 @@ public static class ATSServiceConfiguration
 		// valid: the audit trail runs with the agreed 30-day retention out of the box.
 		services.Configure<AtsAuditOptions>(
 			configuration.GetSection(AtsAuditOptions.SectionName));
+
+		// Same story: absent section means the agreed 30-day notification retention.
+		services.Configure<AtsNotificationOptions>(
+			configuration.GetSection(AtsNotificationOptions.SectionName));
 
 		// The audit change collector and its interceptor are scoped, so the context is
 		// built from the request's provider rather than a static lambda.

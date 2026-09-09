@@ -42,6 +42,20 @@ public interface IOMSTicketingRepository
 		CancellationToken cancellationToken);
 
 	/// <summary>
+	/// Of the given orders, those whose automatic retries are now exhausted and which
+	/// therefore need a person to intervene.
+	/// </summary>
+	/// <remarks>
+	/// Called straight after <see cref="MarkTicketFailedAsync"/> so the requestor is
+	/// notified exactly once - when the budget runs out - rather than on each transient
+	/// failure. Only the database knows what the attempt count became, so this reads it
+	/// back instead of inferring it.
+	/// </remarks>
+	Task<List<Guid>> GetExhaustedTicketIdsAsync(
+		IReadOnlyCollection<Guid> emailInvitationIds,
+		CancellationToken cancellationToken);
+
+	/// <summary>
 	/// Reads the scope identity and current order status of one order, for the access
 	/// check and history entry a manual retry needs. Returns null when the order does
 	/// not exist.

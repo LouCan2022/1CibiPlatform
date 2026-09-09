@@ -77,6 +77,7 @@ public static class FrontendServiceConfig
 		services.AddScoped<FrontendWebassembly.Services.EmploymentVerification.Interface.IEmploymentVerificationService, FrontendWebassembly.Services.EmploymentVerification.Implementation.EmploymentVerificationService>();
 		services.AddScoped<IApplicationFormStateService, ApplicationFormStateService>();
 		services.AddScoped<IEndorsementSubmissionService, EndorsementSubmissionService>();
+		services.AddScoped<INotificationService, NotificationService>();
 		services.AddScoped<IDisputeOrderService, DisputeOrderService>();
 		services.AddScoped<IReportService, ReportService>();
 		services.AddScoped<IBulkUploadService, BulkUploadService>();

@@ -20,6 +20,14 @@ public partial class BulkUploadsComponent
 	private string? _searchString;
 	private bool _isLoadingCounts;
 
+	/// <summary>
+	/// Pre-fills the search box from the URL, so the "bulk upload processed" notification
+	/// lands on the file it is about. The sender passes the file name, which is what this
+	/// board's search matches on.
+	/// </summary>
+	[SupplyParameterFromQuery(Name = "search")]
+	private string? SearchFromQuery { get; set; }
+
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
@@ -28,6 +36,13 @@ public partial class BulkUploadsComponent
 		if (!IsPageAuthorized)
 		{
 			return;
+		}
+
+		// Seeded before the first load, so the opening page is already filtered rather than
+		// fetching the whole board and then narrowing it.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
 		}
 
 		await RefreshCountsAsync();
