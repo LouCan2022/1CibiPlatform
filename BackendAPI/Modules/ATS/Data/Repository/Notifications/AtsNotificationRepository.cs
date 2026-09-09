@@ -101,6 +101,85 @@ public sealed class AtsNotificationRepository : IAtsNotificationRepository
 			})
 			.FirstOrDefaultAsync(cancellationToken);
 
+	public async Task<List<BulkEmailCompletionDTO>> GetCompletedBulkEmailFilesAsync(
+		IReadOnlyCollection<Guid> emailInvitationIds,
+		CancellationToken cancellationToken)
+	{
+		if (emailInvitationIds.Count == 0)
+		{
+			return [];
+		}
+
+		var ids = emailInvitationIds.ToList();
+
+		// The files the just-sent orders belong to. Single orders have no BulkFileID and
+		// are excluded here - they get their own notification at creation time.
+		var fileIds = await _dbContext.EmailInvitationRequests
+			.AsNoTracking()
+			.Where(order => ids.Contains(order.EmailInvitationID) && order.BulkFileID != null)
+			.Select(order => order.BulkFileID!.Value)
+			.Distinct()
+			.ToListAsync(cancellationToken);
+
+		if (fileIds.Count == 0)
+		{
+			return [];
+		}
+
+		// Counted across the whole file, not the batch: the job sends in claimed slices, so
+		// a file is only finished when none of its orders are still Pending or Processing.
+		var progress = await _dbContext.EmailInvitationRequests
+			.AsNoTracking()
+			.Where(order => order.BulkFileID != null && fileIds.Contains(order.BulkFileID.Value))
+			.GroupBy(order => order.BulkFileID!.Value)
+			.Select(group => new
+			{
+				FileId = group.Key,
+				TotalCount = group.Count(),
+				SentCount = group.Count(order => order.EmailSentStatus == EmailStatus.Done),
+				FailedCount = group.Count(order => order.EmailSentStatus == EmailStatus.Error),
+				InFlightCount = group.Count(order =>
+					order.EmailSentStatus == EmailStatus.Pending
+					|| order.EmailSentStatus == EmailStatus.Processing)
+			})
+			.Where(file => file.InFlightCount == 0)
+			.ToListAsync(cancellationToken);
+
+		if (progress.Count == 0)
+		{
+			return [];
+		}
+
+		var completedFileIds = progress.Select(file => file.FileId).ToList();
+
+		var files = await _dbContext.BulkUploadFileDetails
+			.AsNoTracking()
+			.Where(file => completedFileIds.Contains(file.FileID))
+			.Select(file => new
+			{
+				file.FileID,
+				file.FileName,
+				file.UploadedByUserId
+			})
+			.ToListAsync(cancellationToken);
+
+		return progress
+			.Join(
+				files,
+				file => file.FileId,
+				detail => detail.FileID,
+				(file, detail) => new BulkEmailCompletionDTO
+				{
+					FileId = file.FileId,
+					FileName = detail.FileName,
+					UploadedByUserId = detail.UploadedByUserId,
+					TotalCount = file.TotalCount,
+					SentCount = file.SentCount,
+					FailedCount = file.FailedCount
+				})
+			.ToList();
+	}
+
 	private IQueryable<AtsNotification> BuildRowsQuery(Guid recipientUserId, bool unreadOnly)
 	{
 		var query = _dbContext.Notifications

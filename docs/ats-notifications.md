@@ -210,9 +210,23 @@ services.Configure<AtsNotificationOptions>(configuration.GetSection(AtsNotificat
 | Event | File | Placement |
 |---|---|---|
 | Candidate submitted the form | `Services/ApplicationForm/ApplicationFormService.cs` | after `CommitAsync` |
-| Bulk upload finished | `Services/BulkSubmissionProcessor/BulkSubmissionProcessorService.cs` | beside the existing `ReceiveATSResponse` toast, reusing `file.UploadedByUserId` |
+| Bulk upload **parsed** | `Services/BulkSubmissionProcessor/BulkSubmissionProcessorService.cs` | beside the existing `ReceiveATSResponse` toast, reusing `file.UploadedByUserId` |
+| Bulk invitations **all emailed** | `Services/EmailNotificationProcessor/EmailNotificationProcessorService.cs` | after the sent/failed statuses are written |
 | Report ready / order completed | `Services/Report/ReportService.cs` | after `CommitAsync`, on both the update and the insert path |
 | Ticketing retries exhausted | `Services/OMSTicketing/OMSTicketingProcessorService.cs` | after each `MarkTicketFailedAsync` |
+
+**Bulk raises two notifications, at different times.** `BulkUploadCompleted` fires when the
+file is parsed and the orders exist; `BulkEmailsCompleted` fires when every candidate has
+actually been emailed ("All 40 of 40 invitation emails … have been sent"). The gap between
+them can be minutes, and the second is the one a requestor is waiting on.
+
+The subtlety is that **the email job sends in claimed slices, not whole files** — a
+40-subject file may be sent across several passes. So `RaiseForCompletedBulkEmailsAsync` is
+called after *every* pass, but `GetCompletedBulkEmailFilesAsync` asks the database which
+files now have nothing left `Pending` or `Processing`. It therefore fires **once per file**,
+not once per pass. Failures count as attempted: a file is finished when nothing is still in
+flight, not when everything succeeded, and a partial result is worded
+"37 of 40 … 3 could not be delivered" so it does not read as a success.
 
 **The ticketing one is the subtle case.** A retryable failure only exhausts the budget on
 its *last* attempt, so firing on every failure would notify five times for one order.
@@ -266,6 +280,14 @@ repaired the bulk-upload toast that was silently dead in local dev.**
 | File | What it is |
 |---|---|
 | `NotificationCenter.razor{,.cs,.css}` | The bell, badge and dropdown. Mounted once in `ATSLayout`, so the connection is opened once and stays live across ATS navigation. |
+
+**Not every arrival toasts.** `NotificationCenter.ShouldToast` suppresses the snackbar for
+`TicketingFailed` and `InvitationEmailFailed`. Those are raised per order by background
+jobs, so a batch of 40 produced 40 toasts and buried the screen — they are the most likely
+to arrive in bulk and the least likely to need acting on within the second, so the bell's
+count is the right weight. Everything else is one-per-event by nature (a candidate submits
+their own form; a bulk file finishes once), so a toast is proportionate. **All of them still
+land in the bell** — this only decides what interrupts.
 | `NotificationItem.razor{,.cs}` | One row. Shared by the dropdown and the page so they can't drift. Maps `Type` → icon + accent, and `CreatedAt` → "3m ago". |
 | `NotificationsPage.razor{,.cs,.css}` | `/s&i/ats/notifications`. Infinite scroll. |
 | `wwwroot/js/ats/notificationScroll.js` | `IntersectionObserver` that presses "Load more" when the sentinel scrolls into view. |

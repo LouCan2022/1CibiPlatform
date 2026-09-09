@@ -14,6 +14,7 @@ public class EmailNotificationProcessorService : IEmailNotificationProcessorServ
 	private readonly ILogger<EmailNotificationProcessorService> _logger;
 	private readonly IEndorsementSubmissionService _endorsementSubmissionService;
 	private readonly IATSRepository _repository;
+	private readonly IAtsNotificationService _notificationService;
 	private readonly IConfiguration _configuration;
 	private readonly string _applicationformBaseUrl;
 
@@ -25,11 +26,13 @@ public class EmailNotificationProcessorService : IEmailNotificationProcessorServ
 		ILogger<EmailNotificationProcessorService> logger,
 		IEndorsementSubmissionService endorsementSubmissionService,
 		IATSRepository repository,
+		IAtsNotificationService notificationService,
 		IConfiguration configuration)
 	{
 		_logger = logger;
 		_endorsementSubmissionService = endorsementSubmissionService;
 		_repository = repository;
+		_notificationService = notificationService;
 		_configuration = configuration;
 		_applicationformBaseUrl = _configuration.GetSection("ATS").GetValue<string>("ApplicationFormBaseUrl") ?? string.Empty;
 	}
@@ -85,6 +88,17 @@ public class EmailNotificationProcessorService : IEmailNotificationProcessorServ
 		{
 			await _repository.UpdateBulkEmailInvitationRequestForNotSentEmailAsync(errorList);
 		}
+
+		// After the statuses are written, so the completeness check reads the outcome of
+		// this pass rather than the state before it. Every order touched is considered,
+		// including the failures: a file is finished when nothing is still in flight, not
+		// when everything succeeded.
+		var attempted = successList
+			.Concat(errorList)
+			.Select(request => request.EmailInvitationID)
+			.ToList();
+
+		await _notificationService.RaiseForCompletedBulkEmailsAsync(attempted, cancellationToken);
 	}
 
 

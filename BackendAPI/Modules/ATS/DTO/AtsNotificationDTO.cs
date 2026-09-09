@@ -60,3 +60,23 @@ public record NotificationOrderTargetDTO
 		string.Join(' ', new[] { FirstName, LastName }
 			.Where(part => !string.IsNullOrWhiteSpace(part)));
 }
+
+/// <summary>
+/// A bulk file whose invitation emails have all been attempted, with the outcome counts
+/// for the "all invitations sent" notification.
+/// </summary>
+public record BulkEmailCompletionDTO
+{
+	public Guid FileId { get; set; }
+
+	public string? FileName { get; set; }
+
+	// Null for files uploaded through the public API, which have no ATS user to tell.
+	public Guid? UploadedByUserId { get; set; }
+
+	public int TotalCount { get; set; }
+
+	public int SentCount { get; set; }
+
+	public int FailedCount { get; set; }
+}
