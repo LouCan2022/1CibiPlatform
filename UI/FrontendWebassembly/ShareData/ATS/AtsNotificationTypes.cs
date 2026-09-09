@@ -14,6 +14,10 @@ public static class AtsNotificationTypes
 {
 	public const string ApplicationFormSubmitted = "ApplicationFormSubmitted";
 	public const string BulkUploadCompleted = "BulkUploadCompleted";
+
+	// Fires later than BulkUploadCompleted: that one means the file was parsed, this one
+	// means every candidate has actually been emailed.
+	public const string BulkEmailsCompleted = "BulkEmailsCompleted";
 	public const string OrderCompleted = "OrderCompleted";
 	public const string ReportReady = "ReportReady";
 	public const string OrderDisputed = "OrderDisputed";

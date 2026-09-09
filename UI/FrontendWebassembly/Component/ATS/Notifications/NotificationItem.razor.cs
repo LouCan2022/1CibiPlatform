@@ -23,6 +23,7 @@ public partial class NotificationItem
 	{
 		AtsNotificationTypes.ApplicationFormSubmitted => Icons.Material.Filled.AssignmentTurnedIn,
 		AtsNotificationTypes.BulkUploadCompleted => Icons.Material.Filled.CloudDone,
+		AtsNotificationTypes.BulkEmailsCompleted => Icons.Material.Filled.MarkEmailRead,
 		AtsNotificationTypes.OrderCompleted => Icons.Material.Filled.CheckCircle,
 		AtsNotificationTypes.ReportReady => Icons.Material.Filled.Description,
 		AtsNotificationTypes.OrderDisputed => Icons.Material.Filled.Gavel,
@@ -38,6 +39,7 @@ public partial class NotificationItem
 	{
 		AtsNotificationTypes.ApplicationFormSubmitted => "is-info",
 		AtsNotificationTypes.BulkUploadCompleted => "is-info",
+		AtsNotificationTypes.BulkEmailsCompleted => "is-success",
 		AtsNotificationTypes.OrderCompleted => "is-success",
 		AtsNotificationTypes.ReportReady => "is-success",
 		AtsNotificationTypes.OrderDisputed => "is-warn",

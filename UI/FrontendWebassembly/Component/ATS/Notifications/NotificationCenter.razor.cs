@@ -62,7 +62,10 @@ public partial class NotificationCenter : IDisposable
 						_items.RemoveRange(PreviewCount, _items.Count - PreviewCount);
 					}
 
-					Snackbar.Add(arrived.Title, Severity.Info);
+					if (ShouldToast(arrived.Type))
+					{
+						Snackbar.Add(arrived.Title, Severity.Info);
+					}
 				}
 
 				StateHasChanged();
@@ -73,6 +76,28 @@ public partial class NotificationCenter : IDisposable
 			// The component went away between the hub event and the render. Nothing to do.
 		}
 	}
+
+	/// <summary>
+	/// Whether an arriving notification also interrupts with a toast.
+	/// </summary>
+	/// <remarks>
+	/// Everything still lands in the bell; this only decides what is loud enough to
+	/// interrupt. The distinction is whether the event arrives one at a time or in a batch:
+	///
+	/// Ticketing and email failures are raised per order by background jobs, so a batch of
+	/// 40 produced 40 toasts and buried the screen. They are the notifications most likely
+	/// to arrive in bulk and the least likely to need acting on within the second, so the
+	/// bell's count is the right weight for them.
+	///
+	/// The rest are one-per-event by nature - a candidate submits their own form, a bulk
+	/// file finishes once - so a toast is proportionate.
+	/// </remarks>
+	private static bool ShouldToast(string type) => type switch
+	{
+		AtsNotificationTypes.TicketingFailed => false,
+		AtsNotificationTypes.InvitationEmailFailed => false,
+		_ => true
+	};
 
 	private async Task ToggleAsync()
 	{

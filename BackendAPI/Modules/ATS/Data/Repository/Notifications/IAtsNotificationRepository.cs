@@ -53,4 +53,21 @@ public interface IAtsNotificationRepository
 	Task<NotificationOrderTargetDTO?> GetOrderTargetAsync(
 		Guid emailInvitationId,
 		CancellationToken cancellationToken);
+
+	/// <summary>
+	/// Of the bulk files these orders belong to, those whose invitation emails have all
+	/// been attempted - nothing left Pending or Processing.
+	/// </summary>
+	/// <remarks>
+	/// The email job works in claimed slices rather than whole files, so "this batch
+	/// finished" is not "this file finished": a 40-subject file may be sent across several
+	/// passes. This asks the database which files are actually complete, so the "all
+	/// invitations sent" notification fires once per file rather than once per batch.
+	///
+	/// Returns the sent/failed/total counts so the caller can word the message without a
+	/// second query.
+	/// </remarks>
+	Task<List<BulkEmailCompletionDTO>> GetCompletedBulkEmailFilesAsync(
+		IReadOnlyCollection<Guid> emailInvitationIds,
+		CancellationToken cancellationToken);
 }
