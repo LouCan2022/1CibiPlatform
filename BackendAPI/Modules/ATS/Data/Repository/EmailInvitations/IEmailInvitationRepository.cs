@@ -6,6 +6,12 @@ public interface IEmailInvitationRepository
 	Task<bool> AddBulkEmailInvitationRequestAsync(List<EmailInvitationRequest> emailInvitationRequests);
 	Task<List<EmailInvitationRequest>> GetPendingEmailInvitationRequestsAsync();
 	Task<int> ReleaseStaleEmailInvitationClaimsAsync(TimeSpan staleAfter);
+
+	/// <summary>
+	/// Returns claimed rows to Pending WITHOUT charging them a send attempt, for work the
+	/// pass abandoned before offering it to the SMTP server (a provider throttle).
+	/// </summary>
+	Task<int> ReleaseEmailInvitationClaimsAsync(List<EmailInvitationRequest> emailInvitationRequests);
 	Task<bool> UpdateBulkEmailInvitationRequestForSentEmailAsync(List<EmailInvitationRequest> emailInvitationRequests);
 	Task<bool> UpdateBulkEmailInvitationRequestForNotSentEmailAsync(List<EmailInvitationRequest> emailInvitationRequests);
 	Task<bool> UpdateSingleEmailInvitationRequestStatusForSentEmailAsync(Guid emailInvitationId);

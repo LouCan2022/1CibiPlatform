@@ -12,6 +12,10 @@ public class EmailNotificationBackgroundJobSetup : IConfigureOptions<QuartzOptio
 		// an IDLE worker notices new work. At 1s that was two queries a second forever
 		// (the stale-claim UPDATE and the claiming CTE) to shave at most four seconds off
 		// a delay no candidate can perceive.
+		//
+		// It is also not the send rate. Throughput is bounded by AtsEmailDeliveryOptions
+		// (MaxSendsPerSecond), so shortening this interval polls the database harder
+		// without sending a single message faster.
 		options.AddTrigger(opts => opts
 			.ForJob(jobKey)
 			.WithIdentity("EmailNotificationTrigger")

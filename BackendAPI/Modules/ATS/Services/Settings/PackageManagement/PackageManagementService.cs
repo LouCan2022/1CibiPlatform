@@ -33,10 +33,10 @@ public class PackageManagementService : IPackageManagementService
 		var pageSize = KeysetPage.Clamp(paginationRequest.PageSize);
 
 		var rows = await _packageRepository.GetPackagesPageAsync(
-			paginationRequest.SearchTerm, 
-			clientId, 
-			afterPackageName, 
-			pageSize + 1, 
+			paginationRequest.SearchTerm,
+			clientId,
+			afterPackageName,
+			pageSize + 1,
 			cancellationToken);
 		var (items, hasMore) = KeysetPage.Trim(rows, pageSize);
 
