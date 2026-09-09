@@ -84,12 +84,10 @@
 ::deep .ats-download-pill.available::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--c-success); }
 ::deep .ats-download-pill.missing { background: var(--c-neutral-bg); color: var(--text-3); }
 .ats-download-actions { gap: 10px; padding: 18px 24px 24px; border-top: 1px solid var(--border); }
-::deep .ats-download-cancel,
 ::deep .ats-download-submit { min-width: 0; height: 42px; padding: 0 20px !important; border-radius: 10px !important; font-size: 14px !important; font-weight: 700 !important; }
-::deep .ats-download-cancel { border: 1.5px solid var(--border-strong) !important; background: var(--c-surface); color: var(--text-2) !important; }
-::deep .ats-download-cancel:hover { background: var(--c-surface-sunken); }
 ::deep .ats-download-submit.theme-button-inactive { background: var(--c-neutral-bg) !important; color: var(--text-3) !important; }
 ::deep .ats-download-submit.theme-button-active { background: var(--c-primary-gradient) !important; color: var(--c-on-dark-fg) !important; box-shadow: 0 8px 20px -6px rgba(29, 95, 209, .55); }
+
 
 @media (max-width: 520px) {
     .ats-download-header { width: 100%; padding: 20px; }

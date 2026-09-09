@@ -337,7 +337,10 @@ code {
 .main-topbar-greeting-text {
     max-width: min(32vw, 360px);
     overflow: hidden;
-    color: var(--c-surface-sunken);
+    /* On-dark token, not the surface ramp: the topbar stays dark in both themes,
+       and --c-surface-sunken flips near-black under html.dark. Same color as the
+       name in <strong>, so "Hi, Renzy" reads as one piece. */
+    color: var(--c-on-dark-fg);
     font-size: 13.5px;
     font-weight: 600;
     text-overflow: ellipsis;

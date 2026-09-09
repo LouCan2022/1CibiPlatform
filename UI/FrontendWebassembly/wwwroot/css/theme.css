@@ -148,6 +148,11 @@
        they sit on is CSS. Keep the plot background here so the two agree. */
     --c-chart-surface: #ffffff;
     --c-chart-grid: #e4eaf6;
+
+    /* On-screen ink for the signature pad canvas (safeSignaturePad.js reads it).
+       Display only - the exported PNG is always repainted to the canonical dark
+       ink, since it lands on the white consent-form PDF. */
+    --c-signature-ink: #102247;
 }
 
 html.dark,
@@ -257,6 +262,8 @@ html.dark-startup {
 
     --c-chart-surface: #161c28;
     --c-chart-grid: #2a3446;
+
+    --c-signature-ink: #dfe7f5;
 
     color-scheme: dark;
 }

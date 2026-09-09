@@ -1,5 +1,29 @@
 const pads = new WeakMap();
 
+// The exported PNG is embedded in the generated consent-form PDF (white paper),
+// so the stored ink is always this canonical dark color. Only the on-screen ink
+// follows the theme, via the --c-signature-ink token (theme.css).
+const EXPORT_INK = "#102247";
+
+function displayInk(canvas) {
+    const token = getComputedStyle(canvas).getPropertyValue("--c-signature-ink").trim();
+    return token || EXPORT_INK;
+}
+
+// Repaint every opaque pixel of a canvas in one color, preserving alpha. Works
+// because the pad is transparent apart from the ink.
+function recolored(sourceCanvas, color) {
+    const copy = document.createElement("canvas");
+    copy.width = sourceCanvas.width;
+    copy.height = sourceCanvas.height;
+    const copyContext = copy.getContext("2d");
+    copyContext.drawImage(sourceCanvas, 0, 0);
+    copyContext.globalCompositeOperation = "source-in";
+    copyContext.fillStyle = color;
+    copyContext.fillRect(0, 0, copy.width, copy.height);
+    return copy;
+}
+
 export function setup(canvas, componentReference, image, disabled) {
     if (!canvas) {
         return;
@@ -32,7 +56,7 @@ export function setup(canvas, componentReference, image, disabled) {
         context.lineWidth = 2;
         context.lineCap = "round";
         context.lineJoin = "round";
-        context.strokeStyle = "#102247";
+        context.strokeStyle = displayInk(canvas);
 
         if (currentImage) {
             drawImage(canvas, context, currentImage, scale);
@@ -70,7 +94,7 @@ export function setup(canvas, componentReference, image, disabled) {
         }
         componentReference.invokeMethodAsync(
             "SignatureChangedAsync",
-            canvas.toDataURL("image/png"));
+            recolored(canvas, EXPORT_INK).toDataURL("image/png"));
         event.preventDefault();
     };
 
@@ -122,8 +146,14 @@ export function destroy(canvas) {
 function drawImage(canvas, context, source, scale) {
     const image = new Image();
     image.onload = () => {
+        // Stored signatures carry the canonical dark ink; repaint them in the
+        // display ink so they stay visible on a dark canvas.
+        const plate = document.createElement("canvas");
+        plate.width = canvas.width;
+        plate.height = canvas.height;
+        plate.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
         context.drawImage(
-            image,
+            recolored(plate, displayInk(canvas)),
             0,
             0,
             canvas.width / scale,

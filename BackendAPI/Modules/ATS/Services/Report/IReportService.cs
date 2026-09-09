@@ -16,4 +16,9 @@ public interface IReportService
 	/// </summary>
 	Task<(Stream ZipStream, string SubjectName)> DownloadIndividualReportAsync(DownloadIndividualDocumentsRequestDTO downloadInvididualRequest, CancellationToken cancellationToken);
 	Task<Stream> DownloadMultipleOrderRecordsAsync(DownloadMultipleOrderRecordsRequestDTO downloadMultipleOrderRecordsRequest, CancellationToken cancellationToken);
+	/// <summary>
+	/// The application form answers for one order, for the read-only preview dialog.
+	/// The caller must be able to see the order under their ATS access scope.
+	/// </summary>
+	Task<ApplicationFormPreviewDTO> GetApplicationFormPreviewAsync(Guid emailInvitationRequestId, CancellationToken cancellationToken);
 }

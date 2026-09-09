@@ -266,11 +266,14 @@
                                                           Label="First name" />
                                         </MudItem>
                                         <MudItem xs="12" sm="6">
-                                            <MudTextField FullWidth="true"
+                                            <MudTextField @ref="_middleNameField"
+                                                          FullWidth="true"
                                                           Variant="Variant.Outlined"
                                                           Margin="Margin.Dense"
                                                           Disabled="@NoMiddleName"
                                                           @bind-Value="personalDetails.MiddleName"
+                                                          Required="@(!NoMiddleName)"
+                                                          RequiredError="Middle Name is required"
                                                           Class="oneplatform-rounded-input"
                                                           Adornment="Adornment.Start"
                                                           AdornmentIcon="@Icons.Material.Outlined.PersonOutline"
