@@ -90,11 +90,14 @@ public class ATSServiceFixture : IDisposable
 			MockBulkSubmissionProcessorServiceLogger.Object,
 			Configuration);
 
+		// IEndorsementSubmissionService is no longer injected: each send resolves its own
+		// from a scope, because it reaches a DbContext and the sends now run concurrently.
+		// MockEndorsementSubmissionService is registered on the scope factory instead.
 		EmailNotificationProcessorService = new EmailNotificationProcessorService(
 			EmailNotificationProcessoServiceLogger.Object,
-			MockEndorsementSubmissionService.Object,
 			MockRepository.Object,
 			MockNotificationService.Object,
+			MockServiceScopeFactory.Object,
 			Configuration
 			);
 	}
@@ -125,6 +128,12 @@ public class ATSServiceFixture : IDisposable
 		mockServiceProvider
 			.Setup(x => x.GetService(typeof(IAtsNotificationService)))
 			.Returns(MockNotificationService.Object);
+
+		// The email processor resolves one of these per invitation rather than sharing the
+		// injected instance, because the sends run concurrently and it reaches a DbContext.
+		mockServiceProvider
+			.Setup(x => x.GetService(typeof(IEndorsementSubmissionService)))
+			.Returns(MockEndorsementSubmissionService.Object);
 
 		mockServiceScope
 			.Setup(x => x.ServiceProvider)
