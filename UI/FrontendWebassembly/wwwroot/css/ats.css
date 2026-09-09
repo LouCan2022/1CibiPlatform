@@ -5763,9 +5763,14 @@ button.ats-console-brand-text {
         padding: 0;
     }
 
+/* Both sections are MudPapers: without an override they paint MudBlazor's
+   --mud-palette-surface, which stays white on this page (GenericLayout's unbound
+   theme provider), so under html.dark they'd sit as white slabs on the dark card.
+   Transparent lets the themed card surface show through in both modes. */
 .ats-consent-step .ats-consent-copy-section {
     width: 100%;
     border-radius: 0 !important;
+    background: transparent;
 }
 
 .ats-consent-step .ats-consent-title {
@@ -5811,6 +5816,7 @@ button.ats-console-brand-text {
     margin: 0;
     padding: 0;
     border-radius: 0 !important;
+    background: transparent;
 }
 
     .ats-consent-step .ats-signature-section > .mud-grid {
@@ -6066,6 +6072,18 @@ button.ats-console-brand-text {
     .ats-consent-step .ats-consent-date-wrap .mud-input-adornment-end .mud-icon-button {
         padding: 0;
     }
+
+/* Adornment icons across the whole application form - both plain start icons
+   (.mud-icon-default paints --mud-palette-text-secondary directly on the icon,
+   beating the inherited adornment color) and icon buttons (which paint
+   --mud-palette-action-default). Neither palette flips on this page
+   (GenericLayout's unbound theme provider), so in dark mode the icons sat
+   near-black. Same subtle token the New Order inputs use. */
+.ats-appform-modern .mud-input-adornment .mud-icon-root,
+.ats-appform-modern .mud-input-adornment .mud-icon-button,
+.ats-appform-modern .mud-input-adornment .mud-icon-button .mud-icon-root {
+    color: var(--c-fg-subtle);
+}
 
 .ats-application-card .ats-step-action-bar:has(.ats-consent-save-button) {
     padding: 0 !important;

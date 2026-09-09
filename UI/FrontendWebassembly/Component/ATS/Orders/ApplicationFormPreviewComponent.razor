@@ -56,6 +56,7 @@
 
                         <MudText Typo="Typo.subtitle2" Class="ats-appform-preview-group-title">Candidate Information</MudText>
                         <dl class="ats-appform-preview-grid">
+                            @PreviewField("Position applied for", p.PositionAppliedFor)
                             @PreviewField("First name", p.FirstName)
                             @PreviewField("Middle name", p.MiddleName)
                             @PreviewField("Last name", p.LastName)
@@ -162,20 +163,17 @@
                                         </div>
                                         <div class="ats-appform-preview-timeline-content">
                                             <span class="ats-appform-preview-timeline-dates">@EmploymentDates(employer)</span>
-                                            <MudText Typo="Typo.subtitle1" Class="ats-appform-preview-timeline-company">@employer.CompanyName</MudText>
-                                            @if (!string.IsNullOrWhiteSpace(employer.JobTitle))
-                                            {
-                                                <MudText Typo="Typo.body2" Class="ats-appform-preview-timeline-jobtitle">@employer.JobTitle</MudText>
-                                            }
                                             @if (EmploymentStatusLine(employer) is { Length: > 0 } statusLine)
                                             {
                                                 <MudText Typo="Typo.body2" Class="ats-appform-preview-timeline-status">@statusLine</MudText>
                                             }
                                             <dl class="ats-appform-preview-grid ats-appform-preview-grid-two ats-appform-preview-timeline-grid">
+                                                @PreviewField("Company name", employer.CompanyName)
+                                                @PreviewField("Job title", employer.JobTitle)
                                                 @PreviewField("Company address", employer.CompanyAddress)
                                                 @PreviewField("Reason for leaving", employer.ReasonForLeaving)
-                                                @PreviewField("Supervisor", employer.SupervisorName)
-                                                @PreviewField("Supervisor contact", employer.SupervisorContactNumber)
+                                                @PreviewField("Supervisor name", employer.SupervisorName)
+                                                @PreviewField("Supervisor contact number", employer.SupervisorContactNumber)
                                                 @PreviewField("Supervisor email", employer.SupervisorEmail)
                                             </dl>
                                             @if (!string.IsNullOrWhiteSpace(employer.CoeFileName))
@@ -198,18 +196,14 @@
                     <section class="ats-appform-preview-section">
                         @SectionHeading(sectionNumber, "Professional References", "Professional contacts provided by the applicant")
 
-                        @foreach (var reference in references)
+                        @foreach (var (reference, index) in references.Select((r, i) => (r, i)))
                         {
                             <div class="ats-appform-preview-reference-card">
-                                <MudText Typo="Typo.subtitle1" Class="ats-appform-preview-reference-name">@reference.FullName</MudText>
-                                @if (!string.IsNullOrWhiteSpace(reference.ProfessionalRelationship) || !string.IsNullOrWhiteSpace(reference.AffiliatedCompany))
-                                {
-                                    <MudText Typo="Typo.body2" Class="ats-appform-preview-reference-role">
-                                        @string.Join("  |  ", new[] { reference.ProfessionalRelationship, reference.AffiliatedCompany }
-                                            .Where(v => !string.IsNullOrWhiteSpace(v)))
-                                    </MudText>
-                                }
+                                <span class="ats-appform-preview-reference-eyebrow">REFERENCE @(index + 1)</span>
                                 <dl class="ats-appform-preview-grid ats-appform-preview-grid-two ats-appform-preview-reference-grid">
+                                    @PreviewField("Full name", reference.FullName)
+                                    @PreviewField("Professional relationship", reference.ProfessionalRelationship)
+                                    @PreviewField("Affiliated company", reference.AffiliatedCompany)
                                     @PreviewField("Email", reference.Email)
                                     @PreviewField("Mobile", reference.ContactNumber)
                                     @PreviewField("Best time to contact", reference.BestTimeToContact)
