@@ -18,7 +18,6 @@ public static class CsvPreviewParser
 	/// Rows shown in the preview. A 10k-row upload should not build 10k lists of cells
 	/// in the browser before a dialog opens.
 	/// </summary>
-	public const int MaxPreviewRows = 100;
 
 	/// <summary>
 	/// The columns the bulk upload imports, in template order. Spreadsheets often pick
@@ -108,7 +107,7 @@ public static class CsvPreviewParser
 
 		result.TotalRowCount = dataRows.Count;
 		result.Rows = dataRows
-			.Take(MaxPreviewRows)
+			
 			.Select(fields => keptIndexes
 				.Select(index => index < fields.Count ? fields[index].Trim() : string.Empty)
 				.ToList())
