@@ -510,10 +510,20 @@
 
             @* The closed book's leather front cover (easter egg) - and the credits page
                in one: the author names burn in gold-framed leather once the pages have
-               clapped shut around it. *@
-            <section class="auth-cover-panel" aria-hidden="@(!isSecretMode)" inert="@(!isSecretMode ? string.Empty : null)">
+               clapped shut around it. The whole cover is the way back: any click (or
+               Enter/Space, it stands in for the old Flip Back button) unfolds the book
+               and returns to the login. *@
+            <section class="auth-cover-panel"
+                     role="button"
+                     tabindex="@(isSecretMode ? 0 : -1)"
+                     aria-label="Flip the book back open to return to sign in"
+                     aria-hidden="@(!isSecretMode)"
+                     inert="@(!isSecretMode ? string.Empty : null)"
+                     @onclick="CloseSecretPage"
+                     @onclick:stopPropagation="true"
+                     @onkeydown="HandleCoverKeyDown">
                 <div class="auth-secret-embers" aria-hidden="true">
-                    @for (var i = 0; i < 24; i++)
+                    @for (var i = 0; i < 60; i++)
                     {
                         <span style="@GetEmberStyle(i)"></span>
                     }
@@ -527,18 +537,23 @@
                     <p class="auth-cover-eyebrow">One Platform</p>
                     <h2 class="auth-cover-title">The Authors</h2>
                     <ul class="auth-secret-authors">
-                        <li>Russel Gutierrez</li>
-                        <li>Renzy Gutierrez</li>
-                        <li>Siegmund Valdemoro</li>
-                        <li>Christian Lorenzo Evangelista</li>
+                        <li>
+                            <span class="auth-secret-author-name">Russel Gutierrez</span>
+                            <span class="auth-secret-author-role">Lead Developer</span>
+                        </li>
+                        <li>
+                            <span class="auth-secret-author-name">Renzy Gutierrez</span>
+                            <span class="auth-secret-author-role">Software Developer</span>
+                        </li>
+                        <li>
+                            <span class="auth-secret-author-name">Siegmund Valdemoro</span>
+                            <span class="auth-secret-author-role">Software Developer</span>
+                        </li>
+                        <li>
+                            <span class="auth-secret-author-name">Christian Lorenzo Evangelista</span>
+                            <span class="auth-secret-author-role">Project Manager</span>
+                        </li>
                     </ul>
-                    <button type="button" class="auth-secret-close" @onclick="CloseSecretPage" @onclick:stopPropagation="true">
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M20 10a8 8 0 00-14.9-3M4 14a8 8 0 0014.9 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Flip Back
-                    </button>
                 </div>
                 <span class="auth-cover-spine" aria-hidden="true"></span>
             </section>

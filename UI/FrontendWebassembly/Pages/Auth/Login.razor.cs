@@ -154,8 +154,21 @@ public partial class Login
 			$"width:{size:0.#}px;height:{size:0.#}px;left:{left}%;bottom:{bottom}px;animation-duration:{duration:0.#}s;animation-delay:{delay:0.#}s;");
 	}
 
+	// The cover is a focusable role="button", so Enter and Space must flip the
+	// book back the same as a click.
+	private async Task HandleCoverKeyDown(KeyboardEventArgs e)
+	{
+		if (e.Key is "Enter" or " " or "Spacebar")
+			await CloseSecretPage();
+	}
+
 	private async Task CloseSecretPage()
 	{
+		// Re-entry guard: the whole cover is clickable now, and a second click
+		// mid-reopen must not restart the 1.3s unfold hold.
+		if (!isSecretMode)
+			return;
+
 		isSecretMode = false;
 		secretClickCount = 0;
 		// No "close" page-turn here: its forwards-filled animations would override

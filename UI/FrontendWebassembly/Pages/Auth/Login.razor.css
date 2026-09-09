@@ -99,6 +99,57 @@
     transition: visibility 0s linear, transform .75s cubic-bezier(.65, 0, .35, 1);
     will-change: transform;
     pointer-events: auto;
+    /* The whole cover is the Flip Back control now. */
+    cursor: pointer;
+    /* --- The ancient aura ---
+       Old light around the closed book itself: layered gold radiance breathing
+       off the leather's silhouette. Drawn with box-shadow so the cover's
+       overflow:hidden keeps clipping its inside while the light spills past
+       it - the card's own clip is already lifted in secret mode. The breath is
+       delayed until the board has landed flat (.75s); backwards fill holds the
+       faint 0% state while it turns. */
+    animation: auth-secret-aura-breathe 6s ease-in-out .8s infinite backwards;
+}
+
+/* Keyboard focus only - a mouse click must not draw a rectangle around the
+   leather. Gold to match the cover, offset past the aura's bright rim. */
+.auth-card.secret .auth-cover-panel:focus-visible {
+    outline: 2px solid rgba(246, 215, 138, .6);
+    outline-offset: 4px;
+}
+
+/* Each frame restates the base inset gold rule - animating box-shadow replaces
+   the whole list, and the aura must not cost the cover its edge. */
+@keyframes auth-secret-aura-breathe {
+    0%, 100% {
+        box-shadow:
+            inset 0 0 0 1px rgba(246, 215, 138, .12),
+            0 0 18px -2px rgba(246, 215, 138, .28),
+            0 0 60px -6px rgba(255, 179, 71, .18),
+            0 0 130px 0 rgba(255, 150, 50, .1);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 0 0 1px rgba(246, 215, 138, .12),
+            0 0 26px 0 rgba(246, 215, 138, .5),
+            0 0 90px -4px rgba(255, 179, 71, .34),
+            0 0 190px 10px rgba(255, 150, 50, .16);
+    }
+}
+
+/* The right-page stack the closed cover lies on (the dark aside and the
+   register panel). Their spine-side corners are square - in the open spread
+   they meet the login page seamlessly and the card's clip hides them - but
+   with overflow lifted for the ritual those square corners poke past the
+   cover's rounded ones, a hard edge at the book's top-left that the aura
+   light picks out. Match the cover's radius while the book is closed; the
+   corners square up again only after the reopen has landed. */
+.auth-card.secret .auth-page-panel,
+.auth-card.secret .auth-register-panel,
+.auth-card.secret-closing .auth-page-panel,
+.auth-card.secret-closing .auth-register-panel {
+    border-radius: 20px;
 }
 
 /* Held while the book reopens: keeps the swinging board painted above the other
@@ -762,7 +813,7 @@
 }
 
 /* Size, position, duration and delay come from GetEmberStyle's inline style;
-   only the shared animation is here, scoped to .secret so 18 embers are not
+   only the shared animation is here, scoped to .secret so the embers are not
    composited behind an invisible panel the whole session. */
 .auth-card.secret .auth-secret-embers span {
     animation-name: auth-secret-ember-float;
@@ -778,19 +829,26 @@
 }
 
 /* The author names, set in the cover's gold foil - the same treatment as the
-   title, one name per row, no rules or motion: leather, foil, done. */
+   title, one name per row with the role etched beneath it in the eyebrow's
+   muted gold: leather, foil, done. */
 .auth-secret-authors {
     display: flex;
     width: min(100%, 300px);
     margin: 26px 0;
     padding: 0;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     list-style: none;
 }
 
 .auth-secret-authors li {
+    display: flex;
     margin: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.auth-secret-author-name {
     background: linear-gradient(180deg, #fbe9b7 0%, #f6d78a 40%, #c9973f 75%, #b8860b 100%);
     background-clip: text;
     -webkit-background-clip: text;
@@ -804,36 +862,14 @@
     white-space: nowrap;
 }
 
-.auth-secret-close {
-    display: flex;
-    padding: 11px 26px;
-    align-items: center;
-    gap: 8px;
-    border: 1.5px solid rgba(255, 179, 71, .55);
-    border-radius: 100px;
-    background: transparent;
-    color: #ffb347;
-    cursor: pointer;
+.auth-secret-author-role {
+    color: rgba(246, 215, 138, .55);
     font-family: Inter, sans-serif;
-    font-size: 12.5px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: .06em;
+    letter-spacing: .28em;
     text-transform: uppercase;
-    transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
-}
-
-.auth-secret-close:hover {
-    background: rgba(255, 179, 71, .1);
-    box-shadow: 0 0 22px -4px rgba(255, 150, 50, .5);
-}
-
-.auth-secret-close:active {
-    transform: translateY(1px);
-}
-
-.auth-secret-close svg {
-    width: 13px;
-    height: 13px;
+    white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -1033,5 +1069,15 @@
 
     .auth-card.secret .auth-secret-embers span {
         animation: none;
+    }
+
+    /* Hold the aura at its resting glow instead of breathing. */
+    .auth-card.secret .auth-cover-panel {
+        animation: none;
+        box-shadow:
+            inset 0 0 0 1px rgba(246, 215, 138, .12),
+            0 0 18px -2px rgba(246, 215, 138, .28),
+            0 0 60px -6px rgba(255, 179, 71, .18),
+            0 0 130px 0 rgba(255, 150, 50, .1);
     }
 }
