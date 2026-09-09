@@ -298,25 +298,70 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 			Timestamp = DateTime.UtcNow
 		};
 
+		var result = await SendApplicationFormToUserEmailWithResultAsync(
+			gmail,
+			name,
+			applicationFormLink,
+			requestor,
+			clientId,
+			CancellationToken.None);
+
+		if (!result.IsSent)
+		{
+			_logger.LogError("Failed to send Notification email to: {@Context}", logContext);
+
+			// The single-order paths run inside a transaction: a failed send must take the
+			// order with it rather than leaving a saved order whose candidate never got a
+			// link. The bulk job calls the result overload instead, precisely so it can
+			// keep the row and retry it.
+			throw new InternalServerException("Failed to send Notification email.");
+		}
+
+		return true;
+	}
+
+	public async Task<EmailDeliveryResult> SendApplicationFormToUserEmailWithResultAsync(
+		string gmail,
+		string name,
+		string applicationFormLink,
+		string? requestor,
+		int? clientId,
+		CancellationToken cancellationToken)
+	{
+		var logContext = new
+		{
+			Action = "SendApplicationFormEmail",
+			Step = "SendEmail",
+			Email = gmail,
+			Timestamp = DateTime.UtcNow
+		};
+
 		_logger.LogInformation("Sending notification for email: {@Context}", logContext);
 
 		var clientName = await ResolveClientNameAsync(clientId);
 
-		var otpBody = _emailService.SendAppplicationFormNotification(gmail, name, applicationFormLink, requestor, clientName);
+		var emailBody = _emailService.SendAppplicationFormNotification(gmail, name, applicationFormLink, requestor, clientName);
+
+		// The keyed "ats" registration is always ATSEmailService, which implements the
+		// result-aware contract. The cast is guarded rather than assumed so a future
+		// re-registration degrades to the bool path instead of throwing at runtime.
+		if (_emailService is IAtsEmailSender resultAwareSender)
+		{
+			return await resultAwareSender.SendATSEmailWithResultAsync(
+				toEmail: gmail!,
+				subject: "CIBI | Background Verification Information Request",
+				body: emailBody,
+				cancellationToken);
+		}
 
 		var isSent = await _emailService.SendATSEmailAsync(
 			toEmail: gmail!,
 			subject: "CIBI | Background Verification Information Request",
-			body: otpBody
-		);
+			body: emailBody);
 
-		if (!isSent)
-		{
-			_logger.LogError("Failed to send Notification email to: {@Context}", logContext);
-			throw new InternalServerException("Failed to send Notification email.");
-		}
-
-		return isSent;
+		return isSent
+			? EmailDeliveryResult.Sent
+			: EmailDeliveryResult.Transient(null, "Email sender reported failure without a status code.");
 	}
 
 	// A missing or unknown client id degrades to null - the email body falls back to

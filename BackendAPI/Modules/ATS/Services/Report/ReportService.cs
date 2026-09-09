@@ -242,14 +242,14 @@ public class ReportService : IReportService
 			: await (isSearch
 				? _atsRepository.CountSearchReportsAsync(
 					paginationRequest.SearchTerm,
-					paginationRequest.StartDate, 
+					paginationRequest.StartDate,
 					paginationRequest.EndDate,
-					clientIds, 
-					requiredRequestorId, 
+					clientIds,
+					requiredRequestorId,
 					cancellationToken)
 				: _atsRepository.CountReportsAsync(
-					clientIds, 
-					requiredRequestorId, 
+					clientIds,
+					requiredRequestorId,
 					cancellationToken));
 
 		var items = page.Select(x => new ReportListDTO

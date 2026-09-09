@@ -109,6 +109,7 @@ public partial class ApplicationFormComponent : IAsyncDisposable
 			},
 			ProfessionalExperiences = new ProfessionalExperiencesState
 			{
+				HasWorkExperience = hasWorkExperience,
 				AddEmployer2 = AddEmployer2,
 				AddEmployer3 = AddEmployer3,
 				Employer1 = CreateEmployerState(1),
@@ -316,6 +317,17 @@ public partial class ApplicationFormComponent : IAsyncDisposable
 
 	private void RestoreProfessionalExperiences(ProfessionalExperiencesState state)
 	{
+		// Drafts saved before the work-experience toggle existed have no flag but may
+		// carry employer data - infer "yes" from it instead of discarding the entries.
+		hasWorkExperience = state.HasWorkExperience ||
+			!string.IsNullOrWhiteSpace(state.Employer1.CompanyName);
+
+		if (!hasWorkExperience)
+		{
+			ClearProfessionalExperienceDetails();
+			return;
+		}
+
 		AddEmployer2 = state.AddEmployer2;
 		AddEmployer3 = state.AddEmployer3;
 		RestoreEmployerState(1, state.Employer1);

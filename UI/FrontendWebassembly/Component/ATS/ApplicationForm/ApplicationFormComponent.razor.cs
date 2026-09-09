@@ -71,6 +71,7 @@ public partial class ApplicationFormComponent
 	private DateTime? EndOfEmployment3;
 	private bool AddEmployer2 = false;
 	private bool AddEmployer3 = false;
+	private bool hasWorkExperience = false;
 
 	// Step 5 - references
 	private ReferenceDetailsDTO referenceDetails = new();
@@ -311,7 +312,8 @@ public partial class ApplicationFormComponent
 			4 => !(
 				(_licenseError = licensesDetails.LicenseUploadFile == null
 								&& hasProfessionalLicense) |
-				(_emp1Error = professionalExperiences.Emp1COEUploadFile == null) |
+				(_emp1Error = professionalExperiences.Emp1COEUploadFile == null
+								&& hasWorkExperience) |
 				(_emp2Error = professionalExperiences.Emp2COEUploadFile == null && AddEmployer2) |
 				(_emp3Error = professionalExperiences.Emp3COEUploadFile == null && AddEmployer3)
 			),
@@ -567,6 +569,35 @@ public partial class ApplicationFormComponent
 		licensesDetails.LicenseUploadFileName = null;
 		LicenseExpiryDate = null;
 		_licenseError = false;
+	}
+
+	private async Task SetWorkExperienceAsync(bool value)
+	{
+		hasWorkExperience = value;
+
+		if (!value)
+			ClearProfessionalExperienceDetails();
+
+		await SaveDraftAsync();
+	}
+
+	private void ClearProfessionalExperienceDetails()
+	{
+		professionalExperiences = new();
+		DatePermittedToContact1 = null;
+		StartOfEmployment1 = null;
+		EndOfEmployment1 = null;
+		DatePermittedToContact2 = null;
+		StartOfEmployment2 = null;
+		EndOfEmployment2 = null;
+		DatePermittedToContact3 = null;
+		StartOfEmployment3 = null;
+		EndOfEmployment3 = null;
+		AddEmployer2 = false;
+		AddEmployer3 = false;
+		_emp1Error = false;
+		_emp2Error = false;
+		_emp3Error = false;
 	}
 
 	private async Task OnCoe1Upload(InputFileChangeEventArgs e)
@@ -908,31 +939,34 @@ public partial class ApplicationFormComponent
 
 
 
-		if (EndOfEmployment1 is null)
-			EndOfEmployment1 = DateTime.UnixEpoch;
-
-		if (EndOfEmployment2 is null)
-			EndOfEmployment2 = DateTime.UnixEpoch;
-
-		if (EndOfEmployment3 is null)
-			EndOfEmployment3 = DateTime.UnixEpoch;
-
-		professionalExperiences.Emp1DatePermittedToContact = DateOnly.FromDateTime(DatePermittedToContact1!.Value);
-		professionalExperiences.Emp1StartDate = DateOnly.FromDateTime(StartOfEmployment1!.Value);
-		professionalExperiences.Emp1EndDate = DateOnly.FromDateTime(EndOfEmployment1!.Value);
-
-		if (DatePermittedToContact2.HasValue && StartOfEmployment2.HasValue && EndOfEmployment2.HasValue)
+		if (hasWorkExperience)
 		{
-			professionalExperiences.Emp2DatePermittedToContact = DateOnly.FromDateTime(DatePermittedToContact2.Value);
-			professionalExperiences.Emp2StartDate = DateOnly.FromDateTime(StartOfEmployment2.Value);
-			professionalExperiences.Emp2EndDate = DateOnly.FromDateTime(EndOfEmployment2.Value);
-		}
+			if (EndOfEmployment1 is null)
+				EndOfEmployment1 = DateTime.UnixEpoch;
 
-		if (DatePermittedToContact3.HasValue && StartOfEmployment3.HasValue && EndOfEmployment3.HasValue)
-		{
-			professionalExperiences.Emp3DatePermittedToContact = DateOnly.FromDateTime(DatePermittedToContact3!.Value);
-			professionalExperiences.Emp3StartDate = DateOnly.FromDateTime(StartOfEmployment3!.Value);
-			professionalExperiences.Emp3EndDate = DateOnly.FromDateTime(EndOfEmployment3!.Value);
+			if (EndOfEmployment2 is null)
+				EndOfEmployment2 = DateTime.UnixEpoch;
+
+			if (EndOfEmployment3 is null)
+				EndOfEmployment3 = DateTime.UnixEpoch;
+
+			professionalExperiences.Emp1DatePermittedToContact = DateOnly.FromDateTime(DatePermittedToContact1!.Value);
+			professionalExperiences.Emp1StartDate = DateOnly.FromDateTime(StartOfEmployment1!.Value);
+			professionalExperiences.Emp1EndDate = DateOnly.FromDateTime(EndOfEmployment1!.Value);
+
+			if (DatePermittedToContact2.HasValue && StartOfEmployment2.HasValue && EndOfEmployment2.HasValue)
+			{
+				professionalExperiences.Emp2DatePermittedToContact = DateOnly.FromDateTime(DatePermittedToContact2.Value);
+				professionalExperiences.Emp2StartDate = DateOnly.FromDateTime(StartOfEmployment2.Value);
+				professionalExperiences.Emp2EndDate = DateOnly.FromDateTime(EndOfEmployment2.Value);
+			}
+
+			if (DatePermittedToContact3.HasValue && StartOfEmployment3.HasValue && EndOfEmployment3.HasValue)
+			{
+				professionalExperiences.Emp3DatePermittedToContact = DateOnly.FromDateTime(DatePermittedToContact3!.Value);
+				professionalExperiences.Emp3StartDate = DateOnly.FromDateTime(StartOfEmployment3!.Value);
+				professionalExperiences.Emp3EndDate = DateOnly.FromDateTime(EndOfEmployment3!.Value);
+			}
 		}
 
 		if (Ref1BestDate.HasValue && Ref1BestTime.HasValue)

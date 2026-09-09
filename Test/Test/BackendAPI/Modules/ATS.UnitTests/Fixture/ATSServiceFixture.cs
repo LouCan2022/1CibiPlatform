@@ -1,7 +1,9 @@
-﻿using ATS.Data.Repository;
+﻿using ATS.Configuration;
+using ATS.Data.Repository;
 using ATS.Hubs;
 using ATS.Services.BulkSubmissionProcessor;
 using ATS.Services.EmailNotificationProcessor;
+using ATS.Services.EmailService;
 using ATS.Services.EndorsementSubmission;
 using ATS.Services.Notifications;
 using ATS.Services.OrderHistory;
@@ -11,6 +13,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Test.BackendAPI.Modules.ATS.UnitTests.Fixture;
@@ -37,6 +40,8 @@ public class ATSServiceFixture : IDisposable
 
 	// Configuration
 	public IConfiguration Configuration { get; private set; }
+	public AtsEmailDeliveryOptions EmailDeliveryOptions { get; private set; }
+	public SmtpRateLimiter RateLimiter { get; private set; }
 
 	// Service instances
 	public BulkSubmissionProcessorService BulkSubmissionProcessorService { get; private set; }
@@ -90,6 +95,21 @@ public class ATSServiceFixture : IDisposable
 			MockBulkSubmissionProcessorServiceLogger.Object,
 			Configuration);
 
+		// Fast on purpose. The production defaults pace sends at 0.9/s to stay under the
+		// provider's limit; a test asserting on three rows must not wait three seconds for
+		// them, and the limiter's behaviour is covered directly by its own tests.
+		EmailDeliveryOptions = new AtsEmailDeliveryOptions
+		{
+			MaxSendsPerSecond = 10_000,
+			MaxAttemptsPerPass = 3,
+			RetryBaseDelaySeconds = 0,
+			ThrottleBackoffSeconds = 600
+		};
+
+		RateLimiter = new SmtpRateLimiter(
+			Options.Create(EmailDeliveryOptions),
+			new Mock<ILogger<SmtpRateLimiter>>().Object);
+
 		// IEndorsementSubmissionService is no longer injected: each send resolves its own
 		// from a scope, because it reaches a DbContext and the sends now run concurrently.
 		// MockEndorsementSubmissionService is registered on the scope factory instead.
@@ -98,13 +118,15 @@ public class ATSServiceFixture : IDisposable
 			MockRepository.Object,
 			MockNotificationService.Object,
 			MockServiceScopeFactory.Object,
-			Configuration
+			Configuration,
+			RateLimiter,
+			Options.Create(EmailDeliveryOptions)
 			);
 	}
 
 	public void Dispose()
 	{
-		// nothing to dispose currently
+		RateLimiter.Dispose();
 	}
 
 	private void SetupServiceScopeFactory()
