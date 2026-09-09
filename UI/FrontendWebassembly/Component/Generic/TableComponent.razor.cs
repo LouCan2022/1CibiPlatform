@@ -97,8 +97,17 @@ public partial class TableComponent<TItem>
 
 	private async Task SearchChanged(string value)
 	{
-		SearchString = value;
-
+		// Deliberately does NOT assign to SearchString.
+		//
+		// It is a [Parameter], so writing to it makes this component the owner of a value
+		// the parent thinks it owns. Blazor then only overwrites it when the parent
+		// re-renders with a *different* value - so a page that navigates away and back, or
+		// a different page rendering another TableComponent, keeps whatever was typed last.
+		// That is how a search term leaked across screens: the box filled itself on a page
+		// whose URL carried no ?search= at all.
+		//
+		// The parent owns the state. Raising the callback is enough - it sets its own field
+		// and re-renders, which flows the new value back down through SearchString.
 		if (SearchStringChanged.HasDelegate)
 			await SearchStringChanged.InvokeAsync(value);
 

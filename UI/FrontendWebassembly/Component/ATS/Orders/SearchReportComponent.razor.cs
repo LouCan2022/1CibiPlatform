@@ -33,6 +33,15 @@ public partial class SearchReportComponent
 
 	protected override async Task OnInitializedAsync()
 	{
+		// Before any await: the reads below yield, Blazor renders, and MudTable fires its
+		// ServerData callback at that point. Seeding afterwards left a filled search box
+		// over unfiltered results, so the user had to retype a character to trigger a
+		// reload. See TicketingStatusComponent for the full note.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
+
 		var roleIds = await GetStoredRoleIdsAsync();
 		var atsRoleId = await GetStoredATSRoleIdAsync();
 
@@ -42,13 +51,6 @@ public partial class SearchReportComponent
 		// platform super admin / platform manager / admin ladder rather than the
 		// uploader-oriented one above. The API re-checks scope on every call.
 		_canEditSubjectName = roleIds.Contains(1) || atsRoleId is 1 or 2;
-
-		// Seeded before the first server load, so the table's opening page is already
-		// filtered rather than fetching everything and then narrowing it.
-		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
-		{
-			_searchString = SearchFromQuery;
-		}
 	}
 
 	private async Task<List<int>> GetStoredRoleIdsAsync()
