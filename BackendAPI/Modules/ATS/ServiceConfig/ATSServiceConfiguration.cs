@@ -117,6 +117,14 @@ public static class ATSServiceConfiguration
 		services.AddScoped<IOrderInputValidator, OrderInputValidator>();
 		services.AddScoped<IBulkUploadMonitoringService, BulkUploadMonitoringService>();
 
+		// Singletons, because both bound a resource that belongs to the SENDING ACCOUNT
+		// rather than to a request. A per-scope pool is not a pool - it would reopen and
+		// re-authenticate a connection per operation, which is the exact behaviour that got
+		// this sender throttled at 14 messages - and a per-scope limiter would let two
+		// concurrent passes each run at the full rate and double the real one.
+		services.AddSingleton<SmtpConnectionPool>();
+		services.AddSingleton<SmtpRateLimiter>();
+
 		services.AddKeyedScoped<IEmailService, ATSEmailService>("ats");
 		services.AddScoped<IBulkSubmissionProcessorService, BulkSubmissionProcessorService>();
 		services.AddScoped<IEmailNotificationProcessorService, EmailNotificationProcessorService>();
@@ -184,6 +192,11 @@ public static class ATSServiceConfiguration
 		// Same story: absent section means the agreed 30-day notification retention.
 		services.Configure<AtsNotificationOptions>(
 			configuration.GetSection(AtsNotificationOptions.SectionName));
+
+		// And again for SMTP throughput. The safe send rate belongs to the provider, not to
+		// the code, so finding it for a new one must not require a redeploy.
+		services.Configure<AtsEmailDeliveryOptions>(
+			configuration.GetSection(AtsEmailDeliveryOptions.SectionName));
 
 		// The audit change collector and its interceptor are scoped, so the context is
 		// built from the request's provider rather than a static lambda.

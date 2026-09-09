@@ -102,6 +102,8 @@ global using System.Diagnostics;
 global using System.Security.Claims;
 global using System.Net;
 global using System.Net.Mail;
+global using System.Net.Sockets;
+global using Microsoft.Extensions.Logging.Abstractions;
 global using System.Text.Json;
 global using Npgsql;
 global using Quartz;
