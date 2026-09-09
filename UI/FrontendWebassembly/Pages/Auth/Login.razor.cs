@@ -144,7 +144,7 @@ public partial class Login
 	// reshuffle embers mid-flight.
 	private static string GetEmberStyle(int index)
 	{
-		var size = 1.0 + ((index * 37) % 21) / 10.0;
+		var size = 0.8 + ((index * 37) % 13) / 10.0;
 		var left = (index * 53) % 100;
 		var bottom = (index * 29) % 40;
 		var duration = 2.5 + ((index * 41) % 30) / 10.0;

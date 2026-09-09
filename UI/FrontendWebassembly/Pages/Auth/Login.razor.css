@@ -144,7 +144,18 @@
    with overflow lifted for the ritual those square corners poke past the
    cover's rounded ones, a hard edge at the book's top-left that the aura
    light picks out. Match the cover's radius while the book is closed; the
-   corners square up again only after the reopen has landed. */
+   corners square up again only after the reopen has landed.
+
+   overflow for the same reason: each panel flex-centres its content, so when
+   zoom makes the content taller than the card it spills equally above and
+   below - normally the card's clip swallows that, but with the clip lifted
+   the asides' round icon badge surfaces above the book like a stray logo.
+   Every panel under the cover clips its own content instead. */
+.auth-card.secret .auth-panel,
+.auth-card.secret-closing .auth-panel {
+    overflow: hidden;
+}
+
 .auth-card.secret .auth-page-panel,
 .auth-card.secret .auth-register-panel,
 .auth-card.secret-closing .auth-page-panel,
@@ -773,16 +784,6 @@
     height: 100%;
 }
 
-.auth-cover-eyebrow {
-    margin: 0 0 10px;
-    color: rgba(246, 215, 138, .55);
-    font-family: Inter, sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .34em;
-    text-transform: uppercase;
-}
-
 /* Gold foil: a vertical gold gradient clipped to the glyphs, with a dark drop
    shadow standing in for the emboss press. */
 .auth-cover-title {
@@ -808,7 +809,7 @@
     position: absolute;
     border-radius: 50%;
     background: #ffb347;
-    box-shadow: 0 0 6px 1px rgba(255, 150, 50, .7);
+    box-shadow: 0 0 4px 1px rgba(255, 150, 50, .7);
     opacity: 0;
 }
 
@@ -828,9 +829,11 @@
     100% { opacity: 0; transform: translateY(-70px); }
 }
 
-/* The author names, set in the cover's gold foil - the same treatment as the
-   title, one name per row with the role etched beneath it in the eyebrow's
-   muted gold: leather, foil, done. */
+/* The author names, burning into the leather: a fire gradient clipped to the
+   glyphs - white-hot at the letterforms' feet, cooling to ember gold at the
+   top - with the heat rippling upward through the text and an orange glow
+   flickering around it. The roles beneath stay etched and still, so the flame
+   reads against something calm. */
 .auth-secret-authors {
     display: flex;
     width: min(100%, 300px);
@@ -848,18 +851,69 @@
     gap: 2px;
 }
 
+/* The author names as lit neon: the letterform itself is the light source - a
+   white-hot core colour with a violet cast - and the glow bleeds OUT of the
+   glyphs in widening text-shadow rings, the way a lit tube haloes. The halo
+   deepens as it widens: near-white at the stroke through lavender to a deep
+   arcane violet at the widest ring - enchanted script against the navy
+   leather and gold frame. Solid colour, not the foil gradient: a
+   light-emitting stroke has no surface for foil shading. */
 .auth-secret-author-name {
-    background: linear-gradient(180deg, #fbe9b7 0%, #f6d78a 40%, #c9973f 75%, #b8860b 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .65));
+    color: #f8f4ff;
     font-family: Poppins, sans-serif;
     /* Sized so the longest name clears the cover's gold frame. */
     font-size: 17px;
     font-weight: 800;
     letter-spacing: .06em;
     white-space: nowrap;
+    text-shadow:
+        0 0 2px rgba(240, 235, 255, .9),
+        0 0 6px rgba(200, 170, 255, .8),
+        0 0 12px rgba(165, 120, 250, .55),
+        0 0 24px rgba(140, 90, 245, .38),
+        0 0 44px rgba(124, 77, 237, .22);
+}
+
+/* Scoped to .secret like the embers, so four beams are not composited behind
+   an invisible panel all session. The pulse swells core and halo together -
+   the tube running hotter, not a shadow moving. Per-name negative delays
+   stagger the breath so the list glimmers rather than pulsing as one block. */
+.auth-card.secret .auth-secret-author-name {
+    animation: auth-secret-name-glow 3.6s ease-in-out infinite;
+}
+
+.auth-card.secret .auth-secret-authors li:nth-child(2) .auth-secret-author-name {
+    animation-delay: -1.6s;
+}
+
+.auth-card.secret .auth-secret-authors li:nth-child(3) .auth-secret-author-name {
+    animation-delay: -2.7s;
+}
+
+.auth-card.secret .auth-secret-authors li:nth-child(4) .auth-secret-author-name {
+    animation-delay: -.9s;
+}
+
+@keyframes auth-secret-name-glow {
+    0%, 100% {
+        color: #f8f4ff;
+        text-shadow:
+            0 0 2px rgba(240, 235, 255, .9),
+            0 0 6px rgba(200, 170, 255, .8),
+            0 0 12px rgba(165, 120, 250, .55),
+            0 0 24px rgba(140, 90, 245, .38),
+            0 0 44px rgba(124, 77, 237, .22);
+    }
+
+    50% {
+        color: #fefdff;
+        text-shadow:
+            0 0 3px rgba(248, 244, 255, 1),
+            0 0 8px rgba(215, 190, 255, .95),
+            0 0 17px rgba(180, 140, 255, .75),
+            0 0 32px rgba(150, 100, 248, .55),
+            0 0 58px rgba(124, 77, 237, .32);
+    }
 }
 
 .auth-secret-author-role {
@@ -888,6 +942,27 @@
 
     .auth-content {
         padding: 2em 1.6em;
+    }
+
+    /* The cover is only half the card here, so its fixed desktop sizes start
+       pressing the longest name into the gold frame - tighten the type and
+       the frame's inner air together. The names track the viewport (the cover
+       is ~50vw in this band) so the longest one always clears the frame. */
+    .auth-cover-frame {
+        padding: 18px 16px;
+    }
+
+    .auth-cover-title {
+        font-size: 22px;
+    }
+
+    .auth-secret-authors {
+        margin: 20px 0;
+        gap: 12px;
+    }
+
+    .auth-secret-author-name {
+        font-size: clamp(10px, 1.8vw, 14px);
     }
 }
 
@@ -984,6 +1059,30 @@
     .auth-card.forgot .auth-forgot-panel .auth-content {
         animation: none;
     }
+
+    /* Full-card cover again (the board flips in place here), but the card
+       itself can be as narrow as the phone: the names track the viewport so
+       the longest one always clears the frame, whose side margins also come
+       in a step. nowrap stays - a broken name reads as two authors. */
+    .auth-cover-frame {
+        width: calc(100% - 44px);
+        height: calc(100% - 44px);
+        margin-left: 12px;
+        padding: 16px 12px;
+    }
+
+    .auth-cover-spine {
+        width: 12px;
+    }
+
+    .auth-secret-author-name {
+        font-size: clamp(11px, 3.7vw, 15px);
+    }
+
+    .auth-secret-author-role {
+        font-size: 9px;
+        letter-spacing: .22em;
+    }
 }
 
 @media (max-width: 420px) {
@@ -1009,6 +1108,23 @@
     .auth-field-row {
         grid-template-columns: minmax(0, 1fr);
         gap: 0;
+    }
+
+    /* The card is full-bleed and square here; the book matches so its leather
+       meets the screen edges, and the cover's remaining fixed chrome comes in
+       one more step. */
+    .auth-cover-panel {
+        border-radius: 0;
+    }
+
+    .auth-cover-emblem {
+        width: 28px;
+        height: 28px;
+        margin-bottom: 14px;
+    }
+
+    .auth-cover-title {
+        font-size: 20px;
     }
 }
 
@@ -1042,6 +1158,41 @@
     }
 }
 
+/* A short screen (landscape phone, half-height window) squeezes the credits
+   column from above and below: pull the vertical air out of the cover first,
+   then the type, so all four names and roles stay inside the frame without
+   scrolling. */
+@media (max-height: 620px) {
+    .auth-cover-frame {
+        height: calc(100% - 32px);
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .auth-cover-emblem {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 8px;
+    }
+
+    .auth-cover-title {
+        font-size: 19px;
+    }
+
+    .auth-secret-authors {
+        margin: 12px 0;
+        gap: 8px;
+    }
+
+    .auth-secret-author-name {
+        font-size: 13px;
+    }
+
+    .auth-secret-author-role {
+        font-size: 8.5px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .auth-card {
         transition-duration: .01ms;
@@ -1067,7 +1218,8 @@
         transition-delay: 0s;
     }
 
-    .auth-card.secret .auth-secret-embers span {
+    .auth-card.secret .auth-secret-embers span,
+    .auth-card.secret .auth-secret-author-name {
         animation: none;
     }
 
