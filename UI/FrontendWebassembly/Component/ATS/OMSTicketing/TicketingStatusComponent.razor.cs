@@ -39,19 +39,24 @@ public partial class TicketingStatusComponent
 
 	protected override async Task OnInitializedAsync()
 	{
+		// Seeded BEFORE the first await, not after.
+		//
+		// base.OnInitializedAsync awaits an access check, and an await here lets Blazor
+		// render - at which point MudTable fires its ServerData callback and loads the
+		// board. Setting _searchString after that returned a filled search box over
+		// unfiltered results: the value was there, but the query that had already run
+		// never saw it, so the user had to retype a character to trigger a reload.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
+
 		await base.OnInitializedAsync();
 
 		// Without this guard the RequirePermission/RequireATSModule attributes are inert.
 		if (!IsPageAuthorized)
 		{
 			return;
-		}
-
-		// Seeded before the first load, so the opening page is already filtered rather than
-		// fetching the whole board and then narrowing it.
-		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
-		{
-			_searchString = SearchFromQuery;
 		}
 
 		await RefreshCountsAsync();
