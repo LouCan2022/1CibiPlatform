@@ -63,6 +63,7 @@ public sealed class LicensesDetailsState
 
 public sealed class ProfessionalExperiencesState
 {
+	public bool HasWorkExperience { get; set; }
 	public bool AddEmployer2 { get; set; }
 	public bool AddEmployer3 { get; set; }
 	public EmployerState Employer1 { get; set; } = new();
