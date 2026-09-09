@@ -45,7 +45,75 @@
     border-radius: 20px;
     box-shadow: 0 24px 60px -16px rgba(0, 0, 0, .35), 0 10px 24px -10px rgba(0, 0, 0, .15);
     transform-style: preserve-3d;
-    transition: height .25s ease;
+    transition: height .25s ease, max-width .5s cubic-bezier(.65, 0, .35, 1);
+}
+
+/* Easter egg: 11 quick clicks anywhere (except buttons) close the book. The login
+   page is the INSIDE of the book's front board, and the leather authors cover is
+   the OUTSIDE of that same board. Closing, the board folds over the centre spine
+   onto the facing dark page - the login face turning away as the leather back
+   lands face-up on the right half - so the leather genuinely encases the login.
+   Two elements play the board's two faces: the login hinged on its right edge,
+   the cover on its left, co-rotating with hidden backfaces so each hands off to
+   the other at 90deg. The card then slides left so the closed volume settles
+   centre-screen. Flip Back reverses it: slide back, the board unfolds off the
+   spine, and the untouched login is its inside face again.
+
+   The 3D lives here: perspective tight enough (1100px) to foreshorten the turning
+   board, and the overflow clip lifted for the ritual - mid-swing the board
+   projects LARGER than the card, and overflow:hidden would shear it off. The
+   card's own shadow goes with it (the cover carries the shadow instead): a
+   shadow around the mostly-empty spread box would read as a glass slab. */
+.auth-card.secret,
+.auth-card.secret-closing {
+    overflow: visible;
+    perspective: 1100px;
+    box-shadow: none;
+}
+
+/* The fold lands at .75s; then the card slides left so the closed book (the
+   right half of the spread) settles centre-screen. */
+.auth-card.secret {
+    transform: translateX(-25%);
+    transition: box-shadow .3s ease, transform .45s cubic-bezier(.65, 0, .35, 1) .8s;
+}
+
+/* Reopening (Flip Back): slide back first (0-.45s); the board unfolds after it
+   (.5-1.25s, from the base-state delays on the login panel and the cover). */
+.auth-card.secret-closing {
+    transition: transform .45s cubic-bezier(.65, 0, .35, 1);
+}
+
+.auth-card.secret .auth-login-panel {
+    z-index: 6;
+    transform: rotateY(180deg);
+    transition: transform .75s cubic-bezier(.65, 0, .35, 1);
+    will-change: transform;
+    pointer-events: none;
+}
+
+.auth-card.secret .auth-cover-panel {
+    z-index: 6;
+    visibility: visible;
+    transform: rotateY(0deg) translateZ(2px);
+    transition: visibility 0s linear, transform .75s cubic-bezier(.65, 0, .35, 1);
+    will-change: transform;
+    pointer-events: auto;
+}
+
+/* Held while the book reopens: keeps the swinging board painted above the other
+   panels and inert until it lies flat again. The cover's visibility comes from
+   its base rule - still visible, hiding only at 1.3s once the unfold has landed
+   and the leather face is flat against the login's back again. */
+.auth-card.secret-closing .auth-login-panel {
+    z-index: 6;
+    will-change: transform;
+    pointer-events: none;
+}
+
+.auth-card.secret-closing .auth-cover-panel {
+    z-index: 6;
+    will-change: transform;
 }
 
 .auth-card.meter-open {
@@ -86,6 +154,14 @@
     left: 0;
     border-radius: 20px 0 0 20px;
     background: var(--c-surface);
+    /* The book's front board, inside face. Hinged on the centre spine; the hidden
+       backface hands the second half of the fold to the leather cover element
+       (the board's outside face). The .5s delay is the reopen direction only -
+       the card slides back first, then the board unfolds; closing overrides it
+       with the no-delay transition in the .secret rules. */
+    transform-origin: right center;
+    backface-visibility: hidden;
+    transition: transform .75s cubic-bezier(.65, 0, .35, 1) .5s;
 }
 
 .auth-forgot-panel {
@@ -562,6 +638,204 @@
     text-align: left;
 }
 
+/* --- The closed book's leather cover, carrying the credits (easter egg) --- */
+
+/* Navy leather with a soft vignette and a faint grain, framed by a double gold
+   rule, gold-foil title, a spine strip on the left - and the author names in the
+   same gold foil. Fixed colours on purpose: a leather book must look the same in
+   light and dark mode.
+
+   The cover is the OUTSIDE face of the same board whose inside face is the login
+   page. It occupies the right half of the spread - exactly where the board lands
+   when it folds over the spine - hinged on its left edge (the spine), resting at
+   -180deg: flat against the login's back, its hidden backface to the viewer.
+   Closing co-rotates both faces (login 0 to 180, cover -180 to 0); each face's
+   hidden backface hands the fold off to the other at the 90deg edge-on moment,
+   so one board visibly turns over with leather on its back. The base transition
+   here is the reopen direction: the card slides back first, then the board
+   unfolds at .5s; visibility flips only after the unfold lands (1.3s) and exists
+   so the unpainted resting cover cannot swallow clicks meant for the dark page
+   beneath it. */
+.auth-cover-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 20px;
+    background:
+        radial-gradient(120% 100% at 50% 0%, rgba(47, 111, 237, .18), transparent 55%),
+        radial-gradient(140% 120% at 50% 50%, transparent 55%, rgba(0, 0, 0, .5) 100%),
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, .015) 0 2px, transparent 2px 5px),
+        linear-gradient(160deg, #14275a 0%, #0d1b3d 55%, #081228 100%);
+    box-shadow: inset 0 0 0 1px rgba(246, 215, 138, .12);
+    transform-origin: left center;
+    transform: rotateY(-180deg);
+    backface-visibility: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s linear 1.3s, transform .75s cubic-bezier(.65, 0, .35, 1) .5s;
+}
+
+.auth-cover-spine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 16px;
+    background: linear-gradient(90deg, #050b1a 0%, #0a1530 55%, transparent 100%);
+    border-right: 1px solid rgba(246, 215, 138, .18);
+}
+
+.auth-cover-frame {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: calc(100% - 60px);
+    height: calc(100% - 56px);
+    margin-left: 16px;
+    padding: 20px 24px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(246, 215, 138, .45);
+    outline: 1px solid rgba(246, 215, 138, .16);
+    outline-offset: 5px;
+    text-align: center;
+}
+
+.auth-cover-emblem {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 18px;
+    color: #f6d78a;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .6));
+}
+
+.auth-cover-emblem svg {
+    width: 100%;
+    height: 100%;
+}
+
+.auth-cover-eyebrow {
+    margin: 0 0 10px;
+    color: rgba(246, 215, 138, .55);
+    font-family: Inter, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+}
+
+/* Gold foil: a vertical gold gradient clipped to the glyphs, with a dark drop
+   shadow standing in for the emboss press. */
+.auth-cover-title {
+    margin: 0;
+    background: linear-gradient(180deg, #fbe9b7 0%, #f6d78a 40%, #c9973f 75%, #b8860b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .65));
+    font-family: Poppins, sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+.auth-secret-embers {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.auth-secret-embers span {
+    position: absolute;
+    border-radius: 50%;
+    background: #ffb347;
+    box-shadow: 0 0 6px 1px rgba(255, 150, 50, .7);
+    opacity: 0;
+}
+
+/* Size, position, duration and delay come from GetEmberStyle's inline style;
+   only the shared animation is here, scoped to .secret so 18 embers are not
+   composited behind an invisible panel the whole session. */
+.auth-card.secret .auth-secret-embers span {
+    animation-name: auth-secret-ember-float;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes auth-secret-ember-float {
+    0% { opacity: 0; transform: translateY(0); }
+    10% { opacity: .9; }
+    90% { opacity: .4; }
+    100% { opacity: 0; transform: translateY(-70px); }
+}
+
+/* The author names, set in the cover's gold foil - the same treatment as the
+   title, one name per row, no rules or motion: leather, foil, done. */
+.auth-secret-authors {
+    display: flex;
+    width: min(100%, 300px);
+    margin: 26px 0;
+    padding: 0;
+    flex-direction: column;
+    gap: 16px;
+    list-style: none;
+}
+
+.auth-secret-authors li {
+    margin: 0;
+    background: linear-gradient(180deg, #fbe9b7 0%, #f6d78a 40%, #c9973f 75%, #b8860b 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .65));
+    font-family: Poppins, sans-serif;
+    /* Sized so the longest name clears the cover's gold frame. */
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+
+.auth-secret-close {
+    display: flex;
+    padding: 11px 26px;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px solid rgba(255, 179, 71, .55);
+    border-radius: 100px;
+    background: transparent;
+    color: #ffb347;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.auth-secret-close:hover {
+    background: rgba(255, 179, 71, .1);
+    box-shadow: 0 0 22px -4px rgba(255, 150, 50, .5);
+}
+
+.auth-secret-close:active {
+    transform: translateY(1px);
+}
+
+.auth-secret-close svg {
+    width: 13px;
+    height: 13px;
+}
+
 @media (max-width: 768px) {
     .auth-card {
         height: min(720px, calc(100dvh - 16px));
@@ -616,6 +890,27 @@
         right: auto;
         z-index: 1;
         transition: opacity .25s ease, visibility .25s ease;
+    }
+
+    /* On a phone there is no facing page to fold onto: the login board flips over
+       IN PLACE about its own centre - login face turning away, leather back
+       landing face-up in the same spot - and the card never slides. The cover
+       spans the full card here (its desktop box is the right half), and with no
+       slide to wait for, the board unfolds with no delay on the way back. */
+    .auth-card.secret {
+        transform: none;
+    }
+
+    .auth-cover-panel {
+        left: 0;
+        width: 100%;
+        transform-origin: center;
+        transition: visibility 0s linear .8s, transform .75s cubic-bezier(.65, 0, .35, 1);
+    }
+
+    .auth-login-panel {
+        transform-origin: center;
+        transition: opacity .25s ease, visibility .25s ease, transform .75s cubic-bezier(.65, 0, .35, 1);
     }
 
     .auth-card:not(.active) .auth-register-panel,
@@ -724,8 +1019,19 @@
     .auth-card.active .auth-login-panel .auth-content,
     .auth-card.close .auth-register-panel .auth-content,
     .auth-card.close .auth-login-panel .auth-content,
-    .auth-forgot-panel {
+    .auth-forgot-panel,
+    .auth-login-panel,
+    .auth-cover-panel,
+    .auth-card.secret,
+    .auth-card.secret-closing,
+    .auth-card.secret .auth-login-panel,
+    .auth-card.secret .auth-cover-panel {
         animation-duration: .01ms;
         transition-duration: .01ms;
+        transition-delay: 0s;
+    }
+
+    .auth-card.secret .auth-secret-embers span {
+        animation: none;
     }
 }
