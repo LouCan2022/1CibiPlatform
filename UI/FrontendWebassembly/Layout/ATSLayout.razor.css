@@ -6,10 +6,10 @@
     min-height: 64px;
     height: auto;
     padding: 12px 24px;
-    border-bottom: 1px solid #e4eaf6;
-    background: #ffffff;
+    border-bottom: 1px solid var(--c-border-soft);
+    background: var(--c-surface);
     box-shadow: 0 2px 10px -4px rgba(11, 27, 61, 0.08);
-    color: #16233f;
+    color: var(--c-fg-strong);
     font-family: "Inter", sans-serif;
     box-sizing: border-box;
 }
@@ -32,26 +32,26 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #8a97b5;
+    color: var(--c-fg-subtle);
     font-size: 12px;
     font-weight: 500;
     line-height: 1.35;
 }
 
 .ats-console-crumb-separator {
-    color: #c2d2f0;
+    color: var(--c-border-strong);
     font-weight: 400;
 }
 
 .ats-console-crumb strong {
-    color: #1d5fd1;
+    color: var(--c-blue-600);
     font-weight: 700;
 }
 
 .ats-console-topbar h1 {
     margin: 0;
     overflow: hidden;
-    color: #0b1b3d;
+    color: var(--c-navy-900);
     font-family: "Poppins", sans-serif;
     font-size: 18px;
     font-weight: 700;
@@ -67,60 +67,31 @@
     flex-shrink: 0;
 }
 
-.ats-console-icon-btn {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    flex: 0 0 38px;
-    padding: 0;
-    border: 1px solid #c2d2f0;
-    border-radius: 10px;
-    background: #edf3fc;
-    color: #1d5fd1;
-    font-family: inherit;
-    transition: background-color 0.15s ease;
-    box-sizing: border-box;
-}
+/* The whole .ats-console-icon-btn family lives in wwwroot/css/ats.css.
+
+   It has to be global: the notification bell is rendered by NotificationCenter, not by
+   this layout, so a scoped rule carries this file's scope attribute and never matches it -
+   which left the bell with no background, border, radius or icon size at all. The drawer
+   toggle here uses the same class, so both get their styling from the one definition. */
 
 .ats-console-menu-btn {
-    color: #0b1b3d;
+    color: var(--c-navy-900);
 }
 
-.ats-console-icon-btn:hover {
-    background: #e3ecfb;
-}
+/* .ats-console-icon-btn svg sizing moved to wwwroot/css/ats.css for the same reason as
+   the dot below: the notification bell is now rendered by NotificationCenter, and a
+   scoped rule here would not reach it - leaving that SVG at its natural size. */
 
-.ats-console-icon-btn:focus-visible {
-    outline: 3px solid rgba(46, 124, 224, 0.2);
-    outline-offset: 2px;
-}
-
-.ats-console-icon-btn svg {
-    width: 17px;
-    height: 17px;
-}
-
-.ats-console-notification-dot {
-    position: absolute;
-    top: 7px;
-    right: 7px;
-    width: 8px;
-    height: 8px;
-    border: 2px solid #ffffff;
-    border-radius: 50%;
-    background: #e15252;
-    box-sizing: border-box;
-}
+/* .ats-console-notification-dot moved to wwwroot/css/ats.css: the bell now lives in
+   NotificationCenter, and a scoped rule here carries this layout's scope attribute so it
+   would never match that component's markup. */
 
 .ats-console-topbar-divider {
     width: 1px;
     height: 26px;
     margin: 0 4px;
     flex-shrink: 0;
-    background: #e4eaf6;
+    background: var(--c-border-soft);
 }
 
 .ats-console-avatar {
@@ -130,10 +101,12 @@
     width: 38px;
     height: 38px;
     flex: 0 0 38px;
-    border: 2px solid #e3ecfb;
+    border: 2px solid var(--c-blue-tint-2);
     border-radius: 50%;
-    background: linear-gradient(135deg, #2e7ce0, #132a54);
-    color: #ffffff;
+    /* Always a dark gradient carrying white initials, so it uses the on-dark tokens
+       rather than the ramp, which inverts. */
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
     font-family: "Poppins", sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -141,7 +114,7 @@
     box-sizing: border-box;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 960px) {
     .ats-console-topbar {
         padding: 12px 16px;
     }
@@ -165,7 +138,6 @@
         gap: 7px;
     }
 
-    .ats-console-topbar-right .ats-console-icon-btn:first-child,
     .ats-console-topbar-divider {
         display: none;
     }

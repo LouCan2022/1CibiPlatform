@@ -1,8 +1,9 @@
 namespace ATS.ServiceConfig;
+
 public static class ATSServiceConfiguration
 {
-    private const string assemblyName = "APIs";
-    private const string connStringSegment = "OnePlatform_Connection";
+	private const string assemblyName = "APIs";
+	private const string connStringSegment = "OnePlatform_Connection";
 
 	#region Carter Config
 	public static IServiceCollection AddATSCarterModules(this IServiceCollection services, Assembly assembly)
@@ -20,43 +21,81 @@ public static class ATSServiceConfiguration
 
 	#region MediatR Config
 	public static IServiceCollection AddATSMediaTR(this IServiceCollection services, Assembly assembly)
-    {
-        services.AddMediatR(config =>
-        {
-            config.RegisterServicesFromAssembly(assembly);
-            config.AddOpenBehavior(typeof(ValidationBehavior<,>));
-            config.AddOpenBehavior(typeof(LoggingBehavior<,>));
-        });
+	{
+		services.AddMediatR(config =>
+		{
+			config.RegisterServicesFromAssembly(assembly);
+			config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+			config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 
-        services.AddValidatorsFromAssembly(assembly);
-        services.AddExceptionHandler<CustomExceptionHandler>();
-        return services;
-    }
-    #endregion
+			// Last, so validation runs first: a request rejected as invalid never reached
+			// a handler and must not be recorded as an action someone took.
+			config.AddOpenBehavior(typeof(AtsAuditBehavior<,>));
+		});
 
-    #region Services
-    public static IServiceCollection AddATSServices(this IServiceCollection services)
-    {
+		services.AddValidatorsFromAssembly(assembly);
+		services.AddExceptionHandler<CustomExceptionHandler>();
+		return services;
+	}
+	#endregion
+
+	#region Services
+	public static IServiceCollection AddATSServices(this IServiceCollection services)
+	{
 		services.AddTransient<ATSInitialData>();
 		services.AddScoped<IApplicationFormService, ApplicationFormService>();
 		services.AddScoped<IATSRepository, ATSRepository>();
-		services.AddScoped<IOrderHistoryRepository, OrderHistoryRepository>();
+		services.Decorate<IATSRepository, ATSCacheRepository>();
+		services.AddScoped<IApplicantSearchProjectionRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IApplicationFormRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IATSUserRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IBulkUploadRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IClientRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IDashboardRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IDisputeOrderRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IEmailInvitationRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IModuleRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IOrderHistoryRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IPackageRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IReportRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IRoleRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IUserClientRepository>(provider => provider.GetRequiredService<IATSRepository>());
+		services.AddScoped<IWithdrawnApplicationRepository>(provider => provider.GetRequiredService<IATSRepository>());
+
+		// No cache decorator: bulk upload status changes every Quartz tick, so a cached
+		// first page would defeat the dashboard this repository feeds.
+		services.AddScoped<IBulkUploadDashboardRepository, BulkUploadRepository>();
+
+		// Same reasoning: TicketStatus moves within one Quartz tick, and the claim
+		// query must never be served from a cache.
+		services.AddScoped<IOMSTicketingRepository, OMSTicketingRepository>();
+
+
+		// Also uncached: the audit trail is append-only and the screen exists to show what
+		// just happened, so a cached first page would hide the newest action.
+		services.AddScoped<IAtsAuditRepository, AtsAuditRepository>();
+		services.AddScoped<IAtsAuditService, AtsAuditService>();
+
+		// Singleton: the queue has to outlive the request scope that writes to it. The
+		// concrete type is registered as well so the drain can read the channel - see the
+		// note on AtsAuditDrainService's constructor.
+		services.AddSingleton<AtsAuditWriter>();
+		services.AddSingleton<IAtsAuditWriter>(provider => provider.GetRequiredService<AtsAuditWriter>());
+		services.AddHostedService<AtsAuditDrainService>();
+		services.AddHostedService<AtsAuditRetentionService>();
+
+		// Uncached for the same reason as the two above: the bell exists to show what just
+		// happened, so a cached unread count would hide the notification raised a second ago.
+		services.AddScoped<IAtsNotificationRepository, AtsNotificationRepository>();
+		services.AddScoped<IAtsNotificationService, AtsNotificationService>();
+		services.AddHostedService<AtsNotificationRetentionService>();
+
+		// An integrating client polls these to watch an order move, so a cached read
+		// would report exactly the staleness they are polling to avoid.
+		services.AddScoped<IPublicApiRepository, PublicApiRepository>();
 		services.AddScoped<IOrderHistoryFactory, OrderHistoryFactory>();
 		services.AddScoped<IOrderHistoryService, OrderHistoryService>();
-		services.Decorate<IATSRepository, ATSCacheRepository>();
-		services.AddScoped<IPackageRepository, PackageRepository>();
-		services.Decorate<IPackageRepository, PackageCacheRepository>();
-		services.AddScoped<IClientRepository, ClientRepository>();
-		services.Decorate<IClientRepository, ClientCacheRepository>();
-		services.AddScoped<IRoleRepository, RoleRepository>();
-		services.Decorate<IRoleRepository, RoleCacheRepository>();
-		services.AddScoped<IModuleRepository, ModuleRepository>();
-		services.Decorate<IModuleRepository, ModuleCacheRepository>();
-		services.AddScoped<IATSUserRepository, ATSUserRepository>();
-		services.Decorate<IATSUserRepository, ATSUserCacheRepository>();
-		services.AddScoped<IUserClientRepository, UserClientRepository>();
-		services.Decorate<IUserClientRepository, UserClientCacheRepository>();
-		services.AddScoped<AtsQueryScopeResolver>();
+
 		services.AddScoped<IUnitOfWork, UnitOfWork>();
 		services.AddScoped<IEndorsementSubmissionService, EndorsementSubmissionService>();
 		services.AddScoped<IDisputeOrderService, DisputeOrderService>();
@@ -71,34 +110,97 @@ public static class ATSServiceConfiguration
 		services.AddScoped<IUserManagementService, UserManagementService>();
 		services.AddScoped<IClientAssignmentService, ClientAssignmentService>();
 		services.AddScoped<IATSVerificationDataProvider, ATSVerificationDataProvider>();
+		services.AddScoped<IAtsAccessScopeResolver, AtsAccessScopeResolver>();
+
+		// Shared by the web console, the public API and the bulk parser so all three
+		// agree on what a valid package and order type are.
+		services.AddScoped<IOrderInputValidator, OrderInputValidator>();
+		services.AddScoped<IBulkUploadMonitoringService, BulkUploadMonitoringService>();
 
 		services.AddKeyedScoped<IEmailService, ATSEmailService>("ats");
 		services.AddScoped<IBulkSubmissionProcessorService, BulkSubmissionProcessorService>();
 		services.AddScoped<IEmailNotificationProcessorService, EmailNotificationProcessorService>();
+		services.AddScoped<IOMSTicketingProcessorService, OMSTicketingProcessorService>();
+		services.AddScoped<IOMSTicketingMonitoringService, OMSTicketingMonitoringService>();
+		services.AddScoped<IPublicApiService, PublicApiService>();
 		services.AddScoped<IATSQueries, ATSQueries>();
 		services.AddScoped<IAtsAccessClaimsProvider, AtsAccessClaimsProvider>();
+		services.AddScoped<IAtsAssistantService, AtsAssistantService>();
+		services.AddSingleton<AtsOrderDraftStore>();
+		services.AddSingleton<AtsChatHistoryStore>();
 		services.AddSignalR();
 
 		services.ConfigureOptions<BulkSubmissionBackgroundJobSetup>();
 		services.ConfigureOptions<EmailNotificationBackgroundJobSetup>();
 		services.ConfigureOptions<ApplicantSearchProjectionJobSetup>();
+		services.ConfigureOptions<OMSTicketingBackgroundJobSetup>();
 
 		return services;
-    }
-    #endregion
+	}
+	#endregion
 
-    #region Db Config
-    public static IServiceCollection AddATSInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddDbContext<ATSDBContext>(options =>
-        {
-            options.UseNpgsql(
-                configuration.GetConnectionString(connStringSegment),
-                npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
-            );
-        });
+	#region AI Assistant Config
+	/// <summary>
+	/// Registers the chat completion service and kernel used by the ATS assistant. ATS
+	/// registers its own chat completion so automatic function calling is available for
+	/// its <see cref="KernelFunctionAttribute"/> plugin.
+	/// </summary>
+	public static IServiceCollection AddATSAssistantConfiguration(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		var endpoint = configuration.GetValue<string>("OpenAI:Endpoint");
+		var apiKey = configuration.GetValue<string>("OpenAI:ApiKey");
+		var model = configuration.GetValue<string>("OpenAI:Model");
+
+		if (string.IsNullOrWhiteSpace(endpoint)
+			|| string.IsNullOrWhiteSpace(apiKey)
+			|| string.IsNullOrWhiteSpace(model))
+		{
+			return services;
+		}
+
+		services.AddOpenAIChatCompletion(
+			modelId: model,
+			endpoint: new Uri(endpoint),
+			apiKey: apiKey);
+
+		services.AddKernel();
+
+		return services;
+	}
+	#endregion
+
+	#region Db Config
+	public static IServiceCollection AddATSInfrastructure(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		// Every AtsAuditOptions value has a working default, so an absent section is
+		// valid: the audit trail runs with the agreed 30-day retention out of the box.
+		services.Configure<AtsAuditOptions>(
+			configuration.GetSection(AtsAuditOptions.SectionName));
+
+		// Same story: absent section means the agreed 30-day notification retention.
+		services.Configure<AtsNotificationOptions>(
+			configuration.GetSection(AtsNotificationOptions.SectionName));
+
+		// The audit change collector and its interceptor are scoped, so the context is
+		// built from the request's provider rather than a static lambda.
+		services.AddScoped<IAtsAuditChangeCollector, AtsAuditChangeCollector>();
+		services.AddScoped<AtsAuditChangeInterceptor>();
+
+		services.AddDbContext<ATSDBContext>((serviceProvider, options) =>
+		{
+			options.UseNpgsql(
+				configuration.GetConnectionString(connStringSegment),
+				npgsqlOptions => npgsqlOptions.MigrationsAssembly(assemblyName)
+			);
+
+			// Captures before/after values for the audit trail. Reads the change tracker
+			// only - it never writes, and a command that saves nothing costs nothing.
+			options.AddInterceptors(serviceProvider.GetRequiredService<AtsAuditChangeInterceptor>());
+		});
 
 
 		services.AddQuartz(q =>
@@ -136,7 +238,7 @@ public static class ATSServiceConfiguration
 		});
 
 		return services;
-    }
+	}
 	#endregion
 
 }

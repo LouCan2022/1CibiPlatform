@@ -1,38 +1,20 @@
-::deep .yes-no-dialog {
-    width: 100%;
-    max-width: 420px;
-    padding: 0 !important;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px !important;
-    background: #fff;
-    box-shadow:
-        0 0 0 6px rgba(46, 124, 224, 0.10),
-        0 24px 60px -12px rgba(11, 27, 61, 0.35),
-        0 4px 12px rgba(11, 27, 61, 0.08) !important;
-    font-family: "Inter", sans-serif;
-}
-
-::deep .yes-no-dialog > .mud-dialog-content {
-    width: 100%;
-    margin: 0;
-    padding: 0 !important;
-    overflow: hidden;
-}
+/* The .mud-dialog root and .mud-dialog-content are styled globally in
+   wwwroot/css/app.css (.mud-dialog.yes-no-dialog): the dialog teleports to
+   MudDialogProvider, so ::deep scoped rules can never reach it. */
 
 .yes-no-dialog-shell {
-    --yes-no-navy-800: #132a54;
-    --yes-no-blue-500: #2e7ce0;
-    --yes-no-border-strong: #c2d2f0;
-    --yes-no-text-1: #16233f;
-    --yes-no-text-2: #5b6b8c;
-    --yes-no-amber: #b5790f;
-    --yes-no-amber-border: #f0dca8;
-    --yes-no-orange-600: #d3540e;
-    --yes-no-orange-500: #ea7317;
+    --yes-no-navy-800: var(--c-navy-800);
+    --yes-no-blue-500: var(--c-blue-500);
+    --yes-no-border-strong: var(--c-border-strong);
+    --yes-no-text-1: var(--c-fg-strong);
+    --yes-no-text-2: var(--c-fg-muted);
+    --yes-no-amber: var(--c-warn);
+    --yes-no-amber-border: var(--c-warn-bg);
+    --yes-no-orange-600: var(--c-accent-orange);
+    --yes-no-orange-500: var(--c-accent-orange-500);
     width: 100%;
     padding: 32px 30px 28px;
-    background: #fff;
+    background: var(--c-surface);
     box-sizing: border-box;
     color: var(--yes-no-text-1);
     font-family: "Inter", sans-serif;
@@ -47,9 +29,9 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--yes-no-blue-500), var(--yes-no-navy-800));
+    background: var(--c-avatar-gradient);
     box-shadow: 0 10px 22px -8px rgba(29, 95, 209, 0.5);
-    color: #fff;
+    color: var(--c-on-dark-fg);
 }
 
 .yes-no-dialog-shell.is-warning .yes-no-dialog-icon-badge {
@@ -60,7 +42,7 @@
 .yes-no-dialog-icon-badge ::deep .mud-icon-root {
     width: 26px;
     height: 26px;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
     font-size: 26px;
 }
 
@@ -86,10 +68,10 @@
     padding: 12px 14px;
     align-items: flex-start;
     gap: 10px;
-    border: 1.5px solid #cfdcf2;
-    border-left: 3px solid #1d5fd1;
+    border: 1.5px solid var(--c-border-strong);
+    border-left: 3px solid var(--c-blue-600);
     border-radius: 10px;
-    background: var(--yes-no-info-background, #eef4ff);
+    background: var(--yes-no-info-background, var(--c-blue-tint));
     text-align: left;
 }
 
@@ -103,7 +85,7 @@
     height: 16px;
     margin-top: 1px;
     flex: 0 0 16px;
-    color: #1d5fd1 !important;
+    color: var(--c-blue-600) !important;
     font-size: 16px;
 }
 
@@ -113,13 +95,13 @@
 
 .yes-no-dialog-info-message {
     margin: 0;
-    color: #355273;
+    color: var(--c-fg-muted);
     font-size: 12.5px;
     line-height: 1.5;
 }
 
 .yes-no-dialog-shell.is-warning .yes-no-dialog-info-message {
-    color: #7a5209;
+    color: var(--c-warn);
 }
 
 .yes-no-dialog-info-message strong {
@@ -150,20 +132,20 @@
 
 .yes-no-dialog-footer ::deep .yes-no-dialog-cancel {
     border: 1.5px solid var(--yes-no-border-strong) !important;
-    background: #eef1f7 !important;
+    background: var(--c-border-soft) !important;
     box-shadow: none !important;
     color: var(--yes-no-text-2) !important;
 }
 
 .yes-no-dialog-footer ::deep .yes-no-dialog-cancel:hover {
-    background: #e4e9f2 !important;
+    background: var(--c-border-strong) !important;
 }
 
 .yes-no-dialog-footer ::deep .yes-no-dialog-confirm {
     border: 0 !important;
-    background: linear-gradient(120deg, var(--yes-no-navy-800), var(--yes-no-blue-500)) !important;
+    background: var(--c-primary-gradient) !important;
     box-shadow: 0 8px 20px -6px rgba(29, 95, 209, 0.55) !important;
-    color: #fff !important;
+    color: var(--c-on-dark-fg) !important;
 }
 
 .yes-no-dialog-shell.is-warning .yes-no-dialog-footer ::deep .yes-no-dialog-confirm {
@@ -201,6 +183,12 @@
 @media (max-width: 360px) {
     .yes-no-dialog-footer {
         flex-direction: column-reverse;
+    }
+
+    /* flex-basis 0 collapses button height once the footer is a column */
+    .yes-no-dialog-footer ::deep .yes-no-dialog-button {
+        flex: 0 0 auto;
+        width: 100%;
     }
 }
 

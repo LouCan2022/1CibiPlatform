@@ -11,6 +11,7 @@ using BuildingBlocks.SharedConstants;
 using AIAgent;
 using BackendAPI.Modules.ATS;
 using BackendAPI.Modules.EmploymentVerification;
+using BackendAPI.Modules.OMS;
 using BackendAPI.Modules.PlatformLogging;
 
 namespace ApiGateways.YarpApiGateway.Extensions;
@@ -105,6 +106,21 @@ public static class GatewayServiceExtensions
 						QueueLimit = 0
 					}),
 
+					// Partitioned by client IP rather than by policy name: these routes are
+					// anonymous, so a single shared bucket would let one caller starve every
+					// candidate filling in a form. A candidate loads the form once and
+					// submits once; 30/min leaves room for retries and shared office NAT
+					// while making EmailInvitationID enumeration impractical.
+					GatewayConstants.RateLimitPolicies.AnonymousApplicationForm => RateLimitPartition.GetFixedWindowLimiter(
+						httpContext.Connection.RemoteIpAddress?.ToString() ?? policyName,
+						_ => new FixedWindowRateLimiterOptions
+						{
+							PermitLimit = 30,
+							Window = TimeSpan.FromMinutes(1),
+							QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+							QueueLimit = 0
+						}),
+
 					_ => RateLimitPartition.GetFixedWindowLimiter(GatewayConstants.RateLimitPolicies.Default, _ => new FixedWindowRateLimiterOptions
 					{
 						PermitLimit = 500,
@@ -135,6 +151,7 @@ public static class GatewayServiceExtensions
 			typeof(AIAgentMarker).Assembly,
 			typeof(ATSMarker).Assembly,
 			typeof(EmploymentVerificationMarker).Assembly,
+			typeof(OMSMarker).Assembly,
 			typeof(PlatformLoggingMarker).Assembly
 		};
 

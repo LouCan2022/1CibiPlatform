@@ -15,6 +15,17 @@
     border-radius: 12px;
 }
 
+/* Only applied when RowsClickable is set, so tables that handle clicks on a single
+   cell do not advertise the whole row as interactive. */
+.responsive-table-container ::deep .table-component-clickable-rows tbody tr {
+    cursor: pointer;
+}
+
+.responsive-table-container ::deep .table-component-clickable-rows tbody tr:focus-visible {
+    outline: 2px solid var(--mud-palette-primary, var(--c-blue-600));
+    outline-offset: -2px;
+}
+
 .responsive-table-container ::deep .mud-table-toolbar {
     box-sizing: border-box;
     width: 100%;
@@ -41,6 +52,16 @@
     overflow-wrap: anywhere;
     font-size: 1.25rem !important;
     font-weight: 700 !important;
+}
+
+.table-component-heading {
+    min-width: 0;
+}
+
+.responsive-table-container ::deep .table-component-subtitle {
+    display: block;
+    margin-top: 2px;
+    color: var(--mud-palette-text-secondary);
 }
 
 .table-component-toolbar-row {
@@ -90,17 +111,17 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    border: 1.5px solid #c2d2f0;
+    border: 1.5px solid var(--c-border-strong);
     border-radius: 10px;
-    background: #edf3fc;
-    color: #1d5fd1;
+    background: var(--c-blue-tint);
+    color: var(--c-blue-600);
     cursor: pointer;
     transition: background .15s ease, border-color .15s ease;
 }
 
 .table-component-reload-button:hover:not(:disabled) {
-    border-color: #2e7ce0;
-    background: #e3ecfb;
+    border-color: var(--c-blue-500);
+    background: var(--c-blue-tint-2);
 }
 
 .table-component-reload-button:disabled {
@@ -129,8 +150,24 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* Single owner of table width.
+
+   Screens used to set their own min-width on the table root (880/920/940/1100/
+   1120px). Those only got neutralised inside the 960px card-mode query, so the
+   601-960px band rendered stacked cards inside a still-880px table, and any screen
+   that opted out of card mode kept the floor at every width.
+
+   The floor now lives here and applies only ABOVE the card-mode breakpoint, where
+   a wide table is genuinely wanted and the container scrolls horizontally. Below
+   it, cards lay out in the available width with no floor at all. */
 .responsive-table-container ::deep .mud-table-root {
     width: 100%;
+}
+
+@media (min-width: 961px) {
+    .responsive-table-container ::deep .mud-table-root {
+        min-width: 55rem;
+    }
 }
 
 .responsive-table-container ::deep .mud-table-pagination {
@@ -180,8 +217,11 @@
         table-layout: auto !important;
     }
 
+    /* Deliberately NOT overflow-x: hidden. Paired with a surviving min-width that
+       clipped the overflow away unreachably instead of letting the user scroll to
+       it - a worse failure than a scrollbar. */
     .responsive-table-container ::deep .mud-sm-table .mud-table-container {
-        overflow-x: hidden !important;
+        overflow-x: auto !important;
     }
 
     .responsive-table-container ::deep .mud-sm-table .mud-table-cell {
@@ -225,6 +265,26 @@
         flex-basis: auto;
         width: 100%;
         min-width: 0;
+    }
+
+    /* The base rule pins this to a 2.375rem square with `flex: 0 0 2.375rem`. In a
+       stacked column that fixed basis is what squeezed the button (and the search box
+       below it) out of the card, so the whole geometry has to be released - width
+       alone is not enough. Full width with a visible label, because an icon-only
+       square reads as a mystery button once it spans the card. */
+    .table-component-reload-button {
+        width: 100%;
+        height: auto;
+        min-height: 2.75rem;
+        flex: 0 0 auto;
+        gap: 0.5rem;
+    }
+
+    .table-component-reload-button::after {
+        content: "Reload";
+        font-size: 0.8125rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
     }
 
     .table-component-toolbar-actions ::deep .mud-button-root {

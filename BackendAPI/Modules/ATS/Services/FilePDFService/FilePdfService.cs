@@ -6,7 +6,7 @@ public class FilePdfService : IFilePdfService
 	IFormFile imageStream,
 	CancellationToken cancellationToken)
 	{
-		QuestPDF.Settings.License = LicenseType.Community;
+		QuestPDF.Settings.License = LicenseType.Professional;
 		byte[] imageBytes;
 
 		await using (var memory = new MemoryStream())
@@ -37,7 +37,7 @@ public class FilePdfService : IFilePdfService
 
 	public Task<MemoryStream> GenerateConsentFormPdfAsync(string applicantName, DateOnly signedDate, byte[] signatureImage, CancellationToken cancellationToken = default)
 	{
-		QuestPDF.Settings.License = LicenseType.Community;
+		QuestPDF.Settings.License = LicenseType.Professional;
 
 		var stream = new MemoryStream();
 		var document = new ConsentFormPdfDocument(applicantName, signedDate, signatureImage);

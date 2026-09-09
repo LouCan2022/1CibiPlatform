@@ -1,0 +1,175 @@
+.eca-shell {
+    --eca-navy: var(--c-navy-800);
+    --eca-blue: var(--c-blue-600);
+    --eca-border: var(--c-border-strong);
+    --eca-muted: var(--c-fg-muted);
+    overflow: hidden;
+    background: var(--c-surface);
+    color: var(--c-fg-strong);
+    font-family: "Inter", sans-serif;
+}
+
+.eca-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 26px 30px 22px;
+    background: var(--c-dialog-header-gradient);
+    color: var(--c-on-dark-fg);
+}
+
+.eca-header h1 {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.eca-header p {
+    margin: 4px 0 0;
+    color: var(--c-on-dark-fg-muted);
+    font-size: 13px;
+}
+
+.eca-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--c-on-dark-fg);
+    cursor: pointer;
+}
+
+.eca-body {
+    display: grid;
+    gap: 22px;
+    padding: 26px 30px;
+}
+
+.eca-user-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    background: var(--c-blue-tint);
+}
+
+.eca-user-card div {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.eca-user-card a {
+    overflow: hidden;
+    color: var(--eca-muted);
+    font-size: 12px;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.eca-avatar {
+    display: flex;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+}
+
+.eca-field > label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--eca-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.eca-field > label span {
+    color: var(--c-danger);
+}
+
+.eca-field > p {
+    margin: 6px 0 0;
+    color: var(--c-fg-subtle);
+    font-size: 11px;
+}
+
+.eca-field ::deep .mud-input-outlined-border {
+    border-color: var(--eca-border);
+    border-radius: 10px;
+}
+
+.eca-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 30px 24px;
+    border-top: 1px solid var(--c-border);
+}
+
+.eca-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 106px;
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.eca-button:disabled,
+.eca-close:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.eca-button-cancel {
+    border: 1px solid var(--eca-border);
+    background: var(--c-surface);
+    color: var(--eca-muted);
+}
+
+.eca-button-save {
+    border: 0;
+    background: linear-gradient(120deg, var(--eca-navy), var(--eca-blue));
+    color: var(--c-on-dark-fg);
+}
+
+/* 600px to match every other ATS dialog; this file used a private 560px. */
+@media (max-width: 600px) {
+    .eca-header,
+    .eca-body,
+    .eca-footer {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    /* The footer previously never stacked or stretched at any width - its only media
+       query changed padding - so two 106px buttons stayed side by side down to 320px. */
+    .eca-button {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-width: 0;
+    }
+}

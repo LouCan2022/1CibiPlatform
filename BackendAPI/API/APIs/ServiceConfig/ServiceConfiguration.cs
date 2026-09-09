@@ -11,6 +11,7 @@ public static class ServiceConfiguration
 	private static readonly Assembly _atsAssembly = typeof(ATSMarker).Assembly;
 	private static readonly Assembly _platformLoggingAssembly = typeof(PlatformLoggingMarker).Assembly;
 	private static readonly Assembly _employmentVerificationAssembly = typeof(EmploymentVerificationMarker).Assembly;
+	private static readonly Assembly _omsAssembly = typeof(OMSMarker).Assembly;
 
 
 	#region Logging Config
@@ -45,6 +46,52 @@ public static class ServiceConfiguration
 			builder.AddSerilog(dispose: true);
 			builder.AddDebug();
 		});
+
+		return services;
+	}
+
+	#endregion
+
+	#region Observability Config
+
+	/// <summary>
+	/// Registers the health checks that back both the <c>/health</c> endpoint and the
+	/// Prometheus <c>aspnetcore_healthcheck_status</c> gauge scraped by the monitoring
+	/// server. Every check registered here becomes its own time series, so Grafana can
+	/// show per-dependency health rather than a single opaque up/down.
+	/// </summary>
+	public static IServiceCollection AddObservability(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		var databaseConnection = configuration.GetConnectionString("OnePlatform_Connection");
+		var redisConnection = configuration.GetConnectionString("TairRedis");
+
+		var healthChecks = services.AddHealthChecks()
+			.ForwardToPrometheus();
+
+		// Postgres (RDS) is the one hard dependency: without it the API can serve nothing
+		// useful, so it is tagged "ready" and will flip /health/ready to Unhealthy.
+		if (!string.IsNullOrWhiteSpace(databaseConnection))
+		{
+			healthChecks.AddNpgSql(
+				databaseConnection,
+				name: "postgres",
+				tags: ["ready", "db"]);
+		}
+
+		// Redis is a cache, not a source of truth - HybridCache falls back to its
+		// in-memory L1 when the distributed L2 is unreachable. It is therefore reported
+		// as Degraded and left out of the "ready" tag, so a Redis blip does not pull
+		// instances out of rotation. It still surfaces as its own Grafana time series.
+		if (!string.IsNullOrWhiteSpace(redisConnection))
+		{
+			healthChecks.AddRedis(
+				redisConnection,
+				name: "redis",
+				failureStatus: HealthStatus.Degraded,
+				tags: ["cache"]);
+		}
 
 		return services;
 	}
@@ -231,6 +278,7 @@ public static class ServiceConfiguration
 		services.AddATSInfrastructure(configuration);
 		services.AddEmploymentVerificationInfrastructure(configuration);
 		services.AddPlatformLoggingInfrastructure(configuration);
+		services.AddOMSInfrastructure(configuration);
 		return services;
 	}
 	#endregion
@@ -247,6 +295,7 @@ public static class ServiceConfiguration
 			 _atsAssembly,
 			 _platformLoggingAssembly
 			 ,_employmentVerificationAssembly
+			 ,_omsAssembly
 		 ]));
 
 
@@ -268,6 +317,7 @@ public static class ServiceConfiguration
 		services.AddATSMediaTR(_atsAssembly);
 		services.AddPlatformLoggingMediaTR(_platformLoggingAssembly);
 		services.AddEmploymentVerificationMediaTR(_employmentVerificationAssembly);
+		services.AddOMSMediaTR(_omsAssembly);
 		return services;
 	}
 
@@ -283,8 +333,10 @@ public static class ServiceConfiguration
 		services.AddSSOServices();
 		services.AddAIAgentServices();
 			services.AddATSServices();
+			services.AddATSAssistantConfiguration(configuration);
 			services.AddEmploymentVerificationServices();
 		services.AddPlatformLoggingServices(configuration);
+		services.AddOMSServices();
 		return services;
 	}
 	#endregion
@@ -312,9 +364,6 @@ public static class ServiceConfiguration
 				Flags = HybridCacheEntryFlags.DisableDistributedCache
 			};
 		});
-
-		services.AddSingleton<IConnectionMultiplexer>
-			(ConnectionMultiplexer.Connect(redisConnection!));
 
 		return services;
 	}

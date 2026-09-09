@@ -2,7 +2,10 @@ namespace FrontendWebassembly.ShareData.ATS;
 
 public static class ModuleList
 {
-	private static readonly int[] RestrictedAdministrationModuleIds = [6, 7, 8, 9, 11];
+	// 15 (Audit Trail) is restricted for a different reason than the rest: a trail the
+	// audited user can read is a weaker control, so only a platform super admin sees it.
+	// The backend enforces the same rule independently.
+	private static readonly int[] RestrictedAdministrationModuleIds = [6, 7, 8, 9, 11, 15];
 
 	public static Dictionary<int, (string path, string Name, string Icon)> List =>
 		new()
@@ -17,8 +20,23 @@ public static class ModuleList
 			{ 8, ("rolemanagement", "Role Management", Icons.Material.Filled.Group) },
 			{ 9, ("modulemanagement", "Module Management", Icons.Material.Filled.Apps) },
 			{ 10, ("usermanagement", "User Management", Icons.Material.Filled.ManageAccounts) },
-			{ 11, ("clientassigning", "Client Assigning", Icons.Material.Filled.AssignmentInd) }
+			{ 11, ("clientassigning", "Client Assigning", Icons.Material.Filled.AssignmentInd) },
+			{ 12, ("aiassistant", "AI Assistant", Icons.Material.Filled.SmartToy) },
+			{ 13, ("bulkuploads", "Bulk Uploads Status", Icons.Material.Filled.CloudUpload) },
+			{ 14, ("ticketingstatus", "Ticketing Status", Icons.Material.Filled.ConfirmationNumber) },
+			{ 15, ("audittrail", "Audit Trail", Icons.Material.Filled.History) }
+
+			// Notifications (/s&i/ats/notifications) is deliberately NOT here. This list
+			// drives both the sidebar and ATSLayout.CanAccessRoute, and every id in it must
+			// exist in the backend module seed data and be grantable. Notifications is not a
+			// permissioned module - anyone with ATS access has an inbox - so adding it would
+			// show a link only super admins could follow and bounce everyone else to
+			// /access-denied. The page is reached from the bell instead.
 		};
+
+	// Modules that belong in the primary sidebar navigation rather than under Manage.
+	public static bool IsPrimaryNavigationModule(int moduleId) =>
+		moduleId <= 5 || moduleId == 12 || moduleId == 13 || moduleId == 14;
 
 	public static bool IsVisibleForAdministration(int moduleId, bool canViewAllModules) =>
 		canViewAllModules || !RestrictedAdministrationModuleIds.Contains(moduleId);

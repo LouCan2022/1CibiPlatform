@@ -17,6 +17,8 @@ public class ATSPaths : IReverseProxyModule
 				}
 			),
 
+			// Anonymous: the candidate reaches this from an emailed link with no account.
+			// Authorized by hash token in the API, rate limited by IP here.
 			new RouteDefinitionDTO(
 				RouteId: "AddApplicationFormDataEntryPoint",
 				MatchPath: "/ats/addapplicationformdata",
@@ -25,6 +27,10 @@ public class ATSPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "/addapplicationformdata" }
+				},
+				Metadata: new Dictionary<string,string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.AnonymousApplicationForm }
 				}
 			),
 
@@ -36,6 +42,10 @@ public class ATSPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "/getemailidandapplicationformpath" }
+				},
+				Metadata: new Dictionary<string,string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.AnonymousApplicationForm }
 				}
 			),
 
@@ -128,6 +138,290 @@ public class ATSPaths : IReverseProxyModule
 			),
 
 			new RouteDefinitionDTO(
+				RouteId: "GetBulkUploads",
+				MatchPath: "/ats/getbulkuploads",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getbulkuploads" }
+				}
+			),
+
+			// ---------- In-app notifications ----------
+			new RouteDefinitionDTO(
+				RouteId: "GetNotifications",
+				MatchPath: "/ats/getnotifications",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getnotifications" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetUnreadNotificationCount",
+				MatchPath: "/ats/getunreadnotificationcount",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getunreadnotificationcount" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "MarkNotificationRead",
+				MatchPath: "/ats/marknotificationread",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/marknotificationread" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "MarkAllNotificationsRead",
+				MatchPath: "/ats/markallnotificationsread",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/markallnotificationsread" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetBulkUploadStatusCounts",
+				MatchPath: "/ats/getbulkuploadstatuscounts",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getbulkuploadstatuscounts" }
+				}
+			),
+
+			// ---- Public API ----------------------------------------------------
+			// Client integrations, authenticated with a token from
+			// /token/generatetoken. DefaultStrict (20/min) rather than the 500/s
+			// default: these are machine callers, and an integration in a retry loop
+			// must not be able to saturate the platform.
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicCreateEndorsement",
+				MatchPath: "/publicapi/ats/endorsements",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/api/public/ats/endorsements" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicCreateBulkEndorsement",
+				MatchPath: "/publicapi/ats/endorsements/bulk",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/api/public/ats/endorsements/bulk" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			// PathPattern, not PathSet: PathSet would forward the literal "{fileId}".
+			new RouteDefinitionDTO(
+				RouteId: "PublicGetBulkUploadStatus",
+				MatchPath: "/publicapi/ats/endorsements/bulk/{fileId}",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathPattern", "/api/public/ats/endorsements/bulk/{fileId}" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicGetPackages",
+				MatchPath: "/publicapi/ats/packages",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/api/public/ats/packages" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicGetOrders",
+				MatchPath: "/publicapi/ats/orders",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/api/public/ats/orders" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicGetOrder",
+				MatchPath: "/publicapi/ats/orders/{orderId}",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathPattern", "/api/public/ats/orders/{orderId}" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicDownloadReport",
+				MatchPath: "/publicapi/ats/orders/{orderId}/report",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathPattern", "/api/public/ats/orders/{orderId}/report" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "PublicWithdrawOrder",
+				MatchPath: "/publicapi/ats/orders/{orderId}/withdraw",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathPattern", "/api/public/ats/orders/{orderId}/withdraw" }
+				},
+				Metadata: new Dictionary<string, string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.DefaultStrict }
+				}
+			),
+
+			// ---- Web console ---------------------------------------------------
+
+			new RouteDefinitionDTO(
+				RouteId: "GetTicketedOrders",
+				MatchPath: "/ats/getticketedorders",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getticketedorders" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetTicketStatusCounts",
+				MatchPath: "/ats/getticketstatuscounts",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getticketstatuscounts" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "RetryTicket",
+				MatchPath: "/ats/retryticket",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/retryticket" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetAuditTrail",
+				MatchPath: "/ats/getaudittrail",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getaudittrail" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetAuditOutcomeCounts",
+				MatchPath: "/ats/getauditoutcomecounts",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getauditoutcomecounts" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetBulkUploadSubjects",
+				MatchPath: "/ats/getbulkuploadsubjects",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getbulkuploadsubjects" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetBulkUploadSubjectCounts",
+				MatchPath: "/ats/getbulkuploadsubjectcounts",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getbulkuploadsubjectcounts" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "ExportBulkUploadSubjects",
+				MatchPath: "/ats/exportbulkuploadsubjects",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/exportbulkuploadsubjects" }
+				}
+			),
+
+			new RouteDefinitionDTO(
 				RouteId: "GetATSDashboard",
 				MatchPath: "/ats/getdashboard",
 				ClusterId: GatewayConstants.OnePlatformApi,
@@ -150,6 +444,17 @@ public class ATSPaths : IReverseProxyModule
 			),
 
 			new RouteDefinitionDTO(
+				RouteId: "GetApplicationFormPreview",
+				MatchPath: "/ats/getapplicationformpreview",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getapplicationformpreview" }
+				}
+			),
+
+			new RouteDefinitionDTO(
 				RouteId: "MarkAsDisputed",
 				MatchPath: "/ats/markasdisputed",
 				ClusterId: GatewayConstants.OnePlatformApi,
@@ -157,6 +462,17 @@ public class ATSPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "/markasdisputed" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "EditSubjectName",
+				MatchPath: "/ats/editsubjectname",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/editsubjectname" }
 				}
 			),
 
@@ -192,7 +508,7 @@ public class ATSPaths : IReverseProxyModule
 					{ "PathSet", "/downloadmultipleorderrecords" }
 				}
 			),
-			
+
 			new RouteDefinitionDTO(
 				RouteId: "ResendApplicationForm",
 				MatchPath: "/ats/resendapplicationform",
@@ -215,6 +531,7 @@ public class ATSPaths : IReverseProxyModule
 				}
 			),
 
+			// Anonymous, same emailed-link flow as AddApplicationFormData.
 			new RouteDefinitionDTO(
 				RouteId: "WithdrawnApplicationForm",
 				MatchPath: "/ats/withdrawnapplicationform",
@@ -223,6 +540,10 @@ public class ATSPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "/withdrawnapplicationform" }
+				},
+				Metadata: new Dictionary<string,string>
+				{
+					{ "RateLimitPolicy", GatewayConstants.RateLimitPolicies.AnonymousApplicationForm }
 				}
 			),
 
@@ -386,7 +707,7 @@ public class ATSPaths : IReverseProxyModule
 					{ "PathSet", "/get-my-access" }
 				}
 			),
-			
+
 
 			new RouteDefinitionDTO(
 				RouteId: "GetATSUserClientAssignments",
@@ -462,6 +783,39 @@ public class ATSPaths : IReverseProxyModule
 				Transforms: new Dictionary<string, string>
 				{
 					{ "PathSet", "/edituser" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "AskAtsAssistant",
+				MatchPath: "/ats/askassistant",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/askatsassistant" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "ConfirmOrderDraft",
+				MatchPath: "/ats/confirmorderdraft",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Post },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/confirmorderdraft" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "SearchOrdersBySubject",
+				MatchPath: "/ats/searchordersbysubject",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/searchordersbysubject" }
 				}
 			),
 

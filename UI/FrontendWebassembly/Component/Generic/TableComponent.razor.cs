@@ -3,6 +3,7 @@ namespace FrontendWebassembly.Component.Generic;
 public partial class TableComponent<TItem>
 {
 	[Parameter] public string? Title { get; set; }
+	[Parameter] public string? CountLabel { get; set; }
 	[Parameter] public string? TitleId { get; set; }
 	[Parameter] public string? TableAriaLabel { get; set; }
 	[Parameter] public string? ContainerClass { get; set; }
@@ -34,6 +35,14 @@ public partial class TableComponent<TItem>
 	[Parameter] public EventCallback<string> SearchStringChanged { get; set; }
 	[Parameter] public RenderFragment? ToolBarLeft { get; set; }
 	[Parameter] public Func<TItem, int, string>? RowClassFunc { get; set; }
+	// When set, the table is keyset-paginated: renders CursorTablePager (First/Prev/Next,
+	// no jump-to-page) instead of MudTablePager. Pass the table's CursorTableLoader.
+	[Parameter] public ICursorPagerState? CursorPagerState { get; set; }
+	// Opt-in row activation. RowsClickable only adds the pointer/hover affordance, so a
+	// table can handle clicks on specific cells without claiming the whole row is
+	// clickable. Both default off, leaving every existing table unchanged.
+	[Parameter] public EventCallback<TableRowClickEventArgs<TItem>> OnRowClick { get; set; }
+	[Parameter] public bool RowsClickable { get; set; }
 
 	public MudTable<TItem>? TableRef { get; private set; }
 	public Task ReloadServerData() => TableRef?.ReloadServerData() ?? Task.CompletedTask;
@@ -47,9 +56,19 @@ public partial class TableComponent<TItem>
 		? "responsive-table-container"
 		: $"responsive-table-container {ContainerClass}";
 
-	private string TableCssClass => string.IsNullOrWhiteSpace(TableClass)
-		? "generic-responsive-table transparent-paper"
-		: $"generic-responsive-table transparent-paper {TableClass}";
+	private string TableCssClass
+	{
+		get
+		{
+			var cssClass = string.IsNullOrWhiteSpace(TableClass)
+				? "generic-responsive-table transparent-paper"
+				: $"generic-responsive-table transparent-paper {TableClass}";
+
+			return RowsClickable
+				? $"{cssClass} table-component-clickable-rows"
+				: cssClass;
+		}
+	}
 
 	private string ToolbarCssClass =>
 		$"table-component-toolbar{(ToolBarLeft is not null ? " has-left-content" : string.Empty)}{(!string.IsNullOrWhiteSpace(Title) ? " has-title" : string.Empty)}";
@@ -58,6 +77,9 @@ public partial class TableComponent<TItem>
 		ToolBarLeft is not null || EnableSearch || EnableReload || !string.IsNullOrWhiteSpace(AddButtonText);
 
 	private string ResolvedTitleId => string.IsNullOrWhiteSpace(TitleId) ? _generatedTitleId : TitleId;
+	private string? ResolvedCountSubtitle => string.IsNullOrWhiteSpace(CountLabel)
+		? null
+		: $"{CursorPagerState?.TotalCount ?? Items?.LongCount() ?? 0} {CountLabel}";
 	private bool HasAccessibleName =>
 		!string.IsNullOrWhiteSpace(Title) || !string.IsNullOrWhiteSpace(TableAriaLabel);
 	private string? AccessibleLabel => string.IsNullOrWhiteSpace(Title) ? TableAriaLabel : null;
@@ -75,13 +97,29 @@ public partial class TableComponent<TItem>
 
 	private async Task SearchChanged(string value)
 	{
-		SearchString = value;
-
+		// Deliberately does NOT assign to SearchString.
+		//
+		// It is a [Parameter], so writing to it makes this component the owner of a value
+		// the parent thinks it owns. Blazor then only overwrites it when the parent
+		// re-renders with a *different* value - so a page that navigates away and back, or
+		// a different page rendering another TableComponent, keeps whatever was typed last.
+		// That is how a search term leaked across screens: the box filled itself on a page
+		// whose URL carried no ?search= at all.
+		//
+		// The parent owns the state. Raising the callback is enough - it sets its own field
+		// and re-renders, which flows the new value back down through SearchString.
 		if (SearchStringChanged.HasDelegate)
 			await SearchStringChanged.InvokeAsync(value);
 
 		if (TableRef is not null && LoadServerData is not null)
+		{
+			// A changed filter starts a new keyset walk; MudTable's page state must
+			// match the loader's reset-to-first-page or the pager shows a stale page.
+			if (CursorPagerState is not null)
+				TableRef.CurrentPage = 0;
+
 			await TableRef.ReloadServerData();
+		}
 	}
 
 	private async Task ReloadDataAsync()

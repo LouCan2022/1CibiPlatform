@@ -1,0 +1,148 @@
+::deep .withdrawn-applications {
+    --navy-900: var(--c-navy-900);
+    --blue-600: var(--c-blue-600);
+    --blue-tint: var(--c-blue-tint);
+    --blue-tint-2: var(--c-blue-tint-2);
+    --border: var(--c-border-soft);
+    --border-strong: var(--c-border-strong);
+    --text-1: var(--c-fg-strong);
+    --text-2: var(--c-fg-muted);
+    --text-3: var(--c-fg-subtle);
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.withdrawn-applications-scope { width: 100%; }
+
+::deep .withdrawn-applications .mud-table {
+    padding: 26px 28px 8px !important;
+    border: 1px solid var(--border);
+    border-radius: 16px !important;
+    background: var(--c-surface);
+    box-shadow: 0 12px 32px -12px rgba(11, 27, 61, .12);
+    overflow: hidden;
+}
+
+::deep .ats-management-card.withdrawn-applications .mud-table {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+::deep .withdrawn-applications .mud-input-control {
+    margin: 0;
+}
+
+::deep .withdrawn-applications .mud-input-outlined-border {
+    border-width: 1.5px;
+    border-color: var(--border-strong);
+    border-radius: 10px;
+}
+
+::deep .withdrawn-applications .mud-input-slot {
+    color: var(--text-1);
+    font-size: 13.5px;
+}
+
+::deep .withdrawn-applications .mud-input-adornment-start { color: var(--text-3); }
+::deep .withdrawn-applications input::placeholder { color: var(--text-3); opacity: 1; }
+
+::deep .withdrawn-applications .mud-table-head .mud-table-cell {
+    padding: 10px 14px 12px;
+    border-bottom: 1.5px solid var(--border-strong);
+    color: var(--text-1);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+::deep .withdrawn-applications .mud-table-body .mud-table-cell {
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-1);
+    font-size: 13.5px;
+    vertical-align: middle;
+}
+
+::deep .withdrawn-applications .mud-table-row:hover { background: var(--c-surface-sunken) !important; }
+
+/* Same monospace treatment as the OMS Ticketing board's ticket numbers, so the
+   number reads as the same identifier on both screens. */
+.withdrawn-ticket-number {
+    color: var(--text-1);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    white-space: nowrap;
+}
+
+.withdrawn-ticket-empty { color: var(--text-3); }
+
+.withdrawn-candidate { display: flex; align-items: center; gap: 12px; }
+.withdrawn-avatar {
+    display: flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
+    font-family: Poppins, Inter, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.withdrawn-email { color: var(--text-2); font-size: 13px; }
+::deep .withdrawn-name { color: var(--text-1) !important; font-weight: 600; }
+
+.withdrawn-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--c-danger-bg);
+    color: var(--c-danger-strong);
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.withdrawn-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-danger-strong);
+}
+
+.withdrawn-action {
+    display: flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--blue-tint);
+    color: var(--c-blue-600) !important;
+    cursor: pointer;
+    transition: background .12s ease;
+}
+
+.withdrawn-action:hover { background: var(--blue-tint-2); }
+.withdrawn-action svg {
+    width: 14px;
+    height: 14px;
+    color: var(--c-blue-600);
+    stroke: var(--c-blue-600);
+}

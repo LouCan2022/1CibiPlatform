@@ -1,10 +1,34 @@
-﻿namespace FrontendWebassembly.Layout;
+﻿using FrontendWebassembly.Component.Profile;
+
+namespace FrontendWebassembly.Layout;
 
 public partial class MainLayout
 {
-	private bool _isDarkMode = false;
 	private bool _isLoading = true;
+	private bool _isOpeningProfile = false;
 	private string name = "";
+	private string _applicationSearchQuery = string.Empty;
+
+	private static DialogOptions ProfileDialogOptions => new()
+	{
+		NoHeader = true,
+		MaxWidth = MaxWidth.Small,
+		FullWidth = true,
+		BackdropClick = false
+	};
+
+	private bool IsHomeRoute
+	{
+		get
+		{
+			var path = NavigationManager.ToBaseRelativePath(NavigationManager.Uri)
+				.Split('?', '#')[0]
+				.Trim('/');
+
+			return string.IsNullOrEmpty(path) ||
+				string.Equals(path, "dashboard", StringComparison.OrdinalIgnoreCase);
+		}
+	}
 
 	private const string _userNameKey = "Name";
 	private string UserInitials
@@ -21,42 +45,12 @@ public partial class MainLayout
 		}
 	}
 
-	private MudTheme _myTheme = new MudTheme()
-	{
-		PaletteLight = new PaletteLight()
-		{
-			Primary = "#667eea",
-			Secondary = "#764ba2",
-			Background = Colors.Gray.Lighten5,
-			Surface = Colors.Shades.White,
-			AppbarBackground = "#667eea",
-			AppbarText = Colors.Shades.White,
-			TextPrimary = Colors.Gray.Darken3
-		},
-		PaletteDark = new PaletteDark()
-		{
-			Primary = "#8b9dff",
-			Secondary = "#9d6bc7",
-			Background = Colors.Gray.Darken4,
-			Surface = Colors.Gray.Darken3,
-			AppbarBackground = "#5568d3",
-			AppbarText = Colors.Shades.White,
-			TextPrimary = Colors.Shades.White
-		},
-		LayoutProperties = new LayoutProperties()
-		{
-			DefaultBorderRadius = "4px",
-			AppbarHeight = "64px"
-		}
-	};
+	// The palette now lives on ThemeService so MainLayout, ConsoleLayout and
+	// SSOLayout cannot drift apart, and so it stays in step with the CSS tokens in
+	// wwwroot/css/theme.css.
+	private async Task ToggleDarkMode() => await Theme.ToggleAsync();
 
-	private async Task ToggleDarkMode()
-	{
-		_isDarkMode = !_isDarkMode;
-		await LocalStorageService.SetItemAsync("isDarkMode", _isDarkMode);
-		await JS.InvokeVoidAsync("setStartupTheme", _isDarkMode);
-
-	}
+	private void HandleThemeChanged() => InvokeAsync(StateHasChanged);
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -80,12 +74,10 @@ public partial class MainLayout
 
 			name = await LocalStorageService.GetItemAsync<string>(_userNameKey) ?? string.Empty;
 
-			var stored = await LocalStorageService.GetItemAsync<bool?>("isDarkMode");
+			await Theme.InitializeAsync();
+			Theme.OnChanged += HandleThemeChanged;
 
-			_isDarkMode = stored ?? false;
-
-			await JS.InvokeVoidAsync("setStartupTheme", _isDarkMode);
-
+			NavigationManager.LocationChanged += HandleLocationChanged;
 			_isLoading = false;
 		}
 		catch (Exception ex)
@@ -94,6 +86,77 @@ public partial class MainLayout
 			Console.WriteLine($"Is loading: {_isLoading}");
 			Console.WriteLine($"Authentication Error: {ex.Message}");
 			throw;
+		}
+	}
+
+	private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+	{
+		if (!IsHomeRoute)
+		{
+			_applicationSearchQuery = string.Empty;
+		}
+
+		InvokeAsync(StateHasChanged);
+	}
+
+	private void HandleApplicationSearchKeyDown(KeyboardEventArgs args)
+	{
+		if (string.Equals(args.Key, "Escape", StringComparison.Ordinal))
+		{
+			_applicationSearchQuery = string.Empty;
+		}
+	}
+
+	// The profile is fetched on open rather than cached in the layout so the dialog
+	// always edits the current server state, not a stale copy from login time.
+	private async Task OpenProfileSettings()
+	{
+		if (_isOpeningProfile)
+			return;
+
+		_isOpeningProfile = true;
+
+		try
+		{
+			var profileResponse = await UserProfileService.GetMyProfileAsync();
+
+			if (!profileResponse.IsSuccess || profileResponse.Data is null)
+			{
+				Snackbar.Add(
+					string.IsNullOrWhiteSpace(profileResponse.ErrorDetail)
+						? "Your profile could not be loaded."
+						: profileResponse.ErrorDetail,
+					Severity.Error);
+
+				return;
+			}
+
+			var parameters = new DialogParameters<ProfileSettingsComponent>
+			{
+				{ component => component.Profile, profileResponse.Data }
+			};
+
+			var dialog = await DialogService.ShowAsync<ProfileSettingsComponent>(
+				"Profile settings",
+				parameters,
+				ProfileDialogOptions);
+
+			var result = await dialog.Result;
+
+			if (result is null || result.Canceled || result.Data is not UserProfileDTO updatedProfile)
+				return;
+
+			// The service already persisted the new display name to local storage;
+			// this refreshes the greeting without a page reload.
+			if (!string.IsNullOrWhiteSpace(updatedProfile.FullName))
+			{
+				name = updatedProfile.FullName;
+				StateHasChanged();
+			}
+		}
+		finally
+		{
+			_isOpeningProfile = false;
 		}
 	}
 
@@ -120,6 +183,12 @@ public partial class MainLayout
 			Console.WriteLine($"Authentication Error: {ex.Message}");
 			throw;
 		}
+	}
+
+	public void Dispose()
+	{
+		NavigationManager.LocationChanged -= HandleLocationChanged;
+		Theme.OnChanged -= HandleThemeChanged;
 	}
 
 }

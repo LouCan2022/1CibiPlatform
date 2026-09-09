@@ -1,3 +1,4 @@
+using ATS.Data.Entities;
 using ATS.DTO;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Pagination;
@@ -54,17 +55,29 @@ public class PackageManagementServiceIntegrationTests : BaseIntegrationTest
 			("Alpha Screening", "First package"),
 			("Middle Screening", "Second package"));
 
-		var request = new PaginationRequest(PageIndex: 1, PageSize: 2);
+		var request = new KeysetPaginationRequest(Cursor: null, PageSize: 2);
 
 		// Act
 		var result = await _packageManagementService.GetPackagesAsync(request, CancellationToken.None);
 
 		// Assert
-		result.PageIndex.Should().Be(1);
-		result.PageSize.Should().Be(2);
-		result.Count.Should().Be(3);
-		result.Data.Select(x => x.PackageName)
+		// Four, not three: BaseIntegrationTest seeds one package after every truncate,
+		// because orders now carry a foreign key to their package and could not
+		// otherwise be inserted. It sorts last, so the paging assertions below are
+		// unaffected apart from the extra row.
+		result.TotalCount.Should().Be(4);
+		result.Items.Select(x => x.PackageName)
 			.Should().Equal("Alpha Screening", "Middle Screening");
+		result.NextCursor.Should().NotBeNull();
+
+		var secondPage = await _packageManagementService.GetPackagesAsync(
+			new KeysetPaginationRequest(Cursor: result.NextCursor, PageSize: 2),
+			CancellationToken.None);
+
+		secondPage.TotalCount.Should().BeNull();
+		secondPage.Items.Select(x => x.PackageName)
+			.Should().Equal("Zulu Screening", DefaultPackageName);
+		secondPage.NextCursor.Should().BeNull();
 	}
 
 	[Fact]
@@ -76,15 +89,16 @@ public class PackageManagementServiceIntegrationTests : BaseIntegrationTest
 			("Executive Screening", "Premium leadership checks"),
 			("Premium Screening", "Comprehensive checks"));
 
-		var request = new PaginationRequest(PageIndex: 1, PageSize: 10, SearchTerm: "PREMIUM");
+		var request = new KeysetPaginationRequest(Cursor: null, PageSize: 10, SearchTerm: "PREMIUM");
 
 		// Act
 		var result = await _packageManagementService.GetPackagesAsync(request, CancellationToken.None);
 
 		// Assert
-		result.Count.Should().Be(2);
-		result.Data.Select(x => x.PackageName)
+		result.TotalCount.Should().Be(2);
+		result.Items.Select(x => x.PackageName)
 			.Should().Equal("Executive Screening", "Premium Screening");
+		result.NextCursor.Should().BeNull();
 	}
 
 	[Fact]
@@ -197,6 +211,64 @@ public class PackageManagementServiceIntegrationTests : BaseIntegrationTest
 	}
 
 	#endregion
+
+	// Orders reference their package by id, so a rename cannot break them - but they
+	// also carry the name as a display label, which the report lists and search read
+	// directly. Without this the label would silently disagree with the package.
+	[Fact]
+	public async Task EditPackageAsync_ShouldRefreshTheLabelOnOrders_WhenThePackageIsRenamed()
+	{
+		var order = new EmailInvitationRequest
+		{
+			EmailInvitationID = Guid.CreateVersion7(),
+			FirstName = "Juan",
+			LastName = "Dela Cruz",
+			EmailAddress = "juan@example.com",
+			MobileNumber = "09171234567",
+			PackageId = DefaultPackageId,
+			SelectPackage = DefaultPackageName,
+			RushNormal = "Normal",
+			HashToken = Guid.NewGuid().ToString("N"),
+			HashTokenCreatedAt = DateTime.UtcNow,
+			HashTokenExpiration = DateTime.UtcNow.AddHours(24),
+			EmailSentStatus = "Done",
+			ApplicationFormStatus = "Pending",
+			OrderStatus = "Pending Candidate Info",
+			OrderCreatedAt = DateTime.UtcNow,
+
+			// Set false so the assertion below proves the rename raised it.
+			NeedsProjection = false
+		};
+
+		await _dbContext.EmailInvitationRequests.AddAsync(order);
+		await _dbContext.SaveChangesAsync();
+
+		var existing = await _dbContext.PackageDetails
+			.AsNoTracking()
+			.FirstAsync(x => x.PackageId == DefaultPackageId);
+
+		await _packageManagementService.EditPackageAsync(new EditPackageDTO
+		{
+			PackageId = existing.PackageId,
+			PackageName = "Renamed Package",
+			PackageDescription = existing.PackageDescription,
+			IsActive = existing.IsActive,
+			FollowUpEmail = existing.FollowUpEmail
+		}, CancellationToken.None);
+
+		var saved = await _dbContext.EmailInvitationRequests
+			.AsNoTracking()
+			.FirstAsync(x => x.EmailInvitationID == order.EmailInvitationID);
+
+		saved.SelectPackage.Should().Be("Renamed Package");
+
+		// The applicant search row denormalises the package name, so it has to be
+		// rebuilt on the projection job's next pass.
+		saved.NeedsProjection.Should().BeTrue();
+
+		// The relationship itself is untouched.
+		saved.PackageId.Should().Be(DefaultPackageId);
+	}
 
 	private async Task AddPackagesAsync(params (string Name, string Description)[] packages)
 	{

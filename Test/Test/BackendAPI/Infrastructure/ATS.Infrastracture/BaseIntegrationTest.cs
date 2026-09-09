@@ -1,6 +1,20 @@
 ﻿using ATS.Data.Context;
+using ATS.Data.Entities;
 using ATS.Data.Repository;
-using ATS.Services;
+using ATS.Services.AIAssistant;
+using ATS.Services.ApplicantSearchProjections;
+using ATS.Services.BulkSubmissionProcessor;
+using ATS.Services.BulkUploadMonitoring;
+using ATS.Services.Dashboard;
+using ATS.Services.EmailNotificationProcessor;
+using ATS.Services.EndorsementSubmission;
+using ATS.Services.Report;
+using ATS.Services.Settings.ClientAssignment;
+using ATS.Services.Settings.ClientManagement;
+using ATS.Services.Settings.ModuleManagement;
+using ATS.Services.Settings.PackageManagement;
+using ATS.Services.Settings.RoleManagement;
+using ATS.Services.Settings.UserManagement;
 using Auth.Data.Context;
 using Auth.Shared.Contracts;
 using BuildingBlocks.SharedServices.Interfaces;
@@ -10,7 +24,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 
 namespace Test.BackendAPI.Infrastructure.ATS.Infrastracture;
 
@@ -19,6 +32,20 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 	private readonly IServiceScope _scope;
 	protected readonly ISender _sender;
 	protected readonly IHashService _hashService;
+	// The client the fake test principal belongs to. Kept in step with the AtsClientId
+	// claim in IntegrationTestWebAppFactory.
+	protected const int TestClientId = 1;
+
+	// A package created after every truncate, so a test can seed an order without
+	// arranging a package first. The truncate restarts the identity sequence, so this
+	// row is always id 1.
+	//
+	// The name is deliberately last alphabetically: the package list is ordered by name,
+	// and tests that assert on paging should not have their expected order disturbed by
+	// a row they did not create.
+	protected const int DefaultPackageId = 1;
+	protected const string DefaultPackageName = "zzz Default Test Package";
+
 	protected readonly ATSDBContext _dbContext;
 	protected readonly AuthApplicationDbContext _authDbContext;
 	protected readonly IHttpContextAccessor _httpContextAccessor;
@@ -37,10 +64,11 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 	protected readonly IAtsAccessClaimsProvider _atsAccessClaimsProvider;
 	protected readonly IApplicantSearchProjectionService _applicantSearchProjectionService;
 	protected readonly IReportService _reportService;
+	protected readonly IAtsAssistantService _atsAssistantService;
 	protected readonly IDashboardService _dashboardService;
 	protected readonly IATSRepository _atsRepository;
+	protected readonly IBulkUploadMonitoringService _bulkUploadMonitoringService;
 	protected readonly HybridCache _hybridCache;
-	protected readonly IConnectionMultiplexer _redis;
 
 	protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
 	{
@@ -51,7 +79,6 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		_dbContext = _scope.ServiceProvider.GetRequiredService<ATSDBContext>();
 		_authDbContext = _scope.ServiceProvider.GetRequiredService<AuthApplicationDbContext>();
 		_hybridCache = _scope.ServiceProvider.GetRequiredService<HybridCache>();
-		_redis = _scope.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
 		_httpContextAccessor = _scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
 		_configuration = _scope.ServiceProvider.GetRequiredService<IConfiguration>();
 		_objectStorageService = _scope.ServiceProvider.GetRequiredService<IObjectStorageService>();
@@ -67,8 +94,10 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		_atsAccessClaimsProvider = _scope.ServiceProvider.GetRequiredService<IAtsAccessClaimsProvider>();
 		_applicantSearchProjectionService = _scope.ServiceProvider.GetRequiredService<IApplicantSearchProjectionService>();
 		_reportService = _scope.ServiceProvider.GetRequiredService<IReportService>();
+		_atsAssistantService = _scope.ServiceProvider.GetRequiredService<IAtsAssistantService>();
 		_dashboardService = _scope.ServiceProvider.GetRequiredService<IDashboardService>();
 		_atsRepository = _scope.ServiceProvider.GetRequiredService<IATSRepository>();
+		_bulkUploadMonitoringService = _scope.ServiceProvider.GetRequiredService<IBulkUploadMonitoringService>();
 	}
 
 
@@ -93,6 +122,7 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 								ats.""SignatureDetails"",
 								ats.""BulkUploadFileDetails"",
 								ats.""ApplicantSearchProjection"",
+								ats.""AuditTrail"",
 								ats.""UserClientDetails"",
 								ats.""UserDetails"",
 								ats.""ClientDetails"",
@@ -101,6 +131,23 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 								ats.""ModuleDetails""
 						  RESTART IDENTITY CASCADE;";
 				await _dbContext.Database.ExecuteSqlRawAsync(sql);
+
+				// Orders carry a foreign key to their package, so one has to exist
+				// before any test can seed an order. Created here rather than in each
+				// test: most tests do not care which package an order is under, they
+				// just need the row to be insertable. DefaultPackageId is the id it
+				// gets, since the truncate above restarts the identity sequence.
+				//
+				// Inserted with raw SQL and left untracked so it behaves like a row
+				// that was already in the database: a test that adds its own packages
+				// must not collide with a tracked instance of this one.
+				await _dbContext.Database.ExecuteSqlRawAsync(
+					"""
+					INSERT INTO ats."PackageDetails"
+						("PackageName", "PackageDescription", "IsActive", "FollowUpEmail", "CreatedAt", "UpdatedAt")
+					VALUES ({0}, '182', TRUE, 0, NOW(), NOW());
+					""",
+					DefaultPackageName);
 			}
 
 			if (_authDbContext is not null)
@@ -114,6 +161,8 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 				await _authDbContext.Database.ExecuteSqlRawAsync(sql);
 			}
 
+			// Every tag used by the ATS/Auth cache decorators must be listed — cached
+			// first pages and counts survive the table truncation above otherwise.
 			await _hybridCache.RemoveByTagAsync("user");
 			await _hybridCache.RemoveByTagAsync("userclient");
 			await _hybridCache.RemoveByTagAsync("users");
@@ -121,6 +170,10 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 			await _hybridCache.RemoveByTagAsync("disputeorder");
 			await _hybridCache.RemoveByTagAsync("report");
 			await _hybridCache.RemoveByTagAsync("withdrawnapplication");
+			await _hybridCache.RemoveByTagAsync("role");
+			await _hybridCache.RemoveByTagAsync("module");
+			await _hybridCache.RemoveByTagAsync("client");
+			await _hybridCache.RemoveByTagAsync("package");
 
 			if (_objectStorageService is MockObjectStorageService mockObjectStorage)
 				mockObjectStorage.Clear();
@@ -129,6 +182,57 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
 		{
 			throw new Exception("Error during database cleanup in InitializeAsync: " + ex.Message, ex);
 		}
+	}
+
+	/// <summary>
+	/// Creates a package and assigns it to the caller's client, so an order can be
+	/// placed against it. Orders now validate the package against the client's
+	/// assignments, so any test that creates one has to seed this first.
+	/// Returns the package name to pass as SelectPackage / PackageType.
+	/// </summary>
+	protected async Task<string> SeedAssignedPackageAsync(
+		string packageName = DefaultPackageName,
+		int clientId = TestClientId)
+	{
+		var now = DateTime.UtcNow;
+
+		// InitializeAsync already created DefaultPackageName, so reuse it rather than
+		// tripping the unique index on PackageName.
+		var package = await _dbContext.PackageDetails
+			.FirstOrDefaultAsync(existing => existing.PackageName == packageName);
+
+		if (package is null)
+		{
+			package = new PackageDetails
+			{
+				PackageName = packageName,
+				PackageDescription = "182",
+				IsActive = true,
+				FollowUpEmail = 0,
+				CreatedAt = now,
+				UpdatedAt = now
+			};
+
+			await _dbContext.PackageDetails.AddAsync(package);
+			await _dbContext.SaveChangesAsync();
+		}
+
+		// ClientDetails is keyed (ClientId, PackageId): one row per client-package pair
+		// is what "assigned" means.
+		await _dbContext.ClientDetails.AddAsync(new ClientDetails
+		{
+			ClientId = clientId,
+			PackageId = package.PackageId,
+			ClientName = "Integration Test Client",
+			ClientDescription = "Seeded for order-creation tests.",
+			IsActive = true,
+			CreatedAt = now,
+			UpdatedAt = now
+		});
+
+		await _dbContext.SaveChangesAsync();
+
+		return packageName;
 	}
 
 	public Task DisposeAsync()

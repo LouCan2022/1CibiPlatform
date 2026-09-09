@@ -1,0 +1,192 @@
+using FluentAssertions;
+using FrontendWebassembly.SharedService;
+
+namespace Test.UI;
+
+/// <summary>
+/// The bulk-upload preview has to agree with what CsvHelper parses server-side, or the
+/// operator approves an import that does not match what they were shown.
+/// </summary>
+public class CsvPreviewParserTests
+{
+	private const string Header = "LastName,FirstName,MiddleInitial,EmailAddress,MobileNumber";
+
+	[Fact]
+	public void Parse_ShouldReadHeadersAndRows()
+	{
+		var csv = $"{Header}\nDela Cruz,Juan,S,juan@example.com,09171234567";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Headers.Should().Equal(
+			"LastName", "FirstName", "MiddleInitial", "EmailAddress", "MobileNumber");
+		result.Rows.Should().ContainSingle();
+		result.Rows[0].Should().Equal(
+			"Dela Cruz", "Juan", "S", "juan@example.com", "09171234567");
+	}
+
+	[Fact]
+	public void Parse_ShouldKeepCommasInsideQuotedFields()
+	{
+		// The bug this parser replaced: the hand-rolled split turned this into six
+		// misaligned columns, so the preview did not match the import.
+		var csv = $"{Header}\n\"Dela Cruz, Jr.\",Juan,S,juan@example.com,09171234567";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows.Should().ContainSingle();
+		result.Rows[0].Should().HaveCount(5);
+		result.Rows[0][0].Should().Be("Dela Cruz, Jr.");
+		result.Rows[0][1].Should().Be("Juan");
+	}
+
+	[Fact]
+	public void Parse_ShouldUnescapeDoubledQuotes()
+	{
+		var csv = $"{Header}\n\"He said \"\"hi\"\"\",Juan,S,juan@example.com,09171234567";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows[0][0].Should().Be("He said \"hi\"");
+	}
+
+	[Fact]
+	public void Parse_ShouldKeepNewlinesInsideQuotedFields()
+	{
+		var csv = $"{Header}\n\"Line one\nLine two\",Juan,S,juan@example.com,09171234567";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		// One record, not two - the newline is inside the quotes.
+		result.Rows.Should().ContainSingle();
+		result.Rows[0][0].Should().Be("Line one\nLine two");
+	}
+
+	[Fact]
+	public void Parse_ShouldHandleWindowsLineEndings()
+	{
+		var csv = $"{Header}\r\nDela Cruz,Juan,S,juan@example.com,09171234567\r\n";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows.Should().ContainSingle();
+		result.Rows[0][0].Should().Be("Dela Cruz");
+		result.Rows[0][4].Should().Be("09171234567");
+	}
+
+	[Fact]
+	public void Parse_ShouldIgnoreBlankRows()
+	{
+		var csv = $"{Header}\nDela Cruz,Juan,S,juan@example.com,09171234567\n\n,,,,\n";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows.Should().ContainSingle();
+		result.TotalRowCount.Should().Be(1);
+	}
+
+	[Fact]
+	public void Parse_ShouldReturnEmptyForBlankInput()
+	{
+		CsvPreviewParser.Parse(string.Empty).Rows.Should().BeEmpty();
+		CsvPreviewParser.Parse("   ").Rows.Should().BeEmpty();
+	}
+
+	[Fact]
+	public void Parse_ShouldReportHeadersOnlyFileAsEmpty()
+	{
+		var result = CsvPreviewParser.Parse(Header);
+
+		result.Headers.Should().HaveCount(5);
+		result.Rows.Should().BeEmpty();
+		result.TotalRowCount.Should().Be(0);
+		result.IsTruncated.Should().BeFalse();
+	}
+
+	[Fact]
+	public void Parse_ShouldCapPreviewRowsButStillReportTheTotal()
+	{
+		// A large upload must not build a cell list for every row just to show a dialog,
+		// but the operator still needs to know the preview is a sample.
+		var rows = Enumerable.Range(0, CsvPreviewParser.MaxPreviewRows + 50)
+			.Select(index => $"Last{index},First{index},M,user{index}@example.com,09171234567");
+		var csv = $"{Header}\n{string.Join("\n", rows)}";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows.Should().HaveCount(CsvPreviewParser.MaxPreviewRows);
+		result.TotalRowCount.Should().Be(CsvPreviewParser.MaxPreviewRows + 50);
+		result.IsTruncated.Should().BeTrue();
+	}
+
+	[Fact]
+	public void Parse_ShouldIgnoreColumnsBeyondTheCanonicalSet()
+	{
+		// Spreadsheets pick up spare columns after MobileNumber (notes, helper
+		// formulas). The import never reads them, so the preview must not show them -
+		// and their blank cells must not block the upload.
+		var csv = $"{Header},Notes,Extra\nDela Cruz,Juan,S,juan@example.com,09171234567,some note,";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Headers.Should().Equal(
+			"LastName", "FirstName", "MiddleInitial", "EmailAddress", "MobileNumber");
+		result.Rows.Should().ContainSingle();
+		result.Rows[0].Should().Equal(
+			"Dela Cruz", "Juan", "S", "juan@example.com", "09171234567");
+		result.MissingHeaders.Should().BeEmpty();
+		result.HasCanonicalHeaderSequence.Should().BeTrue();
+	}
+
+	[Fact]
+	public void Parse_ShouldIgnoreRowsWhoseOnlyContentIsInDroppedColumns()
+	{
+		// A row that is empty in the template columns but has a stray note past
+		// MobileNumber is spreadsheet debris, not a candidate. It used to render as an
+		// all-"(Blank)" row and block the upload.
+		var csv = $"{Header},Notes\nDela Cruz,Juan,S,juan@example.com,09171234567,\n,,,,,some stray note";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows.Should().ContainSingle();
+		result.TotalRowCount.Should().Be(1);
+		result.Rows[0][0].Should().Be("Dela Cruz");
+	}
+
+	[Fact]
+	public void Parse_ShouldFlagSwappedColumnsAsOffTemplate()
+	{
+		// The template's sequence is the standard. All five columns are present here,
+		// but the order is wrong - the caller must reject the file, not reorder it.
+		var csv = "FirstName,LastName,MiddleInitial,EmailAddress,MobileNumber\nJuan,Dela Cruz,S,juan@example.com,09171234567";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.HasCanonicalHeaderSequence.Should().BeFalse();
+		result.MissingHeaders.Should().BeEmpty();
+	}
+
+	[Fact]
+	public void Parse_ShouldReportMissingCanonicalColumns()
+	{
+		// A file without MobileNumber cannot be imported - the caller blocks on this
+		// before upload instead of letting the background processor stall on it.
+		var csv = "LastName,FirstName,MiddleInitial,EmailAddress\nDela Cruz,Juan,S,juan@example.com";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.HasCanonicalHeaderSequence.Should().BeFalse();
+		result.MissingHeaders.Should().Equal("MobileNumber");
+	}
+
+	[Fact]
+	public void Parse_ShouldTrimUnquotedWhitespace()
+	{
+		var csv = $"{Header}\n  Dela Cruz , Juan ,S,juan@example.com,09171234567";
+
+		var result = CsvPreviewParser.Parse(csv);
+
+		result.Rows[0][0].Should().Be("Dela Cruz");
+		result.Rows[0][1].Should().Be("Juan");
+	}
+}

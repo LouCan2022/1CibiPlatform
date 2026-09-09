@@ -100,6 +100,14 @@ public partial class Otp
 
 	private async Task HandleOtpKeyDownAsync(int index, KeyboardEventArgs args)
 	{
+		if (args.Key == "Enter")
+		{
+			if (IsOtpComplete && !isLoading && !isDone)
+				await HandleVerifyOtp();
+
+			return;
+		}
+
 		if (args.Key == "Backspace"
 			&& string.IsNullOrEmpty(otpDigits[index])
 			&& index > 0)
@@ -180,7 +188,9 @@ public partial class Otp
 		}
 	}
 
-	private async void HandleResendOtp()
+	// async Task, not async void: OnClick awaits the returned task, so a throw here is
+	// observed by the framework instead of being lost.
+	private async Task HandleResendOtp()
 	{
 		SetState(true);
 

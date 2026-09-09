@@ -29,10 +29,14 @@
 
         <main class="preview-upload-body ats-dialog-body">
             <div class="preview-upload-table-panel">
+                @* Uses the default Breakpoint.Sm so the preview stacks into cards on a
+                   phone. It previously passed Breakpoint.None, which suppressed card
+                   mode entirely and left a 920px-wide table inside the dialog at every
+                   viewport. Every MudTd below carries a DataLabel, so stacking reads
+                   correctly. *@
                 <TableComponent TItem="List<string>"
                                 Items="Rows"
                                 ContainerClass="ats-management-card ats-package-card preview-upload-table"
-                                ResponsiveBreakpoint="Breakpoint.None"
                                 RowsPerPage="10">
                     <HeaderTemplate>
                         <MudTh>Row</MudTh>
@@ -50,7 +54,7 @@
                         {
                             var cellColumn = row[i];
                             <MudTd DataLabel="@Headers[i]"
-                                   Class="@(string.IsNullOrWhiteSpace(cellColumn) ? "preview-upload-invalid-cell" : null)">
+                                   Class="@(IsInvalidCell(i, cellColumn) ? "preview-upload-invalid-cell" : null)">
                                 @if (i == 0 && !string.IsNullOrWhiteSpace(cellColumn))
                                 {
                                     <span class="preview-upload-name-cell">
@@ -61,7 +65,9 @@
                                 else
                                 {
                                     <span class="@(i >= 2 ? "preview-upload-muted" : null)">
-                                        @(string.IsNullOrWhiteSpace(cellColumn) ? "(Blank)" : cellColumn)
+                                        @(string.IsNullOrWhiteSpace(cellColumn)
+                                            ? (IsRequiredCellBlank(i, cellColumn) ? "(Blank)" : "—")
+                                            : (IsInvalidMobileNumber(i, cellColumn) ? "(Invalid)" : cellColumn))
                                     </span>
                                 }
                             </MudTd>
@@ -73,7 +79,14 @@
             @if (InvalidRows.Any())
             {
                 <MudAlert Severity="Severity.Error" Dense="true" Class="preview-upload-alert">
-                    Blank values found in row(s): @string.Join(", ", InvalidRows) - @Message
+                    @if (InvalidMobileRows.Any())
+                    {
+                        <div>Mobile number must be exactly 11 digits in row(s): @string.Join(", ", InvalidMobileRows).</div>
+                    }
+                    @if (BlankRows.Any())
+                    {
+                        <div>Blank values found in row(s): @string.Join(", ", BlankRows) - @Message</div>
+                    }
                 </MudAlert>
             }
         </main>
@@ -97,3 +110,4 @@
       </div>
     </DialogContent>
 </MudDialog>
+

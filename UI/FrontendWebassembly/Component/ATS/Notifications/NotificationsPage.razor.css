@@ -1,0 +1,121 @@
+/* The full notifications feed.
+
+   Builds on the shared .ats-management-page / .ats-management-card / .ats-segmented
+   classes in wwwroot/css/ats.css, and on the .ats-notif-row family added there for the
+   rows themselves - those are shared with the bell dropdown and must not be re-declared
+   here. Only what is unique to this page lives below. */
+
+.ats-notif-page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.ats-notif-page-head h1 {
+    margin: 0;
+    color: var(--c-fg-strong);
+    font-family: "Poppins", sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.ats-notif-page-head p {
+    margin: 4px 0 0;
+    color: var(--c-fg-muted);
+    font-size: 13px;
+}
+
+.ats-notif-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.ats-notif-filter-count {
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--c-blue-tint-2);
+    color: var(--c-blue-600);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* The rows carry their own padding and dividers, so the card only supplies the frame.
+   Overrides .ats-management-card's table padding, which does not apply to a feed. */
+.ats-notif-page-card {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.ats-notif-sentinel {
+    display: flex;
+    justify-content: center;
+    padding: 14px;
+}
+
+.ats-notif-load-more {
+    padding: 9px 20px;
+    border: 1.5px solid var(--c-border-strong);
+    border-radius: 10px;
+    background: var(--c-surface);
+    color: var(--c-blue-600);
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.ats-notif-load-more:hover:not(:disabled) {
+    background: var(--c-blue-tint);
+}
+
+.ats-notif-load-more:disabled {
+    cursor: wait;
+    opacity: .7;
+}
+
+.ats-notif-load-more:focus-visible {
+    outline: 3px solid var(--c-focus-ring);
+    outline-offset: 2px;
+}
+
+.ats-notif-end {
+    padding: 18px;
+    color: var(--c-fg-subtle);
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .ats-notif-page-head {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ats-notif-page-actions {
+        width: 100%;
+    }
+
+    .ats-notif-filter {
+        flex: 1 1 auto;
+    }
+
+    /* Matches the other management screens, where the primary action goes full width at
+       this breakpoint. */
+    .ats-notif-page-actions .ats-management-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ats-notif-load-more {
+        transition: none;
+    }
+}

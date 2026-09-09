@@ -1,0 +1,422 @@
+/* Local palette, matching the block BulkUploadsComponent.razor.css declares. The
+   drill-down is the same module and deliberately does not introduce a new hue. */
+.ats-bulk-subjects-header,
+.ats-bulk-subjects-segmented,
+::deep .ats-bulk-subjects-table-card {
+    --navy-900: var(--c-navy-900);
+    --blue-600: var(--c-blue-600);
+    --blue-500: var(--c-blue-500);
+    --blue-tint: var(--c-blue-tint);
+    --blue-tint-2: var(--c-blue-tint-2);
+    --border: var(--c-border-soft);
+    --text-1: var(--c-fg-strong);
+    --text-2: var(--c-fg-muted);
+    --text-3: var(--c-fg-subtle);
+}
+
+/* ---------- Header (PreviewComponent's gradient dialog header) ---------- */
+
+.ats-bulk-subjects-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 30px 20px;
+    color: var(--c-on-dark-fg);
+    background: var(--c-dialog-header-gradient);
+}
+
+    .ats-bulk-subjects-header::before {
+        position: absolute;
+        inset: 0;
+        content: "";
+        opacity: .35;
+        background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1.5px);
+        background-size: 16px 16px;
+        -webkit-mask-image: linear-gradient(to bottom right, #000, transparent 70%);
+        mask-image: linear-gradient(to bottom right, #000, transparent 70%);
+    }
+
+.ats-bulk-subjects-header-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.ats-bulk-subjects-header-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 12px;
+    background: rgba(255,255,255,.14);
+    color: var(--c-on-dark-fg);
+}
+
+.ats-bulk-subjects-header-icon ::deep .mud-icon-root {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+}
+
+.ats-bulk-subjects-header-text {
+    min-width: 0;
+}
+
+    .ats-bulk-subjects-header-text h2 {
+        margin: 0;
+        overflow: hidden;
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: .2px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ats-bulk-subjects-header-text p {
+        margin: 4px 0 0;
+        color: var(--c-on-dark-fg-muted);
+        font-size: 12.5px;
+    }
+
+.ats-bulk-subjects-close {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 9px;
+    background: rgba(255,255,255,.1);
+    color: var(--c-on-dark-fg);
+    cursor: pointer;
+}
+
+    .ats-bulk-subjects-close:hover {
+        background: rgba(255,255,255,.22);
+    }
+
+    .ats-bulk-subjects-close:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, .35);
+        outline-offset: 2px;
+    }
+
+/* ---------- Status filters + export ---------- */
+
+/* Tabs on the left, Export CSV on the right, sharing one row. */
+.ats-bulk-subjects-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 24px 0;
+}
+
+/* The export button is styled by .ats-management-button (ats.css); only the
+   disabled state is local, since the shared class has none. */
+.ats-bulk-subjects-export:disabled {
+    opacity: .55;
+    cursor: default;
+    box-shadow: none;
+}
+
+.ats-bulk-subjects-export:disabled:active {
+    transform: none;
+}
+
+.ats-bulk-subjects-segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--c-surface);
+}
+
+::deep .ats-bulk-subjects-segment {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+    ::deep .ats-bulk-subjects-segment:hover:not(:disabled) {
+        color: var(--blue-600);
+        background: var(--blue-tint);
+    }
+
+    ::deep .ats-bulk-subjects-segment.active {
+        background: var(--blue-tint-2);
+        color: var(--navy-900);
+        box-shadow: 0 2px 6px rgba(11, 27, 61, .1);
+    }
+
+    ::deep .ats-bulk-subjects-segment:disabled {
+        opacity: .6;
+        cursor: default;
+    }
+
+    ::deep .ats-bulk-subjects-segment:focus-visible {
+        outline: 3px solid rgba(46, 124, 224, .35);
+        outline-offset: 2px;
+    }
+
+::deep .ats-bulk-subjects-count {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--c-surface-sunken);
+    color: var(--text-2);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+::deep .ats-bulk-subjects-segment.active .ats-bulk-subjects-count {
+    background: var(--c-primary-gradient);
+    color: var(--c-on-dark-fg);
+}
+
+/* The dot classes the parent page defines are page-scoped, so the dialog restates
+   them. is-failed is new here: the file list has no failure bucket. */
+.ats-bulk-subjects-segmented .bulk-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+    .ats-bulk-subjects-segmented .bulk-status-dot.is-all {
+        background: var(--text-3);
+    }
+
+    .ats-bulk-subjects-segmented .bulk-status-dot.is-pending {
+        background: var(--c-fg-subtle);
+    }
+
+    .ats-bulk-subjects-segmented .bulk-status-dot.is-done {
+        background: var(--c-success);
+    }
+
+    .ats-bulk-subjects-segmented .bulk-status-dot.is-failed {
+        background: var(--c-danger-strong);
+    }
+
+/* ---------- Table ---------- */
+
+/* The card carries .ats-management-card (PreviewComponent pattern), which brings the
+   shared table treatment - headers, cells, search, pager - from ats.css. The card's
+   default drop shadow is dropped: the dialog already has its own elevation, and a
+   shadowed card inside it reads as a double border. `width: auto` overrides the
+   shared card's `width: 100%`, which would push the box past the right margin and
+   swallow it (100% + side margins > container). */
+::deep .ats-bulk-subjects-table-card {
+    width: auto !important;
+    margin: 16px 24px 20px;
+    box-shadow: none !important;
+}
+
+::deep .ats-bulk-subjects-table {
+    box-shadow: none;
+}
+
+::deep .ats-bulk-subjects-table td {
+    vertical-align: middle;
+}
+
+.ats-bulk-subject {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.ats-bulk-subject-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--blue-tint-2);
+    color: var(--blue-600);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .3px;
+}
+
+.ats-bulk-subject-name {
+    overflow: hidden;
+    color: var(--text-1);
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ats-bulk-subject-contact,
+.ats-bulk-subject-email-state {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    align-items: flex-start;
+}
+
+.ats-bulk-subject-email {
+    overflow: hidden;
+    color: var(--text-1);
+    font-size: 12.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ats-bulk-subject-mobile,
+.ats-bulk-subject-meta {
+    color: var(--text-3);
+    font-size: 11.5px;
+}
+
+.ats-bulk-subject-attempts {
+    color: var(--c-warn);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.ats-bulk-subject-order {
+    color: var(--text-2);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+::deep .bulk-muted {
+    color: var(--text-3);
+}
+
+.ats-bulk-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+    .ats-bulk-badge.is-done {
+        background: var(--c-success-bg);
+        color: var(--c-success);
+    }
+
+    .ats-bulk-badge.is-pending {
+        background: var(--c-border-soft);
+        color: var(--c-fg-muted);
+    }
+
+    .ats-bulk-badge.is-failed {
+        background: var(--c-danger-bg);
+        color: var(--c-danger-strong);
+    }
+
+    .ats-bulk-badge.is-unknown {
+        background: var(--c-surface-sunken);
+        color: var(--text-3);
+    }
+
+::deep .ats-bulk-subjects-actions-header,
+::deep .ats-bulk-subjects-actions-cell {
+    text-align: right;
+    width: 84px;
+}
+
+::deep .ats-bulk-subject-resend {
+    color: var(--blue-600);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 720px) {
+    .ats-bulk-subjects-header {
+        padding: 20px 18px;
+    }
+
+    .ats-bulk-subjects-filter-row {
+        margin: 12px 16px 0;
+    }
+
+    .ats-bulk-subjects-export {
+        justify-content: center;
+        width: 100%;
+    }
+
+    ::deep .ats-bulk-subjects-table-card {
+        margin: 12px 16px 16px;
+    }
+
+    /* MudTable stacks below its breakpoint, so the right-aligned actions column
+       would otherwise sit oddly against the stacked labels. */
+    ::deep .ats-bulk-subjects-actions-cell {
+        width: auto;
+    }
+}
+
+/* MudTable's stacked mode (Breakpoint.Sm = max-width 600px) renders each cell as
+   label-left / value-right flex, which shoves long emails and names against the
+   dialog edge where they clip. Restack each cell as a centered column instead:
+   the DataLabel becomes a small heading, the value sits centered under it. */
+@media (max-width: 600px) {
+    /* In stacked mode the <table> still uses table auto-layout, so it sizes to its
+       widest nowrap cell content (long emails) and overflows the card, which clips
+       it. Block-level table + rows bound the flex cells to the card width so the
+       spans' ellipsis can engage. Also overrides ats.css's `min-width: 880px` on
+       every .ats-management-card table. */
+    ::deep .ats-bulk-subjects-table-card table,
+    ::deep .ats-bulk-subjects-table-card tbody,
+    ::deep .ats-bulk-subjects-table-card tr {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    ::deep .ats-bulk-subjects-table .mud-table-cell {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-align: center !important; /* MudBlazor sets text-align with !important */
+    }
+
+    ::deep .ats-bulk-subjects-table .mud-table-cell::before {
+        padding: 0;
+        color: var(--text-3, var(--c-fg-subtle));
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+    }
+
+    /* The per-cell wrappers left-align their children for the desktop table. */
+    .ats-bulk-subject,
+    .ats-bulk-subject-contact,
+    .ats-bulk-subject-email-state {
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+    }
+
+    /* Ellipsis needs a bound now that the column no longer constrains min-content. */
+    .ats-bulk-subject-name,
+    .ats-bulk-subject-email {
+        max-width: 100%;
+    }
+}

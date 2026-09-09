@@ -1,0 +1,94 @@
+/* Only what is specific to the bulk uploads board lives here.
+
+   The intro banner, filter chips, status dots, status pills, lead-identity cell, tag
+   and muted cells all come from the shared .ats-status-board-* / .ats-cell-* /
+   .ats-status-pill rules in wwwroot/css/ats.css, which the OMS ticketing board uses
+   too. Do not re-declare any of those here - change the shared rules instead so both
+   boards stay identical. */
+
+::deep .bulk-order-type {
+    display: inline-flex;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+::deep .bulk-order-type.is-rush {
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
+}
+
+::deep .bulk-order-type.is-normal {
+    background: var(--c-surface-sunken);
+    color: var(--c-fg-muted);
+}
+
+::deep .bulk-subject-count {
+    color: var(--c-fg-strong);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ---------- Email send progress ---------- */
+
+::deep .bulk-email-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 96px;
+}
+
+::deep .bulk-email-figures {
+    color: var(--c-fg-strong);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+::deep .bulk-email-total {
+    color: var(--c-fg-subtle);
+    font-weight: 600;
+}
+
+::deep .bulk-email-bar {
+    display: block;
+    width: 100%;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--c-surface-sunken);
+}
+
+::deep .bulk-email-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--c-blue-500), var(--c-success));
+    transition: width .3s ease;
+}
+
+::deep .bulk-email-failed {
+    color: var(--c-danger-strong);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Deliberately quieter than the failure note: pending resolves on its own. */
+::deep .bulk-email-pending {
+    color: var(--c-fg-subtle);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::deep .bulk-email-bar-fill {
+        transition: none;
+    }
+}
+
+@media (max-width: 720px) {
+    ::deep .bulk-email-progress {
+        min-width: 0;
+        align-items: flex-end;
+    }
+}

@@ -1,0 +1,26 @@
+@namespace FrontendWebassembly.Component.ATS.Notifications
+
+@* One row, shared by the bell dropdown and the full notifications page so the two can
+   never drift apart. Rendered as a button rather than an anchor even when it has a link:
+   activating it marks the notification read first and then navigates, which an <a> would
+   race. *@
+
+<button type="button"
+        class="@RowCssClass"
+        aria-label="@AriaLabel"
+        @onclick="() => OnActivate.InvokeAsync(Item)">
+    <span class="@IconCssClass" aria-hidden="true">
+        <MudIcon Icon="@TypeIcon" />
+    </span>
+
+    <span class="ats-notif-body">
+        <span class="ats-notif-title">@Item.Title</span>
+        <span class="ats-notif-text">@Item.Body</span>
+        <span class="ats-notif-time">@RelativeTime</span>
+    </span>
+
+    @if (!Item.IsRead)
+    {
+        <span class="ats-notif-dot" aria-hidden="true"></span>
+    }
+</button>

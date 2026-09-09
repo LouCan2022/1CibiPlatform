@@ -1,0 +1,289 @@
+.ats-users-page {
+    --users-navy-900: var(--c-navy-900);
+    --users-navy-800: var(--c-navy-800);
+    --users-blue-600: var(--c-blue-600);
+    --users-blue-500: var(--c-blue-500);
+    --users-blue-tint: var(--c-blue-tint);
+    --users-blue-tint-2: var(--c-blue-tint-2);
+    --users-border: var(--c-border-soft);
+    --users-border-strong: var(--c-border-strong);
+    --users-text-1: var(--c-fg-strong);
+    --users-text-2: var(--c-fg-muted);
+    --users-text-3: var(--c-fg-subtle);
+    --users-green: var(--c-success);
+    --users-green-tint: var(--c-success-bg);
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    color: var(--users-text-1);
+    font-family: "Inter", sans-serif;
+}
+
+.ats-users-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.ats-users-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.ats-users-button:active {
+    transform: scale(0.97);
+}
+
+.ats-users-button:focus-visible,
+.ats-users-edit:focus-visible {
+    outline: 3px solid rgba(46, 124, 224, 0.25);
+    outline-offset: 2px;
+}
+
+.ats-users-button svg {
+    width: 15px;
+    height: 15px;
+}
+
+.ats-users-button-outline {
+    border: 1.5px solid var(--users-border-strong);
+    background: var(--c-surface);
+    color: var(--users-blue-600);
+    text-transform: uppercase;
+}
+
+.ats-users-button-outline:hover {
+    background: var(--users-blue-tint);
+}
+
+.ats-users-button-primary {
+    background: var(--c-primary-gradient);
+    box-shadow: 0 8px 20px -6px rgba(29, 95, 209, 0.5);
+    color: var(--c-on-dark-fg);
+}
+
+.ats-users-button-primary:hover {
+    box-shadow: 0 10px 24px -6px rgba(29, 95, 209, 0.65);
+}
+
+.ats-users-table-scope ::deep table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Above the card-mode breakpoint only. Users is the widest board in ATS - ten
+   columns - so it raises the shared 55rem floor from TableComponent and pins its
+   text-heavy columns; without this the browser squeezes them to roughly one
+   character per line. Below 960px card mode takes over and none of this applies. */
+@media (min-width: 961px) {
+    .ats-users-table-scope ::deep table {
+        min-width: 70rem;
+    }
+
+    .ats-users-table-scope ::deep .ats-users-user-column {
+        min-width: 145px;
+    }
+
+    .ats-users-table-scope ::deep .ats-users-email-column {
+        min-width: 190px;
+    }
+
+    .ats-users-table-scope ::deep .ats-users-modules-column {
+        min-width: 280px;
+    }
+}
+
+.ats-users-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ats-users-avatar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--c-avatar-gradient);
+    color: var(--c-on-dark-fg);
+    font-family: "Poppins", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ats-users-name {
+    color: var(--users-text-1);
+    font-weight: 600;
+}
+
+.ats-users-table-scope ::deep .ats-users-muted,
+.ats-users-table-scope ::deep .ats-users-muted a,
+.ats-users-table-scope ::deep .ats-users-date {
+    color: var(--users-text-2);
+}
+
+.ats-users-table-scope ::deep .ats-users-muted a {
+    text-decoration: none;
+}
+
+.ats-users-table-scope ::deep .ats-users-muted a:hover {
+    color: var(--users-blue-600);
+    text-decoration: underline;
+}
+
+.ats-users-table-scope ::deep .ats-users-date {
+    white-space: nowrap !important;
+}
+
+/* min(), not a flat 340px: in card mode the cell has ~300px on a 360px phone, so the
+   old fixed width overflowed the card and was clipped. */
+.ats-users-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: min(340px, 100%);
+    min-width: 0;
+}
+
+.ats-users-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border: 1px solid var(--users-border-strong);
+    border-radius: 20px;
+    background: var(--users-blue-tint-2);
+    color: var(--users-blue-600);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Solid pill with white text, so it uses the fixed on-dark token rather than the
+   ramp (which lightens in dark mode). Matches .ats-management-chip-more. */
+.ats-users-chip-more {
+    border-color: var(--c-chip-solid-bg);
+    background: var(--c-chip-solid-bg);
+    color: var(--c-on-dark-fg);
+}
+
+.ats-users-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--users-green-tint);
+    color: var(--users-green);
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ats-users-status::before {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--users-green);
+    content: "";
+}
+
+.ats-users-status.is-disabled {
+    background: var(--c-neutral-bg);
+    color: var(--users-text-2);
+}
+
+.ats-users-status.is-disabled::before {
+    background: var(--users-text-3);
+}
+
+.ats-users-edit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--users-border-strong);
+    border-radius: 8px;
+    background: var(--users-blue-tint);
+    color: var(--users-blue-600);
+    cursor: pointer;
+}
+
+.ats-users-edit:hover {
+    background: var(--users-blue-tint-2);
+}
+
+.ats-users-edit svg {
+    width: 14px;
+    height: 14px;
+}
+
+.ats-users-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 180px;
+    color: var(--users-text-3);
+    text-align: center;
+}
+
+.ats-users-empty ::deep .mud-icon-root {
+    margin-bottom: 6px;
+    color: var(--users-blue-500);
+    font-size: 34px;
+}
+
+.ats-users-empty strong {
+    color: var(--users-text-1);
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+}
+
+.ats-users-empty span {
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    /* This block used to only re-declare `display: flex`, which the base rule already
+       sets - a no-op. That is why Users was the one management board whose Add button
+       stayed a right-floating pill on phones while Clients, Modules, Roles and
+       Packages went full width via .ats-management-button in wwwroot/css/ats.css. */
+    .ats-users-actions {
+        flex-wrap: wrap;
+    }
+
+    .ats-users-button {
+        justify-content: center;
+        width: 100%;
+        padding: 0 12px;
+        font-size: 11.5px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ats-users-page *,
+    .ats-users-page *::before,
+    .ats-users-page *::after {
+        transition-duration: 0.01ms !important;
+    }
+}

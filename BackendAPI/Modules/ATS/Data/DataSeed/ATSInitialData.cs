@@ -23,7 +23,8 @@ public class ATSInitialData
 		"ATS.Data.DataSeed.IntouchEmailInvitationInitialData.json";
 
 	public IReadOnlyList<EmailInvitationRequest> GetEmailInvitationRequests(
-		IReadOnlyDictionary<string, Guid> userIdsByEmail)
+		IReadOnlyDictionary<string, Guid> userIdsByEmail,
+		IReadOnlyDictionary<string, int> packageIdsByName)
 	{
 		var assembly = typeof(ATSInitialData).Assembly;
 		using var stream = assembly.GetManifestResourceStream(SeedResourceName)
@@ -42,8 +43,11 @@ public class ATSInitialData
 				user => NormalizeRequestor(user.UserName),
 				user => userIdsByEmail[user.UserEmail]);
 
+		// Orders carry a foreign key to their package, so a seed row whose package name
+		// has no matching row cannot be created at all.
 		return rows
-			.Select(row => CreateEmailInvitationRequest(row, requestorIdsByName))
+			.Where(row => packageIdsByName.ContainsKey(row.SelectPackage))
+			.Select(row => CreateEmailInvitationRequest(row, requestorIdsByName, packageIdsByName))
 			.ToArray();
 	}
 
@@ -57,7 +61,8 @@ public class ATSInitialData
 
 	private EmailInvitationRequest CreateEmailInvitationRequest(
 		IntouchEmailInvitationSeedRow row,
-		IReadOnlyDictionary<string, Guid> requestorIdsByName)
+		IReadOnlyDictionary<string, Guid> requestorIdsByName,
+		IReadOnlyDictionary<string, int> packageIdsByName)
 	{
 		var emailAddress = $"intouch.{row.TicketNo.ToLowerInvariant()}@seed.local";
 		var createdAt = row.OrderCreatedAt;
@@ -80,6 +85,8 @@ public class ATSInitialData
 			EmailAddress = emailAddress,
 			MobileNumber = "N/A",
 			Requestor = row.Requestor,
+			// Filtered above, so the lookup always succeeds.
+			PackageId = packageIdsByName[row.SelectPackage],
 			SelectPackage = row.SelectPackage,
 			RushNormal = row.RushNormal,
 			ClientId = row.ClientId,
@@ -94,7 +101,7 @@ public class ATSInitialData
 			EmailSentAt = createdAt,
 			OrderStatus = row.OrderStatus,
 			OrderCreatedAt = row.OrderCreatedAt,
-			OrderCompletedAt = row.OrderCompletedAt,    
+			OrderCompletedAt = row.OrderCompletedAt,
 
 			NeedsProjection = false,
 			ProjectionUpdatedAt = projectionUpdatedAt,
@@ -230,28 +237,39 @@ public class ATSInitialData
 		return users;
 	}
 
+	// Bulk Uploads is granted wherever New Order is: anyone who can submit a CSV must be
+	// able to see what happened to it. Every seed row below already carries module 2.
 	private static IEnumerable<ATSUserModuleSeedRow> GetUserModules() =>
 	[
 		new ATSUserModuleSeedRow(
-			"atsPlatformManager@cibi.com",
+			"atsManager@cibi.com",
 			"ATS Platform Manager",
 			1,
-			Enumerable.Range(1, 10).ToArray()),
+			[.. Enumerable.Range(1, 10), AtsModuleIds.AIAssistant, AtsModuleIds.BulkUploads]),
+
 		new ATSUserModuleSeedRow(
 			"atsAdmin@cibi.com",
 			"ATS Admin",
 			2,
-			Enumerable.Range(1, 10).ToArray()),
+			[.. Enumerable.Range(1, 10), AtsModuleIds.BulkUploads]),
+
+		new ATSUserModuleSeedRow(
+			"atsService@cibi.com",
+			"ATS Service Delivery",
+			3,
+			[.. Enumerable.Range(1, 13)]),
+
 		new ATSUserModuleSeedRow(
 			"atsUser@cibi.com",
 			"ATS User",
 			3,
-			Enumerable.Range(1, 3).ToArray()),
+			[.. Enumerable.Range(1, 3), AtsModuleIds.AIAssistant, AtsModuleIds.BulkUploads]),
+
 		new ATSUserModuleSeedRow(
 			"atsUploader@cibi.com",
 			"ATS Uploader",
 			4,
-			[3])
+			[.. Enumerable.Range(1, 3), AtsModuleIds.BulkUploads])
 	];
 
 	private sealed record ATSUserModuleSeedRow(
@@ -265,8 +283,7 @@ public class ATSInitialData
 	public IEnumerable<RoleDetails> GetATSRoles()
 	{
 		return new List<RoleDetails>
-		{
-
+		   {
 			new RoleDetails
 			{
 				RoleId = 1,
@@ -276,34 +293,179 @@ public class ATSInitialData
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
 			},
+
 			new RoleDetails
 			{
 				RoleId = 2,
-				RoleName = "Admin",
+				RoleName = "Client Admin",
 				RoleDescription = "Administrator role for ATS system.",
 				IsActive = true,
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
 			},
+
 			new RoleDetails
 			{
 				RoleId = 3,
+				RoleName = "Service Delivery",
+				RoleDescription = "Service Delivery role for ATS system.",
+				IsActive = true,
+				CreatedAt = DateTime.UtcNow,
+				UpdatedAt = DateTime.UtcNow
+			},
+
+			new RoleDetails
+			{
+				RoleId = 4,
 				RoleName = "User",
 				RoleDescription = "Basic user role for ATS system.",
 				IsActive = true,
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
-			},
-			new RoleDetails
-			{
-				RoleId = 4,
-				RoleName = "Uploader",
-				RoleDescription = "Uploader role for ATS system.",
-				IsActive = true,
-				CreatedAt = DateTime.UtcNow,
-				UpdatedAt = DateTime.UtcNow
 			}
 		};
+
 	}
+	#endregion
+
+	#region Modules
+	public IEnumerable<ModuleDetails> GetATSModules() =>
+	[
+		new()
+		   {
+			   ModuleId = AtsModuleIds.Dashboard,
+			   ModuleName = "Dashboard",
+			   ModuleDescription = "Dashboard module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.NewOrder,
+			   ModuleName = "New Order",
+			   ModuleDescription = "New order module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.OrdersAndReports,
+			   ModuleName = "Orders & Reports",
+			   ModuleDescription = "Orders and reports module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.Disputes,
+			   ModuleName = "Disputes",
+			   ModuleDescription = "Disputes module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.Withdrawn,
+			   ModuleName = "Withdrawn",
+			   ModuleDescription = "Withdrawn module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.PackageManagement,
+			   ModuleName = "Package Management",
+			   ModuleDescription = "Package management module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.ClientManagement,
+			   ModuleName = "Client Management",
+			   ModuleDescription = "Client management module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.RoleManagement,
+			   ModuleName = "Role Management",
+			   ModuleDescription = "Role management module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.ModuleManagement,
+			   ModuleName = "Module Management",
+			   ModuleDescription = "Module management module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.UserManagement,
+			   ModuleName = "User Management",
+			   ModuleDescription = "User management module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.ClientAssigning,
+			   ModuleName = "Client Assigning",
+			   ModuleDescription = "Client assigning module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.AIAssistant,
+			   ModuleName = "AI Assistant",
+			   ModuleDescription = "AI assistant module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.BulkUploads,
+			   ModuleName = "Bulk Uploads",
+			   ModuleDescription = "Bulk upload monitoring module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.TicketingStatus,
+			   ModuleName = "Ticketing Status",
+			   ModuleDescription = "OMS auto-ticketing monitoring module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   },
+		   new()
+		   {
+			   ModuleId = AtsModuleIds.AuditTrail,
+			   ModuleName = "Audit Trail",
+			   ModuleDescription = "User action audit trail module for ATS system.",
+			   IsActive = true,
+			   CreatedAt = DateTime.UtcNow,
+			   UpdatedAt = DateTime.UtcNow
+		   }
+	];
 	#endregion
 }

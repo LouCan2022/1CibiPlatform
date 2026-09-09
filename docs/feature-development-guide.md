@@ -50,6 +50,10 @@ Auth follows the same business-area segregation used by the focused ATS reposito
 
 For the current Auth session lifecycle, security decisions, and review checklist, also read `docs/authentication-session-security.md` before changing login, logout, JWT claims, refresh rotation, cookies, password recovery, or OTP behavior.
 
+### AI features
+
+ATS AI features use Semantic Kernel plugins: a plain class whose methods carry `[KernelFunction]` and `[Description]`, registered on a cloned kernel with `AddFromObject` and invoked through `FunctionChoiceBehavior.Auto()`. This is intentionally different from the older `AIAgent` module, which discovers `*.skill.yaml` manifests through a reflection registry and requires the user to pick a skill. Prefer the ATS pattern for new work, and read `docs/ats-ai-assistant.md` before adding a function, changing the system prompt, or letting a model reach a write path.
+
 ```text
 BackendAPI/Modules/Auth/
   Data/
@@ -132,6 +136,27 @@ If an area has several commands or queries, each command/query gets its own fold
 
 Use a command for state changes and a query for reads. Follow the local naming style: `<Feature>Command`/`<Feature>Query`, `<Feature>Result`, validator, handler, request, response, and endpoint.
 
+#### Split `Features/` by trust boundary
+
+A module that serves both the web console and external API clients splits its features by who calls them, so the audience of a slice is obvious from its path:
+
+```text
+BackendAPI/Modules/ATS/Features/
+  Web/          console endpoints, called by the Blazor app
+  PublicApi/    client integrations, routed under /publicapi/...
+```
+
+ATS follows this, and EmploymentVerification does the same thing with `VerificationRequests/` (authenticated staff) versus `VerifyEmployment/` (anonymous token holders).
+
+Rules for the `PublicApi/` half:
+
+- **Reuse the service, do not fork it.** A public endpoint is a thin slice over the same application service the web uses. If you find yourself copying service logic, the missing piece belongs in the service as a parameter.
+- **Pass `OrderHistorySource.PublicApi`** on any write, so an order can be traced to the integration that raised it. The web path keeps the `Web` default.
+- **Scope every read and write to the caller's client**, resolved from their token via `IAtsAccessScopeResolver` — never from an id in the request.
+- **Out of scope reads as `404`, never `403`.** A 403 confirms that another client's record exists.
+- **Attach a rate-limit policy** in `Path/<Module>Paths.cs`; machine callers retry in loops, and the 500/s default is not a bound.
+- Public routes are versionless today. If a breaking change becomes necessary, add a new path rather than changing an existing response shape — integrators cannot be redeployed on your schedule.
+
 ### Readability and API error handling
 
 All new feature code must be formatted for vertical readability. Do not compress namespaces, constructors, methods, object initializers, endpoint mappings, DTOs, or Razor markup into one line. Use one declaration/member per line and multiline parameter lists/object initializers when they exceed a short line.
@@ -152,6 +177,30 @@ Backend module-wide imports belong in the module's `GlobalUsing.cs`. Before fini
 Keep a file-level `using` only when the import is genuinely isolated to that file or when avoiding a namespace/type ambiguity. Do not scatter the same imports across endpoints, handlers, repositories, and services. After centralizing imports, format and build the module/API to detect missing or ambiguous namespaces.
 
 UI API services must follow the Auth service error-handling pattern: check `IsSuccessStatusCode`, read `ApiErrorResponse.Detail` and trace information when available, log the detail, and surface it to the page/snackbar. If the response is not valid JSON, preserve and display the raw response body instead of replacing it with a generic error.
+
+#### Do not write try/catch in feature code
+
+**Throw, and let the global handler answer.** `BuildingBlocks.Exceptions.Handler.CustomExceptionHandler` already maps `NotFoundException`, `ValidationException`, `BadRequestException`, `UnauthorizedException`, `ForbiddenException`, `ConflictException` and `InternalServerException` onto the right status code and a `ProblemDetails` body. A handler, service or repository that catches an exception to log it and rethrow, or to convert it into a `false` return, is duplicating that and usually loses the status code in the process.
+
+Use the shared helpers instead of hand-rolling a block:
+
+| Situation | Use |
+|---|---|
+| Anything that should fail the request | Throw the matching `BuildingBlocks.Exceptions` type. `CustomExceptionHandler` does the rest. |
+| A multi-write operation that must be atomic | `TransactionRunner.RunAsync(...)` |
+| Work that touched storage or a third party the transaction cannot undo | `TransactionRunner.RunWithCompensationAsync(...)` |
+| A best-effort side effect after the real work has committed | `SideEffectGuard.RunAsync(...)` |
+| A UI service calling the API | `ApiRequestExtensions.SendAsync<T>(...)` |
+
+`TransactionRunner` (`BuildingBlocks/Data/`) owns begin → work → `SaveChanges` → commit, and rolls back if the work throws. Its `catch` is **not** error handling — it releases the transaction and rethrows untouched, so a `NotFoundException` thrown inside still produces a 404 rather than a 500. Pass any module's `IUnitOfWork`; ATS's implements `ITransactionScope` (PhilSys has the same shape but has not adopted it yet). **See `docs/transaction-runner.md`** for the full API, the multi-compensation overload, and the migration checklist.
+
+Two rules this exists to enforce. **A repository method that calls `SaveChangesAsync` itself commits immediately** — if it runs before the transaction is opened, its write survives a later rollback. That is exactly how a failed application-form email once left a saved order whose candidate never received a link. And **anything the database cannot undo** — an uploaded blob, a created remote record — needs `RunWithCompensationAsync`, which deletes it on failure and still surfaces the original error.
+
+`SideEffectGuard` (`BuildingBlocks/Exceptions/Handler/`) is the narrow exception, and it is narrow on purpose. Raising a notification after an application form is submitted is a follow-up to work that is already durable; if it throws and reaches `CustomExceptionHandler`, the handler correctly returns 500 and the candidate is told their submission failed when it actually saved. Only use it where all three hold: the primary work is already committed, the user is not waiting on the side effect's result, and losing it degrades the experience rather than the data.
+
+`ApiRequestExtensions` (`UI/FrontendWebassembly/Services/Shared/Extensions/`) is the client-side counterpart — it owns the send / `IsSuccessStatusCode` / `ReadErrorDetailAsync` / deserialize sequence once, so a service method reads as the request it makes. It preserves two rules the hand-written copies had: `OperationCanceledException` is rethrown rather than reported as a failure (a cancelled request is the user navigating away), and only transport-shaped exceptions are converted, so a `NullReferenceException` still surfaces as the bug it is.
+
+If you find yourself needing a try/catch outside these, the exception is either one the global handler should see, or a case worth adding to the table above rather than solving locally.
 
 ### Repository, service, and cache responsibilities
 
@@ -255,15 +304,29 @@ Confirm the public route through the gateway. For example, the ATS Carter endpoi
 
 ### 7a. Register every route in the YARP gateway
 
-The gateway is part of the endpoint contract. For each new Carter route, add a named route entry to all environment configuration files:
+The gateway is part of the endpoint contract. Register each new Carter route in the module's typed `Path/<Module>Paths.cs` implementation of `IReverseProxyModule`.
 
-- `ApiGateways/YarpApiGateway/appsettings.Development.json`
-- `ApiGateways/YarpApiGateway/appsettings.UAT.json`
-- `ApiGateways/YarpApiGateway/appsettings.Production.json`
+`GatewayServiceExtensions.AddModuleDiscoveryAndReverseProxy` scans the marker assemblies listed in that method, collects `GetRoutes()`/`GetClusters()` from every discovered module, and hands the result to `LoadFromMemory`. **The typed path module is the only source of routes at runtime.** For a brand-new module, also reference the module project from `YarpApiGateway.csproj` and add its marker assembly to that scan list, or none of its routes will exist.
 
 Match the HTTP method and route template exactly (including route parameters), set the correct cluster, and use `PathSet` to forward the request to the backend Carter path. Keep GET and POST operations as separate entries when they share a path. Follow the existing ATS naming style (`/ats/getusers`), for example `/employmentverification/getrequests` forwarding to backend `api/employment-verification/requests`.
 
-This repository's YARP gateway discovers typed route modules through `IReverseProxyModule`. Therefore, also add a `Path/<Module>Paths.cs` implementation, reference the module project from `YarpApiGateway.csproj`, and include its marker assembly in `GatewayServiceExtensions` assembly scanning. The typed path module is the runtime source of truth; keep the appsettings entries synchronized for deployments that load configuration directly.
+Use `PathPattern`, not `PathSet`, when the route has a `{parameter}` to substitute — `PathSet` forwards the literal text `{token}` to the backend. See the `preview/{token}` entry in `EmploymentVerificationPaths.cs`.
+
+#### Do not add routes to the gateway appsettings files
+
+`appsettings.{Development,UAT,Production}.json` still contain `ReverseProxy:Routes` entries for Auth, PhilSys, CNX, SSO, and token endpoints. **These are dead configuration.** The only code that reads that section is `OnePlatformConfigLoader.AddRoutesFromConfiguration`, which has no callers — `Program.cs` calls `AddGatewayServices()`, which loads routes exclusively from the typed modules. Almost every route in those files is also declared in a `*Paths.cs` module, which is why the gateway still works despite the section being ignored.
+
+No ATS, Employment Verification, PlatformLogging, or AIAgent route appears in appsettings, and those modules route correctly. Adding entries there has no runtime effect and creates a second definition that will silently drift. Register the route in the typed module only.
+
+Confirm this at startup: the gateway logs `[Gateway] Collected N routes and M clusters from modules` — that count comes entirely from the typed modules.
+
+**Two appsettings routes have no typed-module equivalent and are therefore not served at all:** `auth/forgot-password/get-user-id` and `sso/login`. Anything depending on them is already broken; fix by adding them to `AuthPaths`/`SSOPath`, not to appsettings. (`sso/login/callback` does exist in `SSOPath.cs` — only the bare `sso/login` is missing.)
+
+Verify a new route with the gateway's diagnostic endpoint, which returns the actual in-memory catalog:
+
+```text
+GET /__routes
+```
 
 #### Gateway naming convention (ATS-compatible)
 
@@ -324,13 +387,32 @@ For a page/component, normally keep three colocated files:
 
 Use `public partial class <Feature>` in the `.razor.cs` file. Keep substantial C# out of `@code` blocks. Small markup-only components are acceptable, but new feature screens should follow the separated pattern requested for maintainability.
 
-For current visual direction, inspect modern files under `Component/ATS` immediately before implementation, especially:
+For current visual direction, inspect modern files under the feature folders of `Component/ATS` immediately before implementation, especially:
 
-- `UserManagement.razor` and `UserManagement.razor.css` for page/table/search/action styling;
-- `AddUserComponent.razor`, `.razor.cs`, and `.razor.css` for modern dialogs/forms;
+- `UserManagement/UserManagement.razor` and `UserManagement/UserManagement.razor.css` for page/table/search/action styling;
+- `UserManagement/AddUserComponent.razor`, `.razor.cs`, and `.razor.css` for modern dialogs/forms;
 - the corresponding Add/Edit Client, Role, Module, and Package components for comparable workflows.
 
 Follow their design language: ATS layout, navy/blue palette, Poppins headings, Inter body text, rounded cards/dialogs, restrained shadows, consistent buttons, accessible labels/focus states, responsive layout, and MudBlazor components where already established. Reuse shared generic components and `CrudPageBase`/shared loaders where suitable.
+
+#### Reuse existing styles; do not duplicate a design
+
+A new screen that looks like an existing one must **reuse that screen's CSS, not copy it**. Before writing a `.razor.css`, open the closest existing feature and check `wwwroot/css/ats.css` for a shared class that already produces the look. Copying a block and renaming its classes (`.bulk-*` → `.ticketing-*`) is the failure mode this rule exists to prevent: the two copies drift, and a design fix then has to be made twice.
+
+The order of preference is:
+
+1. **Use the existing shared class as-is** (`.ats-management-page`, `.ats-management-card`, `.ats-segmented`, `.ats-segment-btn`, `.ats-console-empty-state`, and the `.ats-status-board-*` / `.ats-cell-*` / `.ats-status-pill` families).
+2. **Generalize an existing rule** when a second screen needs the same treatment. Rename the feature-specific selector to a neutral shared one, move it to `wwwroot/css/ats.css`, and update the original screen to use it in the same change. The Bulk Uploads and Ticketing Status boards share `.ats-status-board-*` this way.
+3. **Add scoped CSS only for what is genuinely unique** to the new screen, and say in a comment at the top of the file which shared rules it builds on and must not re-declare.
+
+Rules of thumb:
+
+- Never re-declare colour, spacing, radius, or typography that a shared class already sets. Palettes come from the `--management-*` custom properties on `.ats-management-page`; do not introduce a new hue for a new screen.
+- A status list (Pending / Processing / Done / Error) must use the shared board classes so every such screen has identical chips, dots and pills.
+- Styles that target shared `TableComponent` internals belong in the global sheet, not in scoped CSS, because the `::deep` boundary and the scope attribute make those overrides fragile to duplicate.
+- Delete wrapper elements and `TableClass`/`ContainerClass` values that no rule matches; an unused hook reads as intentional styling that is not there.
+
+If a screen's scoped stylesheet is more than roughly a screenful, that is a signal something in it should have been shared instead.
 
 Also include:
 
@@ -342,7 +424,47 @@ Also include:
 - accessible names, keyboard focus, validation messages, and responsive CSS;
 - no secrets, base URLs, or environment-specific values in components.
 
-### 12. Verify the complete feature
+### 11a. UI theming and responsiveness are not optional
+
+Every screen must work in both light and dark mode and at phone width. The rules,
+tokens and breakpoints are in `docs/ui-theming-and-responsiveness.md` — **read it before
+writing a `.razor.css`.** The short version:
+
+- Colours come from the shared `--c-*` tokens in `wwwroot/css/theme.css`. Do not add a
+  hex literal to a feature stylesheet; that file is the only place one belongs.
+- Breakpoints are 600 / 960 / 1280, matching MudBlazor's own ladder. `Breakpoint.Sm`
+  card mode fires at **960px**, not 600px.
+- `TableComponent` owns table width. Never put a `min-width` on a table root.
+- Pick the layout by audience: staff screens use `ConsoleLayout` (themed), external
+  token-link pages use `GenericLayout` (deliberately light-only).
+
+### 12. Document the change
+
+**Every feature or fix ships with a Markdown document under `docs/`.** This is part of
+the work, not a follow-up — a change is not complete until it is written down.
+
+- New feature or subsystem → add `docs/<area>-<feature>.md`.
+- Change to something already documented → update that file in the same commit rather
+  than adding a second, competing description.
+- Name the file after the thing it explains (`ats-audit-trail.md`,
+  `ui-theming-and-responsiveness.md`), not after the ticket.
+
+Write it for the next developer who has to change this code. Cover:
+
+1. **What it does** and the user/business problem it solves.
+2. **How it works** — the request path, the important files, the decisions a reader
+   could not infer from the code.
+3. **Why**, wherever the code looks surprising. Record the constraint or the failure
+   that forced the design; that is the part that is expensive to rediscover.
+4. **How to verify it** — the commands to run and what correct looks like.
+5. **What not to do** — the invariants a future change must not break, and the failure
+   mode if it does.
+
+Prefer prose and short tables over bullet soup, and link related documents rather than
+repeating them. If a document contradicts the code, the code is the source of truth and
+the document is a bug — fix it.
+
+### 13. Verify the complete feature
 
 Run the smallest relevant tests first, then the full build:
 
@@ -366,7 +488,7 @@ Also manually verify:
 9. API response and UI DTO compatibility;
 10. no unrelated files or user changes were overwritten.
 
-### 12a. Register a new unified-platform application and submenu
+### 13a. Register a new unified-platform application and submenu
 
 When a feature is a standalone platform application (rather than a submenu owned by ATS/Auth), register it in the frontend permission catalogs as part of the same vertical slice:
 
@@ -430,17 +552,22 @@ Register that initializer in `BackendAPI/API/APIs/Data/Extensions/DatabaseExtens
 - [ ] Backend unit and integration tests pass.
 - [ ] UI DTO and IHttpClientFactory-backed service are complete and registered.
 - [ ] `.razor`, `.razor.cs`, and `.razor.css` follow the modern ATS reference.
+- [ ] Shared CSS was reused or generalized rather than copied; scoped CSS covers only what is unique to the screen.
+- [ ] Colours use the shared `--c-*` tokens; no hex literals outside `wwwroot/css/theme.css`.
+- [ ] Screen was checked at 390px and in both light and dark mode.
 - [ ] UI covers loading, empty, validation, success, failure, and responsive states.
+- [ ] **A `docs/*.md` was added or updated for this change.**
+- [ ] No hand-rolled `try/catch` in feature code — throw and let `CustomExceptionHandler` answer, or use `SideEffectGuard` / `ApiRequestExtensions`.
 - [ ] Relevant tests and the solution build pass.
 - [ ] API/UI contracts and gateway route were verified end to end.
-- [ ] Every endpoint has matching Development, UAT, and Production YARP gateway entries.
+- [ ] Every endpoint is registered in the module's typed `Path/<Module>Paths.cs` and appears in `GET /__routes`.
 
 ## Feature brief template
 
 Copy this into a new Codex/Claude discussion:
 
 ```markdown
-Read `docs/feature-development-guide.md` first and follow it. Implement this feature end to end. Use ATS components as the latest UI/theme reference. Inspect existing neighboring code before editing, preserve unrelated changes, and run relevant tests plus the solution build.
+Read `docs/feature-development-guide.md` first and follow it. If the change touches the UI, also read `docs/ui-theming-and-responsiveness.md`. Implement this feature end to end. Use ATS components as the latest UI/theme reference. Inspect existing neighboring code before editing, preserve unrelated changes, and run relevant tests plus the solution build. Finish by adding or updating a `docs/*.md` describing what you built and why.
 
 Feature name:
 Module and area:

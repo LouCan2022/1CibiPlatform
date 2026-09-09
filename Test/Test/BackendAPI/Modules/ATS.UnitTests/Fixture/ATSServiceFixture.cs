@@ -1,15 +1,17 @@
 ﻿using ATS.Data.Repository;
 using ATS.Hubs;
-using ATS.Services;
+using ATS.Services.BulkSubmissionProcessor;
+using ATS.Services.EmailNotificationProcessor;
+using ATS.Services.EndorsementSubmission;
+using ATS.Services.Notifications;
+using ATS.Services.OrderHistory;
 using Auth.Shared.Contracts;
 using BuildingBlocks.SharedServices.Interfaces;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using StackExchange.Redis;
 
 namespace Test.BackendAPI.Modules.ATS.UnitTests.Fixture;
 
@@ -21,14 +23,13 @@ public class ATSServiceFixture : IDisposable
 	public Mock<IObjectStorageService> MockObjectStorage { get; private set; }
 	public Mock<ISecureToken> MockSecureToken { get; private set; }
 	public Mock<IHashService> MockHashService { get; private set; }
-	public Mock<IConnectionMultiplexer> MockRedis { get; private set; }
-	public Mock<IDatabase> MockRedisDatabase { get; private set; }
-	public Mock<HybridCache> MockHybridCache { get; private set; }
 	public Mock<IHubContext<ATSHub, IATSClient>> MockHubContext { get; private set; }
 	public Mock<IHubClients<IATSClient>> MockClients { get; private set; }
 	public Mock<IATSClient> MockATSClient { get; private set; }
 	public Mock<IServiceScopeFactory> MockServiceScopeFactory { get; private set; }
 	public Mock<ICurrentUser> MockCurrentUser { get; private set; }
+	public Mock<IOrderHistoryService> MockOrderHistoryService { get; private set; }
+	public Mock<IAtsNotificationService> MockNotificationService { get; private set; }
 
 	// Loggers
 	public Mock<ILogger<BulkSubmissionProcessorService>> MockBulkSubmissionProcessorServiceLogger { get; private set; }
@@ -49,14 +50,13 @@ public class ATSServiceFixture : IDisposable
 		MockObjectStorage = new Mock<IObjectStorageService>();
 		MockSecureToken = new Mock<ISecureToken>();
 		MockHashService = new Mock<IHashService>();
-		MockRedis = new Mock<IConnectionMultiplexer>();
-		MockRedisDatabase = new Mock<IDatabase>();
-		MockHybridCache = new Mock<HybridCache>();
 		MockHubContext = new Mock<IHubContext<ATSHub, IATSClient>>();
 		MockClients = new Mock<IHubClients<IATSClient>>();
 		MockATSClient = new Mock<IATSClient>();
 		MockServiceScopeFactory = new Mock<IServiceScopeFactory>();
 		MockCurrentUser = new Mock<ICurrentUser>();
+		MockOrderHistoryService = new Mock<IOrderHistoryService>();
+		MockNotificationService = new Mock<IAtsNotificationService>();
 
 		MockBulkSubmissionProcessorServiceLogger = new();
 		EmailNotificationProcessoServiceLogger = new();
@@ -66,14 +66,9 @@ public class ATSServiceFixture : IDisposable
 			.AddInMemoryCollection(new Dictionary<string, string?>
 			{
 				{ "ATS:ATSApplicationFormExpiryInHours", "24" },
-				{ "ATS:ApplicationFormBaseUrl", "https://example.com/form" },
-				{ "CacheKeys:ATSBatchesPending", "ats-batches-pending" }
+				{ "ATS:ApplicationFormBaseUrl", "https://example.com/form" }
 			})
 			.Build();
-
-		MockRedis
-			.Setup(x => x.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
-			.Returns(MockRedisDatabase.Object);
 
 		MockHubContext
 			.Setup(x => x.Clients)
@@ -91,20 +86,16 @@ public class ATSServiceFixture : IDisposable
 			MockObjectStorage.Object,
 			MockSecureToken.Object,
 			MockHashService.Object,
-			MockHybridCache.Object,
-			MockRedis.Object,
 			MockHubContext.Object,
 			MockBulkSubmissionProcessorServiceLogger.Object,
-			MockCurrentUser.Object,
 			Configuration);
 
 		EmailNotificationProcessorService = new EmailNotificationProcessorService(
 			EmailNotificationProcessoServiceLogger.Object,
 			MockEndorsementSubmissionService.Object,
 			MockRepository.Object,
-			Configuration,
-			MockRedis.Object,
-			MockHybridCache.Object
+			MockNotificationService.Object,
+			Configuration
 			);
 	}
 
@@ -121,6 +112,19 @@ public class ATSServiceFixture : IDisposable
 		mockServiceProvider
 			.Setup(x => x.GetService(typeof(IATSRepository)))
 			.Returns(MockRepository.Object);
+
+		// The bulk parsing job resolves this per file to record an OrderCreated entry
+		// for every order it creates.
+		mockServiceProvider
+			.Setup(x => x.GetService(typeof(IOrderHistoryService)))
+			.Returns(MockOrderHistoryService.Object);
+
+		// Resolved per file to raise the "bulk upload processed" notification alongside
+		// the existing SignalR toast. Without this the job throws on GetRequiredService
+		// and never reaches the status update the tests assert on.
+		mockServiceProvider
+			.Setup(x => x.GetService(typeof(IAtsNotificationService)))
+			.Returns(MockNotificationService.Object);
 
 		mockServiceScope
 			.Setup(x => x.ServiceProvider)

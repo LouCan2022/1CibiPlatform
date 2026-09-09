@@ -93,7 +93,9 @@ public partial class Login
 	private string GetAuthCardClass()
 	{
 		if (isRegisterMode)
-			return "auth-card active";
+			return string.IsNullOrEmpty(registerPassword)
+				? "auth-card active"
+				: "auth-card active meter-open";
 		if (isForgotPasswordMode)
 			return "auth-card forgot";
 
@@ -157,8 +159,23 @@ public partial class Login
 		if (string.IsNullOrWhiteSpace(password))
 			return "Password is required";
 
-		if (password.Length < 8)
-			return "Password must be at least 8 characters";
+		if (password.Length < 6)
+			return "Password must be at least 6 characters long";
+
+		if (password.Length > 100)
+			return "Password must not exceed 100 characters";
+
+		if (!System.Text.RegularExpressions.Regex.IsMatch(password, "[A-Z]"))
+			return "Password must contain at least one uppercase letter";
+
+		if (!System.Text.RegularExpressions.Regex.IsMatch(password, "[a-z]"))
+			return "Password must contain at least one lowercase letter";
+
+		if (!System.Text.RegularExpressions.Regex.IsMatch(password, "[0-9]"))
+			return "Password must contain at least one digit";
+
+		if (!System.Text.RegularExpressions.Regex.IsMatch(password, @"[\W_]"))
+			return "Password must contain at least one special character";
 
 		return null;
 	}
@@ -208,6 +225,17 @@ public partial class Login
 			loginErrorMessage = "An unexpected error occurred. Please try again.";
 			StateHasChanged();
 		}
+	}
+
+	private async Task HandleLoginEnter()
+	{
+		if (loginForm is null || isLoginLoading)
+			return;
+
+		await loginForm.ValidateAsync();
+
+		if (loginForm.IsValid)
+			await HandleLogin();
 	}
 
 	private async Task HandleRegister()
@@ -287,5 +315,16 @@ public partial class Login
 			isForgotPasswordLoading = false;
 			StateHasChanged();
 		}
+	}
+
+	private async Task HandleForgotPasswordEnter()
+	{
+		if (forgotPasswordForm is null || isForgotPasswordLoading)
+			return;
+
+		await forgotPasswordForm.ValidateAsync();
+
+		if (forgotPasswordForm.IsValid)
+			await HandleForgotPassword();
 	}
 }

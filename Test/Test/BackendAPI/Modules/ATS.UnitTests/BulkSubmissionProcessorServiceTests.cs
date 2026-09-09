@@ -12,6 +12,17 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 	public BulkSubmissionProcessorServiceTests(ATSServiceFixture fixture)
 	{
 		_fixture = fixture;
+
+		// The fixture is shared across the class, so clear per-test state. Mocks that
+		// are configured in the fixture constructor only have their invocation history
+		// cleared, so their setups survive.
+		_fixture.MockRepository.Reset();
+		_fixture.MockObjectStorage.Reset();
+		_fixture.MockSecureToken.Reset();
+		_fixture.MockHashService.Reset();
+		_fixture.MockHubContext.Invocations.Clear();
+		_fixture.MockClients.Invocations.Clear();
+		_fixture.MockATSClient.Invocations.Clear();
 	}
 
 	#region Positive Path
@@ -51,7 +62,7 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 			DateCreated = DateTime.UtcNow
 		};
 
-		var csvContent = "FirstName,LastName,MiddleInitial,EmailAddress,MobileNumber\nJuan,Dela Cruz,B,juan@example.com,09123456789\nMaria,Santos,G,maria@example.com,09987654321";
+		var csvContent = "LastName,FirstName,MiddleInitial,EmailAddress,MobileNumber\nJuan,Dela Cruz,B,juan@example.com,09123456789\nMaria,Santos,G,maria@example.com,09987654321";
 		var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(csvContent));
 		stream.Position = 0;
 
@@ -70,11 +81,8 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 		_fixture.MockRepository.Setup(x => x.AddBulkEmailInvitationRequestAsync(It.IsAny<List<EmailInvitationRequest>>()))
 			.ReturnsAsync(true);
 
-		_fixture.MockRepository.Setup(x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<BulkUploadFileDetails>>()))
+		_fixture.MockRepository.Setup(x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<Guid>>(), It.IsAny<string>()))
 			.ReturnsAsync(true);
-
-		_fixture.MockRedisDatabase.Setup(x => x.ListRightPushAsync(It.IsAny<StackExchange.Redis.RedisKey>(), It.IsAny<StackExchange.Redis.RedisValue>()))
-			.ReturnsAsync(1L);
 
 		// Act
 		Func<Task> act = async () => await service.ProcessAsync(CancellationToken.None);
@@ -87,18 +95,71 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 			Times.Once);
 
 		_fixture.MockRepository.Verify(
-			x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<BulkUploadFileDetails>>()),
-			Times.Once);
+			x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<Guid>>(), It.IsAny<string>()),
+			Times.AtLeastOnce);
 
 		_fixture.MockHubContext.Verify(
 			x => x.Clients,
 			Times.Once);
 	}
+
+	[Fact]
+	public async Task ProcessAsync_ShouldStoreNullMiddleInitial_WhenColumnIsBlank()
+	{
+		// Arrange
+		var service = _fixture.BulkSubmissionProcessorService;
+
+		var bulkUploadFile = new BulkUploadFileDetails
+		{
+			FileID = Guid.CreateVersion7(),
+			FileKey = "test-file-key",
+			FileName = "test-file.csv",
+			UploadedByUserId = Guid.CreateVersion7(),
+			PackageType = "Standard",
+			OrderType = "Normal",
+			Status = "Pending",
+			DateCreated = DateTime.UtcNow
+		};
+
+		// Middle initial is optional; blank and whitespace-only cells must not block the
+		// row and must land as null, not empty string.
+		var csvContent = "LastName,FirstName,MiddleInitial,EmailAddress,MobileNumber\nJuan,Dela Cruz,,juan@example.com,09123456789\nMaria,Santos, ,maria@example.com,09987654321";
+		var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(csvContent));
+
+		_fixture.MockRepository.Setup(x => x.GetBulkUploadFileDetailsAsync())
+			.ReturnsAsync(new List<BulkUploadFileDetails> { bulkUploadFile });
+
+		_fixture.MockObjectStorage.Setup(x => x.DownloadAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(stream);
+
+		_fixture.MockSecureToken.Setup(x => x.GenerateSecureToken())
+			.Returns("valid-token-123");
+
+		_fixture.MockHashService.Setup(x => x.Hash(It.IsAny<string>()))
+			.Returns((string token) => $"hashed-{token}");
+
+		List<EmailInvitationRequest>? capturedSubjects = null;
+
+		_fixture.MockRepository.Setup(x => x.AddBulkEmailInvitationRequestAsync(It.IsAny<List<EmailInvitationRequest>>()))
+			.Callback<List<EmailInvitationRequest>>(subjects => capturedSubjects = subjects)
+			.ReturnsAsync(true);
+
+		_fixture.MockRepository.Setup(x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<Guid>>(), It.IsAny<string>()))
+			.ReturnsAsync(true);
+
+		// Act
+		await service.ProcessAsync(CancellationToken.None);
+
+		// Assert
+		capturedSubjects.Should().NotBeNull();
+		capturedSubjects!.Should().HaveCount(2);
+		capturedSubjects.Should().AllSatisfy(subject => subject.MiddleInitial.Should().BeNull());
+	}
 	#endregion
 
 	#region Negative Path
 	[Fact]
-	public async Task ProcessAsync_ShouldThrow_WhenGenerateTokenFails()
+	public async Task ProcessAsync_ShouldLeaveFilePending_WhenGenerateTokenFails()
 	{
 		// Arrange
 		var service = _fixture.BulkSubmissionProcessorService;
@@ -132,13 +193,16 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 		// Act
 		Func<Task> act = async () => await service.ProcessAsync(CancellationToken.None);
 
-		// Assert
-		await act.Should().ThrowAsync<InternalServerException>()
-			.WithMessage("Failed to generate Token.");
+		// Assert: the failure is contained and the file stays Pending for the next tick.
+		await act.Should().NotThrowAsync();
+
+		_fixture.MockRepository.Verify(
+			x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<Guid>>(), It.IsAny<string>()),
+			Times.Never);
 	}
 
 	[Fact]
-	public async Task ProcessAsync_ShouldThrow_WhenHashTokenFails()
+	public async Task ProcessAsync_ShouldLeaveFilePending_WhenHashTokenFails()
 	{
 		// Arrange
 		var service = _fixture.BulkSubmissionProcessorService;
@@ -175,13 +239,43 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 		// Act
 		Func<Task> act = async () => await service.ProcessAsync(CancellationToken.None);
 
-		// Assert
-		await act.Should().ThrowAsync<InternalServerException>()
-			.WithMessage("Failed to hash Token.");
+		// Assert: the failure is contained and the claim is released back to Pending.
+		await act.Should().NotThrowAsync();
+
+		_fixture.MockRepository.Verify(
+			x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<Guid>>(), It.IsAny<string>()),
+			Times.Never);
+
+		_fixture.MockRepository.Verify(
+			x => x.ReleaseBulkFileClaimsAsync(
+				It.Is<List<BulkUploadFileDetails>>(list => list.Count == 1 && list[0].FileID == fileId)),
+			Times.Once);
 	}
 
 	[Fact]
-	public async Task ProcessAsync_ShouldThrow_WhenDownloadFails()
+	public async Task ProcessAsync_ShouldReleaseStaleClaims_BeforeClaimingWork()
+	{
+		// Arrange
+		var service = _fixture.BulkSubmissionProcessorService;
+
+		_fixture.MockRepository
+			.Setup(x => x.ReleaseStaleBulkFileClaimsAsync(It.IsAny<TimeSpan>()))
+			.ReturnsAsync(2);
+
+		_fixture.MockRepository.Setup(x => x.GetBulkUploadFileDetailsAsync())
+			.ReturnsAsync(new List<BulkUploadFileDetails>());
+
+		// Act
+		await service.ProcessAsync(CancellationToken.None);
+
+		// Assert: files stranded in Processing by a crashed worker are recovered.
+		_fixture.MockRepository.Verify(
+			x => x.ReleaseStaleBulkFileClaimsAsync(It.Is<TimeSpan>(t => t > TimeSpan.Zero)),
+			Times.Once);
+	}
+
+	[Fact]
+	public async Task ProcessAsync_ShouldLeaveFilePending_WhenDownloadFails()
 	{
 		// Arrange
 		var service = _fixture.BulkSubmissionProcessorService;
@@ -210,9 +304,13 @@ public class BulkSubmissionProcessorServiceTests : IClassFixture<ATSServiceFixtu
 		// Act
 		Func<Task> act = async () => await service.ProcessAsync(CancellationToken.None);
 
-		// Assert
-		await act.Should().ThrowAsync<InvalidOperationException>()
-			.WithMessage("Download failed");
+		// Assert: a transient OSS failure leaves the file Pending so the next tick
+		// retries it.
+		await act.Should().NotThrowAsync();
+
+		_fixture.MockRepository.Verify(
+			x => x.UpdateBulkFileDetailsStatusAsync(It.IsAny<List<Guid>>(), It.IsAny<string>()),
+			Times.Never);
 	}
 	#endregion
 

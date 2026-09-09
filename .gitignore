@@ -66,6 +66,7 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+.artifacts/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
@@ -407,3 +408,4 @@ FodyWeavers.xsd
 /monitoring/loki-data
 BackendAPI/API/.env
 .env
+/docs/monitoring

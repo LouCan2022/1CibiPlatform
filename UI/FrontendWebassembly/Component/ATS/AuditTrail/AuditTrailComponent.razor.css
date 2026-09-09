@@ -1,0 +1,37 @@
+/* Only what is specific to the audit board lives here.
+
+   The intro banner, filter chips, status dots, status pills, lead-identity cell, tag
+   and muted cells all come from the shared .ats-status-board-* / .ats-cell-* /
+   .ats-status-pill rules in wwwroot/css/ats.css, which Ticketing Status and Bulk
+   Uploads Status use too. Do not re-declare any of those here - change the shared
+   rules instead so every board stays identical. Success reuses the "done" pill and
+   Failure the "error" pill for the same reason. */
+
+/* The outcome cell stacks a pill over an optional failure reason, mirroring the
+   ticketing board's status cell. */
+::deep .audit-outcome-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+/* Clamped to two lines so one long exception message cannot stretch the row; the full
+   text stays available as a title tooltip and in the detail dialog. */
+::deep .audit-failure-reason {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 260px;
+    color: var(--c-danger-strong);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+    ::deep .audit-failure-reason {
+        max-width: 100%;
+    }
+}

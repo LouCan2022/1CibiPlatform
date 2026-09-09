@@ -1,5 +1,5 @@
 ﻿using ATS.Data.DTO;
-using ATS.Features.InsertBulkSubject;
+using ATS.Features.Web.InsertBulkSubject;
 using FluentAssertions;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -11,14 +11,12 @@ namespace Test.BackendAPI.Modules.ATS.IntegrationTests;
 public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 {
 	private readonly string _atsTestFolder;
-	byte[] sampleFileContent = Convert.FromBase64String("SGVsbG8gV29ybGQ=");
+	byte[] sampleFileContent = System.Text.Encoding.UTF8.GetBytes(
+		"LastName,FirstName,MiddleInitial,EmailAddress,MobileNumber\nDela Cruz,Juan,S,juan@example.com,09171234567");
 	string bulkFileName = $"{Guid.CreateVersion7()}-bulkfile.csv";
 
 	public InsertBulkSubjectIntegrationTest(IntegrationTestWebAppFactory factory) : base(factory)
 	{
-		_atsTestFolder = _configuration
-				.GetSection("AlibabaOss")
-				.GetValue<string>("ATSTestFolder") ?? string.Empty;
 	}
 
 	private IFormFile CreateFakeFormFile(byte[] content, string fileName)
@@ -37,13 +35,18 @@ public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 	public async Task InsertBulkSubject_ShouldReturnCreatedIdAndPersist()
 	{
 		// Arrange
+		// The package applies to every row, so it must be assigned to the caller's
+		// client or the upload is rejected before the file is stored.
+		var package = await SeedAssignedPackageAsync("Air BnB");
+
 		var dto = new BulkUploadFileDetailsDTO
 		{
 			BulkFile = CreateFakeFormFile(sampleFileContent, bulkFileName),
 			FileName = bulkFileName,
 			Status = "Pending",
 			OrderType = "Rush",
-			PackageType = "Air BnB"
+			PackageId = DefaultPackageId,
+			PackageType = package
 		};
 
 		var command = new InsertBulkSubjectCommand(dto);
@@ -55,7 +58,17 @@ public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 
 		if (result.isAdded == true)
 		{
-			await _objectStorageService.DeleteAsync($"{_atsTestFolder}/{bulkFileName}");
+			// Delete by the key the row actually persisted rather than
+			// reconstructing it, so cleanup stays correct however
+			// UploadAsync builds keys.
+			var storedFileKey = _dbContext.BulkUploadFileDetails
+				.Where(file => file.FileName == bulkFileName)
+				.Select(file => file.FileKey)
+				.FirstOrDefault();
+			if (!string.IsNullOrWhiteSpace(storedFileKey))
+			{
+				await _objectStorageService.DeleteAsync(storedFileKey);
+			}
 		}
 	}
 
@@ -97,6 +110,7 @@ public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 			FileName = invalidFileName,
 			Status = "Pending",
 			OrderType = "Rush",
+			PackageId = DefaultPackageId,
 			PackageType = "Air BnB"
 		};
 
@@ -112,6 +126,37 @@ public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 		exception.Which.Errors.Should().Contain(e =>
 			e.PropertyName.Contains("BulkFile") &&
 			e.ErrorMessage == "Only .csv files are allowed.");
+	}
+
+	[Fact]
+	public async Task InsertBulkSubject_ShouldThrowValidationException_WhenMobileNumberExceedsElevenDigits()
+	{
+		// Arrange
+		var invalidCsv = System.Text.Encoding.UTF8.GetBytes(
+			"LastName,FirstName,MiddleInitial,EmailAddress,MobileNumber\nDela Cruz,Juan,S,juan@example.com,091712345678");
+
+		var dto = new BulkUploadFileDetailsDTO
+		{
+			BulkFile = CreateFakeFormFile(invalidCsv, bulkFileName),
+			FileName = bulkFileName,
+			Status = "Pending",
+			OrderType = "Rush",
+			PackageId = DefaultPackageId,
+			PackageType = "Air BnB"
+		};
+
+		var command = new InsertBulkSubjectCommand(dto);
+
+		// Act
+		Func<Task> act = async () => await _sender.Send(command);
+
+		// Assert
+		var exception = await act.Should()
+			.ThrowAsync<ValidationException>();
+
+		exception.Which.Errors.Should().Contain(e =>
+			e.PropertyName.Contains("BulkFile")
+			&& e.ErrorMessage == "Mobile number must be no more than 11 digits in row(s): 2.");
 	}
 
 	[Fact]
@@ -133,7 +178,7 @@ public class InsertBulkSubjectIntegrationTest : BaseIntegrationTest
 		var exception = await act.Should()
 			.ThrowAsync<ValidationException>();
 
-		exception.Which.Errors.Should().HaveCount(3);
+		exception.Which.Errors.Should().HaveCount(4);
 	}
 	#endregion
 }
