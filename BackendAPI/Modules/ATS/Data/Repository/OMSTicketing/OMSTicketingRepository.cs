@@ -207,6 +207,30 @@ public sealed class OMSTicketingRepository : IOMSTicketingRepository
 				cancellationToken);
 	}
 
+	public async Task<List<Guid>> GetExhaustedTicketIdsAsync(
+		IReadOnlyCollection<Guid> emailInvitationIds,
+		CancellationToken cancellationToken)
+	{
+		if (emailInvitationIds.Count == 0)
+		{
+			return [];
+		}
+
+		var ids = emailInvitationIds.ToList();
+
+		// Read back rather than inferring from the update above: only the database knows
+		// what TicketAttempts became, and the notification must fire exactly once - when
+		// the budget runs out - not on every transient failure along the way.
+		return await _dbContext.EmailInvitationRequests
+			.AsNoTracking()
+			.Where(x => ids.Contains(x.EmailInvitationID)
+				&& x.TicketStatus == TicketStatus.Error
+				&& !x.IsTicketed
+				&& x.TicketAttempts >= MaxTicketAttempts)
+			.Select(x => x.EmailInvitationID)
+			.ToListAsync(cancellationToken);
+	}
+
 	public async Task<TicketRetryTargetDTO?> GetRetryTargetAsync(
 		Guid emailInvitationId,
 		CancellationToken cancellationToken) =>

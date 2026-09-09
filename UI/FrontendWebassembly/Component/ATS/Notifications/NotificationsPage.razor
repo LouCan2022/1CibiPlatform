@@ -1,0 +1,107 @@
+@page "/s&i/ats/notifications"
+@namespace FrontendWebassembly.Component.ATS.Notifications
+@layout ATSLayout
+@attribute [RequirePermission(6, 7)]
+@inherits SecurePageBase
+@inject INotificationService Notifications
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<PageTitle>ATS - Notifications</PageTitle>
+
+@* Deliberately not a TableComponent. A notification feed is a chronological list, not a
+   record set: there are no columns to sort or filter, and a pager would make the reader
+   click to see what happened five minutes ago. Cursor pagination behind a Load more
+   button, plus an IntersectionObserver that presses it when the sentinel scrolls into
+   view, gives the endless feed without a page-size dropdown. *@
+
+<section class="ats-management-page ats-notif-page">
+    <header class="ats-notif-page-head">
+        <div>
+            <h1>Notifications</h1>
+            <p>Activity on the orders and uploads you requested.</p>
+        </div>
+
+        <div class="ats-notif-page-actions">
+            <div class="ats-segmented ats-notif-filter" role="group" aria-label="Filter notifications">
+                <button type="button"
+                        class="@FilterCssClass(false)"
+                        aria-pressed="@(!_unreadOnly)"
+                        disabled="@_isLoading"
+                        @onclick="() => SetFilterAsync(false)">
+                    All
+                </button>
+                <button type="button"
+                        class="@FilterCssClass(true)"
+                        aria-pressed="@_unreadOnly"
+                        disabled="@_isLoading"
+                        @onclick="() => SetFilterAsync(true)">
+                    Unread
+                    @if (Notifications.UnreadCount > 0)
+                    {
+                        <span class="ats-notif-filter-count">@Notifications.UnreadCount</span>
+                    }
+                </button>
+            </div>
+
+            @if (Notifications.UnreadCount > 0)
+            {
+                <button type="button"
+                        class="ats-management-button"
+                        disabled="@_isBusy"
+                        @onclick="MarkAllReadAsync">
+                    Mark all read
+                </button>
+            }
+        </div>
+    </header>
+
+    <div class="ats-management-card ats-notif-page-card">
+        @if (_isLoading && _items.Count == 0)
+        {
+            <div class="ats-notif-state">Loading…</div>
+        }
+        else if (_items.Count == 0)
+        {
+            <div class="ats-notif-state ats-notif-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.7 21a2 2 0 01-3.4 0" />
+                </svg>
+                <strong>@(_unreadOnly ? "Nothing unread" : "No notifications yet")</strong>
+                <span>
+                    @(_unreadOnly
+                        ? "Everything here has been read."
+                        : "New activity on your orders shows up here.")
+                </span>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in _items)
+            {
+                <NotificationItem Item="item" OnActivate="ActivateAsync" />
+            }
+
+            @* The observer watches this. It stays in the markup while a next cursor exists
+               so scrolling to the bottom loads the next page without a click; the button
+               inside it is the keyboard and no-JS path. *@
+            @if (_nextCursor is not null)
+            {
+                <div class="ats-notif-sentinel" @ref="_sentinel">
+                    <button type="button"
+                            class="ats-notif-load-more"
+                            disabled="@_isLoadingMore"
+                            @onclick="LoadMoreAsync">
+                        @(_isLoadingMore ? "Loading…" : "Load more")
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="ats-notif-end">That's everything.</div>
+            }
+        }
+    </div>
+</section>
