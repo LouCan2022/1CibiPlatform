@@ -10,6 +10,6 @@ public class EmailNotificationBackgroundJobSetup : IConfigureOptions<QuartzOptio
 		options.AddTrigger(opts => opts
 			.ForJob(jobKey)
 			.WithIdentity("EmailNotificationTrigger")
-			.WithSimpleSchedule(x => x.WithIntervalInSeconds(10).RepeatForever()));
+			.WithSimpleSchedule(x => x.WithIntervalInSeconds(1).RepeatForever()));
 	}
 }
