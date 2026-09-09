@@ -30,19 +30,20 @@ public partial class BulkUploadsComponent
 
 	protected override async Task OnInitializedAsync()
 	{
+		// Before the first await: base.OnInitializedAsync yields, Blazor renders, and
+		// MudTable loads the board at that point. Seeding afterwards left a filled search
+		// box over unfiltered results. See TicketingStatusComponent for the full note.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
+
 		await base.OnInitializedAsync();
 
 		// Without this guard the RequirePermission/RequireATSModule attributes are inert.
 		if (!IsPageAuthorized)
 		{
 			return;
-		}
-
-		// Seeded before the first load, so the opening page is already filtered rather than
-		// fetching the whole board and then narrowing it.
-		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
-		{
-			_searchString = SearchFromQuery;
 		}
 
 		await RefreshCountsAsync();
