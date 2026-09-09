@@ -179,6 +179,59 @@ public sealed class AtsNotificationService : IAtsNotificationService
 			: $"/s&i/ats/searchreport?search={Uri.EscapeDataString(subjectName)}";
 	}
 
+	public async Task RaiseForCompletedBulkEmailsAsync(
+		IReadOnlyCollection<Guid> sentEmailInvitationIds,
+		CancellationToken cancellationToken)
+	{
+		if (sentEmailInvitationIds.Count == 0)
+		{
+			return;
+		}
+
+		var completedFiles = await SideEffectGuard.RunAsync(
+			() => _notificationRepository.GetCompletedBulkEmailFilesAsync(
+				sentEmailInvitationIds,
+				cancellationToken),
+			_logger,
+			"resolve bulk files whose invitation emails just completed",
+			fallback: [],
+			cancellationToken);
+
+		foreach (var file in completedFiles ?? [])
+		{
+			if (file.UploadedByUserId is not Guid uploaderId)
+			{
+				// Uploaded through the public API - no ATS user to tell.
+				continue;
+			}
+
+			var fileLabel = string.IsNullOrWhiteSpace(file.FileName)
+				? "Your bulk upload"
+				: $"\"{file.FileName}\"";
+
+			// The counts are the message. "40/40" is what the uploader is waiting to see;
+			// a partial result names the failures so they can be resent.
+			var body = file.FailedCount == 0
+				? $"All {file.SentCount} of {file.TotalCount} invitation emails for {fileLabel} have been sent."
+				: $"{file.SentCount} of {file.TotalCount} invitation emails for {fileLabel} were sent. {file.FailedCount} could not be delivered and can be resent.";
+
+			var title = file.FailedCount == 0
+				? "Invitations sent"
+				: "Invitations sent with errors";
+
+			await RaiseAsync(
+				uploaderId,
+				AtsNotificationType.BulkEmailsCompleted,
+				title,
+				body,
+				string.IsNullOrWhiteSpace(file.FileName)
+					? "/s&i/ats/bulkuploads"
+					: $"/s&i/ats/bulkuploads?search={Uri.EscapeDataString(file.FileName)}",
+				file.FileId,
+				cancellationToken);
+		}
+	}
+
 	public async Task<KeysetPaginatedResult<NotificationListDTO>> GetNotificationsAsync(
 		Guid recipientUserId,
 		KeysetPaginationRequest request,

@@ -39,6 +39,18 @@ public interface IAtsNotificationService
 		string type,
 		CancellationToken cancellationToken);
 
+	/// <summary>
+	/// Tells each uploader when every invitation email for their bulk file has been sent.
+	/// </summary>
+	/// <remarks>
+	/// Given the orders a send pass just finished, works out which of their files are now
+	/// complete and raises one notification per file. The email job sends in claimed slices,
+	/// so this is called after every pass but only fires on the pass that finishes a file.
+	/// </remarks>
+	Task RaiseForCompletedBulkEmailsAsync(
+		IReadOnlyCollection<Guid> sentEmailInvitationIds,
+		CancellationToken cancellationToken);
+
 	Task<KeysetPaginatedResult<NotificationListDTO>> GetNotificationsAsync(
 		Guid recipientUserId,
 		KeysetPaginationRequest request,

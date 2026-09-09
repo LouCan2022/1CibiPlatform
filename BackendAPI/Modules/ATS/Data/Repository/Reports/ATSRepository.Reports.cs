@@ -495,4 +495,202 @@ public partial class ATSRepository
 
 		return documents;
 	}
+
+	public async Task<ApplicationFormPreviewDTO?> GetApplicationFormPreviewAsync(
+		Guid emailInvitationRequestId,
+		IReadOnlyCollection<int>? authorizedClientIds,
+		Guid? requiredRequestorId,
+		CancellationToken cancellationToken)
+	{
+		var eir = await _dbcontext.EmailInvitationRequests
+			.AsNoTracking()
+			.Include(x => x.PersonalDetails)
+			.Include(x => x.AddressDetails)
+			.Include(x => x.EducationalBackground)
+			.Include(x => x.LicensesDetails)
+			.Include(x => x.ProfessionalExperiences)
+			.Include(x => x.ReferenceDetails)
+			.Include(x => x.SignatureDetails)
+			.Where(x => x.EmailInvitationID == emailInvitationRequestId)
+			.Where(x => (authorizedClientIds == null
+					|| (x.ClientId.HasValue && authorizedClientIds.Contains(x.ClientId.Value)))
+				&& (!requiredRequestorId.HasValue
+					|| x.RequestorId == requiredRequestorId.Value))
+			.FirstOrDefaultAsync(cancellationToken);
+
+		if (eir is null)
+			return null;
+
+		var preview = new ApplicationFormPreviewDTO
+		{
+			SubjectName = $"{eir.FirstName} {eir.LastName}".Trim(),
+			FilledFormAt = eir.FormCompletedAt?.ToString("MMMM dd, yyyy")
+		};
+
+		if (eir.PersonalDetails is { } p)
+		{
+			// A stored biometric capture only comes from the PhilSys liveness flow.
+			preview.PhilSysVerified = !string.IsNullOrWhiteSpace(p.BiometricFileKey);
+
+			preview.Personal = new PersonalPreviewDTO
+			{
+				PositionAppliedFor = p.PositionAppliedFor,
+				FirstName = p.FirstName,
+				MiddleName = p.MiddleName,
+				LastName = p.LastName,
+				Suffix = p.Suffix,
+				Sex = p.Sex,
+				DateOfBirth = p.DOB?.ToString("MMMM dd, yyyy"),
+				MaritalStatus = p.MaritalStatus,
+				Nationality = p.Nationality,
+				MobileNumber = p.MobileNumber,
+				TelephoneNumber = p.TelephoneNumber,
+				EmailAddress = p.EmailAddress,
+				EmailAlternative = p.EmailAlternative,
+				SSS = p.SSS,
+				TIN = p.TIN,
+				GovtIdFileName = p.AdditionalGovtIDFileName,
+				NbiClearanceFileName = p.NBIClearanceFileName,
+				ResumeFileName = p.ResumeFileName
+			};
+		}
+
+		if (eir.AddressDetails is { } a)
+		{
+			preview.Address = new AddressPreviewDTO
+			{
+				CurrentAddress = a.CurrentAddress,
+				CurrentCity = a.CurrentCity,
+				CurrentProvince = a.CurrentProvince,
+				CurrentCountry = a.CurrentCountry,
+				CurrentPostalCode = a.CurrentPostalCode,
+				CurrentTypeOfOwnership = a.CurrentTypeOfOwnership,
+				PermanentAddress = a.PermanentAddress,
+				PermanentCity = a.PermanentCity,
+				PermanentProvince = a.PermanentProvince,
+				PermanentCountry = a.PermanentCountry,
+				PermanentPostalCode = a.PermanentPostalCode
+			};
+		}
+
+		if (eir.EducationalBackground is { } e)
+		{
+			// Surface the highest level the applicant filled in, mirroring how the
+			// form stores one level per tier.
+			preview.Education = new EducationPreviewDTO
+			{
+				HighestEducationalAttainment = e.HighestEducationalAttainment,
+				SchoolName = e.PhDSchoolName
+					?? e.MastersSchoolName
+					?? e.BachelorsSchoolName
+					?? e.CollegeSchoolName
+					?? e.SeniorHighSchoolName
+					?? e.HighSchoolName,
+				Degree = e.DoctorateDegree
+					?? e.MastersDegree
+					?? e.BachelorsDegree
+					?? e.CollegeDegree,
+				GraduationDate = (e.DoctorateGraduationDate
+					?? e.MastersGraduationDate
+					?? e.BachelorsGraduationDate
+					?? e.CollegeGraduationDate
+					?? e.SeniorHighSchoolGraduationDate
+					?? e.HighSchoolGraduationDate)?.ToString("MMMM dd, yyyy"),
+				DiplomaFileName = e.DoctorateDiplomaFileName
+					?? e.MastersDiplomaFileName
+					?? e.BachelorsDiplomaFileName
+					?? e.CollegeDiplomaFileName
+					?? e.SeniorHighSchoolDiplomaFileName
+					?? e.HighSchoolDiplomaFileName
+			};
+		}
+
+		if (eir.LicensesDetails is { } l && !string.IsNullOrWhiteSpace(l.LicenseName))
+		{
+			preview.License = new LicensePreviewDTO
+			{
+				LicenseName = l.LicenseName,
+				LicenseNumber = l.LicenseNumber,
+				LicenseExpiryDate = l.LicenseExpiryDate?.ToString("MMMM dd, yyyy"),
+				LicenseFileName = l.LicenseUploadFileName
+			};
+		}
+
+		if (eir.ProfessionalExperiences is { } pe)
+		{
+			void AddEmployer(string? company, string? jobTitle, string? address, DateOnly? start, DateOnly? end,
+				string? currentlyEmployed, string? permissionToContact, string? reason, string? supName,
+				string? supContact, string? supEmail, string? coeFileName)
+			{
+				if (string.IsNullOrWhiteSpace(company))
+					return;
+
+				preview.Employers.Add(new EmployerPreviewDTO
+				{
+					CompanyName = company,
+					JobTitle = jobTitle,
+					CompanyAddress = address,
+					StartDate = start?.ToString("MMMM dd, yyyy"),
+					EndDate = end?.ToString("MMMM dd, yyyy"),
+					CurrentlyEmployed = currentlyEmployed,
+					PermissionToContact = permissionToContact,
+					ReasonForLeaving = reason,
+					SupervisorName = supName,
+					SupervisorContactNumber = supContact,
+					SupervisorEmail = supEmail,
+					CoeFileName = coeFileName
+				});
+			}
+
+			AddEmployer(pe.Emp1CompanyName, pe.Emp1JobTitle, pe.Emp1CompanyAddress, pe.Emp1StartDate, pe.Emp1EndDate,
+				pe.Emp1CurrentlyEmployed, pe.Emp1PermissionToContact, pe.Emp1ReasonForLeaving, pe.Emp1SupervisorName,
+				pe.Emp1SupervisorContactNumber, pe.Emp1SupervisorEmail, pe.Emp1COEUploadFileName ?? pe.COEUploadFileName);
+			AddEmployer(pe.Emp2CompanyName, pe.Emp2JobTitle, pe.Emp2CompanyAddress, pe.Emp2StartDate, pe.Emp2EndDate,
+				pe.Emp2CurrentlyEmployed, pe.Emp2PermissionToContact, pe.Emp2ReasonForLeaving, pe.Emp2SupervisorName,
+				pe.Emp2SupervisorContactNumber, pe.Emp2SupervisorEmail, pe.Emp2COEUploadFileName);
+			AddEmployer(pe.Emp3CompanyName, pe.Emp3JobTitle, pe.Emp3CompanyAddress, pe.Emp3StartDate, pe.Emp3EndDate,
+				pe.Emp3CurrentlyEmployed, pe.Emp3PermissionToContact, pe.Emp3ReasonForLeaving, pe.Emp3SupervisorName,
+				pe.Emp3SupervisorContactNumber, pe.Emp3SupervisorEmail, pe.Emp3COEUploadFileName);
+		}
+
+		if (eir.ReferenceDetails is { } r)
+		{
+			void AddReference(string? fullName, string? relationship, string? company, string? email,
+				string? contact, string? mode, DateTime? bestTime)
+			{
+				if (string.IsNullOrWhiteSpace(fullName))
+					return;
+
+				preview.References.Add(new ReferencePreviewDTO
+				{
+					FullName = fullName,
+					ProfessionalRelationship = relationship,
+					AffiliatedCompany = company,
+					Email = email,
+					ContactNumber = contact,
+					ModeOfContact = mode,
+					BestTimeToContact = bestTime?.ToString("MMMM dd, yyyy h:mm tt")
+				});
+			}
+
+			AddReference(r.Ref1FullName, r.Ref1ProfessionalRelationship, r.Ref1AffiliatedCompany, r.Ref1Email,
+				r.Ref1ContactNumber, r.Ref1ModeOfContact, r.Ref1BestTimeToContact);
+			AddReference(r.Ref2FullName, r.Ref2ProfessionalRelationship, r.Ref2AffiliatedCompany, r.Ref2Email,
+				r.Ref2ContactNumber, r.Ref2ModeOfContact, r.Ref2BestTimeToContact);
+			AddReference(r.Ref3FullName, r.Ref3ProfessionalRelationship, r.Ref3AffiliatedCompany, r.Ref3Email,
+				r.Ref3ContactNumber, r.Ref3ModeOfContact, r.Ref3BestTimeToContact);
+		}
+
+		if (eir.SignatureDetails is { } s)
+		{
+			preview.Signature = new SignaturePreviewDTO
+			{
+				SignerName = s.SignerName,
+				SignatureDate = s.SignatureDate?.ToString("MMMM dd, yyyy"),
+				ConsentFormFileName = s.ConsentFormFileName
+			};
+		}
+
+		return preview;
+	}
 }

@@ -36,6 +36,7 @@ public partial class ApplicationFormComponent
 	}
 	private PersonalDetailsDTO personalDetails = new();
 	private bool NoMiddleName = false;
+	private MudTextField<string>? _middleNameField;
 	private DateTime? DateOfBirth;
 
 	// AddressDetails
@@ -104,7 +105,9 @@ public partial class ApplicationFormComponent
 
 		philSysId = await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:digitalId") ?? string.Empty;
 		personalDetails.FirstName = await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:firstName") ?? personalDetails.FirstName;
-		personalDetails.MiddleName = await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:middleName") ?? personalDetails.MiddleName;
+		personalDetails.MiddleName = NoMiddleName
+			? string.Empty
+			: await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:middleName") ?? personalDetails.MiddleName;
 		personalDetails.LastName = await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:lastName") ?? personalDetails.LastName;
 		personalDetails.Suffix = await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:suffix") ?? personalDetails.Suffix;
 		string? dobString = await LocalStorageService.GetItemAsync<string?>($"ats:applicationForm:birthDate");
@@ -695,13 +698,19 @@ public partial class ApplicationFormComponent
 			addressDetails.PermanentPostalCode = value;
 	}
 
-	private void NoMiddleNameChange(bool value)
+	private async Task NoMiddleNameChange(bool value)
 	{
 		NoMiddleName = value;
 
 		if (NoMiddleName)
 		{
 			personalDetails.MiddleName = string.Empty;
+
+			if (_middleNameField is not null)
+			{
+				await _middleNameField.ClearAsync();
+				await _middleNameField.ResetValidationAsync();
+			}
 		}
 	}
 

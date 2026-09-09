@@ -94,6 +94,7 @@ public class ATSServiceFixture : IDisposable
 			EmailNotificationProcessoServiceLogger.Object,
 			MockEndorsementSubmissionService.Object,
 			MockRepository.Object,
+			MockNotificationService.Object,
 			Configuration
 			);
 	}

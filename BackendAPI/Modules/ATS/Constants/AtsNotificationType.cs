@@ -19,6 +19,17 @@ public static class AtsNotificationType
 	/// <summary>A bulk upload finished parsing; the body carries the accepted/rejected counts.</summary>
 	public const string BulkUploadCompleted = "BulkUploadCompleted";
 
+	/// <summary>
+	/// Every invitation email for a bulk file has been attempted, e.g. "40/40 sent".
+	/// </summary>
+	/// <remarks>
+	/// Distinct from <see cref="BulkUploadCompleted"/>, which fires much earlier: that one
+	/// means the file was parsed and the orders exist, this one means the candidates have
+	/// actually been contacted. The gap between them can be minutes, and the second is the
+	/// one a requestor is waiting on.
+	/// </remarks>
+	public const string BulkEmailsCompleted = "BulkEmailsCompleted";
+
 	/// <summary>An order reached its terminal Completed state.</summary>
 	public const string OrderCompleted = "OrderCompleted";
 

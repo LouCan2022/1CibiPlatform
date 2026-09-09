@@ -281,6 +281,149 @@ public class AtsNotificationServiceTests
 	}
 
 	[Fact]
+	public async Task RaiseForCompletedBulkEmailsAsync_ShouldReportTheFullCount_WhenEveryEmailSent()
+	{
+		var fileId = Guid.CreateVersion7();
+		AtsNotification? stored = null;
+
+		_repository
+			.Setup(x => x.GetCompletedBulkEmailFilesAsync(
+				It.IsAny<IReadOnlyCollection<Guid>>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(
+			[
+				new BulkEmailCompletionDTO
+				{
+					FileId = fileId,
+					FileName = "batch-september.csv",
+					UploadedByUserId = RecipientId,
+					TotalCount = 40,
+					SentCount = 40,
+					FailedCount = 0
+				}
+			]);
+
+		_repository
+			.Setup(x => x.AddAsync(It.IsAny<AtsNotification>(), It.IsAny<CancellationToken>()))
+			.Callback<AtsNotification, CancellationToken>((notification, _) => stored = notification)
+			.Returns(Task.CompletedTask);
+
+		await _service.RaiseForCompletedBulkEmailsAsync(
+			[Guid.CreateVersion7()],
+			CancellationToken.None);
+
+		stored.Should().NotBeNull();
+		stored!.RecipientUserId.Should().Be(RecipientId);
+		stored.Type.Should().Be(AtsNotificationType.BulkEmailsCompleted);
+		stored.EntityId.Should().Be(fileId);
+
+		// "40 of 40" is the line the uploader is waiting for.
+		stored.Body.Should().Contain("40 of 40");
+		stored.Title.Should().Be("Invitations sent");
+	}
+
+	[Fact]
+	public async Task RaiseForCompletedBulkEmailsAsync_ShouldNameTheFailures_WhenSomeCouldNotBeSent()
+	{
+		AtsNotification? stored = null;
+
+		_repository
+			.Setup(x => x.GetCompletedBulkEmailFilesAsync(
+				It.IsAny<IReadOnlyCollection<Guid>>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(
+			[
+				new BulkEmailCompletionDTO
+				{
+					FileId = Guid.CreateVersion7(),
+					FileName = "batch.csv",
+					UploadedByUserId = RecipientId,
+					TotalCount = 40,
+					SentCount = 37,
+					FailedCount = 3
+				}
+			]);
+
+		_repository
+			.Setup(x => x.AddAsync(It.IsAny<AtsNotification>(), It.IsAny<CancellationToken>()))
+			.Callback<AtsNotification, CancellationToken>((notification, _) => stored = notification)
+			.Returns(Task.CompletedTask);
+
+		await _service.RaiseForCompletedBulkEmailsAsync(
+			[Guid.CreateVersion7()],
+			CancellationToken.None);
+
+		// A partial result must not read as a success - the uploader has three candidates
+		// to resend.
+		stored!.Title.Should().Be("Invitations sent with errors");
+		stored.Body.Should().Contain("37 of 40");
+		stored.Body.Should().Contain("3 could not be delivered");
+	}
+
+	[Fact]
+	public async Task RaiseForCompletedBulkEmailsAsync_ShouldDoNothing_WhenNoFileIsFinished()
+	{
+		// The email job sends in claimed slices, so most passes finish no file at all.
+		// Firing per pass instead of per file is what would flood the bell.
+		_repository
+			.Setup(x => x.GetCompletedBulkEmailFilesAsync(
+				It.IsAny<IReadOnlyCollection<Guid>>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync([]);
+
+		await _service.RaiseForCompletedBulkEmailsAsync(
+			[Guid.CreateVersion7()],
+			CancellationToken.None);
+
+		_repository.Verify(
+			x => x.AddAsync(It.IsAny<AtsNotification>(), It.IsAny<CancellationToken>()),
+			Times.Never);
+	}
+
+	[Fact]
+	public async Task RaiseForCompletedBulkEmailsAsync_ShouldSkipFilesWithNoUploader()
+	{
+		// Uploaded through the public API: no ATS user to tell.
+		_repository
+			.Setup(x => x.GetCompletedBulkEmailFilesAsync(
+				It.IsAny<IReadOnlyCollection<Guid>>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(
+			[
+				new BulkEmailCompletionDTO
+				{
+					FileId = Guid.CreateVersion7(),
+					FileName = "api-batch.csv",
+					UploadedByUserId = null,
+					TotalCount = 10,
+					SentCount = 10,
+					FailedCount = 0
+				}
+			]);
+
+		await _service.RaiseForCompletedBulkEmailsAsync(
+			[Guid.CreateVersion7()],
+			CancellationToken.None);
+
+		_repository.Verify(
+			x => x.AddAsync(It.IsAny<AtsNotification>(), It.IsAny<CancellationToken>()),
+			Times.Never);
+	}
+
+	[Fact]
+	public async Task RaiseForCompletedBulkEmailsAsync_ShouldDoNothing_WhenNothingWasSent()
+	{
+		await _service.RaiseForCompletedBulkEmailsAsync([], CancellationToken.None);
+
+		// Not even a lookup: an empty pass has no files to check.
+		_repository.Verify(
+			x => x.GetCompletedBulkEmailFilesAsync(
+				It.IsAny<IReadOnlyCollection<Guid>>(),
+				It.IsAny<CancellationToken>()),
+			Times.Never);
+	}
+
+	[Fact]
 	public async Task GetNotificationsAsync_ShouldReturnACursor_WhenMoreRowsExist()
 	{
 		const int pageSize = 2;

@@ -9,7 +9,7 @@ public partial class ATSRepository
 
 	// Round-robin: each client may contribute at most this many invitations per tick, so
 	// one large upload cannot block every other client behind it.
-	private const int PerClientSliceSize = 30;
+	private const int PerClientSliceSize = 50;
 
 	public async Task<bool> AddEmailInvitationRequestAsync(EmailInvitationRequest emailInvitationRequest)
 	{
@@ -56,7 +56,7 @@ public partial class ATSRepository
 				EmailStatus.Error,
 				MaxEmailSendAttempts,
 				PerClientSliceSize,
-				100)
+				200)
 			.AsNoTracking()
 			.ToListAsync();
 	}

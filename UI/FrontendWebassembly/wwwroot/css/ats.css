@@ -1739,6 +1739,28 @@
     overflow: hidden;
 }
 
+
+/* Application form preview: keep a single scroller. The generic .ats-scroll-dialog
+   rules only catch .mud-dialog-content as a direct child; when MudBlazor nests the
+   content one level deeper that div falls back to its default overflow:auto and a
+   second, outer scrollbar appears. Restated at any depth for this dialog so only
+   .ats-dialog-body scrolls and the header stays pinned. */
+.ats-appform-preview-dialog.mud-dialog {
+    padding: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+.ats-appform-preview-dialog .mud-dialog-content {
+    display: flex !important;
+    min-height: 0;
+    margin: 0;
+    padding: 0 !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
 /* ---------- Gradient dialog header ---------- */
 
 /* The navy gradient header PreviewComponent introduced and BulkUploadSubjectsDialog
@@ -1969,7 +1991,6 @@
     padding: 18px 28px 24px;
 }
 
-.ats-download-cancel,
 .ats-download-submit {
     min-width: 140px;
     border-radius: 12px !important;
@@ -1979,9 +2000,25 @@
     padding: 10px 18px !important;
 }
 
-.ats-download-cancel {
-    border-color: var(--c-border-strong) !important;
-    color: var(--c-navy-900) !important;
+
+/* The tooltip wrapper carries the flex spacing, pushing Download right. */
+.ats-download-actions > .mud-tooltip-root {
+    margin-right: auto;
+}
+
+.ats-download-preview {
+    min-width: 0;
+    padding: 10px 16px !important;
+    border-color: #d9e2ee !important;
+    border-radius: 12px !important;
+    color: #1d5fd1 !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+}
+
+.ats-download-preview.mud-button-disabled {
+    color: #9aa7bd !important;
 }
 
 .ats-download-submit.theme-button-inactive {
@@ -2146,7 +2183,6 @@
         font-size: 12px;
     }
 
-    .ats-download-cancel,
     .ats-download-submit {
         min-width: 120px;
         font-size: 14px !important;
@@ -5727,9 +5763,14 @@ button.ats-console-brand-text {
         padding: 0;
     }
 
+/* Both sections are MudPapers: without an override they paint MudBlazor's
+   --mud-palette-surface, which stays white on this page (GenericLayout's unbound
+   theme provider), so under html.dark they'd sit as white slabs on the dark card.
+   Transparent lets the themed card surface show through in both modes. */
 .ats-consent-step .ats-consent-copy-section {
     width: 100%;
     border-radius: 0 !important;
+    background: transparent;
 }
 
 .ats-consent-step .ats-consent-title {
@@ -5775,6 +5816,7 @@ button.ats-console-brand-text {
     margin: 0;
     padding: 0;
     border-radius: 0 !important;
+    background: transparent;
 }
 
     .ats-consent-step .ats-signature-section > .mud-grid {
@@ -6030,6 +6072,18 @@ button.ats-console-brand-text {
     .ats-consent-step .ats-consent-date-wrap .mud-input-adornment-end .mud-icon-button {
         padding: 0;
     }
+
+/* Adornment icons across the whole application form - both plain start icons
+   (.mud-icon-default paints --mud-palette-text-secondary directly on the icon,
+   beating the inherited adornment color) and icon buttons (which paint
+   --mud-palette-action-default). Neither palette flips on this page
+   (GenericLayout's unbound theme provider), so in dark mode the icons sat
+   near-black. Same subtle token the New Order inputs use. */
+.ats-appform-modern .mud-input-adornment .mud-icon-root,
+.ats-appform-modern .mud-input-adornment .mud-icon-button,
+.ats-appform-modern .mud-input-adornment .mud-icon-button .mud-icon-root {
+    color: var(--c-fg-subtle);
+}
 
 .ats-application-card .ats-step-action-bar:has(.ats-consent-save-button) {
     padding: 0 !important;
