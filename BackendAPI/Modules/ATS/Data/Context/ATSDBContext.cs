@@ -27,6 +27,7 @@ public class ATSDBContext : DbContext
 	public DbSet<UserClientDetails> UserClientDetails { get; set; }
 	public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 	public DbSet<AtsAuditEntry> AuditTrail { get; set; }
+	public DbSet<AtsNotification> Notifications { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{

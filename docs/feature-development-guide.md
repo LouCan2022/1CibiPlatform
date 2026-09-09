@@ -178,6 +178,30 @@ Keep a file-level `using` only when the import is genuinely isolated to that fil
 
 UI API services must follow the Auth service error-handling pattern: check `IsSuccessStatusCode`, read `ApiErrorResponse.Detail` and trace information when available, log the detail, and surface it to the page/snackbar. If the response is not valid JSON, preserve and display the raw response body instead of replacing it with a generic error.
 
+#### Do not write try/catch in feature code
+
+**Throw, and let the global handler answer.** `BuildingBlocks.Exceptions.Handler.CustomExceptionHandler` already maps `NotFoundException`, `ValidationException`, `BadRequestException`, `UnauthorizedException`, `ForbiddenException`, `ConflictException` and `InternalServerException` onto the right status code and a `ProblemDetails` body. A handler, service or repository that catches an exception to log it and rethrow, or to convert it into a `false` return, is duplicating that and usually loses the status code in the process.
+
+Use the shared helpers instead of hand-rolling a block:
+
+| Situation | Use |
+|---|---|
+| Anything that should fail the request | Throw the matching `BuildingBlocks.Exceptions` type. `CustomExceptionHandler` does the rest. |
+| A multi-write operation that must be atomic | `TransactionRunner.RunAsync(...)` |
+| Work that touched storage or a third party the transaction cannot undo | `TransactionRunner.RunWithCompensationAsync(...)` |
+| A best-effort side effect after the real work has committed | `SideEffectGuard.RunAsync(...)` |
+| A UI service calling the API | `ApiRequestExtensions.SendAsync<T>(...)` |
+
+`TransactionRunner` (`BuildingBlocks/Data/`) owns begin → work → `SaveChanges` → commit, and rolls back if the work throws. Its `catch` is **not** error handling — it releases the transaction and rethrows untouched, so a `NotFoundException` thrown inside still produces a 404 rather than a 500. Pass any module's `IUnitOfWork`; ATS's implements `ITransactionScope` (PhilSys has the same shape but has not adopted it yet). **See `docs/transaction-runner.md`** for the full API, the multi-compensation overload, and the migration checklist.
+
+Two rules this exists to enforce. **A repository method that calls `SaveChangesAsync` itself commits immediately** — if it runs before the transaction is opened, its write survives a later rollback. That is exactly how a failed application-form email once left a saved order whose candidate never received a link. And **anything the database cannot undo** — an uploaded blob, a created remote record — needs `RunWithCompensationAsync`, which deletes it on failure and still surfaces the original error.
+
+`SideEffectGuard` (`BuildingBlocks/Exceptions/Handler/`) is the narrow exception, and it is narrow on purpose. Raising a notification after an application form is submitted is a follow-up to work that is already durable; if it throws and reaches `CustomExceptionHandler`, the handler correctly returns 500 and the candidate is told their submission failed when it actually saved. Only use it where all three hold: the primary work is already committed, the user is not waiting on the side effect's result, and losing it degrades the experience rather than the data.
+
+`ApiRequestExtensions` (`UI/FrontendWebassembly/Services/Shared/Extensions/`) is the client-side counterpart — it owns the send / `IsSuccessStatusCode` / `ReadErrorDetailAsync` / deserialize sequence once, so a service method reads as the request it makes. It preserves two rules the hand-written copies had: `OperationCanceledException` is rethrown rather than reported as a failure (a cancelled request is the user navigating away), and only transport-shaped exceptions are converted, so a `NullReferenceException` still surfaces as the bug it is.
+
+If you find yourself needing a try/catch outside these, the exception is either one the global handler should see, or a case worth adding to the table above rather than solving locally.
+
 ### Repository, service, and cache responsibilities
 
 Keep persistence behind a repository interface under `Data/Repository`. The repository implementation should contain database access only (queries, inserts, and saving changes); business rules, validation, token generation, email orchestration, and status transitions belong in the application service. When read caching is needed, add a decorator under `Data/Cache` and register it with Scrutor:
@@ -533,6 +557,7 @@ Register that initializer in `BackendAPI/API/APIs/Data/Extensions/DatabaseExtens
 - [ ] Screen was checked at 390px and in both light and dark mode.
 - [ ] UI covers loading, empty, validation, success, failure, and responsive states.
 - [ ] **A `docs/*.md` was added or updated for this change.**
+- [ ] No hand-rolled `try/catch` in feature code — throw and let `CustomExceptionHandler` answer, or use `SideEffectGuard` / `ApiRequestExtensions`.
 - [ ] Relevant tests and the solution build pass.
 - [ ] API/UI contracts and gateway route were verified end to end.
 - [ ] Every endpoint is registered in the module's typed `Path/<Module>Paths.cs` and appears in `GET /__routes`.

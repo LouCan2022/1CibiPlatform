@@ -3,6 +3,7 @@ using ATS.Hubs;
 using ATS.Services.BulkSubmissionProcessor;
 using ATS.Services.EmailNotificationProcessor;
 using ATS.Services.EndorsementSubmission;
+using ATS.Services.Notifications;
 using ATS.Services.OrderHistory;
 using Auth.Shared.Contracts;
 using BuildingBlocks.SharedServices.Interfaces;
@@ -28,6 +29,7 @@ public class ATSServiceFixture : IDisposable
 	public Mock<IServiceScopeFactory> MockServiceScopeFactory { get; private set; }
 	public Mock<ICurrentUser> MockCurrentUser { get; private set; }
 	public Mock<IOrderHistoryService> MockOrderHistoryService { get; private set; }
+	public Mock<IAtsNotificationService> MockNotificationService { get; private set; }
 
 	// Loggers
 	public Mock<ILogger<BulkSubmissionProcessorService>> MockBulkSubmissionProcessorServiceLogger { get; private set; }
@@ -54,6 +56,7 @@ public class ATSServiceFixture : IDisposable
 		MockServiceScopeFactory = new Mock<IServiceScopeFactory>();
 		MockCurrentUser = new Mock<ICurrentUser>();
 		MockOrderHistoryService = new Mock<IOrderHistoryService>();
+		MockNotificationService = new Mock<IAtsNotificationService>();
 
 		MockBulkSubmissionProcessorServiceLogger = new();
 		EmailNotificationProcessoServiceLogger = new();
@@ -114,6 +117,13 @@ public class ATSServiceFixture : IDisposable
 		mockServiceProvider
 			.Setup(x => x.GetService(typeof(IOrderHistoryService)))
 			.Returns(MockOrderHistoryService.Object);
+
+		// Resolved per file to raise the "bulk upload processed" notification alongside
+		// the existing SignalR toast. Without this the job throws on GetRequiredService
+		// and never reaches the status update the tests assert on.
+		mockServiceProvider
+			.Setup(x => x.GetService(typeof(IAtsNotificationService)))
+			.Returns(MockNotificationService.Object);
 
 		mockServiceScope
 			.Setup(x => x.ServiceProvider)

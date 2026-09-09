@@ -104,6 +104,38 @@ public class OMSTicketingProcessorService : IOMSTicketingProcessorService
 			logContext);
 	}
 
+	/// <summary>
+	/// Tells the requestor when an order's automatic ticketing retries are spent, so it is
+	/// not left sitting in Error until somebody happens to open the ticketing board.
+	/// </summary>
+	/// <remarks>
+	/// Asks the repository which of the ids are actually exhausted rather than assuming:
+	/// a retryable failure only exhausts the budget on its last attempt, and firing on
+	/// each one would notify five times for the same order.
+	/// </remarks>
+	private static async Task NotifyIfTicketingExhaustedAsync(
+		IServiceScope scope,
+		IOMSTicketingRepository repository,
+		Guid emailInvitationId,
+		CancellationToken cancellationToken)
+	{
+		var exhausted = await repository.GetExhaustedTicketIdsAsync(
+			[emailInvitationId],
+			cancellationToken);
+
+		if (exhausted.Count == 0)
+		{
+			return;
+		}
+
+		var notificationService = scope.ServiceProvider.GetRequiredService<IAtsNotificationService>();
+
+		await notificationService.RaiseForOrderAsync(
+			emailInvitationId,
+			AtsNotificationType.TicketingFailed,
+			cancellationToken);
+	}
+
 	private async Task<(Guid Id, bool Succeeded)> ProcessOneAsync(
 		TicketablePayloadDTO payload,
 		SemaphoreSlim semaphore,
@@ -148,6 +180,12 @@ public class OMSTicketingProcessorService : IOMSTicketingProcessorService
 					isRetryable: false,
 					cancellationToken);
 
+				await NotifyIfTicketingExhaustedAsync(
+					scope,
+					repository,
+					payload.EmailInvitationID,
+					cancellationToken);
+
 				return (payload.EmailInvitationID, false);
 			}
 
@@ -190,6 +228,12 @@ public class OMSTicketingProcessorService : IOMSTicketingProcessorService
 				isRetryable: false,
 				cancellationToken);
 
+			await NotifyIfTicketingExhaustedAsync(
+				scope,
+				repository,
+				payload.EmailInvitationID,
+				cancellationToken);
+
 			return (payload.EmailInvitationID, false);
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
@@ -205,6 +249,14 @@ public class OMSTicketingProcessorService : IOMSTicketingProcessorService
 				[payload.EmailInvitationID],
 				ex.Message,
 				isRetryable: true,
+				cancellationToken);
+
+			// Only fires on the attempt that actually spends the budget, so a transient
+			// failure retried five times still produces one notification, not five.
+			await NotifyIfTicketingExhaustedAsync(
+				scope,
+				repository,
+				payload.EmailInvitationID,
 				cancellationToken);
 
 			return (payload.EmailInvitationID, false);

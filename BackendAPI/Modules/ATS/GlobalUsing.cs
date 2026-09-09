@@ -1,8 +1,10 @@
 ﻿global using ATS.BackgroundJobs.BulkSubmission;
+global using BuildingBlocks.Data;
 global using ATS.BackgroundJobs.EmailNotification;
 global using ATS.BackgroundJobs.ApplicantSearchProjection;
 global using ATS.BackgroundJobs.OMSTicketing;
 global using ATS.BackgroundJobs.AuditTrail;
+global using ATS.BackgroundJobs.Notifications;
 global using ATS.Configuration;
 global using ATS.Data.Entities;
 global using ATS.Data.Context;
@@ -11,6 +13,7 @@ global using ATS.Data.Repository;
 global using ATS.Data.Repository.BulkUploadDashboard;
 global using ATS.Data.Repository.OMSTicketing;
 global using ATS.Data.Repository.AuditTrail;
+global using ATS.Data.Repository.Notifications;
 global using ATS.Data.Interceptors;
 global using ATS.Data.Repository.PublicApi;
 global using ATS.Data.Cache;
@@ -50,6 +53,7 @@ global using ATS.Services.OrderValidation;
 global using ATS.Services.Report;
 global using ATS.Services.ApplicantSearchProjections;
 global using ATS.Services.AuditTrail;
+global using ATS.Services.Notifications;
 
 global using BuildingBlocks.Exceptions;
 global using BuildingBlocks.CQRS;

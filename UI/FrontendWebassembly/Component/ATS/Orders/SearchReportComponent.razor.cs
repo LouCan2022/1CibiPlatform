@@ -8,6 +8,17 @@ public partial class SearchReportComponent
 	[Inject]
 	private LocalStorageService LocalStorageService { get; set; } = default!;
 
+	/// <summary>
+	/// Pre-fills the search box from the URL, so a notification can deep-link here already
+	/// filtered to one subject (see AtsNotificationService.BuildOrderLink).
+	/// </summary>
+	/// <remarks>
+	/// Only seeds the initial value - after first load the box is the user's to change, and
+	/// the query string is not rewritten as they type.
+	/// </remarks>
+	[SupplyParameterFromQuery(Name = "search")]
+	private string? SearchFromQuery { get; set; }
+
 	private readonly CursorTableLoader<ReportListDTO> _reportsLoader = new();
 	private TableComponent<ReportListDTO>? reportsTable;
 	private DateRange? _dateRange { get; set; }
@@ -31,6 +42,13 @@ public partial class SearchReportComponent
 		// platform super admin / platform manager / admin ladder rather than the
 		// uploader-oriented one above. The API re-checks scope on every call.
 		_canEditSubjectName = roleIds.Contains(1) || atsRoleId is 1 or 2;
+
+		// Seeded before the first server load, so the table's opening page is already
+		// filtered rather than fetching everything and then narrowing it.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
 	}
 
 	private async Task<List<int>> GetStoredRoleIdsAsync()

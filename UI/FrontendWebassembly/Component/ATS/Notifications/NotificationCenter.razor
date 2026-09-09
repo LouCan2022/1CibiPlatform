@@ -1,0 +1,85 @@
+@namespace FrontendWebassembly.Component.ATS.Notifications
+@implements IDisposable
+
+@* The bell and its dropdown. Mounted once in ATSLayout's topbar, so the connection is
+   live on every ATS screen rather than being restarted per page. *@
+
+<div class="ats-notif-root">
+    <button type="button"
+            class="ats-console-icon-btn ats-notif-bell"
+            aria-label="@BellAriaLabel"
+            aria-expanded="@_isOpen"
+            aria-haspopup="true"
+            title="@BellAriaLabel"
+            @onclick="ToggleAsync">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.7 21a2 2 0 01-3.4 0" />
+        </svg>
+
+        @* The original dot, now carrying the unread count. It keeps the same red-pip
+           position and colour, and only widens once there is a number to show, so the
+           topbar still reads as the original design rather than a badge bolted on. *@
+        @if (Notifications.UnreadCount > 0)
+        {
+            <span class="ats-console-notification-dot has-count" aria-hidden="true">@UnreadLabel</span>
+        }
+    </button>
+
+    @if (_isOpen)
+    {
+        @* Click-away target. A button rather than a div so Escape and keyboard focus
+           behave, and so it is reachable without a pointer. *@
+        <button type="button"
+                class="ats-notif-overlay"
+                aria-label="Close notifications"
+                @onclick="Close"></button>
+
+        <div class="ats-notif-panel" role="dialog" aria-label="Notifications">
+            <header class="ats-notif-panel-head">
+                <h2>Notifications</h2>
+
+                @if (Notifications.UnreadCount > 0)
+                {
+                    <button type="button"
+                            class="ats-notif-mark-all"
+                            disabled="@_isBusy"
+                            @onclick="MarkAllReadAsync">
+                        Mark all read
+                    </button>
+                }
+            </header>
+
+            <div class="ats-notif-list">
+                @if (_isLoading)
+                {
+                    <div class="ats-notif-state">Loading…</div>
+                }
+                else if (_items.Count == 0)
+                {
+                    <div class="ats-notif-state ats-notif-empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.7 21a2 2 0 01-3.4 0" />
+                        </svg>
+                        <strong>You're all caught up</strong>
+                        <span>New activity on your orders shows up here.</span>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in _items)
+                    {
+                        <NotificationItem Item="item" OnActivate="ActivateAsync" />
+                    }
+                }
+            </div>
+
+            <footer class="ats-notif-panel-foot">
+                <a href="/s&i/ats/notifications" @onclick="Close" @onclick:preventDefault="false">
+                    View all notifications
+                </a>
+            </footer>
+        </div>
+    }
+</div>
