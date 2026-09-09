@@ -215,6 +215,35 @@ services.Configure<AtsNotificationOptions>(configuration.GetSection(AtsNotificat
 | Report ready / order completed | `Services/Report/ReportService.cs` | after `CommitAsync`, on both the update and the insert path |
 | Ticketing retries exhausted | `Services/OMSTicketing/OMSTicketingProcessorService.cs` | after each `MarkTicketFailedAsync` |
 
+### Email sending throughput
+
+`EmailNotificationProcessorService` sends **8 invitations concurrently**
+(`MaxConcurrentSends`), with a **2-second pause between retry attempts** (`RetryDelay`),
+polled every **5 seconds**.
+
+Each of those has a reason, and changing one without knowing it will bite:
+
+- **Bounded at 8, not unbounded.** Every concurrent send opens its own SMTP connection; a
+  provider will throttle or block a client that opens 200 at once. Raise it only if you
+  know your provider's concurrent-connection limit.
+- **Each send resolves `IEndorsementSubmissionService` from its own scope.** That service
+  reaches a `DbContext` (it looks up the client name for the email body), and `DbContext`
+  is **not thread-safe** — sharing one across concurrent sends corrupts its change tracker
+  in ways that surface as unrelated errors much later. `BulkSubmissionProcessorService`
+  does the same thing for the same reason.
+- **Results collect into `ConcurrentBag`, not `List`.** `List<T>.Add` from several threads
+  corrupts the backing array without throwing.
+- **The retry delay matters more than it looks.** Three back-to-back attempts against a
+  briefly-unavailable server all fail identically and burn the row's budget in
+  milliseconds. The pause is what actually lets a transient fault clear.
+- **The 5s trigger is a poll interval, not a load multiplier.** The job is
+  `[DisallowConcurrentExecution]`, so a trigger firing mid-pass is skipped entirely. It
+  only decides how fast an *idle* worker notices new work.
+
+`StaleClaimTimeout` (30 min) must stay comfortably above a worst-case pass. Today that is
+about four minutes: 200 messages at 8 at a time is 25 batches, each up to 3 attempts with a
+delay between them.
+
 **Bulk raises two notifications, at different times.** `BulkUploadCompleted` fires when the
 file is parsed and the orders exist; `BulkEmailsCompleted` fires when every candidate has
 actually been emailed ("All 40 of 40 invitation emails … have been sent"). The gap between
