@@ -87,22 +87,19 @@ public class EmailNotificationProcessorService : IEmailNotificationProcessorServ
 
 		var sendTasks = allRequests.Select(async request =>
 		{
-			await semaphore.WaitAsync(cancellationToken);
-
-			try
+			// The semaphore is acquired and released around each ATTEMPT, inside
+			// TrySendEmailWithRetryAsync - not around the whole retry loop.
+			//
+			// Holding it across the loop meant a retrying address kept one of the 8 slots
+			// while it was only sleeping between attempts. Eight failures at once put every
+			// slot to sleep and stalled the pass for healthy emails queued behind them.
+			if (await TrySendEmailWithRetryAsync(request, semaphore, cancellationToken))
 			{
-				if (await TrySendEmailWithRetryAsync(request, cancellationToken))
-				{
-					successBag.Add(request);
-				}
-				else
-				{
-					errorBag.Add(request);
-				}
+				successBag.Add(request);
 			}
-			finally
+			else
 			{
-				semaphore.Release();
+				errorBag.Add(request);
 			}
 		});
 
@@ -142,25 +139,41 @@ public class EmailNotificationProcessorService : IEmailNotificationProcessorServ
 
 	private async Task<bool> TrySendEmailWithRetryAsync(
 		EmailInvitationRequest request,
+		SemaphoreSlim semaphore,
 		CancellationToken cancellationToken)
 	{
 		const int maxAttempts = 3;
 
-		// One scope per invitation, resolved here rather than using the injected service.
-		//
-		// IEndorsementSubmissionService is Scoped and reaches a DbContext (it looks up the
-		// client name for the email body). DbContext is NOT thread-safe, so sharing one
-		// instance across concurrent sends corrupts its change tracker in ways that surface
-		// as unrelated errors much later. Each send gets its own, exactly as
-		// BulkSubmissionProcessorService does for the same reason.
-		using var scope = _serviceScopeFactory.CreateScope();
-
-		var submissionService = scope.ServiceProvider
-			.GetRequiredService<IEndorsementSubmissionService>();
-
 		for (int attempt = 1; attempt <= maxAttempts; attempt++)
 		{
-			if (await TrySendEmailAsync(submissionService, request, attempt == 1 ? null : attempt))
+			// One slot per attempt. Taken immediately before the send and released
+			// immediately after, so the backoff below happens OUTSIDE the semaphore and a
+			// sleeping retry never occupies capacity a healthy email could use.
+			await semaphore.WaitAsync(cancellationToken);
+
+			bool sent;
+
+			try
+			{
+				// One scope per attempt, resolved here rather than using an injected
+				// service. IEndorsementSubmissionService is Scoped and reaches a DbContext
+				// (it looks up the client name for the email body). DbContext is NOT
+				// thread-safe, so sharing one instance across concurrent sends corrupts its
+				// change tracker in ways that surface as unrelated errors much later. Each
+				// attempt gets its own, exactly as BulkSubmissionProcessorService does.
+				using var scope = _serviceScopeFactory.CreateScope();
+
+				var submissionService = scope.ServiceProvider
+					.GetRequiredService<IEndorsementSubmissionService>();
+
+				sent = await TrySendEmailAsync(submissionService, request, attempt == 1 ? null : attempt);
+			}
+			finally
+			{
+				semaphore.Release();
+			}
+
+			if (sent)
 			{
 				return true;
 			}

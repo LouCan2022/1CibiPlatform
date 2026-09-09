@@ -236,6 +236,15 @@ Each of those has a reason, and changing one without knowing it will bite:
 - **The retry delay matters more than it looks.** Three back-to-back attempts against a
   briefly-unavailable server all fail identically and burn the row's budget in
   milliseconds. The pause is what actually lets a transient fault clear.
+- **The semaphore is held per ATTEMPT, not across the retry loop.** This is the subtle one.
+  Holding it across the loop means a retrying address keeps one of the 8 slots while it is
+  only *sleeping* — so a handful of bad addresses can put every slot to sleep and stall the
+  pass for healthy emails queued behind them. Acquire immediately before the send, release
+  immediately after, and let the backoff happen outside. A simulation of 24 emails with a
+  third failing measured 1627ms holding across the loop versus 960ms releasing per attempt.
+- **`SmtpClient.Timeout` is 10s** (`ATSEmailService`). An unreachable host therefore costs
+  ~34s per address (3 × 10s + 2 × 2s backoff). That is the real cost of a dead SMTP server,
+  and no amount of concurrency hides it — lower the timeout if you need to fail faster.
 - **The 5s trigger is a poll interval, not a load multiplier.** The job is
   `[DisallowConcurrentExecution]`, so a trigger firing mid-pass is skipped entirely. It
   only decides how fast an *idle* worker notices new work.
