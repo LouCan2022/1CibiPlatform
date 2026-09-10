@@ -798,14 +798,37 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 12px;
+
+    /* 16px below, so the bar never sits flush against the table card. */
+    margin: 12px 0 16px;
     padding: 12px 16px;
 
+    /* Follows the page down: a selection made at the top of a long list would otherwise
+       scroll out of reach, and the operator would have to scroll back up to act on it.
+       Sticky rather than fixed so it stays inside the page flow and pushes the table
+       down normally when it first appears.
+
+       0 works as the offset because the console topbar is not sticky - nothing overlaps
+       this. Sticky also needs no `overflow` on any ancestor, which holds here:
+       .ats-console, .ats-console-main and .ats-console-content all leave it unset. */
+    position: sticky;
+    top: 0;
+    z-index: 3;
+
     /* Reads as a live state rather than another filter: tinted with the same accent the
-       checkboxes use, so it is obviously about the selection. */
+       checkboxes use, so it is obviously about the selection.
+       Layered over an OPAQUE surface - the tint alone is translucent, and table rows
+       would show through it while scrolling. */
     border: 1px solid var(--management-blue-600);
     border-radius: 12px;
-    background: color-mix(in srgb, var(--management-blue-600) 10%, transparent);
+    background:
+        linear-gradient(
+            color-mix(in srgb, var(--management-blue-600) 10%, transparent),
+            color-mix(in srgb, var(--management-blue-600) 10%, transparent)),
+        var(--c-surface);
+
+    /* Lifts it off the rows passing underneath, so the edge stays legible while stuck. */
+    box-shadow: 0 6px 16px -10px rgba(11, 27, 61, .45);
 }
 
 .ats-management-page .ats-status-board-selection-count {
@@ -981,10 +1004,15 @@
     }
 
     /* The selection bar stacks into a column, so its count sits above full-width
-       actions rather than being squeezed beside them. */
+       actions rather than being squeezed beside them.
+
+       Stops being sticky at this width: stacked it is roughly two rows tall, which on a
+       phone would cover a meaningful share of the visible list for the whole scroll. */
     .ats-management-page .ats-status-board-selection-bar {
+        position: static;
         flex-direction: column;
         align-items: stretch;
+        box-shadow: none;
     }
 
     .ats-management-page .ats-status-board-selection-actions {

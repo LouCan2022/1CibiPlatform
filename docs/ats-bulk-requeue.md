@@ -117,6 +117,20 @@ disturbing any other control; the table simply moves down while it is open.
 It carries `aria-live="polite"` so a keyboard or screen-reader user hears the count change
 as they select, since the bar appears and updates without any navigation.
 
+**It is `position: sticky`.** A selection made at the top of a long list would otherwise
+scroll out of reach, forcing the operator back up to act on it. Two consequences worth
+knowing before changing it:
+
+- **Its background must stay opaque.** The accent tint is translucent, so it is layered over
+  `var(--c-surface)` with a `linear-gradient`. Dropping the surface layer lets table rows
+  show through while scrolling.
+- **No ancestor may set `overflow`.** Sticky silently stops working if one does.
+  `.ats-console`, `.ats-console-main` and `.ats-console-content` all leave it unset today;
+  the dialog sticks to `.ats-dialog-body`, which is the scroll container there.
+
+Below 600px it reverts to `position: static` — stacked it is about two rows tall, which on a
+phone would cover too much of the visible list for the whole scroll.
+
 The Ticketing board uses `.ats-status-board-selection-bar` from `ats.css`. The Bulk Uploads
 dialog restates the same rules locally as `.ats-bulk-subjects-selection-bar`, because it is
 not rendered inside `.ats-management-page` and so cannot match that rule's page anchor —
