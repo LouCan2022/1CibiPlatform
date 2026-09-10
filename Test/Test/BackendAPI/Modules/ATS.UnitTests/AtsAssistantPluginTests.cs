@@ -625,6 +625,73 @@ public class AtsAssistantPluginTests
 
 	#endregion
 
+	#region Function descriptions
+
+	// The descriptions are the only thing steering which function the model calls, so the
+	// properties that matter are asserted rather than left to review.
+	//
+	// The bug these exist for: SearchAuditEntries used to say "use this AFTER a summary",
+	// which the model read as "this is a follow-up step". A direct "list all the errors"
+	// was then answered from GetAuditSummary in prose, nothing populated LastAuditEntries,
+	// and no table was ever rendered.
+
+	private static string DescriptionOf(string methodName) =>
+		typeof(AtsAssistantPlugin)
+			.GetMethod(methodName)!
+			.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+			.Cast<System.ComponentModel.DescriptionAttribute>()
+			.Single()
+			.Description;
+
+	[Theory]
+	[InlineData("list")]
+	[InlineData("show")]
+	[InlineData("display")]
+	public void SearchAuditEntries_ShouldClaimTheListingVerbs(string verb)
+	{
+		// The verbs a user actually types have to appear in the description that WINS them,
+		// or the model picks by vibe and sometimes picks the summary.
+		DescriptionOf(nameof(AtsAssistantPlugin.SearchAuditEntriesAsync))
+			.Should()
+			.Contain(verb, "listing requests must route to the function that renders the table");
+	}
+
+	[Fact]
+	public void GetAuditSummary_ShouldDisclaimTheListingVerbs()
+	{
+		// The other half of the same fix: the summary has to actively hand listing requests
+		// away, not merely fail to claim them.
+		var description = DescriptionOf(nameof(AtsAssistantPlugin.GetAuditSummaryAsync));
+
+		description.Should().Contain("NO table");
+		description.Should().Contain(nameof(AtsAssistantPlugin.SearchAuditEntriesAsync).Replace("Async", string.Empty));
+	}
+
+	[Fact]
+	public void SearchAuditEntries_ShouldNotDescribeItselfAsAFollowUpStep()
+	{
+		// The exact regression. "after a summary" made listing the second step rather than
+		// the default, so a direct request produced prose and no table.
+		DescriptionOf(nameof(AtsAssistantPlugin.SearchAuditEntriesAsync))
+			.Should()
+			.NotContain(
+				"after a summary",
+				"describing this as a follow-up makes the model answer listing requests from the count instead");
+	}
+
+	[Fact]
+	public void SearchAuditEntries_ShouldDocumentTheOutcomeValues()
+	{
+		// The model has to know that "errors" maps to Failure, or it passes the user's own
+		// wording as the filter and matches nothing.
+		var description = DescriptionOf(nameof(AtsAssistantPlugin.SearchAuditEntriesAsync));
+
+		description.Should().Contain("Failure");
+		description.Should().Contain("Success");
+	}
+
+	#endregion
+
 	private void SetupPackages(params string[] packageNames)
 	{
 		var packages = packageNames
