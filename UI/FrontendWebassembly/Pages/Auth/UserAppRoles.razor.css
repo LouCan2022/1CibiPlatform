@@ -228,8 +228,10 @@
 }
 
 .user-app-roles-page ::deep .user-management-panel .table-component-search .mud-input-adornment-start {
-    margin-left: 11px;
+    margin-left: 0;
     margin-right: 7px;
+    margin-inline-start: unset;
+    margin-inline-end: 7px;
     color: var(--um-text-400);
 }
 
