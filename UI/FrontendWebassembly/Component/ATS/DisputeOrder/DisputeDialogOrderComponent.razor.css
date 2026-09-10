@@ -259,9 +259,13 @@
     color: var(--dd-text-3);
 }
 
+/* Same as the application-form inputs: no extra start margin, the outlined
+   input's own padding is what seats the icon at the field's left edge. */
 .dd-input-wrap ::deep .mud-input-adornment-start {
-    margin-left: 12px;
+    margin-left: 0;
     margin-right: 8px;
+    margin-inline-start: unset;
+    margin-inline-end: 8px;
 }
 
 .dd-input-wrap ::deep .mud-input-adornment-start .mud-icon-root {
