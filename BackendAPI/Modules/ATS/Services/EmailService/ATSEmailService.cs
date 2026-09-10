@@ -167,7 +167,7 @@ public class ATSEmailService : IEmailService, IAtsEmailSender
 	{
 		var message = new MimeKit.MimeMessage();
 
-		message.From.Add(new MimeKit.MailboxAddress("Workforce Manager", _connectionPool.SenderEmail));
+		message.From.Add(new MimeKit.MailboxAddress("Applicant Tracking System", _connectionPool.SenderEmail));
 		message.To.Add(MimeKit.MailboxAddress.Parse(toEmail));
 		message.Subject = subject;
 

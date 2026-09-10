@@ -92,12 +92,20 @@
             </div>
 
             <div class="ats-console-sidebar-bottom">
-                <MudButton Variant="Variant.Text"
-                           StartIcon="@Icons.Material.Filled.ArrowBack"
-                           Class="ats-console-back-btn"
-                           OnClick="GoBackToOnePlatform">
-                    Back to OnePlatform
-                </MudButton>
+                <button type="button"
+                        class="ats-console-nav-item ats-console-back-btn"
+                        title="Return home"
+                        @onclick="GoBackToOnePlatform">
+                    <svg class="ats-console-nav-ic ats-console-back-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        @* House with a return arrow sweeping back in through the doorway *@
+                        <path d="M3.5 10.5 12 3.5l8.5 7" />
+                        <path d="M5.5 9v10.5h4.8" />
+                        <path d="M18.5 9v10.5h-4.6" />
+                        <path d="M20 15.5h-7.5" />
+                        <path d="m15.2 12.9-2.7 2.6 2.7 2.6" />
+                    </svg>
+                    <span class="ats-console-nav-text">Return Home</span>
+                </button>
             </div>
         </aside>
 

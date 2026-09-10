@@ -1,6 +1,6 @@
 ﻿namespace FrontendWebassembly.Component.ATS;
 
-public partial class DisputeDialogOrderComponent
+public partial class DisputeDialogOrderComponent : IDisposable
 {
 	private const string OtherDisputeCategory = "Others";
 	private MudForm? disputeForm;
@@ -8,6 +8,12 @@ public partial class DisputeDialogOrderComponent
 	private bool isUploading;
 	private string? selectedDisputeCategory;
 	private string otherReason = string.Empty;
+
+	// Blinks the note under "Please specify" when the field is clicked while it is
+	// still locked. The token restarts the blink on every click instead of letting
+	// an earlier click's delay switch a newer blink off early.
+	private bool isSpecifyNoteBlinking;
+	private CancellationTokenSource? specifyNoteBlinkCts;
 
 	[Inject]
 	private IDialogService DialogService { get; set; } = default!;
@@ -31,13 +37,64 @@ public partial class DisputeDialogOrderComponent
 
 			selectedDisputeCategory = value;
 
-			if (!string.Equals(value, OtherDisputeCategory, StringComparison.Ordinal))
+			if (string.Equals(value, OtherDisputeCategory, StringComparison.Ordinal))
+			{
+				// The field just unlocked; a blink telling the user it is locked
+				// would now be lying.
+				specifyNoteBlinkCts?.Cancel();
+				isSpecifyNoteBlinking = false;
+			}
+			else
+			{
 				otherReason = string.Empty;
+			}
 		}
 	}
 
 	private bool IsOtherDisputeSelected =>
 		string.Equals(SelectedDisputeCategory, OtherDisputeCategory, StringComparison.Ordinal);
+
+	// The wrapper around the disabled field receives the click (a disabled input
+	// never raises one itself) and blinks the note for a moment. Re-clicking
+	// restarts the animation from the first flash.
+	private async Task OnSpecifyFieldClickedAsync()
+	{
+		if (IsOtherDisputeSelected)
+			return;
+
+		specifyNoteBlinkCts?.Cancel();
+		specifyNoteBlinkCts?.Dispose();
+		specifyNoteBlinkCts = new CancellationTokenSource();
+
+		var token = specifyNoteBlinkCts.Token;
+
+		// Drop the class for one render so a click mid-blink restarts the CSS
+		// animation instead of being ignored.
+		isSpecifyNoteBlinking = false;
+		await InvokeAsync(StateHasChanged);
+
+		isSpecifyNoteBlinking = true;
+		await InvokeAsync(StateHasChanged);
+
+		try
+		{
+			// Matches the CSS: 3 blinks x 0.5s.
+			await Task.Delay(1500, token);
+		}
+		catch (TaskCanceledException)
+		{
+			return;
+		}
+
+		isSpecifyNoteBlinking = false;
+		await InvokeAsync(StateHasChanged);
+	}
+
+	public void Dispose()
+	{
+		specifyNoteBlinkCts?.Cancel();
+		specifyNoteBlinkCts?.Dispose();
+	}
 
 	void Cancel() => SubmitDisputeOrderDialog!.Cancel();
 
