@@ -118,8 +118,9 @@ public static class BulkSubjectRowValidator
 	}
 
 	// MailAddress accepts the same shape FluentValidation's EmailAddress() rule does,
-	// without pulling the validator stack into the parsing job.
-	private static bool IsValidEmail(string value)
+	// without pulling the validator stack into the parsing job. Public because the
+	// upload-time BulkEmailValidation shares this rule, so the two tiers cannot drift.
+	public static bool IsValidEmail(string value)
 	{
 		if (value.Contains(' ', StringComparison.Ordinal))
 		{
