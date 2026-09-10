@@ -104,18 +104,19 @@ public class CsvPreviewParserTests
 	}
 
 	[Fact]
-	public void Parse_ShouldMaterialiseAllRowsAndReportTheTotal()
+	public void Parse_ShouldReturnEveryRowOfALargeFile()
 	{
-		// The preview row cap was removed: every row is materialised, so the operator
-		// reviews exactly what the import will process.
-		var rows = Enumerable.Range(0, 250)
+		// The preview row cap was removed: the dialog virtualises its rows, so the
+		// operator reviews the whole file rather than a sample.
+		const int rowCount = 550;
+		var rows = Enumerable.Range(0, rowCount)
 			.Select(index => $"Last{index},First{index},M,user{index}@example.com,09171234567");
 		var csv = $"{Header}\n{string.Join("\n", rows)}";
 
 		var result = CsvPreviewParser.Parse(csv);
 
-		result.Rows.Should().HaveCount(250);
-		result.TotalRowCount.Should().Be(250);
+		result.Rows.Should().HaveCount(rowCount);
+		result.TotalRowCount.Should().Be(rowCount);
 		result.IsTruncated.Should().BeFalse();
 	}
 

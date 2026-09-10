@@ -1,5 +1,6 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject EmailValidationService EmailValidationService
 
 <MudDialog Class="um-dialog preview-upload-dialog ats-scroll-dialog"
            Style="padding: 0; width: min(1000px, calc(100vw - 24px)); max-width: 1000px;">
@@ -82,6 +83,10 @@
                     @if (InvalidMobileRows.Any())
                     {
                         <div>Mobile number must be exactly 11 digits in row(s): @string.Join(", ", InvalidMobileRows).</div>
+                    }
+                    @if (InvalidEmailRows.Any())
+                    {
+                        <div>Email address is not a valid email in row(s): @string.Join(", ", InvalidEmailRows).</div>
                     }
                     @if (BlankRows.Any())
                     {
