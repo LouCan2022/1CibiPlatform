@@ -2,7 +2,9 @@ using ATS.Services.AccessScope;
 using ATS.AI;
 using ATS.Constants;
 using ATS.DTO;
+using ATS.Data.DTO;
 using ATS.Data.Repository;
+using ATS.Services.AuditTrail;
 using ATS.Services.OrderHistory;
 using ATS.Shared.Implementations;
 using Auth.Shared.Contracts;
@@ -21,6 +23,7 @@ public class AtsAssistantPluginTests
 	private readonly Mock<IATSRepository> _repository = new();
 	private readonly Mock<IOrderHistoryService> _orderHistoryService = new();
 	private readonly Mock<IPackageManagementService> _packageManagementService = new();
+	private readonly Mock<IAtsAuditService> _auditService = new();
 	private readonly Mock<ICurrentUser> _currentUser = new();
 	private readonly Mock<IUserClientRepository> _userClientRepository = new();
 	private readonly AtsOrderDraftStore _draftStore = new();
@@ -406,6 +409,222 @@ public class AtsAssistantPluginTests
 
 	#endregion
 
+	#region Audit trail
+
+	[Fact]
+	public async Task GetAuditSummaryAsync_ShouldRefuse_WhenCallerIsNotAPlatformSuperAdmin()
+	{
+		// Arrange: the fixture's default user is an ordinary ATS user, which is the case
+		// that matters - the assistant is available to every role, but the audit trail is
+		// not.
+		var plugin = await CreatePluginAsync();
+
+		// Act
+		var answer = await plugin.GetAuditSummaryAsync(7, CancellationToken.None);
+
+		// Assert
+		answer.Should().Be(AtsAssistantPlugin.AuditNotPermittedReply);
+
+		// The service is never reached, so a future change to its own gate cannot
+		// accidentally open this path.
+		_auditService.Verify(
+			service => service.GetOutcomeCountsAsync(
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<CancellationToken>()),
+			Times.Never);
+	}
+
+	[Fact]
+	public async Task SearchAuditEntriesAsync_ShouldReturnNothing_WhenCallerIsNotAPlatformSuperAdmin()
+	{
+		// Arrange
+		var plugin = await CreatePluginAsync();
+
+		// Act
+		var entries = await plugin.SearchAuditEntriesAsync(7, cancellationToken: CancellationToken.None);
+
+		// Assert
+		entries.Should().BeEmpty();
+		plugin.LastAuditEntries.Should().BeEmpty();
+
+		_auditService.Verify(
+			service => service.GetRecentEntriesAsync(
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<int>(),
+				It.IsAny<CancellationToken>()),
+			Times.Never);
+	}
+
+	[Fact]
+	public async Task GetAuditSummaryAsync_ShouldReportCounts_ForAPlatformSuperAdmin()
+	{
+		// Arrange
+		_currentUser.SetupGet(user => user.IsPlatformSuperAdmin).Returns(true);
+
+		_auditService
+			.Setup(service => service.GetOutcomeCountsAsync(
+				null,
+				null,
+				null,
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(new AuditOutcomeCountsDTO
+			{
+				Success = 340,
+				Failure = 12,
+				Total = 352
+			});
+
+		var plugin = await CreatePluginAsync();
+
+		// Act
+		var answer = await plugin.GetAuditSummaryAsync(7, CancellationToken.None);
+
+		// Assert
+		answer.Should().Contain("352");
+		answer.Should().Contain("340");
+		answer.Should().Contain("12");
+	}
+
+	[Fact]
+	public async Task SearchAuditEntriesAsync_ShouldReturnEntries_ForAPlatformSuperAdmin()
+	{
+		// Arrange
+		_currentUser.SetupGet(user => user.IsPlatformSuperAdmin).Returns(true);
+
+		_auditService
+			.Setup(service => service.GetRecentEntriesAsync(
+				"Failure",
+				null,
+				null,
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<int>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync(
+			[
+				new AtsAuditEntrySummaryDTO
+				{
+					OccurredAt = DateTime.UtcNow,
+					Action = "ResendApplicationForm",
+					Area = "Web",
+					Outcome = "Failure",
+					UserFullName = "Russel Gutierrez",
+					FailureReason = "SMTP unavailable"
+				}
+			]);
+
+		var plugin = await CreatePluginAsync();
+
+		// Act
+		var entries = await plugin.SearchAuditEntriesAsync(
+			7,
+			outcome: "Failure",
+			cancellationToken: CancellationToken.None);
+
+		// Assert
+		entries.Should().ContainSingle();
+		entries[0].Action.Should().Be("ResendApplicationForm");
+
+		// Recorded for the service to render as a table, mirroring LastSearchResults.
+		plugin.LastAuditEntries.Should().ContainSingle();
+	}
+
+	[Theory]
+	[InlineData(0)]
+	[InlineData(-5)]
+	[InlineData(9_999)]
+	public async Task SearchAuditEntriesAsync_ShouldClampTheLookbackPeriod(int daysBack)
+	{
+		// Arrange: the model routinely sends 0 (argument omitted) or an absurd number. Both
+		// have to become a sane range rather than an empty one or an unbounded scan.
+		_currentUser.SetupGet(user => user.IsPlatformSuperAdmin).Returns(true);
+
+		DateTime? capturedStart = null;
+		DateTime? capturedEnd = null;
+
+		_auditService
+			.Setup(service => service.GetRecentEntriesAsync(
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<string>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<int>(),
+				It.IsAny<CancellationToken>()))
+			.Callback<string?, string?, string?, DateTime?, DateTime?, int, CancellationToken>(
+				(_, _, _, start, end, _, _) =>
+				{
+					capturedStart = start;
+					capturedEnd = end;
+				})
+			.ReturnsAsync([]);
+
+		var plugin = await CreatePluginAsync();
+
+		// Act
+		await plugin.SearchAuditEntriesAsync(daysBack, cancellationToken: CancellationToken.None);
+
+		// Assert
+		capturedStart.Should().NotBeNull();
+		capturedEnd.Should().NotBeNull();
+
+		// Never an empty or inverted range, and never further back than the 90 day ceiling.
+		capturedStart!.Value.Should().BeOnOrBefore(capturedEnd!.Value);
+		capturedStart!.Value.Should().BeOnOrAfter(DateTime.UtcNow.Date.AddDays(-90));
+	}
+
+	[Fact]
+	public async Task SearchAuditEntriesAsync_ShouldTreatBlankFiltersAsNoFilter()
+	{
+		// Arrange: an empty string would reach the repository as `= ''` and match nothing.
+		// The model sends one instead of omitting the argument often enough to matter.
+		_currentUser.SetupGet(user => user.IsPlatformSuperAdmin).Returns(true);
+
+		_auditService
+			.Setup(service => service.GetRecentEntriesAsync(
+				It.IsAny<string>(),
+				null,
+				null,
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<int>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync([]);
+
+		var plugin = await CreatePluginAsync();
+
+		// Act
+		await plugin.SearchAuditEntriesAsync(
+			7,
+			action: "   ",
+			area: string.Empty,
+			cancellationToken: CancellationToken.None);
+
+		// Assert: the setup above only matches when both filters arrived as null.
+		_auditService.Verify(
+			service => service.GetRecentEntriesAsync(
+				It.IsAny<string>(),
+				null,
+				null,
+				It.IsAny<DateTime?>(),
+				It.IsAny<DateTime?>(),
+				It.IsAny<int>(),
+				It.IsAny<CancellationToken>()),
+			Times.Once);
+	}
+
+	#endregion
+
 	private void SetupPackages(params string[] packageNames)
 	{
 		var packages = packageNames
@@ -430,6 +649,7 @@ public class AtsAssistantPluginTests
 			_repository.Object,
 			_orderHistoryService.Object,
 			_packageManagementService.Object,
+			_auditService.Object,
 			_draftStore,
 			_currentUser.Object,
 			// A real resolver over the mocked ICurrentUser, so these tests keep

@@ -165,11 +165,11 @@
 
                         <div class="ats-actions-right">
                             @* <MudButton Variant="Variant.Outlined" Class="ats-ghost-btn">Save as draft</MudButton> *@
-                            <MudButton Class="ats-send-button" OnClick="OnSubmitCandidate" StartIcon="@Icons.Material.Outlined.Send">
+                            <MudButton Class="ats-send-button" OnClick="OnSubmitCandidate" StartIcon="@(isSavingCandidate ? null : Icons.Material.Outlined.Send)">
                                 @if (isSavingCandidate)
                                 {
-                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                    <span> Saving...</span>
+                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                                    <span>Saving...</span>
                                 }
                                 else
                                 {

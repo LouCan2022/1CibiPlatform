@@ -26,18 +26,36 @@ public sealed class AtsAssistantPlugin
 		"I can't answer that because it isn't related to ATS. I can only help you look up "
 		+ "background check orders and prepare new ones.";
 
+	// The most days back an audit question may reach. Bounds the query, and a question
+	// about "the last year" is a reporting job rather than a chat answer.
+	private const int MaxAuditDaysBack = 90;
+
+	private const int DefaultAuditDaysBack = 7;
+
+	/// <summary>
+	/// What the assistant says when a non-super-admin asks about the audit trail. Worded so
+	/// it is clearly a permission boundary and not a system fault, and so it does not hint
+	/// at what the trail contains.
+	/// </summary>
+	public const string AuditNotPermittedReply =
+		"I can't look up audit records for your account. The audit trail is available to "
+		+ "platform administrators only.";
+
 	private readonly IATSRepository _atsRepository;
 	private readonly IOrderHistoryService _orderHistoryService;
 	private readonly IPackageManagementService _packageManagementService;
+	private readonly IAtsAuditService _auditService;
 	private readonly AtsOrderDraftStore _draftStore;
 	private readonly IAtsAccessScopeResolver _accessScopeResolver;
 	private readonly Guid _userId;
 	private readonly int? _clientId;
+	private readonly bool _isPlatformSuperAdmin;
 
 	public AtsAssistantPlugin(
 		IATSRepository atsRepository,
 		IOrderHistoryService orderHistoryService,
 		IPackageManagementService packageManagementService,
+		IAtsAuditService auditService,
 		AtsOrderDraftStore draftStore,
 		ICurrentUser currentUser,
 		IAtsAccessScopeResolver accessScopeResolver)
@@ -45,16 +63,30 @@ public sealed class AtsAssistantPlugin
 		_atsRepository = atsRepository;
 		_orderHistoryService = orderHistoryService;
 		_packageManagementService = packageManagementService;
+		_auditService = auditService;
 		_draftStore = draftStore;
 		_accessScopeResolver = accessScopeResolver;
 		_userId = currentUser.UserId ?? Guid.Empty;
 		_clientId = currentUser.AtsClientId;
+		_isPlatformSuperAdmin = currentUser.IsAuthenticated && currentUser.IsPlatformSuperAdmin;
 	}
 
 	/// <summary>
 	/// Orders surfaced during this turn, so the service can render them as a table.
 	/// </summary>
 	public List<AtsOrderSummaryDTO> LastSearchResults { get; } = new();
+
+	/// <summary>
+	/// Audit entries surfaced during this turn, so the service can render them as a table.
+	/// Mirrors <see cref="LastSearchResults"/>.
+	/// </summary>
+	public List<AtsAuditEntrySummaryDTO> LastAuditEntries { get; } = new();
+
+	/// <summary>
+	/// The filters behind <see cref="LastAuditEntries"/>, so the chat can offer an export of
+	/// exactly the rows it showed. Null until an audit search runs.
+	/// </summary>
+	public AtsAuditQueryDTO? LastAuditQuery { get; private set; }
 
 	/// <summary>
 	/// The order staged during this turn, if any, so the service can render a confirm card.
@@ -138,6 +170,104 @@ public sealed class AtsAssistantPlugin
 		LastSearchResults.AddRange(orders);
 
 		return orders;
+	}
+
+	[KernelFunction]
+	[Description("Report how many audited actions succeeded and failed over a recent period. "
+		+ "Use this for questions like 'were there any failures today', 'how many actions "
+		+ "this week' or 'is anything going wrong'. Only platform administrators can read "
+		+ "the audit trail; for anyone else this returns a message saying so, which you must "
+		+ "relay as your whole answer.")]
+	public async Task<string> GetAuditSummaryAsync(
+		[Description("How many days back to look, from 1 to 90. Use 1 for 'today', 7 for 'this week'.")]
+		int daysBack,
+		CancellationToken cancellationToken)
+	{
+		// Checked here as well as in the service, so the model is TOLD it may not read this
+		// rather than being handed an empty result it might explain away as "no activity".
+		//
+		// Note this is IsPlatformSuperAdmin and NOT IAtsAccessScopeResolver, unlike every
+		// other function in this file. The audit trail is deliberately not client-scoped -
+		// see AtsAuditService.CanRead - because a trail the audited user can read is a
+		// weaker control.
+		if (!_isPlatformSuperAdmin)
+		{
+			return AuditNotPermittedReply;
+		}
+
+		var (startDate, endDate) = ResolveAuditPeriod(daysBack);
+
+		var counts = await _auditService.GetOutcomeCountsAsync(
+			action: null,
+			area: null,
+			searchTerm: null,
+			startDate,
+			endDate,
+			cancellationToken);
+
+		if (counts.Total == 0)
+		{
+			return $"No audited actions were recorded in the last {ClampDaysBack(daysBack)} day(s).";
+		}
+
+		return $"In the last {ClampDaysBack(daysBack)} day(s) there were {counts.Total} audited "
+			+ $"action(s): {counts.Success} succeeded and {counts.Failure} failed.";
+	}
+
+	[KernelFunction]
+	[Description("List recent audited actions, newest first, optionally filtered. Use this "
+		+ "after a summary when the user asks WHICH actions failed or what someone did. Do "
+		+ "not repeat the rows in prose - the application shows them as a table. Only "
+		+ "platform administrators can read the audit trail; for anyone else this returns "
+		+ "nothing.")]
+	public async Task<IReadOnlyList<AtsAuditEntrySummaryDTO>> SearchAuditEntriesAsync(
+		[Description("How many days back to look, from 1 to 90. Use 1 for 'today', 7 for 'this week'.")]
+		int daysBack,
+		[Description("Optional outcome filter. Either 'Success' or 'Failure'. Omit for both.")]
+		string? outcome = null,
+		[Description("Optional action name filter, for example 'ResendApplicationForm'. Omit for all.")]
+		string? action = null,
+		[Description("Optional area filter, for example 'Web' or 'PublicApi'. Omit for all.")]
+		string? area = null,
+		CancellationToken cancellationToken = default)
+	{
+		// Same reasoning as GetAuditSummaryAsync: the access rule here is the platform role,
+		// not the ATS client scope.
+		if (!_isPlatformSuperAdmin)
+		{
+			return Array.Empty<AtsAuditEntrySummaryDTO>();
+		}
+
+		var (startDate, endDate) = ResolveAuditPeriod(daysBack);
+
+		var normalizedAction = NullIfBlank(action);
+		var normalizedArea = NullIfBlank(area);
+		var normalizedOutcome = NullIfBlank(outcome);
+
+		var entries = await _auditService.GetRecentEntriesAsync(
+			normalizedOutcome,
+			normalizedAction,
+			normalizedArea,
+			startDate,
+			endDate,
+			MaxSearchResults,
+			cancellationToken);
+
+		LastAuditEntries.Clear();
+		LastAuditEntries.AddRange(entries);
+
+		// Recorded so the chat can offer an export of exactly these filters. The clamped
+		// day count is stored, not what the model asked for, so the export covers the same
+		// period the user was shown.
+		LastAuditQuery = new AtsAuditQueryDTO
+		{
+			DaysBack = ClampDaysBack(daysBack),
+			Outcome = normalizedOutcome,
+			Action = normalizedAction,
+			Area = normalizedArea
+		};
+
+		return entries;
 	}
 
 	[KernelFunction]
@@ -230,6 +360,30 @@ public sealed class AtsAssistantPlugin
 			+ "The order has NOT been created yet. Reply briefly and do not describe a card "
 			+ "or ask the user to press anything.";
 	}
+
+	// The model is unreliable with relative dates, so it passes a day count and the period
+	// is derived here. endDate is today because the repository treats it as inclusive
+	// (it filters OccurredAt < endDate + 1 day).
+	private static (DateTime StartDate, DateTime EndDate) ResolveAuditPeriod(int daysBack)
+	{
+		var clamped = ClampDaysBack(daysBack);
+		var today = DateTime.UtcNow.Date;
+
+		// clamped - 1 so "1 day" means today rather than today and yesterday.
+		return (today.AddDays(-(clamped - 1)), today);
+	}
+
+	// A model that omits the argument sends 0; treat that as the default period rather
+	// than an empty range that would silently return nothing.
+	private static int ClampDaysBack(int daysBack) =>
+		daysBack <= 0
+			? DefaultAuditDaysBack
+			: Math.Min(daysBack, MaxAuditDaysBack);
+
+	// An empty string filter would reach the repository as a literal `= ''` and match
+	// nothing; the model sometimes sends one instead of omitting the argument.
+	private static string? NullIfBlank(string? value) =>
+		string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
 	// Delegates to AtsAccessScopeResolver - this used to be a fourth inline copy of the
 	// role ladder. The assistant must never see further than the user it answers for.

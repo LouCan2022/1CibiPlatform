@@ -142,9 +142,13 @@
     box-shadow: 0 0 0 3px rgba(46, 124, 224, 0.12);
 }
 
+/* No extra start margin - the outlined input's own padding seats the icon at
+   the field's left edge, same as the application-form and dispute inputs. */
 .ats-management-card .table-component-search .mud-input-adornment-start {
-    margin-left: 14px;
+    margin-left: 0;
     margin-right: 8px;
+    margin-inline-start: unset;
+    margin-inline-end: 8px;
     color: var(--management-text-3);
 }
 
@@ -772,6 +776,155 @@
     margin-right: auto;
 }
 
+/* The selection gutter, shared by every board that offers a bulk action. Narrow and
+   centred so the checkbox column reads as a gutter rather than a column of data
+   competing with the identity cell beside it.
+
+   Shared rather than per-screen because the Ticketing and Bulk Upload boards must keep
+   identical row geometry - see the note at the top of this section. */
+.ats-management-page .ats-status-board-select-header,
+.ats-management-page .ats-status-board-select-cell {
+    padding-right: 0;
+    text-align: center;
+    width: 48px;
+}
+
+/* Chips on the left, a board-level action on the right, sharing the row above the table.
+   Lives here rather than in a scoped sheet because it is the same arrangement any status
+   board needs the moment it grows an export or similar. */
+.ats-management-page .ats-audit-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    /* Takes over the segmented control's own bottom margin, released below, so the gap
+       to the table is unchanged from before the row existed. */
+    margin-bottom: 16px;
+}
+
+/* The segmented control carries its own 16px bottom margin; the row owns the spacing
+   now, so it is released here rather than being restated on both children. */
+.ats-management-page .ats-audit-filter-row .ats-status-board-segmented {
+    margin-bottom: 0;
+}
+
+.ats-management-page .ats-audit-export:disabled {
+    opacity: .55;
+    cursor: default;
+    box-shadow: none;
+}
+
+.ats-management-page .ats-audit-export:disabled:active {
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    .ats-management-page .ats-audit-export {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+/* The selection bar: its own band between the filter chips and the table, not a control
+   inside the table toolbar.
+
+   It lives here because sharing the toolbar row forced the button to align with the
+   search box and the reload button, and pushed both out of shape the moment a selection
+   existed. As a separate band it can appear, grow and disappear without moving anything
+   except the table below it. */
+.ats-management-page .ats-status-board-selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    /* 16px below, so the bar never sits flush against the table card. */
+    margin: 12px 0 16px;
+    padding: 12px 16px;
+
+    /* Follows the page down: a selection made at the top of a long list would otherwise
+       scroll out of reach, and the operator would have to scroll back up to act on it.
+       Sticky rather than fixed so it stays inside the page flow and pushes the table
+       down normally when it first appears.
+
+       0 works as the offset because the console topbar is not sticky - nothing overlaps
+       this. Sticky also needs no `overflow` on any ancestor, which holds here:
+       .ats-console, .ats-console-main and .ats-console-content all leave it unset. */
+    position: sticky;
+    top: 0;
+    z-index: 3;
+
+    /* Reads as a live state rather than another filter: tinted with the same accent the
+       checkboxes use, so it is obviously about the selection.
+       Layered over an OPAQUE surface - the tint alone is translucent, and table rows
+       would show through it while scrolling. */
+    border: 1px solid var(--management-blue-600);
+    border-radius: 12px;
+    background:
+        linear-gradient(
+            color-mix(in srgb, var(--management-blue-600) 10%, transparent),
+            color-mix(in srgb, var(--management-blue-600) 10%, transparent)),
+        var(--c-surface);
+
+    /* Lifts it off the rows passing underneath, so the edge stays legible while stuck. */
+    box-shadow: 0 6px 16px -10px rgba(11, 27, 61, .45);
+}
+
+.ats-management-page .ats-status-board-selection-count {
+    color: var(--management-text-1);
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.ats-management-page .ats-status-board-selection-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Quiet secondary action - clearing is a correction, not the thing the bar is for. */
+.ats-management-page .ats-status-board-selection-clear {
+    padding: 8px 14px;
+    border: 1px solid var(--management-border-strong);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--management-text-2);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ats-management-page .ats-status-board-selection-clear:hover:not(:disabled) {
+    border-color: var(--management-blue-600);
+    color: var(--management-text-1);
+}
+
+.ats-management-page .ats-status-board-selection-clear:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+/* Sized by its own content now that it no longer has to match the 56px toolbar
+   controls beside it. */
+.ats-management-page .ats-status-board-requeue {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.ats-management-page .ats-status-board-requeue:disabled {
+    opacity: .55;
+    cursor: default;
+    box-shadow: none;
+}
+
+.ats-management-page .ats-status-board-requeue:disabled:active {
+    transform: none;
+}
+
 .ats-management-page .ats-status-board-date-field {
     display: flex;
     width: 100%;
@@ -890,6 +1043,28 @@
     .ats-management-page .ats-status-board-date-field .mud-picker,
     .ats-management-page .ats-status-board-date-field .mud-picker-inline {
         width: 100% !important;
+    }
+
+    /* The selection bar stacks into a column, so its count sits above full-width
+       actions rather than being squeezed beside them.
+
+       Stops being sticky at this width: stacked it is roughly two rows tall, which on a
+       phone would cover a meaningful share of the visible list for the whole scroll. */
+    .ats-management-page .ats-status-board-selection-bar {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+        box-shadow: none;
+    }
+
+    .ats-management-page .ats-status-board-selection-actions {
+        width: 100%;
+    }
+
+    .ats-management-page .ats-status-board-selection-clear,
+    .ats-management-page .ats-status-board-requeue {
+        flex: 1 1 0;
+        justify-content: center;
     }
 
     /* Release the 56px pin: stacked, the search box can take its natural height. */
@@ -2390,8 +2565,7 @@ button.ats-console-brand-text {
 
 .ats-console-collapsed .ats-console-brand-text,
 .ats-console-collapsed .ats-console-nav-text,
-.ats-console-collapsed .ats-console-nav-label,
-.ats-console-collapsed .ats-console-sidebar-bottom {
+.ats-console-collapsed .ats-console-nav-label {
     display: none;
 }
 
@@ -2846,18 +3020,36 @@ button.ats-console-brand-text {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Native-button reset - ats-console-nav-item supplies the padding, color,
+   hover, and collapsed (icon-only) behavior shared with the nav. The icon is
+   pinned left and the label centers in the remaining space, so it reads as a
+   footer action without losing the nav rows' left-anchored icon rhythm. */
 .ats-console-back-btn {
+    position: relative;
     width: 100%;
-    justify-content: flex-start;
-    text-transform: none !important;
-    color: rgba(255, 255, 255, 0.88) !important;
-    border-radius: 9px;
-    padding: 9px 10px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    justify-content: center;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--c-on-dark-fg);
 }
 
-    .ats-console-back-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
+.ats-console-back-btn .ats-console-back-ic {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+}
+
+.ats-console-collapsed .ats-console-back-btn .ats-console-back-ic {
+    position: static;
+    transform: none;
+}
 
 .ats-appform-modern {
     background: var(--modern-bg);
@@ -3919,26 +4111,6 @@ button.ats-console-brand-text {
     color: var(--c-fg-muted);
     padding: 10px 0;
 }
-
-.ats-console-sidebar-bottom {
-    flex: 0 0 auto;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.ats-console-back-btn {
-    width: 100%;
-    justify-content: flex-start;
-    text-transform: none !important;
-    color: rgba(255, 255, 255, 0.88) !important;
-    border-radius: 9px;
-    padding: 9px 10px;
-}
-
-    .ats-console-back-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
 
 /* Re-pointed at the shared tokens; the same six names are declared identically in
    philsys.css for the same selector list. */
@@ -4964,8 +5136,7 @@ button.ats-console-brand-text {
 
     .ats-console-collapsed .ats-console-brand-text,
     .ats-console-collapsed .ats-console-nav-text,
-    .ats-console-collapsed .ats-console-nav-label,
-    .ats-console-collapsed .ats-console-sidebar-bottom {
+    .ats-console-collapsed .ats-console-nav-label {
         display: block;
     }
 
