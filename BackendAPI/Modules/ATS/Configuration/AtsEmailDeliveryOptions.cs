@@ -46,4 +46,18 @@ public sealed class AtsEmailDeliveryOptions
 	// When the provider answers "slow down" (SMTP 4xx), the whole pass stops for this long.
 	// Continuing to send into a rate limit is what turns a short throttle into a long one.
 	public int ThrottleBackoffSeconds { get; set; } = 600;
+
+	// Minimum gap between opening NEW authenticated sessions, paced separately from sends.
+	//
+	// Providers throttle authentication on its own budget - Gmail answers "454 Too many
+	// login attempts" long before it complains about message volume. Pacing messages does
+	// nothing for that, because a discarded session forces a fresh login that the send
+	// limiter never sees. Five seconds means a pool of 2 refills in ten, and a pathological
+	// reconnect loop still cannot exceed 12 logins a minute.
+	public int MinSecondsBetweenLogins { get; set; } = 5;
+
+	// A login throttle ("454 Too many login attempts") is answered with a longer pause than
+	// a send throttle. Authentication limits are enforced over a longer window, so the
+	// ten-minute send back-off is not enough to clear one.
+	public int LoginThrottleBackoffSeconds { get; set; } = 1_800;
 }
