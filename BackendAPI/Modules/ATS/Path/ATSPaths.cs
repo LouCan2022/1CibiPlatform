@@ -389,6 +389,17 @@ public class ATSPaths : IReverseProxyModule
 			),
 
 			new RouteDefinitionDTO(
+				RouteId: "ExportAuditTrail",
+				MatchPath: "/ats/exportaudittrail",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/exportaudittrail" }
+				}
+			),
+
+			new RouteDefinitionDTO(
 				RouteId: "GetAuditOutcomeCounts",
 				MatchPath: "/ats/getauditoutcomecounts",
 				ClusterId: GatewayConstants.OnePlatformApi,
