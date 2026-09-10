@@ -785,6 +785,44 @@
     width: 48px;
 }
 
+/* Chips on the left, a board-level action on the right, sharing the row above the table.
+   Lives here rather than in a scoped sheet because it is the same arrangement any status
+   board needs the moment it grows an export or similar. */
+.ats-management-page .ats-audit-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    /* Takes over the segmented control's own bottom margin, released below, so the gap
+       to the table is unchanged from before the row existed. */
+    margin-bottom: 16px;
+}
+
+/* The segmented control carries its own 16px bottom margin; the row owns the spacing
+   now, so it is released here rather than being restated on both children. */
+.ats-management-page .ats-audit-filter-row .ats-status-board-segmented {
+    margin-bottom: 0;
+}
+
+.ats-management-page .ats-audit-export:disabled {
+    opacity: .55;
+    cursor: default;
+    box-shadow: none;
+}
+
+.ats-management-page .ats-audit-export:disabled:active {
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    .ats-management-page .ats-audit-export {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
 /* The selection bar: its own band between the filter chips and the table, not a control
    inside the table toolbar.
 
