@@ -63,5 +63,10 @@ public class PhilSysCacheRepository : IPhilSysRepository
 		return result;
 	}
 
+	public async Task<List<PhilSysTransaction>> GetExpiredUntransactedTransactionsAsync(DateTime cutoffUtc)
+	{
+		return await _philSysRepository.GetExpiredUntransactedTransactionsAsync(cutoffUtc);
+	}
+
 	private static string LivenessStatusKey(string HashToken) => $"PhilSys_LivenessSessionStatus_{HashToken}";
 }
