@@ -6,21 +6,18 @@ public class ATSEmailService : IEmailService, IAtsEmailSender
 	private readonly ILogger<ATSEmailService> _logger;
 	private readonly SmtpConnectionPool _connectionPool;
 	private readonly SmtpRateLimiter _rateLimiter;
-	private readonly AtsEmailDeliveryOptions _options;
 	private readonly int _atsApplicationFormExpirationInHours;
 
 	public ATSEmailService(
 		IConfiguration configuration,
 		ILogger<ATSEmailService> logger,
 		SmtpConnectionPool connectionPool,
-		SmtpRateLimiter rateLimiter,
-		IOptions<AtsEmailDeliveryOptions> options)
+		SmtpRateLimiter rateLimiter)
 	{
 		_configuration = configuration;
 		_logger = logger;
 		_connectionPool = connectionPool;
 		_rateLimiter = rateLimiter;
-		_options = options.Value;
 		_atsApplicationFormExpirationInHours = _configuration.GetSection("ATS").GetValue<int>("ATSApplicationFormExpiryInHours");
 	}
 
@@ -55,54 +52,114 @@ public class ATSEmailService : IEmailService, IAtsEmailSender
 		// a scarce resource for no reason.
 		await _rateLimiter.WaitForSlotAsync(cancellationToken);
 
-		await using var lease = await _connectionPool.AcquireAsync(cancellationToken);
-
-		var message = BuildMessage(toEmail, subject, body);
+		SmtpLease lease;
 
 		try
 		{
-			await lease.Client.SendAsync(message, cancellationToken);
-
-			lease.RecordSend();
-
-			_logger.LogInformation("Email sent successfully to {Email}", toEmail);
-
-			return EmailDeliveryResult.Sent;
+			lease = await _connectionPool.AcquireAsync(cancellationToken);
 		}
-		catch (MailKit.Net.Smtp.SmtpCommandException exception)
+		catch (SmtpLoginThrottledException exception)
 		{
-			// The server answered with a status code. This is the branch the old
-			// implementation threw away by collapsing everything to `false`.
-			return ClassifyCommandFailure(toEmail, exception, lease);
+			// The pool declined to open a session because authentication is rate limited.
+			// Nothing was attempted, so this is reported as a throttle rather than a
+			// delivery failure - the row keeps its budget.
+			return exception.Result;
 		}
-		catch (MailKit.Net.Smtp.SmtpProtocolException exception)
+		catch (SmtpConnectFailedException exception)
 		{
-			// The conversation itself broke down. The session is not trustworthy.
-			lease.MarkFaulted();
-
-			_logger.LogError(
-				exception,
-				"SMTP protocol error sending to {Email}. The session was discarded.",
-				toEmail);
-
-			return EmailDeliveryResult.Transient(null, exception.Message);
-		}
-		catch (Exception exception) when (exception is IOException or SocketException or TimeoutException or OperationCanceledException
-			&& !cancellationToken.IsCancellationRequested)
-		{
-			// Socket dropped or timed out. Transient, but the connection is dead.
-			//
-			// Note this can fire AFTER the provider accepted the message - which is exactly
-			// how a candidate received the same invitation more than once. The generous
-			// SendTimeoutSeconds default exists to make this rare rather than routine.
-			lease.MarkFaulted();
-
+			// Already classified inside the pool, including the login-throttle case that
+			// used to escape unclassified and be retried into another login.
 			_logger.LogWarning(
-				exception,
-				"SMTP transport failure sending to {Email}. Treating as transient.",
-				toEmail);
+				"Could not open an SMTP session to send to {Email}: {StatusCode} {Message}",
+				toEmail,
+				exception.Result.StatusCode,
+				exception.Result.Message);
 
-			return EmailDeliveryResult.Transient(null, exception.Message);
+			return exception.Result;
+		}
+
+		await using (lease)
+		{
+			var message = BuildMessage(toEmail, subject, body);
+
+			try
+			{
+				await lease.Client.SendAsync(message, cancellationToken);
+
+				lease.RecordSend();
+
+				_logger.LogInformation("Email sent successfully to {Email}", toEmail);
+
+				return EmailDeliveryResult.Sent;
+			}
+			catch (MailKit.Net.Smtp.SmtpCommandException exception)
+			{
+				// The server answered with a status code. The classifier also decides whether
+				// the SESSION survives - a per-recipient rejection says nothing about the
+				// connection, and discarding it would force a needless re-login.
+				var (result, sessionIsUsable) = SmtpFailureClassifier.ClassifySendFailure(exception);
+
+				if (!sessionIsUsable)
+				{
+					lease.MarkFaulted();
+				}
+
+				if (result.Outcome == EmailDeliveryOutcome.Throttled)
+				{
+					_logger.LogWarning(
+						"SMTP throttling detected while sending to {Email}: {StatusCode} {Message}",
+						toEmail,
+						result.StatusCode,
+						exception.Message);
+				}
+				else if (result.Outcome == EmailDeliveryOutcome.Permanent)
+				{
+					_logger.LogError(
+						"Permanent SMTP rejection for {Email}: {StatusCode} {Message}",
+						toEmail,
+						result.StatusCode,
+						exception.Message);
+				}
+				else
+				{
+					_logger.LogWarning(
+						"Transient SMTP failure sending to {Email}: {StatusCode} {Message}",
+						toEmail,
+						result.StatusCode,
+						exception.Message);
+				}
+
+				return result;
+			}
+			catch (MailKit.Net.Smtp.SmtpProtocolException exception)
+			{
+				// The conversation itself broke down. The session is not trustworthy.
+				lease.MarkFaulted();
+
+				_logger.LogError(
+					exception,
+					"SMTP protocol error sending to {Email}. The session was discarded.",
+					toEmail);
+
+				return EmailDeliveryResult.Transient(null, exception.Message);
+			}
+			catch (Exception exception) when (exception is IOException or SocketException or TimeoutException or OperationCanceledException
+				&& !cancellationToken.IsCancellationRequested)
+			{
+				// Socket dropped or timed out. Transient, but the connection is dead.
+				//
+				// Note this can fire AFTER the provider accepted the message - which is exactly
+				// how a candidate received the same invitation more than once. The generous
+				// SendTimeoutSeconds default exists to make this rare rather than routine.
+				lease.MarkFaulted();
+
+				_logger.LogWarning(
+					exception,
+					"SMTP transport failure sending to {Email}. Treating as transient.",
+					toEmail);
+
+				return EmailDeliveryResult.Transient(null, exception.Message);
+			}
 		}
 	}
 
@@ -120,65 +177,6 @@ public class ATSEmailService : IEmailService, IAtsEmailSender
 		}.ToMessageBody();
 
 		return message;
-	}
-
-	/// <summary>
-	/// Turns an SMTP status code into a retry decision.
-	///
-	/// The three outcomes lead to genuinely different behaviour upstream, which is why this
-	/// is not a bool: a permanent refusal fails the row immediately instead of burning five
-	/// attempts, and a throttle stops the entire pass rather than retrying into a wall.
-	/// </summary>
-	private EmailDeliveryResult ClassifyCommandFailure(
-		string toEmail,
-		MailKit.Net.Smtp.SmtpCommandException exception,
-		SmtpLease lease)
-	{
-		var code = (int)exception.StatusCode;
-		var codeText = code.ToString(CultureInfo.InvariantCulture);
-
-		// 421 (service closing) and 454 (too many auth attempts) are the two Gmail returns
-		// when it is deliberately slowing a sender down. 421 also closes the connection, so
-		// the session must not go back in the pool.
-		var isThrottle =
-			code is 421 or 454
-			|| exception.Message.Contains("try again later", StringComparison.OrdinalIgnoreCase)
-			|| exception.Message.Contains("unusual rate", StringComparison.OrdinalIgnoreCase)
-			|| exception.Message.Contains("rate limit", StringComparison.OrdinalIgnoreCase);
-
-		if (isThrottle)
-		{
-			lease.MarkFaulted();
-
-			_logger.LogWarning(
-				"SMTP throttling detected while sending to {Email}: {StatusCode} {Message}",
-				toEmail,
-				codeText,
-				exception.Message);
-
-			return EmailDeliveryResult.Throttled(codeText, exception.Message);
-		}
-
-		// 4xx is temporary by RFC 5321; 5xx is permanent and will refuse identically on
-		// every retry.
-		if (code >= 400 && code < 500)
-		{
-			_logger.LogWarning(
-				"Transient SMTP failure sending to {Email}: {StatusCode} {Message}",
-				toEmail,
-				codeText,
-				exception.Message);
-
-			return EmailDeliveryResult.Transient(codeText, exception.Message);
-		}
-
-		_logger.LogError(
-			"Permanent SMTP rejection for {Email}: {StatusCode} {Message}",
-			toEmail,
-			codeText,
-			exception.Message);
-
-		return EmailDeliveryResult.Permanent(codeText, exception.Message);
 	}
 
 	public string SendAppplicationFormNotification(string gmail, string name, string applicationFormLink, string? requestor, string? clientName)

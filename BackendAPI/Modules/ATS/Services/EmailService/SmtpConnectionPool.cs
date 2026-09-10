@@ -16,6 +16,7 @@ public sealed class SmtpConnectionPool : IAsyncDisposable
 {
 	private readonly ILogger<SmtpConnectionPool> _logger;
 	private readonly AtsEmailDeliveryOptions _options;
+	private readonly SmtpRateLimiter _rateLimiter;
 	private readonly SemaphoreSlim _available;
 	private readonly ConcurrentBag<PooledConnection> _idle = [];
 	private readonly string _host;
@@ -23,15 +24,22 @@ public sealed class SmtpConnectionPool : IAsyncDisposable
 	private readonly string _senderEmail;
 	private readonly string _appPassword;
 
+	// Diagnostic, and the number that matters most here: it should stay close to
+	// MaxConcurrentConnections over a whole run. If it climbs with the message count, the
+	// pool is not pooling and the provider is about to say so.
+	private long _loginCount;
+
 	private bool _disposed;
 
 	public SmtpConnectionPool(
 		IConfiguration configuration,
 		IOptions<AtsEmailDeliveryOptions> options,
+		SmtpRateLimiter rateLimiter,
 		ILogger<SmtpConnectionPool> logger)
 	{
 		_logger = logger;
 		_options = options.Value;
+		_rateLimiter = rateLimiter;
 
 		_senderEmail = configuration["Email:ATSGmail:SenderEmail"]
 			?? throw new InvalidOperationException("Email:ATSGmail:SenderEmail not configured");
@@ -48,6 +56,8 @@ public sealed class SmtpConnectionPool : IAsyncDisposable
 	}
 
 	public string SenderEmail => _senderEmail;
+
+	public long LoginCount => Interlocked.Read(ref _loginCount);
 
 	/// <summary>
 	/// Leases a connected, authenticated session. Dispose the lease to return it to the
@@ -91,6 +101,20 @@ public sealed class SmtpConnectionPool : IAsyncDisposable
 
 	private async Task<PooledConnection> CreateConnectionAsync(CancellationToken cancellationToken)
 	{
+		// Refused outright rather than queued. Waiting out a 30-minute login back-off here
+		// would hold a pool slot for the duration and starve the sessions that are still
+		// perfectly usable.
+		if (_rateLimiter.IsLoginThrottled)
+		{
+			throw new SmtpLoginThrottledException(
+				"The SMTP provider is rate limiting authentication; no new session was opened.");
+		}
+
+		// Paced on its own budget. Authentication is throttled separately from volume at the
+		// provider, and a discarded session forces a login the SEND limiter never sees -
+		// which is how one bad response used to cascade into a stream of logins.
+		await _rateLimiter.WaitForLoginSlotAsync(cancellationToken);
+
 		var client = new MailKit.Net.Smtp.SmtpClient
 		{
 			// Applies to every network operation on this client. Generous on purpose: a
@@ -99,19 +123,53 @@ public sealed class SmtpConnectionPool : IAsyncDisposable
 			Timeout = (int)TimeSpan.FromSeconds(_options.SendTimeoutSeconds).TotalMilliseconds
 		};
 
-		await client.ConnectAsync(
-			_host,
-			_port,
-			MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable,
-			cancellationToken);
+		try
+		{
+			await client.ConnectAsync(
+				_host,
+				_port,
+				MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable,
+				cancellationToken);
 
-		await client.AuthenticateAsync(_senderEmail, _appPassword, cancellationToken);
+			await client.AuthenticateAsync(_senderEmail, _appPassword, cancellationToken);
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			client.Dispose();
+
+			// Classified HERE, not left to escape as an unclassified exception. "454 Too many
+			// login attempts" is raised by AuthenticateAsync, so the send path's handler
+			// never saw it: it was reported as a generic transient fault and retried, opening
+			// yet another connection. The throttle has to be recognised at the point the
+			// login happens.
+			var classified = SmtpFailureClassifier.ClassifyConnectFailure(exception);
+
+			if (classified.Outcome == EmailDeliveryOutcome.Throttled)
+			{
+				// The longer back-off: authentication limits are enforced over a wider
+				// window than send limits, so the ten-minute send pause does not clear one.
+				_rateLimiter.ReportThrottled(
+					TimeSpan.FromSeconds(_options.LoginThrottleBackoffSeconds));
+
+				_logger.LogError(
+					exception,
+					"The SMTP provider is rate limiting LOGINS ({StatusCode}). Pausing new sessions for {BackoffMinutes} minutes. Logins so far: {LoginCount}.",
+					classified.StatusCode,
+					_options.LoginThrottleBackoffSeconds / 60,
+					LoginCount);
+			}
+
+			throw new SmtpConnectFailedException(classified, exception);
+		}
+
+		var totalLogins = Interlocked.Increment(ref _loginCount);
 
 		_logger.LogInformation(
-			"Opened SMTP session to {Host}:{Port} as {Sender}.",
+			"Opened SMTP session to {Host}:{Port} as {Sender}. Logins this process: {LoginCount}.",
 			_host,
 			_port,
-			_senderEmail);
+			_senderEmail,
+			totalLogins);
 
 		return new PooledConnection(client);
 	}

@@ -20,8 +20,10 @@ public sealed class SmtpRateLimiter : IDisposable
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private readonly ILogger<SmtpRateLimiter> _logger;
 	private readonly double _minIntervalTicks;
+	private readonly TimeSpan _minLoginInterval;
 
 	private DateTime _nextSlotUtc = DateTime.MinValue;
+	private DateTime _nextLoginSlotUtc = DateTime.MinValue;
 
 	// Set when the provider says "slow down". Every waiter parks until it passes, which is
 	// what stops a pass from spending its whole retry budget against a closed door.
@@ -43,6 +45,9 @@ public sealed class SmtpRateLimiter : IDisposable
 		}
 
 		_minIntervalTicks = TimeSpan.TicksPerSecond / perSecond;
+
+		_minLoginInterval = TimeSpan.FromSeconds(
+			Math.Max(0, options.Value.MinSecondsBetweenLogins));
 	}
 
 	/// <summary>
@@ -89,6 +94,54 @@ public sealed class SmtpRateLimiter : IDisposable
 	}
 
 	/// <summary>
+	/// Blocks until a NEW authenticated session may be opened.
+	///
+	/// Paced separately from sends, and this is not a refinement - it is the fix for a real
+	/// failure. Authentication has its own budget at the provider ("454 Too many login
+	/// attempts" arrives long before any complaint about volume), and a discarded session
+	/// forces a login that the send limiter never sees. Without this gate, one throttled
+	/// send could produce an unbounded stream of logins, each one provoking the next
+	/// throttle.
+	/// </summary>
+	public async Task WaitForLoginSlotAsync(CancellationToken cancellationToken)
+	{
+		TimeSpan delay;
+
+		await _gate.WaitAsync(cancellationToken);
+
+		try
+		{
+			var now = DateTime.UtcNow;
+
+			var earliest = _throttledUntilUtc > now ? _throttledUntilUtc : now;
+
+			if (_nextLoginSlotUtc < earliest)
+			{
+				_nextLoginSlotUtc = earliest;
+			}
+
+			var slot = _nextLoginSlotUtc;
+
+			_nextLoginSlotUtc = slot.Add(_minLoginInterval);
+
+			delay = slot - now;
+		}
+		finally
+		{
+			_gate.Release();
+		}
+
+		if (delay > TimeSpan.Zero)
+		{
+			_logger.LogInformation(
+				"Delaying a new SMTP login by {DelaySeconds:0.0}s to stay under the provider's authentication limit.",
+				delay.TotalSeconds);
+
+			await Task.Delay(delay, cancellationToken);
+		}
+	}
+
+	/// <summary>
 	/// Records that the provider is rate limiting this sender. Every subsequent
 	/// <see cref="WaitForSlotAsync"/> parks until the back-off elapses.
 	/// </summary>
@@ -116,6 +169,13 @@ public sealed class SmtpRateLimiter : IDisposable
 			"SMTP provider is rate limiting this sender. Pausing all sends until {ThrottledUntil:O}.",
 			until);
 	}
+
+	/// <summary>
+	/// True while a provider throttle is in force, without the side effect of taking a slot.
+	/// Used by the pool to refuse a new login outright rather than queue behind the
+	/// back-off holding a pool slot for the duration.
+	/// </summary>
+	public bool IsLoginThrottled => DateTime.UtcNow < _throttledUntilUtc;
 
 	/// <summary>
 	/// True while a provider throttle is in force. The processor reads this to abandon the
