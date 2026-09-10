@@ -48,6 +48,42 @@
         }
     </div>
 
+    @* Its own band between the filters and the table, rather than a control inside the
+       table toolbar. Sharing that row meant the button had to align with the search box
+       and reload, and it pushed them out of shape as soon as it appeared. Here it can
+       grow with the selection without disturbing anything, and the table simply moves
+       down while it is open.
+
+       aria-live so a keyboard or screen-reader user hears the count change as they
+       select, since the bar appears and updates without any navigation. *@
+    @if (_selectedInvitationIds.Count > 0)
+    {
+        <div class="ats-status-board-selection-bar" role="region" aria-live="polite">
+            <span class="ats-status-board-selection-count">
+                @_selectedInvitationIds.Count selected
+            </span>
+
+            <div class="ats-status-board-selection-actions">
+                <button type="button"
+                        class="ats-status-board-selection-clear"
+                        disabled="@_isBulkRetrying"
+                        @onclick="ClearSelection">
+                    Clear
+                </button>
+
+                <button type="button"
+                        class="ats-management-button ats-status-board-requeue"
+                        disabled="@_isBulkRetrying"
+                        @onclick="ConfirmBulkRetryAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 11A8 8 0 1 0 12 20M20 5v6h-6" />
+                    </svg>
+                    @(_isBulkRetrying ? "Queueing..." : "Retry selected")
+                </button>
+            </div>
+        </div>
+    }
+
     <TableComponent TItem="TicketedOrderListDTO"
                     @ref="_ordersTable"
                     Title="Ticketing status"
@@ -80,22 +116,6 @@
                                     PlaceholderEnd="End Date" />
             </div>
 
-            @* Appears only with a selection, so the toolbar stays quiet in the common case
-               where nobody is retrying anything. *@
-            @if (_selectedInvitationIds.Count > 0)
-            {
-                <button type="button"
-                        class="ats-management-button ats-status-board-requeue"
-                        disabled="@_isBulkRetrying"
-                        @onclick="ConfirmBulkRetryAsync">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M20 11A8 8 0 1 0 12 20M20 5v6h-6" />
-                    </svg>
-                    @(_isBulkRetrying
-                        ? "Queueing..."
-                        : $"Retry selected ({_selectedInvitationIds.Count})")
-                </button>
-            }
         </ToolBarLeft>
 
         <HeaderTemplate>

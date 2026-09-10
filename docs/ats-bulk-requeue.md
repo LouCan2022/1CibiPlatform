@@ -102,7 +102,27 @@ deliberately-paced email queue — at 0.9 sends/second, 500 invitations is alrea
 minutes of sending. Every requeued order becomes an OMS round trip. Releasing thousands at
 once would let one operator's click monopolise a shared job and block every other client.
 
-## 3. Selection is per page, on purpose
+## 3. The selection bar
+
+The action lives in **its own band between the filter chips and the table**, not in the
+table's toolbar. It appears only when something is selected, showing the count, a `Clear`
+button and the requeue button.
+
+This is a layout decision with a reason. The first version put the button in the toolbar's
+left slot beside the date filter, which forced it to align with the search box and reload
+button and pushed both out of shape the moment a selection existed — the button ended up
+overlapping the table header. As a separate band it can appear, grow and disappear without
+disturbing any other control; the table simply moves down while it is open.
+
+It carries `aria-live="polite"` so a keyboard or screen-reader user hears the count change
+as they select, since the bar appears and updates without any navigation.
+
+The Ticketing board uses `.ats-status-board-selection-bar` from `ats.css`. The Bulk Uploads
+dialog restates the same rules locally as `.ats-bulk-subjects-selection-bar`, because it is
+not rendered inside `.ats-management-page` and so cannot match that rule's page anchor —
+**keep the two in step.**
+
+## 4. Selection is per page, on purpose
 
 The header checkbox selects **only the eligible rows on the current page**, not everything
 matching the filter.
@@ -121,7 +141,7 @@ Two supporting rules:
   in `LoadSubjectsAsync` / `LoadOrdersAsync`. Keeping it would let an operator submit rows
   they cannot see.
 
-## 4. Files
+## 5. Files
 
 ```text
 Backend
@@ -135,15 +155,17 @@ Backend
   Path/ATSPaths.cs                                      both gateway routes
 
 Frontend
-  Component/ATS/OMSTicketing/TicketingStatusComponent   checkbox column + toolbar button
-  Component/ATS/BulkUploads/BulkUploadSubjectsDialog    checkbox column + toolbar button
+  Component/ATS/OMSTicketing/TicketingStatusComponent   checkbox column + selection bar
+  Component/ATS/BulkUploads/BulkUploadSubjectsDialog    checkbox column + selection bar
   Services/ATS/OMSTicketing/                            RetryTicketsAsync
   Services/ATS/EndorsementSubmission/                   ResendApplicationFormsAsync
   DTO/ATS/BulkRetryResultDTO.cs
-  wwwroot/css/ats.css                                   .ats-status-board-select-*, .ats-status-board-requeue
+  wwwroot/css/ats.css                                   .ats-status-board-select-*,
+                                                        .ats-status-board-selection-*,
+                                                        .ats-status-board-requeue
 ```
 
-## 5. How to verify it
+## 6. How to verify it
 
 ```powershell
 dotnet test Test/Test/Test.csproj --filter "FullyQualifiedName~ResendApplicationForm"
@@ -167,7 +189,7 @@ GET /__routes
 Manually: fail some rows, select several, requeue, and watch them move to `Pending` with a
 cleared attempt count — that visible reset is the confirmation the retry took effect.
 
-## 6. What not to do
+## 7. What not to do
 
 - **Do not give each requeued invitation the same token.** `RequeueEmailInvitationsAsync`
   runs one `UPDATE` per row precisely so each carries its own. A shared token would let any
@@ -182,6 +204,9 @@ cleared attempt count — that visible reset is the confirmation the retry took 
 - **Do not extend select-all across the whole filter** without also showing the operator
   what they are about to touch. The cap bounds the damage; visibility is what prevents the
   mistake.
+- **Do not move the action back into the table toolbar.** It has to share that row with the
+  search box and the reload button, which are pinned to a fixed height for alignment; the
+  button either breaks that alignment or gets pushed onto the table header.
 - **Do not raise the batch caps to "make it faster".** They exist because the queues
   downstream are deliberately paced. A bigger batch does not send faster; it just blocks
   other clients for longer.

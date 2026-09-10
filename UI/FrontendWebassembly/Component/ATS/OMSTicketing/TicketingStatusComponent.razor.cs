@@ -306,6 +306,10 @@ public partial class TicketingStatusComponent
 		}
 	}
 
+	// The selection bar's own escape hatch. Unchecking rows one at a time is the only
+	// other way out, which is tedious once a whole page is selected.
+	private void ClearSelection() => _selectedInvitationIds.Clear();
+
 	private async Task ConfirmBulkRetryAsync()
 	{
 		var selectedCount = _selectedInvitationIds.Count;

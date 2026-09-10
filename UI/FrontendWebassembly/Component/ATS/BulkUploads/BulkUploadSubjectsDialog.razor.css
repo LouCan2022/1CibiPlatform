@@ -120,13 +120,62 @@
     margin: 16px 24px 0;
 }
 
-/* Keeps the two buttons side by side at the row's right edge. Without the wrapper the
-   filter row's space-between would push them to opposite ends of the row. */
-.ats-bulk-subjects-actions {
+/* The selection bar: its own band between the filter row and the table, mirroring
+   .ats-status-board-selection-bar on the Ticketing board. Restated rather than shared
+   because this dialog is not rendered inside .ats-management-page and so cannot match
+   that rule's page anchor - keep the two in step.
+
+   It sits outside the filter row on purpose: sharing that row meant the button had to
+   align with the export control, and it moved the tabs every time a selection changed. */
+.ats-bulk-subjects-selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 12px 24px 0;
+    padding: 12px 16px;
+
+    /* Reads as a live state rather than another filter: tinted with the same accent the
+       checkboxes use, so it is obviously about the selection. */
+    border: 1px solid var(--blue-600);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--blue-600) 10%, transparent);
+}
+
+.ats-bulk-subjects-selection-count {
+    color: var(--text-1);
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.ats-bulk-subjects-selection-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px;
+}
+
+/* Quiet secondary action - clearing is a correction, not the thing the bar is for. */
+.ats-bulk-subjects-selection-clear {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ats-bulk-subjects-selection-clear:hover:not(:disabled) {
+    border-color: var(--blue-600);
+    color: var(--text-1);
+}
+
+.ats-bulk-subjects-selection-clear:disabled {
+    opacity: .55;
+    cursor: default;
 }
 
 /* Both buttons are styled by .ats-management-button (ats.css); only the disabled
@@ -376,13 +425,24 @@
         margin: 12px 16px 0;
     }
 
-    .ats-bulk-subjects-actions {
+    .ats-bulk-subjects-export {
+        justify-content: center;
         width: 100%;
     }
 
-    .ats-bulk-subjects-export,
+    .ats-bulk-subjects-selection-bar {
+        flex-direction: column;
+        align-items: stretch;
+        margin: 12px 16px 0;
+    }
+
+    .ats-bulk-subjects-selection-actions {
+        width: 100%;
+    }
+
+    .ats-bulk-subjects-selection-clear,
     .ats-bulk-subjects-requeue {
-        flex: 1 1 100%;
+        flex: 1 1 0;
         justify-content: center;
     }
 
