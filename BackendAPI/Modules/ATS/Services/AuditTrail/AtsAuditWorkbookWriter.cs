@@ -15,9 +15,23 @@ public static class AtsAuditWorkbookWriter
 {
 	private const string SheetName = "Audit Trail";
 
+	// The action name AtsAssistantService.RecordAudit writes. Matched on rather than
+	// sniffing the payload's shape, which would misfire on any future command carrying a
+	// "Question" field.
+	private const string AssistantAction = "AskAtsAssistant";
+
+	private const int ColumnCount = 12;
+
 	// Wide enough for a sentence without letting one long stack trace set the column width
 	// for the whole sheet. Excel wraps within this.
 	private const double CauseColumnWidth = 60;
+
+	// Wider still: this holds a whole chat exchange.
+	private const double DetailsColumnWidth = 80;
+
+	// Excel refuses a cell over 32,767 characters. Kept well below so a long transcript
+	// cannot fail the whole export.
+	private const int MaxDetailsLength = 30_000;
 
 	/// <summary>
 	/// Builds the workbook. The returned stream is positioned at 0 and owned by the caller.
@@ -57,6 +71,7 @@ public static class AtsAuditWorkbookWriter
 			"Email",
 			"Site",
 			"Duration (ms)",
+			"Details",
 			"IP address",
 			"Trace ID"
 		];
@@ -102,12 +117,75 @@ public static class AtsAuditWorkbookWriter
 			sheet.Cell(rowNumber, 7).Value = entry.UserEmail ?? string.Empty;
 			sheet.Cell(rowNumber, 8).Value = entry.Site ?? string.Empty;
 			sheet.Cell(rowNumber, 9).Value = entry.DurationMs;
-			sheet.Cell(rowNumber, 10).Value = entry.IpAddress ?? string.Empty;
-			sheet.Cell(rowNumber, 11).Value = entry.TraceId ?? string.Empty;
+
+			// The payload rendered for a human. For an assistant turn this is the actual
+			// question and answer, which is the whole point of exporting those rows.
+			// SetValue, like the cause column, so text beginning '=' is never a formula.
+			sheet.Cell(rowNumber, 10).SetValue(DescribePayload(entry));
+			sheet.Cell(rowNumber, 10).Style.Alignment.WrapText = true;
+
+			sheet.Cell(rowNumber, 11).Value = entry.IpAddress ?? string.Empty;
+			sheet.Cell(rowNumber, 12).Value = entry.TraceId ?? string.Empty;
 
 			StyleOutcome(sheet, rowNumber, entry.Outcome);
 		}
 	}
+
+	/// <summary>
+	/// Renders an entry's payload as readable text for the Details column.
+	///
+	/// An assistant transcript gets a Q/A layout, because "what did they ask and what were
+	/// they told" is unreadable as raw JSON in a spreadsheet cell. Everything else falls
+	/// back to the stored JSON, which is what the detail dialog shows.
+	/// </summary>
+	private static string DescribePayload(AuditTrailListDTO entry)
+	{
+		if (string.IsNullOrWhiteSpace(entry.Payload) || entry.Payload == "{}")
+		{
+			return string.Empty;
+		}
+
+		if (!string.Equals(entry.Action, AssistantAction, StringComparison.OrdinalIgnoreCase))
+		{
+			return Truncate(entry.Payload, MaxDetailsLength);
+		}
+
+		try
+		{
+			using var document = JsonDocument.Parse(entry.Payload);
+			var root = document.RootElement;
+
+			var question = ReadString(root, "Question");
+			var answer = ReadString(root, "Answer");
+
+			var transcript = $"Q: {question}\n\nA: {answer}";
+
+			// Surfaced as a line rather than left to be inferred from the answer's wording,
+			// which may change.
+			if (root.TryGetProperty("WasRefused", out var refused)
+				&& refused.ValueKind == JsonValueKind.True)
+			{
+				transcript += "\n\n[refused as out of scope]";
+			}
+
+			return Truncate(transcript, MaxDetailsLength);
+		}
+		catch (JsonException)
+		{
+			// A payload that will not parse is still worth exporting as-is.
+			return Truncate(entry.Payload, MaxDetailsLength);
+		}
+	}
+
+	private static string ReadString(JsonElement root, string propertyName) =>
+		root.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
+			? value.GetString() ?? string.Empty
+			: string.Empty;
+
+	// Excel refuses a cell over 32,767 characters, so this is a hard limit rather than a
+	// stylistic one.
+	private static string Truncate(string value, int maxLength) =>
+		value.Length > maxLength ? value[..maxLength] : value;
 
 	// A failure is tinted across the whole row, not just its Outcome cell: someone scanning
 	// a thousand rows for what went wrong should find them without reading a column.
@@ -123,7 +201,7 @@ public static class AtsAuditWorkbookWriter
 			return;
 		}
 
-		var row = sheet.Range(rowNumber, 1, rowNumber, 11);
+		var row = sheet.Range(rowNumber, 1, rowNumber, ColumnCount);
 
 		row.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#FDECEA");
 		row.Style.Font.FontColor = ClosedXML.Excel.XLColor.FromHtml("#8C2F2A");
@@ -140,21 +218,29 @@ public static class AtsAuditWorkbookWriter
 
 		var lastRow = Math.Max(rowCount + 1, 1);
 
-		sheet.Range(1, 1, lastRow, 11).SetAutoFilter();
+		sheet.Range(1, 1, lastRow, ColumnCount).SetAutoFilter();
 
 		sheet.Columns().AdjustToContents();
 
-		// AdjustToContents sizes the Cause column to its longest message, which can be
-		// hundreds of characters. Pin it and let the wrap handle the rest.
+		// AdjustToContents sizes a column to its longest value, which for Cause and Details
+		// can be thousands of characters. Pin both and let the wrap handle the rest.
 		sheet.Column(5).Width = CauseColumnWidth;
+		sheet.Column(10).Width = DetailsColumnWidth;
 
 		// Keep every other column readable without becoming a wall of text.
 		foreach (var column in sheet.ColumnsUsed())
 		{
-			if (column.ColumnNumber() != 5 && column.Width > 40)
+			var number = column.ColumnNumber();
+
+			if (number != 5 && number != 10 && column.Width > 40)
 			{
 				column.Width = 40;
 			}
 		}
+
+		// Top-aligned so a wrapped transcript reads from the top of its cell rather than
+		// floating in the middle of a tall row.
+		sheet.Rows(2, lastRow).Style.Alignment.Vertical =
+			ClosedXML.Excel.XLAlignmentVerticalValues.Top;
 	}
 }

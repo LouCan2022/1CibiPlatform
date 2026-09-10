@@ -7,7 +7,8 @@ lane, and what to know before adding a function.
 change the system prompt, or let a model reach a write path.
 
 The audit trail itself has no separate document: its access rule is stated in
-`AtsAuditService.CanRead()`, and what the assistant may do with it is section 4 below.
+`AtsAuditService.CanRead()`, what the assistant may do with it is section 4, and how
+conversations are recorded into it is section 5.
 
 ---
 
@@ -107,7 +108,53 @@ Both functions take `daysBack`, not a date range. Models are unreliable with rel
 and a day count is trivially bounded: clamped to 1–90, with 0 (an omitted argument) treated
 as the 7-day default rather than an empty range.
 
-## 5. Export to Excel
+## 5. Every conversation is audited
+
+Both sides of every turn — the question **and** the answer — are recorded in the ATS audit
+trail as an `AskAtsAssistant` entry.
+
+### Why the service writes it, not the pipeline
+
+`AskAtsAssistantCommand` still carries `[SkipAudit]`, which looks wrong until you know why:
+**`AtsAuditBehavior` only ever serializes the request.** An entry written there would capture
+what was asked and lose what the system replied, and half a conversation is not a record of
+it.
+
+So `AtsAssistantService.RecordAudit` writes the entry itself, straight to `IAtsAuditWriter`,
+with `AtsChatAuditPayloadDTO` as the payload:
+
+```json
+{
+  "Question": "show me today's failures",
+  "Answer": "There were 12 failed actions today.",
+  "WasRefused": false,
+  "OrderResultCount": 0,
+  "AuditResultCount": 12,
+  "StagedOrderDraft": false
+}
+```
+
+It is written in both the success and the exception path, so a turn that blew up is recorded
+too — that is exactly the one someone comes looking for. The whole method is wrapped
+best-effort: nothing about recording a conversation may break the conversation.
+
+### What is stored, and what is not
+
+**Counts, not rows.** `OrderResultCount` and `AuditResultCount` say how much came back, but
+the rows themselves are not copied in. That data already lives in the tables this trail sits
+beside, and duplicating candidate details into the audit payload would spread it further for
+no gain. `AuditResultCount > 0` is how you find who used the assistant to read the trail.
+
+**The question is stored verbatim, and that is a real trade-off.** `AtsAuditRedactor` masks
+by *property name*, which cannot help with free prose — a question that happens to contain an
+SSS or TIN is stored exactly as typed. Accepted deliberately, for a complete transcript, and
+it is part of why the trail stays super-admin only. The detail dialog shows an extra warning
+on these rows so nobody reads the standard "IDs are masked" note and assumes it applies.
+
+Both fields are truncated at 4,000 characters. The question is already validated to 2,000,
+but an answer is model output with no such cap.
+
+## 6. Export to Excel
 
 **A model cannot hand the browser a file.** A download has to be started by a real user
 gesture on the page or the browser blocks it. So "export this to Excel" works like this:
@@ -134,13 +181,17 @@ The prompt tells the model it cannot download anything and must not claim it has
 - **Failed rows tinted red across the whole row**, not just the outcome cell — someone
   scanning a thousand rows should find the failures without reading a column
 - **"Cause of failure" as its own column**, immediately after Outcome
-- Frozen header, auto-filter, wrapped cause column pinned to 60 chars wide
+- **"Details"**, which for an `AskAtsAssistant` row is the transcript laid out as
+  `Q: … / A: …` rather than raw JSON, with a `[refused as out of scope]` line when the turn
+  was refused. Any other command falls back to its stored payload.
+- Frozen header, auto-filter, wrapped Cause and Details columns, top-aligned rows
 
 That styling is the reason this is a workbook rather than a CSV — a CSV cannot do any of it.
 
-Two safety details: the cause is written with `SetValue` as text so a reason starting with
-`=` cannot execute as a formula, and the filename is built from a timestamp so no filter
-value reaches the `Content-Disposition` header.
+Two safety details: the cause **and the transcript** are written with `SetValue` as text so
+a value starting with `=` cannot execute as a formula, and the filename is built from a
+timestamp so no filter value reaches the `Content-Disposition` header. Both are pinned by
+`AtsAuditWorkbookWriterTests`.
 
 ### The screen has the same export
 
@@ -152,7 +203,7 @@ Unlike the paged read, **the export throws `ForbiddenException`** for a non-admi
 returning an empty result. A download leaves the system; a plausible-looking empty file is
 worse than being told no.
 
-## 6. How to verify it
+## 7. How to verify it
 
 ```powershell
 dotnet format BackendAPI/Modules/ATS/ATS.csproj whitespace --no-restore
@@ -167,6 +218,8 @@ The tests that pin the security decisions:
 - `SearchAuditEntriesAsync_ShouldReturnNothing_WhenCallerIsNotAPlatformSuperAdmin`
 - `GetRecentEntriesAsync_ShouldReturnNothing_ForAnOrdinaryUser`
 - `ExportAuditTrailAsync_ShouldThrowForbidden_ForAnOrdinaryUser`
+- `Write_ShouldNotTreatLeadingEqualsAsAFormula`
+- `Write_ShouldRenderAnAssistantTranscriptAsQuestionAndAnswer`
 
 Manually, as a super admin:
 
@@ -178,7 +231,22 @@ Manually, as a super admin:
 Then repeat 1–3 as an ordinary ATS user: the assistant should say the trail is not available
 to their account, with no table and no button.
 
-## 7. What not to do
+To confirm conversations are recorded, open the Audit Trail screen after any of the above —
+each turn appears as an `AskAtsAssistant` row, and its detail dialog shows the question and
+answer. Or straight from the database:
+
+```sql
+SELECT "OccurredAt", "UserFullName", "Payload"->>'Question', "Payload"->>'Answer'
+FROM ats."AuditTrail"
+WHERE "Action" = 'AskAtsAssistant'
+ORDER BY "OccurredAt" DESC
+LIMIT 20;
+```
+
+The payload is `jsonb`, so this is queryable directly — `"Payload"->>'AuditResultCount' <> '0'`
+finds everyone who used the assistant to read the trail.
+
+## 8. What not to do
 
 - **Do not scope the audit functions with `IAtsAccessScopeResolver`.** It is the platform
   role that governs the trail, not the ATS client. Using the scope resolver would hand every
@@ -190,5 +258,10 @@ to their account, with no table and no button.
 - **Do not remove the kernel `Clone()`.** Plugins would leak across users and modules.
 - **Do not let the model claim it downloaded, emailed or created anything.** It stages and
   reports; the application acts. `StageNewOrder` in particular only prepares a draft.
+- **Do not remove `[SkipAudit]` from `AskAtsAssistantCommand` thinking it is an oversight.**
+  It is there so the pipeline does not write a second, half-blind entry alongside the one
+  `RecordAudit` writes with both sides of the conversation.
+- **Do not let `RecordAudit` throw.** It is wrapped best-effort on purpose: recording a
+  conversation must never break the conversation.
 - **Do not describe UI in the prompt** ("press Confirm", "click the button"). The application
   decides what to render, and the wording drifts out of sync the moment it changes.

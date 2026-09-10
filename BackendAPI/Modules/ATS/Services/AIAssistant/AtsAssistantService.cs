@@ -2,6 +2,11 @@ namespace ATS.Services.AIAssistant;
 
 public class AtsAssistantService : IAtsAssistantService
 {
+	// Bounds one audited exchange. The question is already validated to 2000 characters,
+	// but an answer is model output and has no such cap, and the trail must not be filled
+	// by a single runaway reply. Generous enough that a normal exchange is never cut.
+	private const int MaxAuditedTextLength = 4_000;
+
 	private const string SystemPrompt = """
 		You are the ATS Assistant for the CIBI Applicant Tracking System.
 		You help background check requestors with exactly three things:
@@ -85,6 +90,8 @@ public class AtsAssistantService : IAtsAssistantService
 	private readonly AtsOrderDraftStore _draftStore;
 	private readonly AtsChatHistoryStore _historyStore;
 	private readonly ICurrentUser _currentUser;
+	private readonly IAtsAuditWriter _auditWriter;
+	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly IHubContext<ATSHub, IATSClient> _hubContext;
 	private readonly ILogger<AtsAssistantService> _logger;
 
@@ -99,6 +106,8 @@ public class AtsAssistantService : IAtsAssistantService
 		AtsOrderDraftStore draftStore,
 		AtsChatHistoryStore historyStore,
 		ICurrentUser currentUser,
+		IAtsAuditWriter auditWriter,
+		IHttpContextAccessor httpContextAccessor,
 		IHubContext<ATSHub, IATSClient> hubContext,
 		ILogger<AtsAssistantService> logger)
 	{
@@ -112,6 +121,8 @@ public class AtsAssistantService : IAtsAssistantService
 		_draftStore = draftStore;
 		_historyStore = historyStore;
 		_currentUser = currentUser;
+		_auditWriter = auditWriter;
+		_httpContextAccessor = httpContextAccessor;
 		_hubContext = hubContext;
 		_logger = logger;
 	}
@@ -123,6 +134,11 @@ public class AtsAssistantService : IAtsAssistantService
 
 		var userLock = _historyStore.GetUserLock(userId);
 		await userLock.WaitAsync(cancellationToken);
+
+		// Timed and recorded here rather than by AtsAuditBehavior, which only ever
+		// serializes the REQUEST - an entry written there would hold the question and lose
+		// the answer, and half a conversation is not a record of it.
+		var stopwatch = Stopwatch.StartNew();
 
 		try
 		{
@@ -192,9 +208,43 @@ public class AtsAssistantService : IAtsAssistantService
 			_historyStore.Append(userId, AuthorRole.User.Label, question);
 			_historyStore.Append(userId, AuthorRole.Assistant.Label, answer);
 
+			stopwatch.Stop();
+
+			RecordAudit(
+				question,
+				answer,
+				stopwatch,
+				AuditOutcome.Success,
+				failureReason: null,
+				plugin.WasRefusedAsOutOfScope,
+				orders?.Count ?? 0,
+				auditEntries?.Count ?? 0,
+				draft is not null);
+
 			await _hubContext.Clients.Group(userGroup).ReceiveChatResponse(answer);
 
 			return new AtsChatAnswerDTO(answer, orders, draft, auditEntries, auditQuery);
+		}
+		catch (Exception exception)
+		{
+			stopwatch.Stop();
+
+			// The attempt is recorded and the exception continues to the global handler, so
+			// the caller still gets its normal error response. A turn that blew up is
+			// exactly the one someone will come looking for later - matching how
+			// AtsAuditBehavior treats a failed command.
+			RecordAudit(
+				question,
+				answer: string.Empty,
+				stopwatch,
+				AuditOutcome.Failure,
+				exception.Message,
+				wasRefused: false,
+				orderResultCount: 0,
+				auditResultCount: 0,
+				stagedOrderDraft: false);
+
+			throw;
 		}
 		finally
 		{
@@ -202,6 +252,94 @@ public class AtsAssistantService : IAtsAssistantService
 			userLock.Release();
 		}
 	}
+
+	/// <summary>
+	/// Records one assistant exchange - question AND answer - in the ATS audit trail.
+	/// </summary>
+	/// <remarks>
+	/// Written here rather than by <c>AtsAuditBehavior</c> because that behaviour only
+	/// serializes the request, so it would capture what was asked and lose what the system
+	/// replied. <c>AskAtsAssistantCommand</c> therefore keeps its <c>[SkipAudit]</c> and
+	/// this method owns the entry.
+	///
+	/// The whole method is best-effort: nothing about recording a conversation may break
+	/// the conversation, exactly as the behaviour treats its own writes.
+	/// </remarks>
+	private void RecordAudit(
+		string question,
+		string answer,
+		Stopwatch stopwatch,
+		string outcome,
+		string? failureReason,
+		bool wasRefused,
+		int orderResultCount,
+		int auditResultCount,
+		bool stagedOrderDraft)
+	{
+		try
+		{
+			var payload = new AtsChatAuditPayloadDTO
+			{
+				// Stored verbatim. The audit redactor masks by PROPERTY NAME, which cannot
+				// help with free prose - a question that happens to contain an SSS or TIN is
+				// stored as typed. That is the accepted cost of a complete transcript, and
+				// the reason the trail stays super-admin only.
+				Question = Truncate(question, MaxAuditedTextLength) ?? string.Empty,
+				Answer = Truncate(answer, MaxAuditedTextLength) ?? string.Empty,
+				WasRefused = wasRefused,
+
+				// Counts, not the rows themselves: candidate and audit data already live in
+				// the tables this trail sits beside, and copying them into the payload would
+				// spread that data further for no gain.
+				OrderResultCount = orderResultCount,
+				AuditResultCount = auditResultCount,
+				StagedOrderDraft = stagedOrderDraft
+			};
+
+			var entry = new AtsAuditEntry
+			{
+				AuditEntryId = Guid.CreateVersion7(),
+				OccurredAt = DateTime.UtcNow,
+
+				// The same shape AtsAuditBehavior.ResolveAction produces, so this row reads
+				// like every other one on the screen.
+				Action = "AskAtsAssistant",
+				Area = "AIAssistant",
+				Outcome = outcome,
+				FailureReason = Truncate(failureReason, 500),
+				DurationMs = (int)Math.Min(stopwatch.ElapsedMilliseconds, int.MaxValue),
+				UserId = _currentUser.UserId,
+				UserEmail = Truncate(_currentUser.Email, 255),
+				UserFullName = Truncate(_currentUser.FullName, 255),
+				AtsRoleId = _currentUser.AtsRoleId,
+				AtsClientId = _currentUser.AtsClientId,
+				IsPlatformSuperAdmin = _currentUser.IsPlatformSuperAdmin,
+				IpAddress = Truncate(
+					_httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+					64),
+				TraceId = Truncate(Activity.Current?.TraceId.ToString(), 64),
+				Payload = JsonSerializer.Serialize(payload),
+
+				// A conversation writes nothing EF tracks; the one assistant action that
+				// does - ConfirmOrderDraft - raises its own audited entry with its own diff.
+				Changes = null
+			};
+
+			_auditWriter.TryEnqueue(entry);
+		}
+		catch (Exception exception)
+		{
+			_logger.LogError(
+				exception,
+				"Failed to record an ATS assistant audit entry for user {UserId}",
+				_currentUser.UserId);
+		}
+	}
+
+	private static string? Truncate(string? value, int maxLength) =>
+		value is not null && value.Length > maxLength
+			? value[..maxLength]
+			: value;
 
 	public async Task<AtsChatAnswerDTO> ConfirmOrderDraftAsync(
 		Guid draftId,
