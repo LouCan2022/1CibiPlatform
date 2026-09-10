@@ -94,7 +94,11 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 
 				await using var stream = await _objectStorageService.DownloadAsync(file.FileKey!, cancellationToken);
 
-				using var reader = new StreamReader(stream);
+				// Excel ANSI exports are Windows-1252 with no BOM; a plain StreamReader
+				// persisted Ñ/ñ as U+FFFD.
+				var csvContent = await CsvTextDecoder.DecodeAsync(stream, cancellationToken);
+
+				using var reader = new StringReader(csvContent);
 
 				using var csv = new CsvReader(
 					reader,

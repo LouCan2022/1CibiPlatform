@@ -65,6 +65,7 @@ global using BuildingBlocks.Exceptions.Handler;
 global using BuildingBlocks.SharedServices.Interfaces;
 global using BuildingBlocks.Pagination;
 global using BuildingBlocks.SignalR;
+global using BuildingBlocks.Text;
 
 global using Microsoft.EntityFrameworkCore.Storage;
 global using Microsoft.EntityFrameworkCore;

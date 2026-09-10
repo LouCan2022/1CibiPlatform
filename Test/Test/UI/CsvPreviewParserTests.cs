@@ -104,19 +104,19 @@ public class CsvPreviewParserTests
 	}
 
 	[Fact]
-	public void Parse_ShouldCapPreviewRowsButStillReportTheTotal()
+	public void Parse_ShouldMaterialiseAllRowsAndReportTheTotal()
 	{
-		// A large upload must not build a cell list for every row just to show a dialog,
-		// but the operator still needs to know the preview is a sample.
-		var rows = Enumerable.Range(0, CsvPreviewParser.MaxPreviewRows + 50)
+		// The preview row cap was removed: every row is materialised, so the operator
+		// reviews exactly what the import will process.
+		var rows = Enumerable.Range(0, 250)
 			.Select(index => $"Last{index},First{index},M,user{index}@example.com,09171234567");
 		var csv = $"{Header}\n{string.Join("\n", rows)}";
 
 		var result = CsvPreviewParser.Parse(csv);
 
-		result.Rows.Should().HaveCount(CsvPreviewParser.MaxPreviewRows);
-		result.TotalRowCount.Should().Be(CsvPreviewParser.MaxPreviewRows + 50);
-		result.IsTruncated.Should().BeTrue();
+		result.Rows.Should().HaveCount(250);
+		result.TotalRowCount.Should().Be(250);
+		result.IsTruncated.Should().BeFalse();
 	}
 
 	[Fact]
