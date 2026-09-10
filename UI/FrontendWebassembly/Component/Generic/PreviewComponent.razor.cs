@@ -18,7 +18,7 @@ public partial class PreviewComponent
 		if (InvalidRows.Any())
 		{
 
-			Snackbar.Add("Error. Bulk Submit Failed. Blank details found", Severity.Error);
+			Snackbar.Add("Error. Bulk Submit Failed. Blank or invalid details found", Severity.Error);
 
 			return;
 		}
@@ -88,12 +88,27 @@ public partial class PreviewComponent
 		&& !string.IsNullOrWhiteSpace(cell)
 		&& cell.Trim().Length != 11;
 
+	private bool IsEmailAddressColumn(int columnIndex) =>
+		columnIndex < Headers.Count
+		&& Headers[columnIndex].Replace(" ", string.Empty)
+			.Equals("EmailAddress", StringComparison.OrdinalIgnoreCase);
+
+	// ValidateEmail returns null for a blank value, so a blank email is reported once,
+	// by the required-cell rule, not twice. The server re-checks malformed emails at
+	// upload time (BulkEmailValidation); this catches them before the file leaves the
+	// browser, with the same row-numbered message.
+	private bool IsInvalidEmail(int columnIndex, string cell) =>
+		IsEmailAddressColumn(columnIndex)
+		&& EmailValidationService.ValidateEmail(cell.Trim()) is not null;
+
 	private bool IsRequiredCellBlank(int columnIndex, string cell) =>
 		string.IsNullOrWhiteSpace(cell)
 		&& (columnIndex >= Headers.Count || !IsOptionalHeader(Headers[columnIndex]));
 
 	private bool IsInvalidCell(int columnIndex, string cell) =>
-		IsRequiredCellBlank(columnIndex, cell) || IsInvalidMobileNumber(columnIndex, cell);
+		IsRequiredCellBlank(columnIndex, cell)
+		|| IsInvalidMobileNumber(columnIndex, cell)
+		|| IsInvalidEmail(columnIndex, cell);
 
 	private List<int> InvalidRows =>
 	Rows
@@ -113,6 +128,13 @@ public partial class PreviewComponent
 	Rows
 		.Select((row, index) => new { row, index })
 		.Where(x => x.row.Where((cell, cellIndex) => IsInvalidMobileNumber(cellIndex, cell)).Any())
+		.Select(x => x.index + 2)
+		.ToList();
+
+	private List<int> InvalidEmailRows =>
+	Rows
+		.Select((row, index) => new { row, index })
+		.Where(x => x.row.Where((cell, cellIndex) => IsInvalidEmail(cellIndex, cell)).Any())
 		.Select(x => x.index + 2)
 		.ToList();
 }
