@@ -40,4 +40,6 @@ public record AtsAuditQueryDTO
 	public string? Action { get; set; }
 
 	public string? Area { get; set; }
+
+	public string? SearchTerm { get; set; }
 }
