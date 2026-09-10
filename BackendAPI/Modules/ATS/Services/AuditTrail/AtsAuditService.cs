@@ -2,9 +2,11 @@ namespace ATS.Services.AuditTrail;
 
 public sealed class AtsAuditService : IAtsAuditService
 {
-	// What the AI assistant may read in one turn. Matches the assistant's own search
-	// ceiling so a chat answer is never longer than the model can usefully summarise.
-	private const int MaxAssistantEntries = 10;
+	// What the AI assistant may read in one turn. Higher than the order search ceiling
+	// because "list all the failures" is a normal audit question and ten rows reads as a
+	// broken answer. Still bounded: the rows are rendered into a chat bubble and summarised
+	// by a model, so anything larger belongs in the Excel export.
+	private const int MaxAssistantEntries = 50;
 
 	// A failure reason is diagnostic prose; the assistant only needs enough to say what
 	// went wrong.

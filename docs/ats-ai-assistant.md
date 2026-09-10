@@ -108,6 +108,33 @@ Both functions take `daysBack`, not a date range. Models are unreliable with rel
 and a day count is trivially bounded: clamped to 1–90, with 0 (an omitted argument) treated
 as the 7-day default rather than an empty range.
 
+### The two functions compete, and the descriptions are what separate them
+
+`[Description]` text is the **only** thing steering which function the model calls. Both
+audit functions answer questions about "failures today", so the wording has to divide them
+explicitly or the model picks by feel.
+
+It got this wrong once. `SearchAuditEntries` said *"use this **after a summary**"*, which the
+model read as "this is a follow-up step" — so "list all the errors" was answered from
+`GetAuditSummary` in prose, nothing populated `LastAuditEntries`, and **no table appeared**.
+Intermittently, which made it look like a rendering bug.
+
+The split is now stated from both sides:
+
+| | `GetAuditSummary` | `SearchAuditEntries` |
+|---|---|---|
+| Answers | how many | which ones |
+| Renders | a sentence, **no table** | the table |
+| Claims | "how many", "were there any" | "list", "show", "display", "see" |
+| Disclaims | listing verbs, by name | — |
+
+`AtsAssistantPluginTests` §"Function descriptions" asserts these properties — including that
+"after a summary" never comes back — because a description is prose that no compiler checks.
+
+The row cap is **50** (not the order search's 10): "list all the failures" is a normal
+question, and ten rows reads as a broken answer. The prompt tells the model to say the newest
+are shown, and point at the export, when the count exceeds what it received.
+
 ## 5. Every conversation is audited
 
 Both sides of every turn — the question **and** the answer — are recorded in the ATS audit
@@ -258,6 +285,9 @@ finds everyone who used the assistant to read the trail.
 - **Do not remove the kernel `Clone()`.** Plugins would leak across users and modules.
 - **Do not let the model claim it downloaded, emailed or created anything.** It stages and
   reports; the application acts. `StageNewOrder` in particular only prepares a draft.
+- **Do not describe one function in terms of another's turn order** ("use this after…",
+  "once you have…"). The model treats that as a precondition and will not call it directly.
+  Name the trigger words each function owns instead.
 - **Do not remove `[SkipAudit]` from `AskAtsAssistantCommand` thinking it is an oversight.**
   It is there so the pipeline does not write a second, half-blind entry alongside the one
   `RecordAudit` writes with both sides of the conversation.

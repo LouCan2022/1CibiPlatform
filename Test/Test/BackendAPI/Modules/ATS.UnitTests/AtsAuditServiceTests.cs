@@ -375,8 +375,9 @@ public class AtsAuditServiceTests
 			take: 5_000,
 			CancellationToken.None);
 
-		// Assert
-		Assert.InRange(seenTake, 1, 10);
+		// Assert: bounded, but generous enough that "list all the failures" is not answered
+		// with a handful of rows.
+		Assert.InRange(seenTake, 1, 50);
 	}
 
 	[Fact]

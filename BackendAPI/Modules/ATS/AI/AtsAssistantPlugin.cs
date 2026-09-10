@@ -14,6 +14,11 @@ public sealed class AtsAssistantPlugin
 {
 	private const int MaxSearchResults = 10;
 
+	// Higher than the order search, because "list all the failures" is a normal audit
+	// question and ten rows reads as a broken answer. Still bounded - the rows are rendered
+	// into a chat bubble and summarised by a model, so a full page belongs in the export.
+	private const int MaxAuditResults = 50;
+
 	// A real candidate name is short. Anything longer arriving as a "name" is a question or
 	// an instruction the model tried to funnel through the search, not a person.
 	private const int MaxSubjectNameLength = 100;
@@ -173,11 +178,20 @@ public sealed class AtsAssistantPlugin
 	}
 
 	[KernelFunction]
-	[Description("Report how many audited actions succeeded and failed over a recent period. "
-		+ "Use this for questions like 'were there any failures today', 'how many actions "
-		+ "this week' or 'is anything going wrong'. Only platform administrators can read "
-		+ "the audit trail; for anyone else this returns a message saying so, which you must "
-		+ "relay as your whole answer.")]
+	// Deliberately narrowed to COUNTING. The two audit functions compete for the same
+	// questions, and when this one wins a request to "list the failures" the user gets a
+	// sentence and no table. Anything that asks to SEE the actions belongs to
+	// SearchAuditEntriesAsync.
+	[Description("Report only the NUMBER of audited actions that succeeded and failed over "
+		+ "a period. Returns counts as a sentence and produces NO table. "
+		+ "Use this only when the user asks how many, or whether anything failed at all - "
+		+ "for example 'how many actions this week', 'were there any failures today', 'is "
+		+ "anything going wrong'. "
+		+ "Do NOT use this when the user asks to list, show, display or see the actions "
+		+ "themselves; call SearchAuditEntries for that, because only it can render the "
+		+ "table. If the user asks for both a count and a list, call both. "
+		+ "Only platform administrators can read the audit trail; for anyone else this "
+		+ "returns a message saying so, which you must relay as your whole answer.")]
 	public async Task<string> GetAuditSummaryAsync(
 		[Description("How many days back to look, from 1 to 90. Use 1 for 'today', 7 for 'this week'.")]
 		int daysBack,
@@ -215,11 +229,25 @@ public sealed class AtsAssistantPlugin
 	}
 
 	[KernelFunction]
-	[Description("List recent audited actions, newest first, optionally filtered. Use this "
-		+ "after a summary when the user asks WHICH actions failed or what someone did. Do "
-		+ "not repeat the rows in prose - the application shows them as a table. Only "
-		+ "platform administrators can read the audit trail; for anyone else this returns "
-		+ "nothing.")]
+	// The wording here is load-bearing. An earlier version said "use this AFTER a summary",
+	// which the model read as "this is a follow-up step" - so a direct "list all the
+	// failures" was answered from GetAuditSummary in prose and no table was ever produced,
+	// because nothing populated LastAuditEntries. It now says to call this FIRST and names
+	// the trigger words, so listing is the default rather than the second step.
+	[Description("List individual audited actions as rows, newest first. THIS IS THE ONLY "
+		+ "WAY TO SHOW THE USER A TABLE OF AUDIT ACTIVITY. "
+		+ "Call this - not GetAuditSummary - whenever the user says list, show, display, "
+		+ "give me, what were, or which, together with actions, activity, logs, audit, "
+		+ "errors, failures or successes. Examples that MUST call this function: 'list all "
+		+ "successful actions', 'show me the errors', 'what failed today', 'display the "
+		+ "audit log', 'give me all the failures this week'. "
+		+ "Pass outcome='Failure' for errors or failures, outcome='Success' for successful "
+		+ "actions, and omit it for both. "
+		+ "Call this even when you have already given a count, and call it FIRST when the "
+		+ "user asks to see the actions themselves - a count is not a list. "
+		+ "Do not write the rows out in prose; the application renders them as a table "
+		+ "under your reply. Only platform administrators can read the audit trail; for "
+		+ "anyone else this returns nothing.")]
 	public async Task<IReadOnlyList<AtsAuditEntrySummaryDTO>> SearchAuditEntriesAsync(
 		[Description("How many days back to look, from 1 to 90. Use 1 for 'today', 7 for 'this week'.")]
 		int daysBack,
@@ -250,7 +278,7 @@ public sealed class AtsAssistantPlugin
 			normalizedArea,
 			startDate,
 			endDate,
-			MaxSearchResults,
+			MaxAuditResults,
 			cancellationToken);
 
 		LastAuditEntries.Clear();
