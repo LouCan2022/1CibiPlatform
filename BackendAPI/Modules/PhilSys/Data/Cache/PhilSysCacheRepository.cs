@@ -24,15 +24,20 @@ public class PhilSysCacheRepository : IPhilSysRepository
 
 	public async Task<bool> DeleteTransactionDataAsync(PhilSysTransaction HashToken)
 	{
-		return await _philSysRepository.DeleteTransactionDataAsync(HashToken);
+		var result = await _philSysRepository.DeleteTransactionDataAsync(HashToken);
+
+		if (result)
+		{
+			await _hybridCache.RemoveAsync(LivenessStatusKey(HashToken.HashToken!));
+		}
+
+		return result;
 	}
 
 	public async Task<TransactionStatusResponse> GetLivenessSessionStatusAsync(string HashToken)
 	{
-		var cacheKey = $"PhilSys_LivenessSessionStatus_{HashToken}";
-
 		return await _hybridCache.GetOrCreateAsync<TransactionStatusResponse>(
-			cacheKey,
+			LivenessStatusKey(HashToken),
 			async status => await _philSysRepository.GetLivenessSessionStatusAsync(HashToken));
 	}
 
@@ -46,8 +51,17 @@ public class PhilSysCacheRepository : IPhilSysRepository
 		return await _philSysRepository.UpdateFaceLivenessSessionAsync(HashToken, FaceLivenessSessionId);
 	}
 
-	public Task<PhilSysTransaction> UpdateTransactionDataAsync(PhilSysTransaction Transaction)
+	public async Task<PhilSysTransaction> UpdateTransactionDataAsync(PhilSysTransaction Transaction)
 	{
-		return _philSysRepository.UpdateTransactionDataAsync(Transaction);
+		var result = await _philSysRepository.UpdateTransactionDataAsync(Transaction);
+
+		if (result != null)
+		{
+			await _hybridCache.RemoveAsync(LivenessStatusKey(Transaction.HashToken!));
+		}
+
+		return result;
 	}
+
+	private static string LivenessStatusKey(string HashToken) => $"PhilSys_LivenessSessionStatus_{HashToken}";
 }

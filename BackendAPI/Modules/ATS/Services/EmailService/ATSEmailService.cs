@@ -36,7 +36,7 @@ public class ATSEmailService : IEmailService
 
 				using (var mailMessage = new MailMessage())
 				{
-					mailMessage.From = new MailAddress(_senderEmail, "Workforce Manager");
+					mailMessage.From = new MailAddress(_senderEmail, "Applicant Tracking System");
 					mailMessage.To.Add(toEmail);
 					mailMessage.Subject = subject;
 					mailMessage.Body = body;
