@@ -108,4 +108,45 @@ public class SmtpRateLimiterTests
 		// Assert
 		act.Should().NotThrowAsync();
 	}
+
+	[Fact]
+	public void ReportThrottled_ShouldAlsoBlockNewLogins()
+	{
+		// Arrange: the two budgets share one back-off window. A throttle must stop new
+		// LOGINS as well as new sends, or the pool keeps re-authenticating into it.
+		using var limiter = CreateLimiter(sendsPerSecond: 100);
+
+		limiter.IsLoginThrottled.Should().BeFalse();
+
+		// Act
+		limiter.ReportThrottled(TimeSpan.FromMinutes(30));
+
+		// Assert
+		limiter.IsLoginThrottled.Should().BeTrue();
+	}
+
+	[Fact]
+	public async Task WaitForLoginSlotAsync_ShouldSpaceLogins_IndependentlyOfSends()
+	{
+		// Arrange: logins are paced on their own budget. This is the fix for "454 Too many
+		// login attempts" - a fast send rate must not imply a fast login rate.
+		using var limiter = new SmtpRateLimiter(
+			Options.Create(new AtsEmailDeliveryOptions
+			{
+				MaxSendsPerSecond = 1_000,
+				MinSecondsBetweenLogins = 1
+			}),
+			new Mock<ILogger<SmtpRateLimiter>>().Object);
+
+		var stopwatch = Stopwatch.StartNew();
+
+		// Act: two logins, one interval apart.
+		await limiter.WaitForLoginSlotAsync(CancellationToken.None);
+		await limiter.WaitForLoginSlotAsync(CancellationToken.None);
+
+		stopwatch.Stop();
+
+		// Assert: the second waited, even though the send rate is effectively unlimited.
+		stopwatch.ElapsedMilliseconds.Should().BeGreaterThanOrEqualTo(800);
+	}
 }
