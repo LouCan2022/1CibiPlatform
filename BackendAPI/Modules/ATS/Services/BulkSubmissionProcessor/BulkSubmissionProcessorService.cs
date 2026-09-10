@@ -94,7 +94,11 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 
 				await using var stream = await _objectStorageService.DownloadAsync(file.FileKey!, cancellationToken);
 
-				using var reader = new StreamReader(stream);
+				// Excel ANSI exports are Windows-1252 with no BOM; a plain StreamReader
+				// persisted Ñ/ñ as U+FFFD.
+				var csvContent = await CsvTextDecoder.DecodeAsync(stream, cancellationToken);
+
+				using var reader = new StringReader(csvContent);
 
 				using var csv = new CsvReader(
 					reader,
@@ -257,10 +261,37 @@ public class BulkSubmissionProcessorService : IBulkSubmissionProcessorService
 						logContext);
 				}
 
+				var uploadMessage = BuildUploadReceivedMessage(file.FileName, subjects.Count, rejectedRows.Count);
+
 				await _hubContext
 						.Clients
 						.Group(file.UploadedByUserId.ToString()!)
-						.ReceiveATSResponse(BuildUploadReceivedMessage(file.FileName, subjects.Count, rejectedRows.Count));
+						.ReceiveATSResponse(uploadMessage);
+
+				// The toast above only reaches an uploader who still has the app open on
+				// the page that listens for it. This is the durable half: it survives a
+				// refresh, and it is there on Monday for a file that finished on Friday.
+				if (file.UploadedByUserId is Guid uploaderId)
+				{
+					var notificationService = scope.ServiceProvider
+						.GetRequiredService<IAtsNotificationService>();
+
+					// Pre-filtered to the file name, which is what the bulk board's search
+					// matches on, so the uploader lands on their file rather than the top
+					// of the list.
+					var bulkLink = string.IsNullOrWhiteSpace(file.FileName)
+						? "/s&i/ats/bulkuploads"
+						: $"/s&i/ats/bulkuploads?search={Uri.EscapeDataString(file.FileName)}";
+
+					await notificationService.RaiseAsync(
+						uploaderId,
+						AtsNotificationType.BulkUploadCompleted,
+						"Bulk upload processed",
+						uploadMessage,
+						bulkLink,
+						file.FileID,
+						cancellationToken);
+				}
 
 				return (file, succeeded: true);
 			}

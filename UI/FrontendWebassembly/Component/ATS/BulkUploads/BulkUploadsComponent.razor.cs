@@ -20,8 +20,24 @@ public partial class BulkUploadsComponent
 	private string? _searchString;
 	private bool _isLoadingCounts;
 
+	/// <summary>
+	/// Pre-fills the search box from the URL, so the "bulk upload processed" notification
+	/// lands on the file it is about. The sender passes the file name, which is what this
+	/// board's search matches on.
+	/// </summary>
+	[SupplyParameterFromQuery(Name = "search")]
+	private string? SearchFromQuery { get; set; }
+
 	protected override async Task OnInitializedAsync()
 	{
+		// Before the first await: base.OnInitializedAsync yields, Blazor renders, and
+		// MudTable loads the board at that point. Seeding afterwards left a filled search
+		// box over unfiltered results. See TicketingStatusComponent for the full note.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
+
 		await base.OnInitializedAsync();
 
 		// Without this guard the RequirePermission/RequireATSModule attributes are inert.

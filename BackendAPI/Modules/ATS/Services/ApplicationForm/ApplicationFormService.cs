@@ -9,6 +9,7 @@ public class ApplicationFormService : IApplicationFormService
 	private readonly IObjectStorageService _objectStorageService;
 	private readonly IFilePdfService _filePdfService;
 	private readonly IOrderHistoryService _orderHistoryService;
+	private readonly IAtsNotificationService _notificationService;
 	private readonly string _applicationFormBaseUrl;
 	private readonly string _folderName;
 
@@ -39,7 +40,8 @@ public class ApplicationFormService : IApplicationFormService
 					  IConfiguration configuration,
 					  IObjectStorageService objectStorageService,
 					  IFilePdfService filePdfService,
-					  IOrderHistoryService orderHistoryService)
+					  IOrderHistoryService orderHistoryService,
+					  IAtsNotificationService notificationService)
 	{
 		_logger = logger;
 		_atsRepository = atsRepository;
@@ -48,6 +50,7 @@ public class ApplicationFormService : IApplicationFormService
 		_objectStorageService = objectStorageService;
 		_filePdfService = filePdfService;
 		_orderHistoryService = orderHistoryService;
+		_notificationService = notificationService;
 		_applicationFormBaseUrl = _configuration.GetSection("ATS").GetValue<string>("ApplicationFormBaseUrl", "");
 		_folderName = _configuration.GetSection("ATS").GetValue<string>("ATSApplicationFormFileFolderName", "");
 	}
@@ -116,6 +119,15 @@ public class ApplicationFormService : IApplicationFormService
 			await _unitOfWork.CommitAsync(ct);
 
 			_logger.LogInformation("Succcessfully added the Application Form Data for {EmailId}: {@Context}", emailInvitationId, logContext);
+
+			// After the commit, deliberately. The candidate's submission is the thing that
+			// matters and it is now durable; telling the requestor is a best-effort follow-up
+			// that must not be able to roll it back. RaiseForOrderAsync swallows its own
+			// failures for the same reason.
+			await _notificationService.RaiseForOrderAsync(
+				emailInvitationId,
+				AtsNotificationType.ApplicationFormSubmitted,
+				ct);
 
 			return true;
 		}

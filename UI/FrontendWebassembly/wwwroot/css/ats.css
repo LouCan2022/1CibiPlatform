@@ -6192,3 +6192,263 @@ button.ats-console-brand-text {
         transition: none;
     }
 }
+
+/* ---------- Notification rows ----------
+
+   Shared by the bell dropdown (NotificationCenter) and the full notifications page, which
+   is why they live here rather than in either component's scoped sheet: the two must not
+   drift, and NotificationItem is rendered inside both scopes.
+
+   Colour comes entirely from the --c-* tokens, so both themes are covered by one set of
+   rules. See docs/ui-theming-and-responsiveness.md. */
+
+.ats-notif-row {
+    display: flex;
+    width: 100%;
+    padding: 12px 16px;
+    align-items: flex-start;
+    gap: 12px;
+    border: 0;
+    border-bottom: 1px solid var(--c-border-soft);
+    background: transparent;
+    color: inherit;
+    font-family: "Inter", sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.ats-notif-row:last-child {
+    border-bottom: 0;
+}
+
+.ats-notif-row:hover {
+    background: var(--c-surface-hover);
+}
+
+.ats-notif-row:focus-visible {
+    outline: 3px solid var(--c-focus-ring);
+    outline-offset: -3px;
+}
+
+/* Unread carries a tint plus the dot on the right. The tint alone would be too subtle in
+   dark mode, where the surface ramp is already compressed. */
+.ats-notif-row.is-unread {
+    background: var(--c-blue-tint);
+}
+
+.ats-notif-row.is-unread:hover {
+    background: var(--c-blue-tint-2);
+}
+
+.ats-notif-icon {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.ats-notif-icon .mud-icon-root {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+}
+
+.ats-notif-icon.is-info {
+    background: var(--c-blue-tint-2);
+    color: var(--c-blue-600);
+}
+
+.ats-notif-icon.is-success {
+    background: var(--c-success-bg);
+    color: var(--c-success);
+}
+
+.ats-notif-icon.is-warn {
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
+}
+
+.ats-notif-icon.is-danger {
+    background: var(--c-danger-bg);
+    color: var(--c-danger-strong);
+}
+
+.ats-notif-icon.is-neutral {
+    background: var(--c-neutral-bg);
+    color: var(--c-neutral-fg);
+}
+
+/* min-width: 0 so a long body wraps instead of stretching the row past the panel. */
+.ats-notif-body {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ats-notif-title {
+    color: var(--c-fg-strong);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* Clamped to two lines: one long failure reason must not make a row taller than the rest
+   of the list. The full text is on the destination screen. */
+.ats-notif-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: var(--c-fg-muted);
+    font-size: 12.5px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.ats-notif-time {
+    margin-top: 2px;
+    color: var(--c-fg-subtle);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.ats-notif-dot {
+    width: 8px;
+    height: 8px;
+    margin-top: 6px;
+    flex: 0 0 8px;
+    border-radius: 50%;
+    background: var(--c-blue-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ats-notif-row {
+        transition: none;
+    }
+}
+
+/* ---------- Notification empty / loading states ----------
+
+   Shared by the bell dropdown and the notifications page, for the same reason as the row
+   rules above: both render this markup. These were briefly scoped to the dropdown, which
+   left the page's SVG with no width or height at all - an inline SVG with only a viewBox
+   expands to its container, so it filled the whole card. */
+
+.ats-notif-state {
+    padding: 28px 18px;
+    color: var(--c-fg-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.ats-notif-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* flex: none so the icon keeps its size inside the flex column rather than being
+   stretched by it. */
+.ats-notif-empty svg {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    margin-bottom: 6px;
+    color: var(--c-fg-subtle);
+}
+
+.ats-notif-empty strong {
+    color: var(--c-fg-strong);
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+}
+
+.ats-notif-empty span {
+    font-size: 12.5px;
+}
+
+/* ---------- ATS console topbar icon buttons ----------
+
+   Global rather than scoped to ATSLayout: the notification bell is rendered by
+   NotificationCenter, and Blazor scoped CSS would never match it from the layout's sheet.
+   The drawer toggle and the theme toggle use the same class. */
+.ats-console-icon-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    padding: 0;
+    border: 1px solid var(--c-border-strong);
+    border-radius: 10px;
+    background: var(--c-blue-tint);
+    color: var(--c-blue-600);
+    font-family: inherit;
+    transition: background-color 0.15s ease;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.ats-console-icon-btn:hover {
+    background: var(--c-blue-tint-2);
+}
+
+.ats-console-icon-btn:focus-visible {
+    outline: 3px solid var(--c-focus-ring);
+    outline-offset: 2px;
+}
+
+/* Icon sizing for the topbar buttons. Global rather than scoped to ATSLayout because
+   the notification bell now lives in NotificationCenter; a scoped rule would carry the
+   layout's scope attribute and leave that SVG at its natural size. */
+.ats-console-icon-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* The topbar unread dot. Global rather than scoped to ATSLayout because the bell it sits
+   on now lives in NotificationCenter, and a scoped rule would carry the layout's scope
+   attribute and never match. The button is position: relative via .ats-console-icon-btn. */
+.ats-console-notification-dot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 8px;
+    height: 8px;
+    border: 2px solid var(--c-surface);
+    border-radius: 50%;
+    background: var(--c-danger);
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+/* Carrying a count. Grows out of the same pip rather than being a separate badge: it keeps
+   the dot's colour and its anchor to the button's top-right, and only the width changes.
+   Nudged up and out so a two-digit pill still sits on the corner rather than over the icon. */
+.ats-console-notification-dot.has-count {
+    top: -5px;
+    right: -5px;
+    display: flex;
+    width: auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: var(--c-on-dark-fg);
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}

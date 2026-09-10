@@ -1,0 +1,130 @@
+/* Bell, badge and dropdown panel.
+
+   Every colour comes from the shared --c-* tokens in wwwroot/css/theme.css, so this works
+   in both themes without a second set of rules - see docs/ui-theming-and-responsiveness.md.
+   The bell itself reuses .ats-console-icon-btn from the topbar, so only the badge and the
+   panel are defined here. */
+
+.ats-notif-root {
+    position: relative;
+    display: inline-flex;
+}
+
+/* The unread indicator is .ats-console-notification-dot, already defined in
+   Layout/ATSLayout.razor.css alongside the other topbar chrome. Nothing to add here. */
+
+/* Full-viewport click-away. Transparent rather than dimmed: this is a dropdown, not a
+   modal, and dimming the whole console for it would be too heavy. */
+.ats-notif-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: default;
+}
+
+.ats-notif-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 1210;
+    display: flex;
+    width: 380px;
+    max-width: calc(100vw - 24px);
+    max-height: min(30rem, calc(100dvh - 120px));
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+    background: var(--c-surface-raised);
+    box-shadow: var(--c-shadow-card);
+    color: var(--c-fg-strong);
+    font-family: "Inter", sans-serif;
+}
+
+.ats-notif-panel-head {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--c-border-soft);
+}
+
+.ats-notif-panel-head h2 {
+    margin: 0;
+    color: var(--c-fg-strong);
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ats-notif-mark-all {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--c-blue-600);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ats-notif-mark-all:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.ats-notif-mark-all:focus-visible {
+    outline: 3px solid var(--c-focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* The only scrolling region. min-height: 0 is what lets it actually shrink inside the
+   flex column instead of pushing the footer off the panel. */
+.ats-notif-list {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* .ats-notif-state / .ats-notif-empty live in wwwroot/css/ats.css: the notifications page
+   renders the same markup, and while these rules were scoped here that page's SVG had no
+   size at all and stretched to fill the card. Do not re-declare them. */
+
+.ats-notif-panel-foot {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border-top: 1px solid var(--c-border-soft);
+    text-align: center;
+}
+
+.ats-notif-panel-foot a {
+    color: var(--c-blue-600);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ats-notif-panel-foot a:hover {
+    text-decoration: underline;
+}
+
+/* Phone: a 380px dropdown pinned to the bell would hang off the screen, so it becomes a
+   near-full-width sheet anchored to the viewport instead of the button. */
+@media (max-width: 600px) {
+    .ats-notif-panel {
+        position: fixed;
+        top: 64px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: none;
+        max-height: calc(100dvh - 88px);
+    }
+}

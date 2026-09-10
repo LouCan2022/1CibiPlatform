@@ -21,12 +21,36 @@ public partial class TicketingStatusComponent
 	private string? _searchString;
 	private bool _isLoadingCounts;
 
+	/// <summary>
+	/// Pre-fills the search box from the URL, so a "ticketing failed" notification can deep
+	/// link straight to the order it is about.
+	/// </summary>
+	/// <remarks>
+	/// The sender passes the subject's LAST NAME, not the full name: this board's search
+	/// ILIKEs FirstName and LastName as separate columns, so "Russel Gutierrez" would match
+	/// neither. See AtsNotificationService.BuildOrderLink.
+	/// </remarks>
+	[SupplyParameterFromQuery(Name = "search")]
+	private string? SearchFromQuery { get; set; }
+
 	// Disables the row's button while its retry is in flight, so a double-click cannot
 	// queue the same order twice.
 	private Guid? _retryingOrderId;
 
 	protected override async Task OnInitializedAsync()
 	{
+		// Seeded BEFORE the first await, not after.
+		//
+		// base.OnInitializedAsync awaits an access check, and an await here lets Blazor
+		// render - at which point MudTable fires its ServerData callback and loads the
+		// board. Setting _searchString after that returned a filled search box over
+		// unfiltered results: the value was there, but the query that had already run
+		// never saw it, so the user had to retype a character to trigger a reload.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
+
 		await base.OnInitializedAsync();
 
 		// Without this guard the RequirePermission/RequireATSModule attributes are inert.

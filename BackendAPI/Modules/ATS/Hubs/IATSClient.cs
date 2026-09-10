@@ -7,6 +7,18 @@ public interface IATSClient
 	Task ReceiveChatResponse(string message);
 	Task ReceiveChatTyping(bool isTyping);
 	Task SessionCleared();
+
+	/// <summary>
+	/// A new in-app notification for this user.
+	/// </summary>
+	/// <remarks>
+	/// Deliberately its own method rather than another ReceiveATSResponse: that one carries
+	/// an unstructured string a client can only forward to a snackbar, and NewOrderComponent
+	/// depends on exactly that behaviour. A notification needs an id, a type and a link, so
+	/// it gets a typed payload - the same DTO the inbox endpoint returns, so the client has
+	/// one code path for a live arrival and a fetched row.
+	/// </remarks>
+	Task ReceiveNotification(NotificationListDTO notification);
 }
 /// <summary>
 /// Bulk-upload and AI assistant notifications, delivered per user.

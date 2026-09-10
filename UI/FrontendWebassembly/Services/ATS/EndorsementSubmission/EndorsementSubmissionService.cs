@@ -34,7 +34,17 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		var hubUrl = $"{baseUri}/hubs/atsbulk";
 
 		_hubConnection = new HubConnectionBuilder()
-			.WithUrl(hubUrl)
+			.WithUrl(hubUrl, options =>
+			{
+				// The hub derives its group from the authenticated principal, which only
+				// exists if the auth cookie rides the handshake - and a bare
+				// HubConnectionBuilder does not send one cross-origin. Deployed that went
+				// unnoticed because the gateway serves the UI and the API from one origin;
+				// in local development they are different ports, so Context.User was null,
+				// the connection joined no group, and this toast never fired.
+				options.HttpMessageHandlerFactory = innerHandler =>
+					new CookieHandler { InnerHandler = innerHandler };
+			})
 			.WithAutomaticReconnect()
 			.Build();
 

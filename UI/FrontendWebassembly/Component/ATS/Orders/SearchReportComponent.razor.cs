@@ -8,6 +8,17 @@ public partial class SearchReportComponent
 	[Inject]
 	private LocalStorageService LocalStorageService { get; set; } = default!;
 
+	/// <summary>
+	/// Pre-fills the search box from the URL, so a notification can deep-link here already
+	/// filtered to one subject (see AtsNotificationService.BuildOrderLink).
+	/// </summary>
+	/// <remarks>
+	/// Only seeds the initial value - after first load the box is the user's to change, and
+	/// the query string is not rewritten as they type.
+	/// </remarks>
+	[SupplyParameterFromQuery(Name = "search")]
+	private string? SearchFromQuery { get; set; }
+
 	private readonly CursorTableLoader<ReportListDTO> _reportsLoader = new();
 	private TableComponent<ReportListDTO>? reportsTable;
 	private DateRange? _dateRange { get; set; }
@@ -22,6 +33,15 @@ public partial class SearchReportComponent
 
 	protected override async Task OnInitializedAsync()
 	{
+		// Before any await: the reads below yield, Blazor renders, and MudTable fires its
+		// ServerData callback at that point. Seeding afterwards left a filled search box
+		// over unfiltered results, so the user had to retype a character to trigger a
+		// reload. See TicketingStatusComponent for the full note.
+		if (!string.IsNullOrWhiteSpace(SearchFromQuery))
+		{
+			_searchString = SearchFromQuery;
+		}
+
 		var roleIds = await GetStoredRoleIdsAsync();
 		var atsRoleId = await GetStoredATSRoleIdAsync();
 

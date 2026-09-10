@@ -2,6 +2,7 @@ using ATS.Constants;
 using ATS.Data.DTO;
 using ATS.Data.Entities;
 using ATS.Data.Repository.OMSTicketing;
+using ATS.Services.Notifications;
 using ATS.Services.OMSTicketing;
 using Auth.DTO;
 using Auth.Shared.Contracts;
@@ -20,6 +21,12 @@ public class OMSTicketingProcessorServiceTests
 	private readonly Mock<IOMSTicketCreator> _ticketCreator = new();
 	private readonly Mock<IAuthQueries> _authQueries = new();
 	private readonly Mock<HybridCache> _hybridCache = new();
+
+	// Resolved when a ticketing attempt fails, to tell the requestor once the automatic
+	// retries are spent. These tests assert on the repository calls, so it only needs to
+	// exist; GetExhaustedTicketIdsAsync defaults to an empty list, meaning "not exhausted".
+	private readonly Mock<IAtsNotificationService> _notificationService = new();
+
 	private readonly OMSTicketingProcessorService _service;
 
 	private static readonly Guid RequestorId = Guid.CreateVersion7();
@@ -33,6 +40,15 @@ public class OMSTicketingProcessorServiceTests
 		provider.Setup(x => x.GetService(typeof(IOMSTicketingRepository))).Returns(_repository.Object);
 		provider.Setup(x => x.GetService(typeof(IOMSTicketCreator))).Returns(_ticketCreator.Object);
 		provider.Setup(x => x.GetService(typeof(IAuthQueries))).Returns(_authQueries.Object);
+		provider.Setup(x => x.GetService(typeof(IAtsNotificationService))).Returns(_notificationService.Object);
+
+		// Default: no order has exhausted its retries, so the failure paths under test do
+		// not also raise a notification. A test about exhaustion overrides this.
+		_repository
+			.Setup(x => x.GetExhaustedTicketIdsAsync(
+				It.IsAny<IReadOnlyCollection<Guid>>(),
+				It.IsAny<CancellationToken>()))
+			.ReturnsAsync([]);
 
 		scope.Setup(x => x.ServiceProvider).Returns(provider.Object);
 		scopeFactory.Setup(x => x.CreateScope()).Returns(scope.Object);

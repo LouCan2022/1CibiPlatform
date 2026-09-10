@@ -148,6 +148,51 @@ public class ATSPaths : IReverseProxyModule
 				}
 			),
 
+			// ---------- In-app notifications ----------
+			new RouteDefinitionDTO(
+				RouteId: "GetNotifications",
+				MatchPath: "/ats/getnotifications",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getnotifications" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "GetUnreadNotificationCount",
+				MatchPath: "/ats/getunreadnotificationcount",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Get },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/getunreadnotificationcount" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "MarkNotificationRead",
+				MatchPath: "/ats/marknotificationread",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/marknotificationread" }
+				}
+			),
+
+			new RouteDefinitionDTO(
+				RouteId: "MarkAllNotificationsRead",
+				MatchPath: "/ats/markallnotificationsread",
+				ClusterId: GatewayConstants.OnePlatformApi,
+				Methods: new [] { GatewayConstants.HttpMethod.Patch },
+				Transforms: new Dictionary<string, string>
+				{
+					{ "PathSet", "/markallnotificationsread" }
+				}
+			),
+
 			new RouteDefinitionDTO(
 				RouteId: "GetBulkUploadStatusCounts",
 				MatchPath: "/ats/getbulkuploadstatuscounts",
