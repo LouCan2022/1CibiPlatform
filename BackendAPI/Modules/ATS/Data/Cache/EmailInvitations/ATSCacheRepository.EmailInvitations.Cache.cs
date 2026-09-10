@@ -22,6 +22,11 @@ public partial class ATSCacheRepository
 		return await _atsRepository.ReleaseStaleEmailInvitationClaimsAsync(staleAfter);
 	}
 
+	public async Task<int> ReleaseEmailInvitationClaimsAsync(List<EmailInvitationRequest> emailInvitationRequests)
+	{
+		return await _atsRepository.ReleaseEmailInvitationClaimsAsync(emailInvitationRequests);
+	}
+
 	public async Task<bool> AddBulkEmailInvitationRequestAsync(List<EmailInvitationRequest> emailInvitationRequests)
 	{
 		var result = await _atsRepository.AddBulkEmailInvitationRequestAsync(emailInvitationRequests);

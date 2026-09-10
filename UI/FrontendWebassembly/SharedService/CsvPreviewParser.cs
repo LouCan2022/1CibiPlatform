@@ -8,18 +8,9 @@ namespace FrontendWebassembly.SharedService;
 /// escaped quotes (""). The preview used to split on ',' and '\n' by hand, so a row like
 /// <c>"Dela Cruz, Jr.",Juan,...</c> previewed misaligned - and the operator was
 /// approving a preview that did not match what CsvHelper would import on the server.
-///
-/// This is a preview, so it is deliberately bounded: <see cref="MaxPreviewRows"/> caps
-/// how much is materialised for a browser to render.
 /// </remarks>
 public static class CsvPreviewParser
 {
-	/// <summary>
-	/// Rows shown in the preview. A 10k-row upload should not build 10k lists of cells
-	/// in the browser before a dialog opens.
-	/// </summary>
-	public const int MaxPreviewRows = 100;
-
 	/// <summary>
 	/// The columns the bulk upload imports, in template order. Spreadsheets often pick
 	/// up spare columns after these (notes, helper formulas, a stray cell), and the
@@ -108,7 +99,7 @@ public static class CsvPreviewParser
 
 		result.TotalRowCount = dataRows.Count;
 		result.Rows = dataRows
-			.Take(MaxPreviewRows)
+			
 			.Select(fields => keptIndexes
 				.Select(index => index < fields.Count ? fields[index].Trim() : string.Empty)
 				.ToList())

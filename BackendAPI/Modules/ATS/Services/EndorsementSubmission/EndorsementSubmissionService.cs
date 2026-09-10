@@ -143,95 +143,54 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		emailInvitationRequest.Requestor = _currentUser.FullName;
 		emailInvitationRequest.HashTokenExpiration = DateTime.UtcNow.AddHours(_applicationFormExpiryInHours);
 
-		try
-		{
-			await _atsRepository.AddEmailInvitationRequestAsync(emailInvitationRequest);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(
-				ex,
-				"Failed to add Email Invitation Request. {@Context}",
-				logContext);
-
-			throw new InternalServerException(
-				$"Failed to add transaction. {ex.InnerException?.Message ?? ex.Message}");
-		}
-
 		var applicationFormLink = $"{_applicationformBaseUrl}/{HashToken}";
 
-		try
-		{
-			await SendApplicationFormToUserEmailAsync(
-				emailInvitationRequestDTO.EmailAddress!,
-				subjectName,
-				applicationFormLink,
-				emailInvitationRequest.Requestor,
-				emailInvitationRequest.ClientId);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(
-				ex,
-				"Failed to send application form email. {@Context}",
-				logContext);
+		// The insert, the email and the status update are one unit.
+		//
+		// They used to be three separate steps, and AddEmailInvitationRequestAsync calls
+		// SaveChangesAsync itself - so the order was committed before the email was even
+		// attempted. A failed send left a saved order whose candidate never received a
+		// link: invisible until somebody noticed the form was never filled in.
+		//
+		// The send is inside the transaction, so failing it rolls the order back and the
+		// caller gets a clean failure to retry rather than a half-created order. What that
+		// does NOT cover: SMTP is external and cannot be rolled back, so if the send
+		// succeeds and the commit then fails, the candidate holds a link to an order that
+		// no longer exists. That window is the price of sending inline; the alternative is
+		// queueing it for EmailNotificationProcessor, which is how bulk orders work.
+		//
+		// TransactionRunner owns the begin / SaveChanges / commit / rollback, and rethrows
+		// untouched so CustomExceptionHandler still decides the status code.
+		await TransactionRunner.RunAsync(
+			_unitOfWork,
+			async () =>
+			{
+				await _atsRepository.AddEmailInvitationRequestAsync(emailInvitationRequest);
 
-			await TryUpdateEmailStatusToNotSentAsync(
-				emailInvitationRequest.EmailInvitationID,
-				logContext);
+				await SendApplicationFormToUserEmailAsync(
+					emailInvitationRequestDTO.EmailAddress!,
+					subjectName,
+					applicationFormLink,
+					emailInvitationRequest.Requestor,
+					emailInvitationRequest.ClientId);
 
-			throw new InternalServerException("Failed to send application form email.");
-		}
+				await _atsRepository.UpdateSingleEmailInvitationRequestStatusForSentEmailAsync(
+					emailInvitationRequest.EmailInvitationID);
 
-		await _unitOfWork.BeginTransactionAsync(ct);
-
-		try
-		{
-			await _atsRepository.UpdateSingleEmailInvitationRequestStatusForSentEmailAsync(
-				emailInvitationRequest.EmailInvitationID);
-
-			await _orderHistoryService.RecordAsync(
-				emailInvitationRequest.EmailInvitationID,
-				OrderHistoryEventType.OrderCreated,
-				null,
-				OrderStatus.PendingCandidateInfo, ct, source);
-
-			await _unitOfWork.SaveChangesAsync(ct);
-
-			await _unitOfWork.CommitAsync(ct);
-		}
-		catch (Exception ex)
-		{
-			await _unitOfWork.RollbackAsync(ct);
-
-			_logger.LogError(
-				ex,
-				"Email was sent successfully, but failed to update its status. {@Context}",
-				logContext);
-
-			throw new InternalServerException(
-				"The email was sent successfully, but the system failed to update its status.");
-		}
+				await _orderHistoryService.RecordAsync(
+					emailInvitationRequest.EmailInvitationID,
+					OrderHistoryEventType.OrderCreated,
+					null,
+					OrderStatus.PendingCandidateInfo, ct, source);
+			},
+			ct);
 
 		return true;
 	}
-	private async Task TryUpdateEmailStatusToNotSentAsync(
-	Guid emailInvitationId,
-	object logContext)
-	{
-		try
-		{
-			await _atsRepository.UpdateSingleEmailInvitationRequestStatusForNotSentEmailAsync(
-				emailInvitationId);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(
-				ex,
-				"Failed to update email status to 'Not Sent'. {@Context}",
-				logContext);
-		}
-	}
+	// TryUpdateEmailStatusToNotSentAsync was removed with its only caller. It existed to
+	// mark a saved order's email as "Not Sent" after an inline send failed - which only
+	// made sense while the order survived that failure. The send now runs inside the
+	// transaction, so a failure takes the order with it and there is no row left to mark.
 
 	public async Task<bool> InsertBulkSubjectAsync(BulkUploadFileDetailsDTO bulkUploadFileDetailsDTO, CancellationToken ct = default, string source = OrderHistorySource.Web)
 	{
@@ -297,17 +256,22 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		// Carried on the file so the parsing job can stamp it on every order it creates.
 		bulkUploadFileDetails.Source = source;
 
-		try
-		{
-			await _atsRepository.AddBulkUploadFileDetailsAsync(bulkUploadFileDetails);
-			_logger.LogInformation("Successfully added the file info in the database and object storage - {FileID}: {@Context}", bulkUploadFileDetailsDTO.UploadedByUserId, logContext);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Failed to insert data for Bulk File Information {FileID} : {@Context}", bulkUploadFileDetailsDTO.UploadedByUserId, logContext);
-			await _objectStorageService.DeleteAsync(bulkFileKey, ct);
-			throw new InternalServerException($"Failed insert data to the database. {ex.InnerException?.Message ?? ex.Message}");
-		}
+		// The file is already in object storage by this point, and storage is not part of
+		// any database transaction - so if the row insert fails, the blob has to be deleted
+		// by hand or it is orphaned there forever. RunWithCompensationAsync owns that
+		// pattern and rethrows the insert failure untouched.
+		await TransactionRunner.RunWithCompensationAsync(
+			work: () => _atsRepository.AddBulkUploadFileDetailsAsync(bulkUploadFileDetails),
+			compensate: () => _objectStorageService.DeleteAsync(bulkFileKey, ct),
+			onCompensationFailed: exception => _logger.LogError(
+				exception,
+				"Failed to delete the orphaned bulk upload {FileKey} after its row insert failed.",
+				bulkFileKey));
+
+		_logger.LogInformation(
+			"Successfully added the file info in the database and object storage - {FileID}: {@Context}",
+			bulkUploadFileDetailsDTO.UploadedByUserId,
+			logContext);
 
 		return true;
 	}
@@ -334,25 +298,70 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 			Timestamp = DateTime.UtcNow
 		};
 
+		var result = await SendApplicationFormToUserEmailWithResultAsync(
+			gmail,
+			name,
+			applicationFormLink,
+			requestor,
+			clientId,
+			CancellationToken.None);
+
+		if (!result.IsSent)
+		{
+			_logger.LogError("Failed to send Notification email to: {@Context}", logContext);
+
+			// The single-order paths run inside a transaction: a failed send must take the
+			// order with it rather than leaving a saved order whose candidate never got a
+			// link. The bulk job calls the result overload instead, precisely so it can
+			// keep the row and retry it.
+			throw new InternalServerException("Failed to send Notification email.");
+		}
+
+		return true;
+	}
+
+	public async Task<EmailDeliveryResult> SendApplicationFormToUserEmailWithResultAsync(
+		string gmail,
+		string name,
+		string applicationFormLink,
+		string? requestor,
+		int? clientId,
+		CancellationToken cancellationToken)
+	{
+		var logContext = new
+		{
+			Action = "SendApplicationFormEmail",
+			Step = "SendEmail",
+			Email = gmail,
+			Timestamp = DateTime.UtcNow
+		};
+
 		_logger.LogInformation("Sending notification for email: {@Context}", logContext);
 
 		var clientName = await ResolveClientNameAsync(clientId);
 
-		var otpBody = _emailService.SendAppplicationFormNotification(gmail, name, applicationFormLink, requestor, clientName);
+		var emailBody = _emailService.SendAppplicationFormNotification(gmail, name, applicationFormLink, requestor, clientName);
+
+		// The keyed "ats" registration is always ATSEmailService, which implements the
+		// result-aware contract. The cast is guarded rather than assumed so a future
+		// re-registration degrades to the bool path instead of throwing at runtime.
+		if (_emailService is IAtsEmailSender resultAwareSender)
+		{
+			return await resultAwareSender.SendATSEmailWithResultAsync(
+				toEmail: gmail!,
+				subject: "CIBI | Background Verification Information Request",
+				body: emailBody,
+				cancellationToken);
+		}
 
 		var isSent = await _emailService.SendATSEmailAsync(
 			toEmail: gmail!,
 			subject: "CIBI | Background Verification Information Request",
-			body: otpBody
-		);
+			body: emailBody);
 
-		if (!isSent)
-		{
-			_logger.LogError("Failed to send Notification email to: {@Context}", logContext);
-			throw new InternalServerException("Failed to send Notification email.");
-		}
-
-		return isSent;
+		return isSent
+			? EmailDeliveryResult.Sent
+			: EmailDeliveryResult.Transient(null, "Email sender reported failure without a status code.");
 	}
 
 	// A missing or unknown client id degrades to null - the email body falls back to
@@ -362,18 +371,19 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 		if (!clientId.HasValue)
 			return null;
 
-		try
-		{
-			var clients = await _atsRepository.GetClientsByIdsAsync(
-				[clientId.Value], searchTerm: null, CancellationToken.None);
+		// Purely cosmetic: the name is interpolated into the email body, and a null falls
+		// back to generic phrasing. Failing to read it must never fail the send, so it goes
+		// through SideEffectGuard rather than a local catch.
+		return await SideEffectGuard.RunAsync(
+			async () =>
+			{
+				var clients = await _atsRepository.GetClientsByIdsAsync(
+					[clientId.Value], searchTerm: null, CancellationToken.None);
 
-			return clients.FirstOrDefault()?.ClientName;
-		}
-		catch (Exception ex)
-		{
-			_logger.LogWarning(ex, "Failed to resolve client name for client {ClientId}; the email falls back to generic phrasing.", clientId);
-			return null;
-		}
+				return clients.FirstOrDefault()?.ClientName;
+			},
+			_logger,
+			$"resolve client name for client {clientId} (the email falls back to generic phrasing)");
 	}
 
 	public async Task<KeysetPaginatedResult<EmailInvitationRequestListDTO>> GetWithdrawnEmailInvitationRequestsAsync(KeysetPaginationRequest paginationRequest, CancellationToken cancellationToken)
@@ -476,51 +486,37 @@ public class EndorsementSubmissionService : IEndorsementSubmissionService
 
 		var newExpiration = DateTime.UtcNow.AddHours(_applicationFormExpiryInHours);
 
-		await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-		try
-		{
-			await _atsRepository.ResendApplicationFormAsync(emailInvitationId, hashToken, newExpiration, cancellationToken);
-
-			logContext = new
+		// Same shape as the create path above: the new token, the email and the history
+		// entry are one unit, so a failed send does not leave the candidate holding a link
+		// whose token was never issued - or an issued token nobody received.
+		await TransactionRunner.RunAsync(
+			_unitOfWork,
+			async () =>
 			{
-				Action = "ResendApplicationForm",
-				Step = "SendingEmail",
-				EmailInvitationId = emailInvitationId,
-				Timestamp = DateTime.UtcNow
-			};
+				await _atsRepository.ResendApplicationFormAsync(emailInvitationId, hashToken, newExpiration, cancellationToken);
 
-			var applicationFormLink = $"{_applicationformBaseUrl}/{hashToken}";
-			var fullName = $"{invitation.FirstName} {invitation.LastName}";
+				var applicationFormLink = $"{_applicationformBaseUrl}/{hashToken}";
+				var fullName = $"{invitation.FirstName} {invitation.LastName}";
 
-			await SendApplicationFormToUserEmailAsync(
-				invitation.EmailAddress!,
-				fullName,
-				applicationFormLink,
-				invitation.Requestor,
-				invitation.ClientId);
+				await SendApplicationFormToUserEmailAsync(
+					invitation.EmailAddress!,
+					fullName,
+					applicationFormLink,
+					invitation.Requestor,
+					invitation.ClientId);
 
-			await _orderHistoryService.RecordAsync(
-				emailInvitationId,
-				OrderHistoryEventType.ApplicationFormResent,
-				invitation.OrderStatus,
-				OrderStatus.PendingCandidateInfo,
-				cancellationToken);
+				await _orderHistoryService.RecordAsync(
+					emailInvitationId,
+					OrderHistoryEventType.ApplicationFormResent,
+					invitation.OrderStatus,
+					OrderStatus.PendingCandidateInfo,
+					cancellationToken);
+			},
+			cancellationToken);
 
-			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		_logger.LogInformation("Successfully resent application form for invitation: {@Context}", logContext);
 
-			await _unitOfWork.CommitAsync(cancellationToken);
-
-			_logger.LogInformation("Successfully resent application form for invitation: {@Context}", logContext);
-			return true;
-		}
-		catch (Exception ex)
-		{
-			await _unitOfWork.RollbackAsync(cancellationToken);
-
-			_logger.LogError("Failed to resend application form: {@Context}, {Exception}", logContext, ex);
-			throw new InternalServerException($"Failed to resend application form. {ex.InnerException?.Message ?? ex.Message}");
-		}
+		return true;
 	}
 
 	// Applies the same role ladder the read paths use. A null scope means the caller may

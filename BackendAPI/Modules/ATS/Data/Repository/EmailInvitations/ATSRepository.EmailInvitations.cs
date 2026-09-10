@@ -9,7 +9,7 @@ public partial class ATSRepository
 
 	// Round-robin: each client may contribute at most this many invitations per tick, so
 	// one large upload cannot block every other client behind it.
-	private const int PerClientSliceSize = 30;
+	private const int PerClientSliceSize = 50;
 
 	public async Task<bool> AddEmailInvitationRequestAsync(EmailInvitationRequest emailInvitationRequest)
 	{
@@ -56,9 +56,24 @@ public partial class ATSRepository
 				EmailStatus.Error,
 				MaxEmailSendAttempts,
 				PerClientSliceSize,
-				100)
+				200)
 			.AsNoTracking()
 			.ToListAsync();
+	}
+
+	public async Task<int> ReleaseEmailInvitationClaimsAsync(List<EmailInvitationRequest> emailInvitationRequests)
+	{
+		// Deliberately does NOT touch EmailSendAttempts. These rows were claimed but never
+		// offered to the SMTP server - the pass stood down because the provider was rate
+		// limiting. Charging them an attempt would retire a perfectly valid address after
+		// five throttles without a single real delivery failure.
+		var ids = emailInvitationRequests.Select(x => x.EmailInvitationID).ToList();
+
+		return await _dbcontext.EmailInvitationRequests
+			.Where(x => ids.Contains(x.EmailInvitationID))
+			.ExecuteUpdateAsync(setters => setters
+				.SetProperty(x => x.EmailSentStatus, x => EmailStatus.Pending)
+				.SetProperty(x => x.EmailClaimedAt, x => null));
 	}
 
 	public async Task<int> ReleaseStaleEmailInvitationClaimsAsync(TimeSpan staleAfter)

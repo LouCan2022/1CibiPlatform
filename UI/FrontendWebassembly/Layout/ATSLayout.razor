@@ -153,13 +153,9 @@
                         }
                     </button>
 
-                    <button type="button" class="ats-console-icon-btn" aria-label="Notifications">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                            <path d="M13.7 21a2 2 0 01-3.4 0" />
-                        </svg>
-                        <span class="ats-console-notification-dot" aria-hidden="true"></span>
-                    </button>
+                    @* Mounted here rather than per page so the hub connection is opened
+                       once and stays live across ATS navigation. *@
+                    <NotificationCenter />
                     <div class="ats-console-topbar-divider" aria-hidden="true"></div>
                     <div class="ats-console-avatar"
                          role="img"
@@ -310,6 +306,13 @@ else
 			string.Equals(item.Value.path, routeSegment, StringComparison.OrdinalIgnoreCase));
 		if (module.Key > 0)
 			return _accessibleModuleIds.Contains(module.Key);
+
+		// Notifications is not a permissioned module - everyone who can reach ATS at all
+		// has an inbox, and it only ever shows that user's own rows. It is therefore
+		// deliberately absent from ModuleList, which would otherwise put an ungrantable
+		// entry in the sidebar; the check has to allow it explicitly instead.
+		if (string.Equals(routeSegment, "notifications", StringComparison.OrdinalIgnoreCase))
+			return true;
 
 		return string.Equals(routeSegment, "settings", StringComparison.OrdinalIgnoreCase) &&
 			_accessibleModuleIds.Overlaps([6, 7, 8]);

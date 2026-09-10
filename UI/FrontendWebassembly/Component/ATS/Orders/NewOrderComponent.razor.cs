@@ -386,9 +386,10 @@ public partial class NewOrderComponent
 		using var stream = bulkUploadFileDetailsDTO.BulkFile!
 			.OpenReadStream(maxAllowedSize: 25 * 1024 * 1024);
 
-		using var reader = new StreamReader(stream);
-
-		var csvContent = await reader.ReadToEndAsync();
+		// Excel ANSI exports are Windows-1252 with no BOM; a plain StreamReader decoded
+		// Ñ/ñ to U+FFFD in the preview. IBrowserFile streams are single-read, so the
+		// decoder buffers the bytes before choosing an encoding.
+		var csvContent = await CsvTextDecoder.DecodeAsync(stream);
 
 		// Quote-aware, so the preview matches what CsvHelper parses server-side.
 		return CsvPreviewParser.Parse(csvContent);
