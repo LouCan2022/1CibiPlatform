@@ -59,16 +59,37 @@
                 }
             </div>
 
-            @* Same control as the Package Management "Add package" button. *@
-            <button type="button"
-                    class="ats-management-button ats-bulk-subjects-export"
-                    disabled="@(_isExporting || _counts.Total == 0)"
-                    @onclick="ExportSubjectsAsync">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
-                </svg>
-                @(_isExporting ? "Exporting..." : "Export CSV")
-            </button>
+            @* Grouped so the row's space-between keeps the tabs left and BOTH buttons
+               together on the right, rather than spreading the two apart. *@
+            <div class="ats-bulk-subjects-actions">
+                @* Appears only with a selection, so the toolbar stays quiet in the common
+                   case where nobody is retrying anything. *@
+                @if (_selectedInvitationIds.Count > 0)
+                {
+                    <button type="button"
+                            class="ats-management-button ats-bulk-subjects-requeue"
+                            disabled="@_isBulkResending"
+                            @onclick="ConfirmBulkResendAsync">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 11A8 8 0 1 0 12 20M20 5v6h-6" />
+                        </svg>
+                        @(_isBulkResending
+                            ? "Queueing..."
+                            : $"Resend selected ({_selectedInvitationIds.Count})")
+                    </button>
+                }
+
+                @* Same control as the Package Management "Add package" button. *@
+                <button type="button"
+                        class="ats-management-button ats-bulk-subjects-export"
+                        disabled="@(_isExporting || _counts.Total == 0)"
+                        @onclick="ExportSubjectsAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16" />
+                    </svg>
+                    @(_isExporting ? "Exporting..." : "Export CSV")
+                </button>
+            </div>
         </div>
 
         <TableComponent TItem="BulkUploadSubjectListDTO"
@@ -80,7 +101,7 @@
                         ContainerClass="ats-management-card ats-bulk-subjects-table-card"
                         TableClass="ats-bulk-subjects-table"
                         TableAriaLabel="Subjects created from this bulk upload"
-                        ColumnCount="6"
+                        ColumnCount="7"
                         RowsPerPage="10"
                         LoadServerData="LoadSubjectsAsync"
                         CursorPagerState="_subjectsLoader"
@@ -88,6 +109,16 @@
                         SearchStringChanged="@((string value) => _searchString = value)">
 
             <HeaderTemplate>
+                <MudTh Class="ats-bulk-subjects-select-header">
+                    @* Selects only the resendable rows on this page - checking a row the
+                       server would refuse just produces a confusing "0 of N" result. *@
+                    <MudCheckBox T="bool"
+                                 Value="@AreAllSelectablesSelected"
+                                 ValueChanged="@((bool value) => ToggleSelectAll(value))"
+                                 Size="Size.Small"
+                                 Disabled="@(!HasSelectableSubjects)"
+                                 aria-label="Select all resendable subjects on this page" />
+                </MudTh>
                 <MudTh>Subject</MudTh>
                 <MudTh>Contact</MudTh>
                 <MudTh>Invitation email</MudTh>
@@ -97,6 +128,17 @@
             </HeaderTemplate>
 
             <RowTemplate Context="subject">
+                <MudTd DataLabel="Select" Class="ats-bulk-subjects-select-cell">
+                    @if (CanResend(subject))
+                    {
+                        <MudCheckBox T="bool"
+                                     Value="@_selectedInvitationIds.Contains(subject.EmailInvitationID)"
+                                     ValueChanged="@((bool value) => ToggleSelection(subject.EmailInvitationID, value))"
+                                     Size="Size.Small"
+                                     aria-label="@($"Select {FormatName(subject)} for resending")" />
+                    }
+                </MudTd>
+
                 <MudTd DataLabel="Subject">
                     <div class="ats-bulk-subject">
                         <span class="ats-bulk-subject-initials" aria-hidden="true">

@@ -57,7 +57,7 @@
                     EnableSearch="true"
                     SearchLabel=""
                     SearchPlaceholder="Search subject, requestor, package or ticket no."
-                    ColumnCount="7"
+                    ColumnCount="8"
                     RowsPerPage="10"
                     LoadServerData="LoadOrdersAsync"
                     CursorPagerState="_ordersLoader"
@@ -79,9 +79,36 @@
                                     PlaceholderStart="Start Date"
                                     PlaceholderEnd="End Date" />
             </div>
+
+            @* Appears only with a selection, so the toolbar stays quiet in the common case
+               where nobody is retrying anything. *@
+            @if (_selectedInvitationIds.Count > 0)
+            {
+                <button type="button"
+                        class="ats-management-button ats-status-board-requeue"
+                        disabled="@_isBulkRetrying"
+                        @onclick="ConfirmBulkRetryAsync">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 11A8 8 0 1 0 12 20M20 5v6h-6" />
+                    </svg>
+                    @(_isBulkRetrying
+                        ? "Queueing..."
+                        : $"Retry selected ({_selectedInvitationIds.Count})")
+                </button>
+            }
         </ToolBarLeft>
 
         <HeaderTemplate>
+            <MudTh Class="ats-status-board-select-header">
+                @* Selects only the retryable rows on this page - checking a row the server
+                   would refuse just produces a confusing "0 of N" result. *@
+                <MudCheckBox T="bool"
+                             Value="@AreAllSelectablesSelected"
+                             ValueChanged="@((bool value) => ToggleSelectAll(value))"
+                             Size="Size.Small"
+                             Disabled="@(!HasSelectableOrders)"
+                             aria-label="Select all retryable orders on this page" />
+            </MudTh>
             <MudTh>Subject</MudTh>
             <MudTh>Requestor</MudTh>
             <MudTh>Package</MudTh>
@@ -92,6 +119,17 @@
         </HeaderTemplate>
 
         <RowTemplate Context="order">
+            <MudTd DataLabel="Select" Class="ats-status-board-select-cell">
+                @if (CanRetry(order))
+                {
+                    <MudCheckBox T="bool"
+                                 Value="@_selectedInvitationIds.Contains(order.EmailInvitationID)"
+                                 ValueChanged="@((bool value) => ToggleSelection(order.EmailInvitationID, value))"
+                                 Size="Size.Small"
+                                 aria-label="@($"Select {FullName(order)} for retrying")" />
+                }
+            </MudTd>
+
             <MudTd DataLabel="Subject">
                 <div class="ats-cell-lead">
                     <span class="ats-cell-lead-icon" aria-hidden="true">

@@ -770,13 +770,63 @@
        filter reads as the leading control, so anchor it left and push the rest. */
     margin-left: 0;
     margin-right: auto;
+
+    /* The slot holds more than the date field now - the bulk action button sits beside
+       it - so it lays its children out as a row. Without this the slot is a plain block
+       and the button drops onto its own line under the date picker.
+
+       Bottom-aligned to match the toolbar row's own `align-items: flex-end`, so the
+       button's baseline lines up with the date input rather than its label. */
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* The selection gutter, shared by every board that offers a bulk action. Narrow and
+   centred so the checkbox column reads as a gutter rather than a column of data
+   competing with the identity cell beside it.
+
+   Shared rather than per-screen because the Ticketing and Bulk Upload boards must keep
+   identical row geometry - see the note at the top of this section. */
+.ats-management-page .ats-status-board-select-header,
+.ats-management-page .ats-status-board-select-cell {
+    padding-right: 0;
+    text-align: center;
+    width: 48px;
+}
+
+/* The bulk action button sits beside the date filter in the toolbar's left slot, so it
+   must not stretch to fill the row the way the filter does. */
+.ats-management-page .ats-status-board-requeue {
+    flex: 0 0 auto;
+
+    /* 56px, matching the outlined picker beside it and the search box - the same
+       height every other control on this toolbar is pinned to. */
+    height: 56px;
+    white-space: nowrap;
+}
+
+.ats-management-page .ats-status-board-requeue:disabled {
+    opacity: .55;
+    cursor: default;
+    box-shadow: none;
+}
+
+.ats-management-page .ats-status-board-requeue:disabled:active {
+    transform: none;
 }
 
 .ats-management-page .ats-status-board-date-field {
     display: flex;
-    width: 100%;
     flex-direction: column;
     gap: 4px;
+
+    /* Grows to fill the slot when it is alone, but yields when the bulk action button
+       appears beside it. A hard `width: 100%` here consumed the whole row and pushed
+       the button onto its own line. */
+    flex: 1 1 16rem;
+    min-width: 0;
 }
 
 .ats-management-page .ats-status-board-date-field label {
@@ -890,6 +940,16 @@
     .ats-management-page .ats-status-board-date-field .mud-picker,
     .ats-management-page .ats-status-board-date-field .mud-picker-inline {
         width: 100% !important;
+    }
+
+    /* Stacked, the bulk action button goes full width under the date filter and drops
+       the 56px pin that only existed to align it with the picker beside it. */
+    .ats-management-page .ats-status-board-requeue {
+        width: 100%;
+        height: auto;
+        min-height: 44px;
+        flex: 0 0 auto;
+        justify-content: center;
     }
 
     /* Release the 56px pin: stacked, the search box can take its natural height. */

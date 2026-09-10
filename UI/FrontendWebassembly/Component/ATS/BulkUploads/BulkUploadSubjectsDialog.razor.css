@@ -120,15 +120,26 @@
     margin: 16px 24px 0;
 }
 
-/* The export button is styled by .ats-management-button (ats.css); only the
-   disabled state is local, since the shared class has none. */
-.ats-bulk-subjects-export:disabled {
+/* Keeps the two buttons side by side at the row's right edge. Without the wrapper the
+   filter row's space-between would push them to opposite ends of the row. */
+.ats-bulk-subjects-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Both buttons are styled by .ats-management-button (ats.css); only the disabled
+   state is local, since the shared class has none. */
+.ats-bulk-subjects-export:disabled,
+.ats-bulk-subjects-requeue:disabled {
     opacity: .55;
     cursor: default;
     box-shadow: none;
 }
 
-.ats-bulk-subjects-export:disabled:active {
+.ats-bulk-subjects-export:disabled:active,
+.ats-bulk-subjects-requeue:disabled:active {
     transform: none;
 }
 
@@ -340,6 +351,16 @@
     width: 84px;
 }
 
+/* The same 48px gutter as .ats-status-board-select-* in ats.css, restated because this
+   dialog is not rendered inside .ats-management-page and so cannot match that rule's
+   page anchor. Keep the two in step: they are the same control on two screens. */
+::deep .ats-bulk-subjects-select-header,
+::deep .ats-bulk-subjects-select-cell {
+    padding-right: 0;
+    text-align: center;
+    width: 48px;
+}
+
 ::deep .ats-bulk-subject-resend {
     color: var(--blue-600);
 }
@@ -355,9 +376,14 @@
         margin: 12px 16px 0;
     }
 
-    .ats-bulk-subjects-export {
-        justify-content: center;
+    .ats-bulk-subjects-actions {
         width: 100%;
+    }
+
+    .ats-bulk-subjects-export,
+    .ats-bulk-subjects-requeue {
+        flex: 1 1 100%;
+        justify-content: center;
     }
 
     ::deep .ats-bulk-subjects-table-card {
