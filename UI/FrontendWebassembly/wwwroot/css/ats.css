@@ -2394,8 +2394,7 @@ button.ats-console-brand-text {
 
 .ats-console-collapsed .ats-console-brand-text,
 .ats-console-collapsed .ats-console-nav-text,
-.ats-console-collapsed .ats-console-nav-label,
-.ats-console-collapsed .ats-console-sidebar-bottom {
+.ats-console-collapsed .ats-console-nav-label {
     display: none;
 }
 
@@ -2850,18 +2849,36 @@ button.ats-console-brand-text {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Native-button reset - ats-console-nav-item supplies the padding, color,
+   hover, and collapsed (icon-only) behavior shared with the nav. The icon is
+   pinned left and the label centers in the remaining space, so it reads as a
+   footer action without losing the nav rows' left-anchored icon rhythm. */
 .ats-console-back-btn {
+    position: relative;
     width: 100%;
-    justify-content: flex-start;
-    text-transform: none !important;
-    color: rgba(255, 255, 255, 0.88) !important;
-    border-radius: 9px;
-    padding: 9px 10px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    justify-content: center;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--c-on-dark-fg);
 }
 
-    .ats-console-back-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
+.ats-console-back-btn .ats-console-back-ic {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+}
+
+.ats-console-collapsed .ats-console-back-btn .ats-console-back-ic {
+    position: static;
+    transform: none;
+}
 
 .ats-appform-modern {
     background: var(--modern-bg);
@@ -3923,26 +3940,6 @@ button.ats-console-brand-text {
     color: var(--c-fg-muted);
     padding: 10px 0;
 }
-
-.ats-console-sidebar-bottom {
-    flex: 0 0 auto;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.ats-console-back-btn {
-    width: 100%;
-    justify-content: flex-start;
-    text-transform: none !important;
-    color: rgba(255, 255, 255, 0.88) !important;
-    border-radius: 9px;
-    padding: 9px 10px;
-}
-
-    .ats-console-back-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-    }
 
 /* Re-pointed at the shared tokens; the same six names are declared identically in
    philsys.css for the same selector list. */
@@ -4968,8 +4965,7 @@ button.ats-console-brand-text {
 
     .ats-console-collapsed .ats-console-brand-text,
     .ats-console-collapsed .ats-console-nav-text,
-    .ats-console-collapsed .ats-console-nav-label,
-    .ats-console-collapsed .ats-console-sidebar-bottom {
+    .ats-console-collapsed .ats-console-nav-label {
         display: block;
     }
 
