@@ -257,6 +257,8 @@ public sealed class AtsAssistantPlugin
 		string? action = null,
 		[Description("Optional area filter, for example 'Web' or 'PublicApi'. Omit for all.")]
 		string? area = null,
+		[Description("Optional user full name to search for in the audit trail, for example 'Russel Gutierrez'. Omit to not filter by user name.")]
+		string? name = null,
 		CancellationToken cancellationToken = default)
 	{
 		// Same reasoning as GetAuditSummaryAsync: the access rule here is the platform role,
@@ -271,11 +273,13 @@ public sealed class AtsAssistantPlugin
 		var normalizedAction = NullIfBlank(action);
 		var normalizedArea = NullIfBlank(area);
 		var normalizedOutcome = NullIfBlank(outcome);
+		var normalizedSearchTerm = NullIfBlank(name);
 
 		var entries = await _auditService.GetRecentEntriesAsync(
 			normalizedOutcome,
 			normalizedAction,
 			normalizedArea,
+			normalizedSearchTerm,
 			startDate,
 			endDate,
 			MaxAuditResults,
@@ -292,7 +296,8 @@ public sealed class AtsAssistantPlugin
 			DaysBack = ClampDaysBack(daysBack),
 			Outcome = normalizedOutcome,
 			Action = normalizedAction,
-			Area = normalizedArea
+			Area = normalizedArea,
+			SearchTerm = normalizedSearchTerm
 		};
 
 		return entries;

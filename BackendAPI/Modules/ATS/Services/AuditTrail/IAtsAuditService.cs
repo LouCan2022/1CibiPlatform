@@ -29,6 +29,7 @@ public interface IAtsAuditService
 		string? outcome,
 		string? action,
 		string? area,
+		string? searchTerm,
 		DateTime? startDate,
 		DateTime? endDate,
 		int take,
