@@ -127,6 +127,7 @@ public sealed class AtsAuditService : IAtsAuditService
 		string? outcome,
 		string? action,
 		string? area,
+		string? searchTerm,
 		DateTime? startDate,
 		DateTime? endDate,
 		int take,
@@ -153,7 +154,7 @@ public sealed class AtsAuditService : IAtsAuditService
 			NormalizeOutcome(outcome),
 			action,
 			area,
-			searchTerm: null,
+			searchTerm,
 			startDate,
 			endDate,
 			cancellationToken);
