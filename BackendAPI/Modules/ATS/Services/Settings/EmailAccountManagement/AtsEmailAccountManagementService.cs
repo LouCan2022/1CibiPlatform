@@ -293,7 +293,7 @@ public class AtsEmailAccountManagementService : IAtsEmailAccountManagementServic
 			};
 		}
 
-		if (!_hashService.Verify(request.OtpCode, otp.OtpCodeHash))
+		if (!_hashService.Verify(_hashService.Hash(request.OtpCode), otp.OtpCodeHash))
 		{
 			otp.AttemptCount++;
 
